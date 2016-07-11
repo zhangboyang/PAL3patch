@@ -1,0 +1,32 @@
+【解析PAL3A.PDB】
+仙剑3和问情篇采用的都是GBENGINE引擎。
+而问情篇附带了主程序PAL3A.EXE的调试符号文件PAL3A.PDB（哇，一份大礼诶）
+这样在逆向GBENGINE时，很多数据结构的内容可以直接从调试符号中提取。
+但是由于版本不同，可能有些细微的差别，在逆向的时候要小心留意。
+PDB Explorer: 可以把PDB文件中的数据结构直接以C/C++形式表示。（非常有用）
+  http://blog.titilima.com/pdbexp.html
+    需要安装vc2005运行库，并手工用regsvr32注册msdia80.dll，注意用32位的。
+    注册命令为 C:\Windows\SysWOW64\regsvr32.exe "C:\Program Files (x86)\Common Files\microsoft shared\VC\msdia80.dll"
+微软官方的PDB转储工具
+  https://github.com/Microsoft/microsoft-pdb/blob/master/cvdump/cvdump.exe
+
+【IDA中直接显示D3D函数名称的方法】
+IDA并不能自动识别D3D函数，会显示为类似汇编去索引虚函数表的形式。
+要想显示函数名，只要把对应的变量设置好变量类型即可
+例如
+  v1->lpD3D9 => 此成员的类型为 IDirect3D*;
+    struct __declspec(align(4)) IDirect3D9 // 此结构体是 IDA 自带，使用方法见IDA Pro权威指南 8.5节 p120
+    {
+        struct IDirect3D9Vtbl *lpVtbl;
+    };
+这样函数就会显示成这样的形式了
+  result = v1->lpD3D9->lpVtbl->CreateDevice(
+             v1->lpD3D9, // this 指针
+             *v9,
+             *(D3DDEVTYPE *)(v23 + 4),
+             v1->hFocusWindow,
+             v5,
+             (D3DPRESENT_PARAMETERS *)&v1->pPresentParameters,
+             &v1->lpD3DDevice9);
+
+

@@ -1,0 +1,129 @@
+【关于GBENGINE.DLL中OD反汇编与IDA反汇编函数位置有偏移的问题】
+例如100017b0处两者结果不同，因为两个文件不一样。初步比较，根目录下DLL与EXE只有GBENGINE.DLL文件不太相同。
+用strings提取两个文件中字符串发现，其中LZO库的编译时间戳为
+DVD纪念版：修改日期2009-12-24 11:49:24，文件大小为1,134,592字节 -》 2003-06-01 17:23:50
+简体版：修改日期2004-01-05 16:39:10，文件大小1,265,664字节 -》 2004-01-05 16:38:34 MD5:ce0213b1734f8cae1e1a0ea5213dd03f 是 v1.04 升级包中带的
+尚不知两文件有什么区别，或许可以通过IDA的PatchDiff2插件来分析它们之间的差异。（IDA Pro 权威指南 p386）
+
+
+【关于破解补丁的内容】
+PAL3.EXE: MD5: 52ca2bfcb773714f55b5e1c951653a27 取自官方v1.04繁体版升级补丁Patch1.04-tw.exe，可从http://patch.joypark.com.tw/download/files/pal3/Patch1.04-tw.exe下载
+PAL3.DLL: 破解者编写的原地脱壳程序。
+    f1f500d877baabd03e04d0c69dbc5633  修正版，应该只是改变了DLL的默认基址。由0改为了0x10000000。
+    a7c48885bdde533e9c44e3e4497848a9  之前的版本
+
+【关于DVD纪念版中的内容】
+GBENGINE.DLL 采用的是旧版，编译于2003-06-01 17:23:50
+PAL3.EXE 采用的是官方v1.04繁体版升级补丁Patch1.04-tw.exe中的版本
+PAL3.DLL 采用的是旧版本的破解补丁（即未修正DLL基址的版本，官方号称去除了SF保护装置）
+至于游戏数据，尚未比较。
+
+【决定采用的分析版本】
+基于DVD纪念版
+将其中GBENGINE.DLL替换为新版，MD5: ce0213b1734f8cae1e1a0ea5213dd03f
+将其中PAL3.DLL替换为修正版，MD5: f1f500d877baabd03e04d0c69dbc5633
+PAL3.EXE保持不变，MD5: 52ca2bfcb773714f55b5e1c951653a27
+
+
+
+【LZO库】
+GBENGINE9使用了LZO压缩算法库1.04版（啊，违反了GPL）
+下载地址http://pupngo.dk/source/lzo-1.04.tar.gz
+猜测只是使用了其中的miniLZO部分
+可以使用VC6编译，然后生成库签名给IDA Pro使用=>已经生成好的签名minilzo_PAL3.sig。
+使用VC6编译的方法：
+新建Win32 Static Library项目，将minilzo.c minilzo.h lzoconf.h添加进去，然后Build All即可
+注意编译选项：
+Configurations|Win32 Release（已确认）
+C/C++|Code Generation|Use run-time library=Multithreaded（猜想）
+C/C++|Optimizations|Inline function expansion=Any Suitable（已确认）
+生成签名的方法：IDA Pro权威指南第12章
+目前可以认出_lzo1x_1_compress和_lzo1x_decompress这两个函数。。（唉，真没用）
+
+
+
+
+【关于进入PAL3.DLL中的代码的问题】
+疑惑之处
+例如：（读档时）
+4229a6: call 422760 
+422760: jmp 19957e0 (pal3.dll)
+[422760, 422947) = 1e7
+[19957e0, 19959dc) = 1fc 略大
+发现 19957e0 那块函数代码 略微大于 422760 处的函数（其实可以明显看出不是函数，但确实是指令，可能只是垃圾指令）代码。
+另一个例子：（游戏加载时）
+53c455: call 53c730
+53c730: jmp 1995ac0
+[53c730, 53c807) = d7
+[1995ac0, 1995b9c) = dc 略大
+不知道为什么？
+
+
+
+【关于API调用问题】
+有一部分是PAL3.DLL在脱壳过程中显式动态链接的。
+例如
+55bfe7: CALL DWORD PTR DS:[407A98]
+而 407a98 存放的是 MultiByteToWideChar 的地址
+是通过脱壳程序
+1995359: MOV DWORD PTR SS:[EBP+7A98], EAX (此时EBP是PAL3.EXE的基址)
+当然，除此处之外，脱壳程序还填写了IAT表项。
+199535f: MOV DWORD PTR SS:[EBP+16A128], EAX (此时EBP是PAL3.EXE的基址, BASE+16A128是IAT所在位置) 
+存入该处的。
+我想在之后的脱壳中，需要把这些API添加到导入表中。
+可是，这些地址零零散散分散在代码中间，无法添加到导入表，需要先把它们集中起来。
+初步想法：通过全文搜索FF 15来解决，把这些引用类似407A98的指令改掉，使他们引用IAT的对应位置。
+
+
+【导入表、重定位表】
+好像PE导入DLL函数只能通过导入表的方式
+也就是说只能把函数地址填入表格中，然后调用时去索引这个表格。
+OD中，反汇编窗口中，画下划线的字节，应该是会被重定位的字节，应该和导入表没有关系。
+
+
+【满天飞的JMP】
+在函数的间隙处，经常会被插入JMP指令，这些指令大多是PAL3.EXE内部的相互跳转。
+但是有些JMP就会调到PAL3.DLL中。
+目前还没有想好怎么处理这些指令。
+一个函数内转移被改掉的例子：（在读档时）
+0053a36a: jae 0189ce5e = jae 0053a4e3
+0189ce5e: jmp 0053a4e3
+
+
+【.brick节】
+PAL3.EXE中有一个.brick节。里面看起来都是合法的指令，不知道干嘛用的。
+用OD的交叉引用搜索功能，搜到三条指令，都是穿插的JMP指令而已。
+还有几个数据看似是指向该节某些内容的指针（待确认）
+而且我在brick节下断点，还没有遇到断下来的情况（只是初步测试）
+
+【vc6的编译特点】
+地址从低到高分别为 .text .data .rdata .rsrc
+.text: 存放代码
+.rdata: 存放只读数据(rodata)，也存放导入表、IAT
+.data: 存放初始化过的数据，也是未初始化数据(bss)存放的位置
+.rsrc: 资源
+例如：
+char a[10000]; // .data 节后部
+char b[1000] = "hello"; // .data 节前部
+const char c[] = "hello"; // .rdata
+system("pause"); // 注意，VC6中字符串常量"pause"是存在data节中的，不是rdata！
+
+【关于释放无效堆指针】
+有时在读条时，会出现释放无效的堆指针的问题 RtlFreeHeap()
+0054d10: void __cdecl operator delete(void *) 00541d14: call 00552f55
+04b6fb0: sub_4b6fb0(...): 004b6fde: call 00541d10
+貌似跟NBTree有关？
+
+
+【IAT】
+根据VC6的特点，FirstThunk存放于rdata最前，而函数名称什么的存放在rdata最后
+但是这些都被starforce抹成0了
+可能需要还原。
+
+
+【关于资源节.rsrc】
+资源节被切成两半
+一部分是图标、程序版本之类的——没有加密直接存储
+另一部分是对话框之类的——在程序运行时解密
+p.s. 对话框里面有很多有趣的内容，似乎与游戏调试有关，如果能找到调用它们的方法就好了。
+
