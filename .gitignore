@@ -1,0 +1,9 @@
+*.*
+!.gitignore
+!*.txt
+!*.c
+!*.h
+!*.S
+!*.def
+!*.bat
+

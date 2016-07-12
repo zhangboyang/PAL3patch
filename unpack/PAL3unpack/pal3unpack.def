@@ -1,0 +1,3 @@
+LIBRARY pal3unpack.dll
+EXPORTS
+	start @1

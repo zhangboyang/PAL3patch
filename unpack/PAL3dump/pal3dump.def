@@ -1,0 +1,3 @@
+LIBRARY pal3dump.dll
+EXPORTS
+	start @1

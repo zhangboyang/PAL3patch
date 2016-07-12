@@ -20,10 +20,10 @@ PAL3.DLL 采用的是旧版本的破解补丁（即未修正DLL基址的版本�
 
 【决定采用的分析版本】
 基于DVD纪念版
-将其中GBENGINE.DLL替换为新版，MD5: ce0213b1734f8cae1e1a0ea5213dd03f
-将其中PAL3.DLL替换为修正版，MD5: f1f500d877baabd03e04d0c69dbc5633
-PAL3.EXE保持不变，MD5: 52ca2bfcb773714f55b5e1c951653a27
-
+将其中GBENGINE.DLL替换为新版，MD5: ce0213b1734f8cae1e1a0ea5213dd03f, BASE: 10000000
+将其中PAL3.DLL替换为修正版，MD5: f1f500d877baabd03e04d0c69dbc5633, BASE: 01990000
+PAL3.EXE保持不变，MD5: 52ca2bfcb773714f55b5e1c951653a27, BASE: 00400000
+系统：Windows 2000 SP4 英文版
 
 
 【LZO库】
@@ -108,7 +108,7 @@ PAL3.EXE中有一个.brick节。里面看起来都是合法的指令，不知道
 
 【vc6的编译特点】
 地址从低到高分别为 .text .data .rdata .rsrc
-.text: 存放代码
+.text: 存放代码，函数均按0x10对齐
 .rdata: 存放只读数据(rodata)，也存放导入表、IAT
 .data: 存放初始化过的数据，也是未初始化数据(bss)存放的位置
 .rsrc: 资源

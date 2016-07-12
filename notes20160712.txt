@@ -1,0 +1,92 @@
+【PAL3dump】
+把PAL3.exe的各种段的原始数据转储出来。
+所谓原始数据指：刚刚解密出来，还没有经过任何修改（如添加JMP，动态链接等）
+程序中有些数据需要自己在编译前填写好（当前填写的是针对PAL3.DLL的数据），这些位置用MANUALLY标出了。
+使用方法：
+1. 把原本的脱壳程序PAL3.dll重命名为pal3unpack.dll
+2. 把PAL3dump编译出来的PAL3.dll放到原理的脱壳程序的位置
+3. 运行PAL3.exe即可
+4. 运行完后会生成 dump.data dump.rdata dump.text dump.rsrc dump.summary.txt 文件
+原理：
+利用PAL3.exe加载DLL的机会，用自己编写的DLL假冒解密DLL，然后从自己编写的DLL里，使用 LoadLibrary
+加载解密 DLL，并且为它打补丁，让它在解密后调用自己编写的DLL中的函数，从而实现DUMP功能
+
+【PAL3analysis】
+分析破解补丁的程序pal3unpack.dll与PAL3ananysis放在一起，运行后生成分析结果文件analysis.txt
+程序中有些数据需要自己在编译前填写好（当前填写的是针对PAL3.DLL的数据），这些位置用MANUALLY标出了。
+使用方法：将破解补丁命名为
+(1) 分析 JMP，格式：
+        JMP  ADDR [JMP指令的位置] [JMP的目的地]
+(2) FUNC 分析特殊加密的函数，格式：
+        FUNC [函数相对于DLL基址的偏移]
+            DATA  LEN [函数长度]
+              [函数指令数据，以十六进制表示]
+            RELOCATE  OFFSET [重定位指令中立即数地址, 相对于函数开头的偏移] DEST [重定位的跳转/函数调用目的地]
+            FUNCJMP ADDR [指向该函数的JMP指令的所在地址]
+        ENDFUNC
+(3) LIBRARY 导入DLL，格式：
+        LIBRARY [DLL名字]
+          IMPORT [函数名] ADDR [要填写函数指针的地址1] [地址2] ... END
+        ENDLIBRARY
+
+
+【PAL3fixdump】
+读入PAL3analysis分析结果并修正PAL3dump的转储文件的程序，功能：
+(1) JMP：对于每个JMP x，查找谁调用了这个JMP，把它直接指向 x， 例如
+        a: JMP/JCC/CALL y
+        y: JMP x  <= 根据分析结果知道这里有个JMP
+        x: the read destnation
+    会被改为
+        a: JMP/JCC/CALL x   // 直接跳转到真正目的地
+        y: INT3 // 这里会被填入 FILLBYTE (0xCC) 
+        x: the read destnation
+(2) FUNC:
+    将分析出的特殊函数追加到 .text 段的末尾，并进行一系列重定位操作
+    另外对于 JMP somefunc 也会按照之前JMP的处理方式处理
+(3) LIBRARY:
+    尚未完成
+
+【PAL3unpack】
+与破解补丁相同功能的程序，读入PAL3fixdump和PAL3dump和PAL3analyse的结果，在内存中进行脱壳的程序
+目前的功能是：
+读入dump.summary.txt（由PAL3dump生成）读取段基址信息
+读入dump.text.fixed （由PAL3fixdump生成）装入.text段
+读入dump.rdata （由PAL3dump生成）装入.rdata段
+读入dump.data （由PAL3dump生成）装入.data段
+读入dump.rsrc （由PAL3dump生成）装入.rsrc段
+读入analysis.txt（由PAL3analyse生成）进行动态连接（只有LIBRARY项会被处理，其余部分都被忽略）
+进行完这些处理后，程序就已经在内存中脱壳完成了。
+
+
+【申请内存空间的问题】
+PAL3.DLL在跳入OEP前夕，使用VirtualAlloc申请了一块内存，供程序使用
+在问情篇中，这样申请的内存区域远不止这一个，申请方式更加复杂
+现在还没想好怎么处理这样的内存区域
+最后申请的区域为 VirtualAlloc(NULL, 128, MEM_COMMIT, PAGE_READWRITE)
+此区域的指针存放到 1895300 处（有两处指令引用）
+
+或许可以把这段内存指向 .data 节的最后1896f80(.data节最后，有一堆JMP和DLL函数指针，或许说明那些位置并没被用到）
+======>暂时不行，因为这样会把某些DLL函数指针给覆盖掉，从而导致错误
+       如果修复了所有IAT之类的东西，应该也许可以这样做
+
+
+【多余的 REP MOVS 指令】
+在01991231处有一条多余的 REP MOVS 指令
+ESI = 0060C000 // 正好是 .data 节的物理数据(physsize)的末尾
+EDI = 0060C004
+ECX = 0128AD10
+猜测可能是用来清零data节后部的。
+但是疑点在于，.data节和.rsrc节起始位置相差0137000（约20MB）但是这里ECX只有0128AD10。
+不清楚为什么
+
+【最后申请内存前，导入完API后，有一对MOV指令对一片内存区域进行清空】
+用IDA Pro可以看到有代码引用了这一块区域
+但是这里原本就是0，为何要再清零一遍？
+
+
+【一块新发现的“垃圾区域”】
+[507a50,407ab0) 可能是一块无用的(或者说用来存放加密代码的）区域，里面有很多JMP和DLL函数指针
+
+【对于满天飞JMP的新发现】
+似乎这样的JMP只集中在几个区域内（例如特殊保护的代码附近）
+看来加密程序还是比较保守的
