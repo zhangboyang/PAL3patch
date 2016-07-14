@@ -1,4 +1,4 @@
-// the alternate unpacker
+// the alternate unpacker, unpack data directly in memory
 // see notes20160712.txt for details
 
 #include <windows.h>
@@ -91,8 +91,11 @@ static void loader()
 
 
 
+// MANUALLY enter IAT information here
+#define IAT_START 0x56A000
+#define IAT_END (0x56A000 + 0x1000)
 
-
+#define IS_GOOD_IATADDR(x) (IAT_START <= (x) && (x) < IAT_END)
 
 void link_library()
 {
@@ -106,7 +109,9 @@ void link_library()
             while (strcmp((s = read_token()), "END")) {
                 unsigned ptraddr;
                 sscanf(s, "%x", &ptraddr);
-                memcpy((void *)ptraddr, &funcaddr, sizeof(funcaddr));
+                if (IS_GOOD_IATADDR(ptraddr)) {
+                    memcpy((void *)ptraddr, &funcaddr, sizeof(funcaddr));
+                }
             }
         } else if (strcmp(s, "ENDLIBRARY") == 0) {
             return;
@@ -136,9 +141,9 @@ void unpack()
     loader();
     dynlinker();
     
-    unsigned *memptrptr = (void *) 0x1895300;
+//    unsigned *memptrptr = (void *) 0x1895300;
 //    *memptrptr = 0x1896f80;
-    *memptrptr = (unsigned) malloc(128);
+//    *memptrptr = (unsigned) malloc(128);
     
     MessageBox(NULL, "Here we go!", "PAL3unpack", 0);
 }

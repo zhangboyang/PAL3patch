@@ -1,0 +1,12 @@
+d0dcedabbd3843b5b1d6fc7552e91c04 *ADVAPI32.LIB
+69120884fece50bfeed0b55f1b9f4629 *KERNEL32.lib
+2552e9cffd352ff5b939d88af6fc6b61 *Mss32.dll
+52ca2bfcb773714f55b5e1c951653a27 *PAL3.exe
+9cd97635b91d15b8654f27a8b4d3c6a6 *USER32.LIB
+5a8ef13965d1d019f18a4058c9e32c15 *WINMM.LIB
+ae21d55ba68440490d9cbf2fd4130928 *binkw32.dll
+84de6d92f62cca5c65d9b84a07eb3e1d *dinput8.lib
+ce0213b1734f8cae1e1a0ea5213dd03f *gbengine.dll
+1aa06c81a0621e277e755b965b5e4b5f *ijl15.dll
+f1f500d877baabd03e04d0c69dbc5633 *pal3unpack.dll
+fce747b978f3130810d47eadf960ee13 *topo.dll

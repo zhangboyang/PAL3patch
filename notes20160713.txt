@@ -1,0 +1,77 @@
+【.data节的末尾在哪里？】
+猜测.data节[580000,1896D14)
+因为VC6好像有这样的特点：start（OEP）处引用数据位于data节的最后
+
+【用VirtualAlloc申请的内存根本没有用到！】
+PAL3中，用VirtualAlloc申请了一块128B的内存
+实际上，用到这块内存的代码只在WinMain函数中
+只是对它填充了0-127这128个字节
+然后在最后就把它VirtualFree掉了
+需要清除（填NOP）的代码块
+
+[00541a73, 00541a88) len=0x15 填0-127
+[00541c10, 00541c22) len=0x12 调用VirtualFree
+
+【IDA Pro的MSVC++类识别插件】
+《IDA Pro权威指南》23.5 p404
+可能会对逆向有用
+
+【VC编译出的PE文件中Dos Stub和PE Header之间的东西是什么】
+是VC连接时生成的一些信息（例如编译器连接器版本），这信息叫做Microsoft's Rich Signature
+参考资料：
+http://www.ntcore.com/files/richsign.htm
+http://www.stoned-vienna.com/microsofts-rich-header.html
+有程序可以读出这里面的内容：
+https://github.com/dishather/richprint
+
+【VC6生成的导入表的格式】
+IAT: 位于 .rdata 的最前面，数据形式如下(每一项都是IMAGE_THUNK_DATA)
+  .rdata:
+    dd [指针1]  // “指针”即函数名字的RVA(指向IMAGE_IMPORT_BY_NAME结构体)
+    dd [指针2]
+    dd 0       // 0 表示某个 DLL 的IAT结束
+    dd [指针3]
+    dd [指针4]
+    dd [指针5]
+    dd 0
+    .......
+  这一部分的数据首地址存储在DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress
+  长度存储在DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].Size
+IMPORT: 位于 .rdata 的最末尾
+    DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress:
+        [第1个IMAGE_IMPORT_DESCRIPTOR结构体] // 每一个结构体表示一个DLL
+        [第2个IMAGE_IMPORT_DESCRIPTOR结构体]
+        [第n个IMAGE_IMPORT_DESCRIPTOR结构体]
+        [全0的IMAGE_IMPORT_DESCRIPTOR结构体] // 某个结构体全0表示结束
+        [紧接着这里是与IAT大小内容完全相同的数据]
+        [DLL名字字符串；HINT+NAME（即IMAGE_IMPORT_BY_NAME）的存储区域] // 这里字符串、结构体的顺序很奇怪，但是大致是按照“某DLL函数对应的结构体”在前，“某DLL文件名字符串”在后的布局
+
+【lshint: 怎样得到IMAGE_IMPORT_BY_NAME中的HINT值？】
+可以用DUMPBIN工具解析LIB/DLL文件，然后处理解析结果，命令：
+对于LIB文件： dumpbin /headers /out:output.txt KERNEL32.LIB
+对于DLL文件： dumpbin /exports /out:output.txt GBENGINE.DLL
+lshint使用方法：lshint [DLL/LIB文件名]
+lshint输出文件为 filename+".hint.txt"
+lshint输出格式：[HINT四位十六进制] [函数名]
+注意输出结果不一定按照HINT升序排列
+
+【PAL3mkimport】
+使用PAL3analyse输出的analysis.txt和lshint输出的*.hint.txt重建导入表的工具
+生成出两个文件iat.bin, import.bin，分别应该放到.rdata的开头部分和结尾部分
+注意，应该先运行这个工具一次，得到import.bin的大小IMPORT SIZE后
+确定import部分的RVA地址，把它填写到IMPORT_RVA中，再编译运行这个工具一次
+
+【PAL3makepe】
+PE文件格式的比较详细的说明文档：https://msdn.microsoft.com/en-us/library/ms809762.aspx
+VC6生成的PE文件的格式：
+  0:
+    [DOS Stub]
+    [Rich Signature]
+    [IMAGE_NT_HEADER（含IMAGE_FILE_HEADER, IMAGE_OPTIONAL_HEADER）]
+    [IMAGE_SECTION_HEADER（.text节）]
+    [IMAGE_SECTION_HEADER（.rdata节）]
+    [IMAGE_SECTION_HEADER（.data节）]
+    [IMAGE_SECTION_HEADER（.rsrc节）]
+  0x1000（即SizeOfHeaders）:
+    各个节的数据
+

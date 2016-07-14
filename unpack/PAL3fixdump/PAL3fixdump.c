@@ -11,6 +11,8 @@
 #define MAXLINE 4096
 #define MAXLINEFMT "%" TO_STR(MAXLINE) "s"
 
+#define MAXIMPORTADDRCOUNT 10
+
 
 // token reader with unread feature
 // token means string without space chars
@@ -20,6 +22,7 @@ static int token_buffer_unread_flag;
 static void tokenreader_init(const char *filename)
 {
     tokenfp = fopen(filename, "r");
+    assert(tokenfp);
     token_buffer_unread_flag = 0;
 }
 static void tokenreader_cleanup()
@@ -47,15 +50,15 @@ static void unread_token()
 
 
 
-// what byte do you want to fill the remaining space
-#define FILLBYTE 0xCC
 
-static unsigned load_section(void *buf, unsigned bufsize, const char *sname)
+
+static unsigned load_section(void *buf, unsigned bufsize, const char *sname, int fillbyte)
 {
     char fn[MAXLINE];
     snprintf(fn, sizeof(fn), "dump%s", sname);
     FILE *fp = fopen(fn, "rb");
-    memset(buf, FILLBYTE, bufsize);
+    assert(fp);
+    memset(buf, fillbyte, bufsize);
     unsigned ret = fread(buf, 1, bufsize, fp);
     assert(ret < bufsize); // ensure buffer not full
     fclose(fp);
@@ -76,21 +79,49 @@ static void save_section(void *buf, unsigned size, const char *sname)
 #define BUFSIZE (1048576 * 16)
 static unsigned stextsize, oldstextsize, stextsizelimit;
 static char stext[BUFSIZE];
+static unsigned srdatasize, oldsrdatasize, srdatasizelimit;
+static char srdata[BUFSIZE];
 
 
-#define ROUND_UP(value, graduate) ((value) % (graduate) == 0 ? (value) : ((value) - (value) % (graduate) + (graduate)))
+#define ROUND_UP_INC(value, graduate) ((value) - (value) % (graduate) + (graduate))
+#define ROUND_UP(value, graduate) ((value) % (graduate) == 0 ? (value) : ROUND_UP_INC(value, graduate))
 
+
+#define INT3 0xCC
+#define NOP 0x90
 
 // MANUALLY enter section information here
 #define S_TEXT_BASE 0x00401000
+#define S_RDATA_BASE 0x0056A000
+#define IAT_START 0x56A000
+#define IAT_END (0x56A000 + 0x1000)
 
+#define IS_GOOD_IATADDR(x) (IAT_START <= (x) && (x) < IAT_END)
 
+// what byte do you want to fill the remaining space
+#define S_TEXT_FILLBYTE INT3
+#define S_RDATA_FILLBYTE 0x00
 
-static unsigned search_and_fix_jmp(unsigned vaddr, unsigned char *data, unsigned psize, unsigned jtarget, unsigned new_jtarget)
+static unsigned search_and_fix_imm(unsigned vaddr, unsigned char *data, unsigned psize, void *magic, unsigned magiclen, unsigned oldimm, unsigned newimm)
+{
+    unsigned i;
+    unsigned fixcount = 0;
+    for (i = magiclen; i < psize - 4; i++) {
+        unsigned imm;
+        memcpy(&imm, &data[i], sizeof(imm));
+        if (imm == oldimm) {
+            assert(memcmp(&data[i - magiclen], magic, magiclen) == 0);
+            memcpy(&data[i], &newimm, sizeof(newimm));
+            printf("  IMMFIX: OFFSET=%08X OLDIMM=%08X NEWIMM=%08X\n", vaddr + i, oldimm, newimm);
+            fixcount++;
+        }
+    }
+    return fixcount;
+}
+static void search_and_fix_jmp(unsigned vaddr, unsigned char *data, unsigned psize, unsigned jtarget, unsigned new_jtarget)
 {
     // search JMP/JCC/CALL to 'jtarget' in range [vaddr, psize)
     unsigned i;
-    unsigned ret = -1;
     unsigned fixcount = 0;
     //    OP AA BB CC DD ??
     //       ^[vaddr+i]  ^[vaddr+i+4]
@@ -106,13 +137,24 @@ static unsigned search_and_fix_jmp(unsigned vaddr, unsigned char *data, unsigned
             printf(" NEWIMM=%08X\n", imm);
             memcpy(&data[i], &imm, sizeof(imm));
             fixcount++;
-            ret = i;
         }
     }
     assert(fixcount == 1);
-    return ret; // return value points to imm
 }
 
+static int try_fill(unsigned vaddr, unsigned len)
+{
+    // should be unsigned compare, no need to check low limit
+    if (vaddr - S_TEXT_BASE < stextsize - len) {
+        memset(stext + (vaddr - S_TEXT_BASE), S_TEXT_FILLBYTE, len);
+        printf("  FILL: IN .text  ADDR=%08X LEN=%08X BYTE=%02X\n", vaddr, len, S_TEXT_FILLBYTE);
+        return 1;
+    } else if (vaddr - S_RDATA_BASE < srdatasize - len) {
+        memset(srdata + (vaddr - S_RDATA_BASE), S_RDATA_FILLBYTE, len);
+        printf("  FILL: IN .rdata ADDR=%08X LEN=%08X BYTE=%02X\n", vaddr, len, S_RDATA_FILLBYTE);
+        return 1;
+    } else return 0;
+}
 static void fix_jmp()
 {
     unsigned addr, dest;
@@ -123,10 +165,7 @@ static void fix_jmp()
     sscanf(read_token(), "%x", &dest);
     printf("FIX: JMP ADDR=%08X DEST=%08X\n", addr, dest);
     search_and_fix_jmp(S_TEXT_BASE, stext, stextsize, addr, dest);
-    if (addr - S_TEXT_BASE < stextsize - 5) {
-        memset(stext + (addr - S_TEXT_BASE), FILLBYTE, 5);
-        printf("  FILL: ADDR=%08X BYTE=%02X\n", addr, FILLBYTE);
-    }
+    try_fill(addr, 5);
 }
 
 static void fix_func()
@@ -144,7 +183,7 @@ static void fix_func()
     sscanf(read_token(), "%x", &len);
     
     // append data to end of .text
-    stextsize = ROUND_UP(stextsize, 0x10);
+    stextsize = ROUND_UP_INC(stextsize, 0x10);
     rfuncaddr = stextsize;
     funcaddr = stextsize + S_TEXT_BASE;
     printf("FUNC %08X => %08X\n", funcid, funcaddr);
@@ -177,7 +216,7 @@ static void fix_func()
     sscanf(read_token(), "%x", &funcjmp);
     search_and_fix_jmp(S_TEXT_BASE, stext, stextsize, funcjmp, funcaddr);
     
-    // fill junk instrs with FILLBYTE
+    // fill junk instrs with S_TEXT_FILLBYTE
     unsigned junksize;
     switch (funcid) { // MANUALLY enter the size of junk here
         case 0x59E0: junksize = 0x0E0; break;
@@ -186,8 +225,9 @@ static void fix_func()
         case 0x5AC0: junksize = 0x0E0; break;
         default: assert(0);
     }
-    memset(stext + (funcjmp - S_TEXT_BASE), FILLBYTE, junksize);
-    printf("  FILL: ADDR=%08X LEN=%08X BYTE=%02X\n", funcjmp, junksize, FILLBYTE);
+    
+    int ret = try_fill(funcjmp, junksize);
+    assert(ret);
     
     s = read_token(); assert(strcmp(s, "ENDFUNC") == 0);
     assert(stextsize <= stextsizelimit);
@@ -195,14 +235,82 @@ static void fix_func()
 static void fix_library()
 {
     char *s = read_token(); assert(strcmp(s, "LIBRARY") == 0);
-    printf("LIBRARY ingored!\n");
+    char dllname[MAXLINE];
+    strncpy(dllname, read_token(), sizeof(dllname));
+    dllname[sizeof(dllname) - 1] = '\0';
+    
+    printf("LIBRARY: %s\n", dllname);
+    while (1) {
+        s = read_token();
+        if (strcmp(s, "IMPORT") == 0) {
+            char funcname[MAXLINE];
+            strncpy(funcname, read_token(), sizeof(funcname));
+            funcname[sizeof(funcname) - 1] = '\0';
+            
+            s = read_token(); assert(strcmp(s, "ADDR") == 0);
+            
+            unsigned ptraddr[MAXIMPORTADDRCOUNT];
+            int cnt = 0;
+            while (strcmp((s = read_token()), "END")) {
+                assert(cnt < MAXIMPORTADDRCOUNT);
+                sscanf(s, "%x", &ptraddr[cnt++]);
+            }
+            int i;
+            unsigned goodaddr = 0;
+            for (i = 0; i < cnt; i++) {
+                if (IS_GOOD_IATADDR(ptraddr[i])) {
+                    assert(goodaddr == 0);
+                    goodaddr = ptraddr[i];
+                }
+            }
+            assert(goodaddr != 0);
+            for (i = 0; i < cnt; i++) {
+                if (ptraddr[i] != goodaddr) {
+                    printf(" FIX  %08X => %08X  FUNC %s\n", ptraddr[i], goodaddr, funcname);
+                    unsigned fixcnt;
+                    fixcnt = search_and_fix_imm(S_TEXT_BASE, stext, stextsize, "\xFF\x15", 2, ptraddr[i], goodaddr);
+                    assert(fixcnt == 1);
+                    try_fill(ptraddr[i], 4);
+                }
+            }
+        } else if (strcmp(s, "ENDLIBRARY") == 0) {
+            return;
+        } else assert(0);
+    }
     while (strcmp(read_token(), "ENDLIBRARY"));
+}
+
+static void fix_manually()
+{   
+    // MANUALLY fix something here
+    /* no need to alloc memory here, see notes20160713.txt
+    // fix VirtualAlloc memblock
+    unsigned vallocmemptr = 0x1896D20; // place the 0x80 memblock at end of .data
+    srdatasize = ROUND_UP_INC(srdatasize, 0x10);
+    unsigned vallocmemptrptr = srdatasize + S_RDATA_BASE;
+    memcpy(&srdata[srdatasize], &vallocmemptr, sizeof(vallocmemptr));
+    srdatasize += 4;
+    
+    // fix reference to the pointer to pointer to VirtualAlloc memblock
+    unsigned ret;
+    ret = search_and_fix_imm(S_TEXT_BASE, stext, stextsize, 0x1895300, vallocmemptrptr);
+    assert(ret == 3);
+    */
+    
+    // patch out VirtualAlloc() related mem area instructions
+    memset(stext + 0x140a73, NOP, 0x15); // [541a73, 541a88)
+    memset(stext + 0x140c10, NOP, 0x12); // [541c10, 541c22)
+    
+    // patch another range of junk
+    memset(stext + 0x6a50, S_TEXT_FILLBYTE, 0x60); // [407a50, 407ab0)
 }
 
 int main()
 {
-    oldstextsize = stextsize = load_section(stext, sizeof(stext), ".text");
+    oldstextsize = stextsize = load_section(stext, sizeof(stext), ".text", S_TEXT_FILLBYTE);
     stextsizelimit = ROUND_UP(stextsize, 0x1000); // round to page
+    oldsrdatasize = srdatasize = load_section(srdata, sizeof(srdata), ".rdata", S_RDATA_FILLBYTE);
+    srdatasizelimit = ROUND_UP(srdatasize, 0x1000); // round to page
     
     tokenreader_init("analysis.txt");
     while (1) {
@@ -219,11 +327,16 @@ int main()
     }
     tokenreader_cleanup();
     
+    fix_manually();
+    
     assert(stextsize <= stextsizelimit);
+    assert(srdatasize <= srdatasizelimit);
     
     printf("\n\n===== SUMMARY =====\n\n");
-    printf(".text OLDSIZE=%08X NEWSIZE=%08X LIMIT=%08X\n", oldstextsize, stextsize, stextsizelimit);
+    printf(".text   BASE=%08X OLDSIZE=%08X NEWSIZE=%08X LIMIT=%08X\n", S_TEXT_BASE, oldstextsize, stextsize, stextsizelimit);
+    printf(".rdata  BASE=%08X OLDSIZE=%08X NEWSIZE=%08X LIMIT=%08X\n", S_RDATA_BASE, oldsrdatasize, srdatasize, srdatasizelimit);
     
     save_section(stext, stextsize, ".text");
+    save_section(srdata, srdatasize, ".rdata");
     return 0;
 }

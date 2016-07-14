@@ -94,7 +94,7 @@ static void analyse_func()
             // MANUALLY enter func length here
             case 0x59E0: funclen = 0x0E0; break;
             case 0x57E0: funclen = 0x200; break;
-            case 0x55A0: funclen = 0x240; break;
+            case 0x55A0: funclen = 0x1C0; break;
             case 0x5AC0: funclen = 0x0E0; break;
             default: assert(0); // unknown func
         }
@@ -150,7 +150,7 @@ static unsigned read_immediate_string(unsigned char *ptr, char *buf, unsigned bu
 }
 static void check_no_space_chars(char *str)
 {
-    while (*str) assert(!isspace(*str++));
+    while (*str) { assert(!isspace(*str)); str++; }
 }
 
 static void analyse_library()
