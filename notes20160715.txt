@@ -1,0 +1,4 @@
+【IDA的bindiff插件】
+可以用来比较两个文件的差异
+https://www.zynamics.com/bindiff/manual/index.html
+
