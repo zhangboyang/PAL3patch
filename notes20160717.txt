@@ -1,0 +1,28 @@
+【逆向PAL3】
+从今天开始，逆向PAL3将是主要任务
+也可以找个时间把PAL3A脱壳
+
+【杂记】
+PAL3A.PDB里面的数据果然非常有用啊，虽然PAL3A与PAL3有不少差别，但是还是省了不少麻烦的～
+class PAL3; 这个结构体在PAL3A中有变化。现在还没有完全摸清这个结构体（估计不太好弄清楚，慢慢来）。
+class ConfigFile; 在PAL3中的比PAL3A中的简单一些。少了几个元素。
+class gbGfxDriverInfo; 完全一样！
+
+【问题】
+byte_BFDA88这个东西不知道干什么用的，在正常情况下似乎不会触发，但是在调出了内置战斗调试界面后，在读档时可能会触发。（不太确定，需进一步确认）
+
+
+【读取config.ini的代码】
+通过ConfigFile类实现，其中读ini是通过GetPrivateProfileString这个API实现的。
+这个API会受到IniFileMapping的影响
+另外misc这块部分的配置还可通过命令行指定（指定了即返回1，详见get_config_misc_int(sub_4066F0)
+
+
+【调出内置的战斗调试控制台】
+调出内置的战斗调试界面有两个条件，一个是设置PAL3.m_bTestCombat这个标志
+另外还要注意程序需要以窗口化模式运行，即取消设置gbGfxDriverInfo.fullscreen这个标志
+BYTE PAL3.m_bTestCombat; 位于00BFDA90，修改此标志的代码位于004047BF
+DWORD gbGfxDriverInfo.fullscreen; 位于00BFD6E8，修改此标志的代码位于004064DA
+今天玩了玩里面的功能，并不能在游戏过程中使用，只能在模拟的战斗中调试战斗特效啥的
+另外还有“场景编辑”功能报错（目录没找到，不清楚原因），感觉没啥太大意思。。。
+

@@ -1,0 +1,28 @@
+【“场景编辑”找不到的目录的猜想】
+通过搜索“CBScene”字符串，发现在函数sub_4E16F0/sub_4E1870中，程序试图直接读取“程序目录\basedata\cbscene\*.”
+但是可能由于basedata已经用CPK进行打包，所以该目录不存在
+可能的解决办法是，将basedata.cpk解包，也许其中就有所需要的CBScene目录
+
+
+【PAL3patch/launcher 补丁启动器】
+launcher是一个通用的DLL注入工具，用于在EXE启动时注入DLL
+大致的功能和注入步骤是
+    启动一个程序，并让其暂停(CREATE_SUSPENDED)
+    修改入口点代码
+    跳转到我们注入的代码
+    注入的代码会恢复入口点的代码
+    调用LoadLibrary()加载需要注入的DLL
+    调用DLL中一个函数让该DLL进行初始化
+    跳回到入口点继续执行
+在 Win98/Win2000/Win7/Win8上测试通过，也支持在DEP保护功能开启的情况下进行注入。
+注意在 Win98 下由于调用了 VirtualAllocEx() 所以需要 KernelEx 开启才能正常执行。
+另外，对于这样的注入行为，360会报警，若用户拒绝则WriteProcessMemory()返回错误。
+在这个PAL3patch补丁中，launcher会注入PAL3patch.dll并调用其导出的init函数
+
+【PAL3patch.dll的初始化】
+由于launcher不能知道PAL3.EXE是否已经脱壳，所以需要在init中判断
+判断的方式是GetModuleHandle("PAL3.DLL")，若返回0则说明已经脱壳，否则说明没有脱壳
+当已经脱壳时，直接调用init_patch()进行补丁的初始化
+若没有脱壳，则需要对脱壳代码打补丁，让其最后一条指令（是RETN）变成JMP init_patch。
+  这样当脱壳完毕时，就会调用我们的init_patch()进行补丁的初始化，并且在初始化完毕后调到OEP继续执行
+

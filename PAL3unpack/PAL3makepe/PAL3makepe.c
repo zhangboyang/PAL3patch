@@ -162,6 +162,7 @@ unsigned make_dosheader()
     sret = fread(&doshdr, sizeof(IMAGE_DOS_HEADER), 1, fp);
     assert(sret == 1);
     iret = fseek(fp, 0, SEEK_SET);
+    assert(iret == 0);
     sret = fread(pe + peptr, 1, doshdr.e_lfanew, fp);
     assert(sret == doshdr.e_lfanew);
     fclose(fp);

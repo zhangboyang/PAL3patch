@@ -1,0 +1,3 @@
+LIBRARY pal3patch.dll
+EXPORTS
+	init @1
