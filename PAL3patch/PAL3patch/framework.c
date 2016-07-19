@@ -23,3 +23,13 @@ void make_jmp(unsigned addr, void *jtarget)
     memcpy(instrbuf + 1, &jmpimm, 4);
     memcpy_to_process(addr, instrbuf, 5);
 }
+
+void check_code(unsigned addr, void *code, unsigned size)
+{
+    void *buf = malloc(size);
+    memcpy_from_process(buf, addr, size);
+    int ret = memcmp(buf, code, size);
+    if (ret != 0) fail("Code mismatch at 0x%08X.", addr);
+    free(buf);
+}
+

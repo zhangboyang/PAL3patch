@@ -4,9 +4,16 @@
 #include "common.h"
 
 
+
 static void init_patch()
 {
-    MessageBox(NULL, "Hello World!", "PAL3patch", 0);
+    read_config_file();
+    INIT_PATCHSET(testcombat);
+    INIT_PATCHSET(cdpatch);
+    
+    char buf[MAXLINE];
+    sprintf(buf, "Hello World!\nasmentry = %08X\n", (unsigned) asmentry);
+    MessageBox(NULL, buf, "PAL3patch", 0);
 }
 
 
@@ -18,8 +25,9 @@ static void patch_unpacker(unsigned unpacker_base)
     // so replace this RETN with a JMP to our init_patch()
     // p.s. since the unpacker destoryed the register values PUSHADed
     //      we doesn't care about it, either
-    unsigned retn_offset = 0x57d1;
-    make_jmp(unpacker_base + retn_offset, init_patch);
+    unsigned jmpaddr = unpacker_base + 0x57d1;
+    check_code(jmpaddr, "\xC3\x90\x90\x90\x90", 5);
+    make_jmp(jmpaddr, init_patch);
 }
 
 

@@ -1,0 +1,40 @@
+【补丁框架之asmentry】
+需要修改数据的地方，可以通过替换原来的代码中10个字节调用补丁C代码，并在C代码中进一步完成操作。
+这十个字节是：
+    push (此处补丁对应C代码的地址)
+    call (asmentry的地址)
+asmentry.S包含了asmentry处的代码，它的大致功能如下：
+    在栈上开辟一些空间，以便C代码可以向栈上压数据（见后）
+    调整一下数据的位置（主要是返回地址、C的函数指针、ESP值），并用PUSHA保存所有寄存器的值
+    以trapframe为参数调用C函数，完成补丁工作
+    调整数据位置，POPA弹出所有寄存器值，调整ESP，最后用RETN返回补丁处继续执行原来的代码
+
+【补丁框架之trapframe】
+asmentry借用了中断中trapframe的思想，可以在C代码中操作寄存器的值，也可以操作栈上的内容。
+trapframe存有八个通用寄存器的值，在C代码中可以修改这些值，这些修改都会反映到原来代码执行处
+值得一提的是，由于asmentry精心检查ESP，所以我们可以在C代码中向栈上压值或者弹出值
+（但是最多只能压MAX_PUSH_DWORDS个DWORD入栈，出栈无限制）
+
+【补丁框架之C函数】
+在经过asmentry->patchentry的层层调用后，终于到C函数大显身手的时候了
+在C函数中可以通过很多宏来完成有用的操作（例如数据的移动、栈的操作等）
+PUSH_DWORD, POP_DWORD, TOPTR, MEM_DWORD, MEM_WORD, MEM_BYTE
+R_EAX, R_ECX ... R_ESI, R_EDI
+这些宏用起来很像寄存器传输语言。
+
+
+【补丁框架之PATCHSET】
+一个补丁集(PATCHSET)可以包含多个单独的补丁(PATCH)
+宏MAKE_PATCHSET(your_patch_set_name)表示建立一个补丁集初始化函数，一般在补丁对应的c源码文件中出现
+宏INIT_PATCHSET(your_patch_set_name)会先读取配置文件，当配置文件中说明启用该补丁后，会调用MAKE_PATCHSET创建的初始化函数进行补丁集的初始化
+
+【补丁框架之PATCH】
+宏MAKE_PATCH(prefix, addr, size)用来建立会被asmentry调用的C函数（有一个参数struct trapframe *tf）
+宏INIT_PATCH(prefix, addr, size, oldcode)用来在addr处打上补丁，将控制流劫持到asmentry，最终调用MAKE_PATCH(prefix, addr, size)构造出的函数
+注意：由于宏内部对prefix, addr, size进行字符串拼接，所以MAKE_PATCH/INIT_PATCH的这三个参数必须完全相同（并且不能使用类似a-b的表达式）。
+
+【补丁框架之补丁样例】
+以下是两个简单的补丁：
+patch_testcombat.c 是用来调出战斗调试控制台的补丁
+patch_cdpatch.c 是免CD补丁（通过替换查注册表的函数来实现）
+
