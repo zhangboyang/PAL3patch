@@ -1,0 +1,197 @@
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "common.h"
+
+// file functions
+#define MY_REG_FILE "save\\registry.txt"
+#define MAX_REG_ITEM 100
+
+struct reg_item {
+    char *key1;
+    char *key2;
+    unsigned val;
+};
+
+static struct reg_item reg[MAX_REG_ITEM];
+static int nr_reg;
+
+static int reg_cmp(const void *a, const void *b)
+{
+    const struct reg_item *pa = a, *pb = b;
+    int ret = strcmp(pa->key1, pb->key1);
+    if (ret) return ret;
+    return strcmp(pa->key2, pb->key2);
+}
+static int alloc_reg()
+{
+    if (nr_reg >= MAX_REG_ITEM) fail("too many registry items.");
+    return nr_reg++;
+}
+static void load_reg()
+{
+    nr_reg = 0;
+    FILE *fp = fopen(MY_REG_FILE, "r");
+    if (!fp) return;
+    char buf1[MAXLINE], buf2[MAXLINE];
+    unsigned val;
+    int ret;
+    while ((ret = fscanf(fp, MAXLINEFMT MAXLINEFMT "%x", buf1, buf2, &val)) == 3) {
+        int id = alloc_reg();
+        reg[id].key1 = strdup(buf1);
+        reg[id].key2 = strdup(buf2);
+        reg[id].val = val;
+    }
+    fclose(fp);
+    if (ret != 0 && ret != EOF) fail("can't parse registry file.");
+    qsort(reg, nr_reg, sizeof(struct reg_item), reg_cmp);
+    int i;
+    for (i = 1; i < nr_reg; i++) {
+        if (reg_cmp(&reg[i - 1], &reg[i]) == 0) {
+            fail("duplicate registry key:\n  '%s'\n  '%s'", reg[i].key1, reg[i].key2);
+        }
+    }
+}
+static void save_reg()
+{
+    qsort(reg, nr_reg, sizeof(struct reg_item), reg_cmp);
+    FILE *fp = fopen(MY_REG_FILE, "w");
+    if (!fp) fail("can't save registry file.");
+    int i;
+    for (i = 0; i < nr_reg; i++) {
+        fprintf(fp, "%s\t%s\t%08X\n", reg[i].key1, reg[i].key2, reg[i].val);
+    }
+    fclose(fp);
+}
+static void assign_reg(const char *key1, const char *key2, unsigned val)
+{
+    int i;
+    for (i = 0; i < nr_reg; i++) {
+        if (strcmp(reg[i].key1, key1) == 0 && strcmp(reg[i].key2, key2) == 0) {
+            reg[i].val = val;
+            goto done;
+        }
+    }
+    int id = alloc_reg();
+    reg[id].key1 = strdup(key1);
+    reg[id].key2 = strdup(key2);
+    reg[id].val = val;
+done:
+    save_reg();
+}
+static int query_reg(const char *key1, const char *key2, unsigned *pval)
+{
+    int i;
+    for (i = 0; i < nr_reg; i++) {
+        if (strcmp(reg[i].key1, key1) == 0 && strcmp(reg[i].key2, key2) == 0) {
+            *pval = reg[i].val;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// no clean up functions, just let these strings leak
+
+
+
+
+
+// registry functions
+static void write_winreg(LPCSTR lpSubKey, LPCSTR lpValueName, DWORD Data)
+{
+    HKEY hKey;
+    if (RegCreateKeyEx(HKEY_LOCAL_MACHINE, lpSubKey, 0, "", REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+        RegSetValueEx(hKey, lpValueName, 0, REG_DWORD, (CONST BYTE *) &Data, sizeof(DWORD));
+        RegCloseKey(hKey);
+    }
+}
+static void read_winreg(LPCSTR lpSubKey, LPCSTR lpValueName, LPDWORD lpData)
+{
+    HKEY hKey;
+    DWORD dwType = REG_DWORD;
+    DWORD dwSize = sizeof(DWORD);
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, lpSubKey, 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS) {
+        if (RegQueryValueEx(hKey, lpValueName, NULL, &dwType, (LPBYTE) lpData, &dwSize) == ERROR_SUCCESS) {
+            RegCloseKey(hKey);
+        } else {
+            *lpData = 0;
+        }
+    } else {
+        *lpData = 0;
+    }
+}
+
+/*
+    0: patch disabled (read and write windows registry only)
+    1: read file first, read windows registry when key not exists in file
+       write both file and windows registry
+    2: read and write file only
+*/
+#define REGREDIRECT_SYNC 1
+#define REGREDIRECT_FILEONLY 2
+static int regredirect_flag;
+
+
+// patch functions
+static BOOL save_dword(LPCSTR lpSubKey, LPCSTR lpValueName, DWORD Data)
+{
+    // write file
+    assign_reg(lpSubKey, lpValueName, Data);
+    if (regredirect_flag == REGREDIRECT_SYNC) {
+        // always write windows registry is sync is enabled
+        write_winreg(lpSubKey, lpValueName, Data);
+    }
+    return TRUE;
+}
+
+static BOOL query_dword(LPCSTR lpSubKey, LPCSTR lpValueName, LPDWORD lpData)
+{
+    // read file
+    int ret = query_reg(lpSubKey, lpValueName, (unsigned *) lpData);
+    if (regredirect_flag == REGREDIRECT_SYNC) {
+        if (ret) {
+            // if we read data from file
+            // sync data to windows registry
+            write_winreg(lpSubKey, lpValueName, *lpData);
+        } else {
+            // if there is no data in file
+            // try read registry and sync data to file
+            read_winreg(lpSubKey, lpValueName, lpData);
+            assign_reg(lpSubKey, lpValueName, *lpData);
+        }
+    } else {
+        if (!ret) *lpData = 0;
+    }
+    return TRUE;
+}
+
+
+
+
+MAKE_PATCHSET(regredirect)
+{
+    regredirect_flag = flag;
+    if (regredirect_flag != REGREDIRECT_SYNC && regredirect_flag != REGREDIRECT_FILEONLY) {
+        fail("unknown regredirect_flag %d.", regredirect_flag);
+    }
+    
+    load_reg();
+    
+    const unsigned char save_dword_func_magic[] = "\x53\x56\x8B\x74\x24\x0C\x57\x85\xF6\x75\x06\x5F\x5E\x32\xC0\x5B";
+    const unsigned save_dword_funcs[] = {
+        0x4070A0, 0x437E60, 0x44E2B0, 0x456590,
+        0x4B2840, 0x528190, 0x52F570,
+    };
+    
+    int i;
+    for (i = 0; i < sizeof(save_dword_funcs) / sizeof(unsigned); i++) {
+        check_code(save_dword_funcs[i], save_dword_func_magic, sizeof(save_dword_func_magic) - 1);
+        make_jmp(save_dword_funcs[i], save_dword);
+    }
+    
+    const unsigned char query_dword_func_magic[] = "\x51\x8B\x4C\x24\x08\x8D\x44\x24\x08\x50\x6A\x01\x6A\x00\x51\x68";
+    const unsigned query_dword_func = 0x456FC0;
+    check_code(query_dword_func, query_dword_func_magic, sizeof(query_dword_func_magic) - 1);
+    make_jmp(query_dword_func, query_dword);
+}

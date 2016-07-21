@@ -4,7 +4,7 @@
 #include "common.h"
 
 
-void memcpy_to_process(unsigned dest, void *src, unsigned size)
+void memcpy_to_process(unsigned dest, const void *src, unsigned size)
 {
     BOOL ret = WriteProcessMemory(GetCurrentProcess(), (void *) dest, src, size, NULL);
     if (!ret) fail("WriteProcessMemory() failed.");
@@ -15,7 +15,7 @@ void memcpy_from_process(void *dest, unsigned src, unsigned size)
     if (!ret) fail("ReadProcessMemory() failed.");
 }
 
-void make_jmp(unsigned addr, void *jtarget)
+void make_jmp(unsigned addr, const void *jtarget)
 {
     unsigned jmpimm = (unsigned) jtarget - (addr + 5);
     unsigned char instrbuf[5];
@@ -24,7 +24,7 @@ void make_jmp(unsigned addr, void *jtarget)
     memcpy_to_process(addr, instrbuf, 5);
 }
 
-void check_code(unsigned addr, void *code, unsigned size)
+void check_code(unsigned addr, const void *code, unsigned size)
 {
     void *buf = malloc(size);
     memcpy_from_process(buf, addr, size);

@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -O0
+CFLAGS := -Wall -O2 -finput-charset=cp936
 SFLAGS := -Wall
 LDFLAGS := -Wall -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows
 

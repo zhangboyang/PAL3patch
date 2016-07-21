@@ -10,7 +10,7 @@
 
 #define EXE_NAME "PAL3.exe"
 #define DLL_NAME "PAL3patch.dll"
-#define DLL_FUNC "init"
+#define DLL_FUNC "launcher_entry"
 
 
 /*

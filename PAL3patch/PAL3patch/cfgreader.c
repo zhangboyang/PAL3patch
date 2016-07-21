@@ -5,7 +5,7 @@
 #include "common.h"
 
 struct config_line {
-    const char *key, *val;
+    char *key, *val;
 };
 
 static struct config_line cfgdata[MAX_CONFIG_LINES];
@@ -43,7 +43,7 @@ void read_config_file()
         char *keystr = buf, *valstr = ptr + 1;
         
         // rtrim 'key'
-        ptr--;
+        if (ptr > buf) ptr--;
         while (ptr >= buf && isspace(*ptr)) *ptr-- = '\0';
         if (!*ptr) fail("keystr is empty");
         
@@ -72,7 +72,7 @@ void read_config_file()
 const char *get_string_from_configfile(const char *key)
 {
     struct config_line tmp;
-    tmp.key = key;
+    tmp.key = (char *) key;
     struct config_line *result;
     result = bsearch(&tmp, cfgdata, cfglines, sizeof(struct config_line), config_line_cmp);
     if (!result) fail("can't find config line with key '%s'.", key);
@@ -88,4 +88,13 @@ int get_int_from_configfile(const char *key)
     return result;
 }
 
+void get_all_config(char *buf, unsigned size)
+{
+    unsigned len = 0;
+    int i;
+    for (i = 0; i < cfglines; i++) {
+        snprintf(buf + len, size - len, "  %s=%s\n", cfgdata[i].key, cfgdata[i].val);
+        len += strlen(buf + len);
+    }
+}
 // no clean up functions, just let these strings leak

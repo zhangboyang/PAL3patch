@@ -1,0 +1,61 @@
+【破解补丁PAL3.DLL不能在win98下加载的原因】
+主要是因为PAL3.DLL的入口点DllMain()函数编写不符合标准。
+入口点DllMain()的传参方式是 __stdcall (即WINAPI)
+BOOL WINAPI DllMain(
+  _In_ HINSTANCE hinstDLL,
+  _In_ DWORD     fdwReason,
+  _In_ LPVOID    lpvReserved
+);
+但是PAL3.DLL的函数入口点的代码如下
+100010C6      837C24 08 01  CMP DWORD PTR SS:[ESP+8],1
+100010CB      75 10         JNE SHORT 100010DD
+100010CD      8B4424 04     MOV EAX,DWORD PTR SS:[ESP+4]
+100010D1      A3 E1100010   MOV DWORD PTR DS:[100010E1],EAX
+100010D6      50            PUSH EAX
+100010D7      FF15 56100010 CALL DWORD PTR DS:[10001056]
+100010DD      6A 01         PUSH 1
+100010DF      58            POP EAX
+100010E0      C3            RETN
+最后RETN指令应该改为RETN 0C，但是这样代码会增长两字节。
+由于破解补丁的作者视代码长度为生命，一丁点多余空间都不给留，所以只能另想办法
+那就让它的代码再短一点吧
+100010C6      59            POP ECX
+100010C7      58            POP EAX
+100010C8      5A            POP EDX
+100010C9      83FA 01       CMP EDX,1
+100010CC      5A            POP EDX
+100010CD      51            PUSH ECX
+100010CE      75 0D         JNE SHORT 100010DD
+100010D0      90            NOP //哈哈哈还省出来一个字节
+100010D1      A3 E1100010   MOV DWORD PTR DS:[100010E1],EAX
+100010D6      50            PUSH EAX
+100010D7      FF15 56100010 CALL DWORD PTR DS:[10001056]
+100010DD      6A 01         PUSH 1
+100010DF      58            POP EAX
+100010E0      C3            RETN
+在其他Windows平台上，Windows做了兼容处理，在调用前保存栈指针，调用后恢复栈指针，所以不会发生问题。
+做成的补丁在PAL3patch.c中，不可通过配置文件控制。
+
+
+【regredirect注册表重定向/同步功能】
+已开启的小游戏、已播放的动画的信息存放于注册表中，不便于备份，通过此功能可以把这些数据重定向到文件中
+默认的数据文件是save/registry.txt。该功能有两个选项可供选择
+1 双向同步：文件中数据优先，注册表中数据和文件中数据保持一致
+2 仅文件：仅使用文件中数据，完全不读写注册表
+
+【disablekbdhook禁用键盘钩子】
+默认情况下游戏会通过键盘钩子禁止Alt+Tab之类的热键（在Windows2000下）
+启用该功能将允许游戏中使用这些热键
+
+【加载补丁的两种方式】
+1. 通过launcher，动态注入DLL：
+   优点：不需要繁琐的文件替换、重命名过程，可以用于脱壳后的程序
+   缺点：可能会导致杀软误报，不支持Win98（因为PAL3.DLL不修正无法加载）
+   详细信息：入口点代码位于PAL3patch.c:launcher_entry()
+2. 通过对PAL3.DLL进行代理（把PAL3patch.dll重命名为PAL3.dll，原PAL3.dll重命名为PAL3unpack.dll）
+   优点：支持Win98，不会误报，必须携带破解补丁
+   缺点：文件替换易出错，不能用于脱壳后的程序
+   详细信息：入口点代码位于PAL3patch.c:sforce_unpacker_init()
+调试时使用方法1更方便些，发布补丁时使用方式2更稳妥。
+
+
