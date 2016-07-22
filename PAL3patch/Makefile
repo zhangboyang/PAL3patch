@@ -1,7 +1,7 @@
 CC := gcc
 CFLAGS := -Wall -O2 -finput-charset=cp936
 SFLAGS := -Wall
-LDFLAGS := -Wall -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows
+LDFLAGS := -Wall -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lcomctl32
 
 TARGET_EXE := launcher.exe
 
@@ -38,5 +38,5 @@ $(TARGET_DLL_SRCPATH)/%.o: $(TARGET_DLL_SRCPATH)/%.S
 	$(CC) $(SFLAGS) -c -o $@ $<
 
 $(TARGET_DLL): $(TARGET_DLL_OBJS)
-	$(CC) $(LDFLAGS) -shared -o $@ $(TARGET_DLL_OBJS) $(TARGET_DLL_SRCPATH)/$(@:.dll=.def)
+	$(CC) -shared -o $@ $(TARGET_DLL_OBJS) $(TARGET_DLL_SRCPATH)/$(@:.dll=.def) $(LDFLAGS)
 	strip $@

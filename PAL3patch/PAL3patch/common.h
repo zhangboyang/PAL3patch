@@ -71,6 +71,8 @@ extern void check_code(unsigned addr, const void *code, unsigned size);
 // misc.c
 #define fail(fmt, ...) __fail(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
 extern void __fail(const char *file, int line, const char *func, const char *fmt, ...);
+extern const char build_info[];
+extern void show_about();
 
 // trapframe.c
 struct trapframe;
@@ -116,13 +118,14 @@ extern int get_int_from_configfile(const char *key);
 extern void get_all_config(char *buf, unsigned size);
 
 // PAL3patch.c
-extern const char build_info[];
+extern const char *unpacker_module_name;
 
 // all patchs
 MAKE_PATCHSET(testcombat);
 MAKE_PATCHSET(cdpatch);
 MAKE_PATCHSET(regredirect);
 MAKE_PATCHSET(disablekbdhook);
+MAKE_PATCHSET(depcompatible);
 
 #endif // __ASSEMBLER__
 

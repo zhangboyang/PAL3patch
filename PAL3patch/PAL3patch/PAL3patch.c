@@ -3,57 +3,17 @@
 #include <assert.h>
 #include "common.h"
 
-const char build_info[] =
-    "  built on: " __DATE__ ", " __TIME__ "\n"
-    "  compiler: "
-#if defined(__GNUC__) && defined(__VERSION__)
-        "gcc " __VERSION__
-#else
-        "unknown C compiler"
-#endif
-    "\n";
-
-
-static void show_about()
-{
-    int flag = get_int_from_configfile("showabout");
-    if (flag) {
-        char cfgbuf[MAXLINE];
-        get_all_config(cfgbuf, sizeof(cfgbuf));
-        wchar_t buf[MAXLINE];
-        snwprintf(buf, sizeof(buf) / sizeof(wchar_t), 
-            L"欢迎使用《仙剑奇侠传三》增强补丁\n"
-            L"\n"
-            L"本补丁可以修复一些游戏程序编写不合理的地方\n"
-            L"并且添加了一些实用的小功能\n" 
-            L"详细信息和使用方法请参见 PAL3patch_README.txt\n" 
-            L"\n"
-            L"\n"
-            L"配置选项:\n%hs" 
-            L"源代码:\n"
-            L"  https://github.com/zhangboyang/PAL3patch\n"
-            L"编译信息:\n%hs"
-            L"\n"
-            L"\n"
-            L"如果您不想每次启动时看到此信息\n"
-            L"请将配置文件 %hs 中的\n"
-            L"  showabout=%d\n"
-            L"修改为\n"
-            L"  showabout=0\n"
-            L"\n"
-            , cfgbuf, build_info, CONFIG_FILE, flag); 
-            
-            
-        MessageBoxW(NULL, buf, L"关于", MB_ICONINFORMATION); 
-    }
-}
-
-static void init_patch()
+// init_stage1() should be called before unpacker is executed (if exists)
+static void init_stage1()
 {
     read_config_file();
     
-    show_about();
-    
+    INIT_PATCHSET(depcompatible);
+}
+
+// init_stage2() should be called after EXE is unpacked
+static void init_stage2()
+{
     INIT_PATCHSET(cdpatch);
     INIT_PATCHSET(regredirect);
     INIT_PATCHSET(disablekbdhook);
@@ -61,37 +21,40 @@ static void init_patch()
     if (!INIT_PATCHSET(testcombat)) {
         // here are some patches not compatiable with 'testcombat'
     }
+
+    show_about();
 }
 
 
 
 
 
-
-// patch unpacker code, let it call init_patch() after unpacking
+// patch unpacker code, let it call init_stage2() after unpacking
 static void patch_unpacker(unsigned unpacker_base)
 {
     // there is a RETN and many NOPs at end of unpacking code
-    // so replace this RETN with a JMP to our init_patch()
+    // so replace this RETN with a JMP to our init_stage2()
     // p.s. since the unpacker destoryed the register values PUSHADed
     //      we doesn't care about it, either
     unsigned jmpaddr = unpacker_base + 0x57d1;
     check_code(jmpaddr, "\xC3\x90\x90\x90\x90", 5);
-    make_jmp(jmpaddr, init_patch);
+    make_jmp(jmpaddr, init_stage2);
 }
 
 
 // this function will be called immediately after DLL is injected by launcher
 void launcher_entry(unsigned oep_addr)
 {
+    init_stage1();
+    
     unsigned unpacker_base = (unsigned) GetModuleHandle("PAL3.DLL");
     if (unpacker_base) {
         // unpacker exists and not executed
-        // we should call init_patch() when after unpacking
+        // we should call init_stage2() when after unpacking
         patch_unpacker(unpacker_base);
     } else {
         // no unpacker exists
-        init_patch();
+        init_stage2();
     }
 }
 
@@ -120,6 +83,8 @@ fail:
 
 unsigned sforce_unpacker_init()
 {
+    init_stage1();
+    
     // our DLL is loaded as fake unpacker
     // we should load the real unpack, patch it, and execute it
     HMODULE unpacker = LoadLibrary(EXTERNAL_UNPACKER);
