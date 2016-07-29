@@ -1,0 +1,19 @@
+【逆向思路】
+首先需要初步了解计算机图形学、DirectX9的基础知识（《DirectX 9.0 3D游戏开发编程基础》）
+找到能显示调用Direct3D函数的工具，然后进一步分析
+目前找到这两个工具，都太不合我意：
+    (1) PIX，能显示所有DirectX调用，但是好像看不到调用者地址
+    (2) WinAPIOverride，通用的DLL挂钩(hook)工具，功能强大，但是要想显示Direct3D的COM接口的调用比较麻烦
+
+【WinAPIOverride】
+强大的挂钩工具，可以用来动态分析PAL3.EXE/GBENGINE.DLL之间的函数调用
+需要先用MonitoringFileBuilder分析GBENGINE.DLL生成出GBENGING.TXT
+然后加载分析结果即可对PAL3.EXE进行动态分析了
+
+【WinAPIOverride： Debug Infos Viewer】
+可以查看PDB里面的函数名和地址信息，与之前能查看PDB里面结构体的工具提供的信息结合起来，对逆向非常有用。
+
+【取消限制鼠标活动区域】
+限制鼠标活动区域的功能是通过ClipCursor()这个API达成的。
+GBENGINE.DLL中多处都引用了这个函数
+
