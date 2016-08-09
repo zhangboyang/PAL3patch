@@ -4,6 +4,7 @@
 目前找到这两个工具，都太不合我意：
     (1) PIX，能显示所有DirectX调用，但是好像看不到调用者地址
     (2) WinAPIOverride，通用的DLL挂钩(hook)工具，功能强大，但是要想显示Direct3D的COM接口的调用比较麻烦
+    (3) apitrace，跨平台的API追踪工具，主要用于图形API如Direct 3D、OpenGL，详细见 notes20160809.txt
 
 【WinAPIOverride】
 强大的挂钩工具，可以用来动态分析PAL3.EXE/GBENGINE.DLL之间的函数调用
