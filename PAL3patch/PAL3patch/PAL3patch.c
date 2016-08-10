@@ -14,14 +14,17 @@ static void init_stage1()
 // init_stage2() should be called after EXE is unpacked
 static void init_stage2()
 {
+    if (!INIT_PATCHSET(testcombat)) {
+        // here are some patches not compatiable with 'testcombat'
+        INIT_PATCHSET(dpiawareness);
+        INIT_PATCHSET(windowed);
+    }
+    
     INIT_PATCHSET(cdpatch);
     INIT_PATCHSET(regredirect);
     INIT_PATCHSET(disablekbdhook);
+    INIT_PATCHSET(setlocale);
     
-    if (!INIT_PATCHSET(testcombat)) {
-        // here are some patches not compatiable with 'testcombat'
-    }
-
     show_about();
 }
 
@@ -86,7 +89,7 @@ unsigned sforce_unpacker_init()
     init_stage1();
     
     // our DLL is loaded as fake unpacker
-    // we should load the real unpack, patch it, and execute it
+    // we should load the real unpacker, patch it, and execute it
     HMODULE unpacker = LoadLibrary(EXTERNAL_UNPACKER);
     if (!unpacker && try_fix_unpacker()) unpacker = LoadLibrary(EXTERNAL_UNPACKER_FIXED);
     if (!unpacker) fail("Can't load unpacker.");

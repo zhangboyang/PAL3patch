@@ -1,9 +1,11 @@
 CC := gcc
-CFLAGS := -Wall -O2 -finput-charset=cp936
+CFLAGS := -Wall -Os -finput-charset=cp936 -fexec-charset=cp936
 SFLAGS := -Wall
 LDFLAGS := -Wall -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lcomctl32
 
-TARGET_EXE := launcher.exe
+TARGET_LAUNCHER := launcher.exe
+TARGET_LAUNCHER_USEUNPACKED := launcher_useunpacked.exe
+TARGET_EXE := $(TARGET_LAUNCHER) $(TARGET_LAUNCHER_USEUNPACKED)
 
 TARGET_DLL := PAL3patch.dll
 TARGET_DLL_SRCPATH := $(TARGET_DLL:.dll=)
@@ -25,8 +27,12 @@ all: $(TARGET_EXE) $(TARGET_DLL)
 clean:
 	rm -f $(TARGET_EXE) $(TARGET_DLL) $(TARGET_DLL_OBJS)
 
-$(TARGET_EXE):
-	$(CC) $(CFLAGS) -Wl,--subsystem,windows -o $@ $(@:.exe=)/$(@:.exe=.c)
+$(TARGET_LAUNCHER):
+	$(CC) $(CFLAGS) -Wl,--subsystem,windows -o $@ launcher/launcher.c
+	strip $@
+
+$(TARGET_LAUNCHER_USEUNPACKED):
+	$(CC) $(CFLAGS) -DUSE_UNPACKED_EXE -Wl,--subsystem,windows -o $@ launcher/launcher.c
 	strip $@
 
 $(TARGET_DLL_OBJS): $(TARGET_DLL_HFILES)

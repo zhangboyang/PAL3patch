@@ -7,8 +7,11 @@
 #include <string.h>
 #include <assert.h>
 
-
+#ifdef USE_UNPACKED_EXE
+#define EXE_NAME "PAL3unpacked.exe"
+#else
 #define EXE_NAME "PAL3.exe"
+#endif
 #define DLL_NAME "PAL3patch.dll"
 #define DLL_FUNC "launcher_entry"
 

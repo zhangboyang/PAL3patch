@@ -32,9 +32,10 @@
 
 #define MAKE_PATCHSET_NAME(name) CONCAT(name, _patchset)
 #define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
+#define GET_PATCHSET_FLAG(name) (get_int_from_configfile(TOSTR(name)))
 #define INIT_PATCHSET(name) \
     ({ \
-        int __flag = get_int_from_configfile(TOSTR(name)); \
+        int __flag = GET_PATCHSET_FLAG(name); \
         if (__flag) MAKE_PATCHSET_NAME(name)(__flag); \
         __flag; \
     })
@@ -56,6 +57,9 @@ extern void memcpy_to_process(unsigned dest, const void *src, unsigned size);
 extern void memcpy_from_process(void *dest, unsigned src, unsigned size);
 extern void make_jmp(unsigned addr, const void *jtarget);
 extern void check_code(unsigned addr, const void *code, unsigned size);
+extern void *get_func_address(const char *dllname, const char *funcname);
+extern void hook_iat(void *iatbase, void *oldptr, void *newptr);
+extern void *hook_import_table(void *image_base, const char *dllname, const char *funcname, void *newptr);
 #define SIMPLE_PATCH(addr, oldcode, newcode, size) \
     do { \
         check_code(addr, oldcode, size); \
@@ -126,6 +130,9 @@ MAKE_PATCHSET(cdpatch);
 MAKE_PATCHSET(regredirect);
 MAKE_PATCHSET(disablekbdhook);
 MAKE_PATCHSET(depcompatible);
+MAKE_PATCHSET(windowed);
+MAKE_PATCHSET(setlocale);
+MAKE_PATCHSET(dpiawareness);
 
 #endif // __ASSEMBLER__
 
