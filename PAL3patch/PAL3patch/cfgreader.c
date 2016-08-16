@@ -10,6 +10,7 @@ struct config_line {
 
 static struct config_line cfgdata[MAX_CONFIG_LINES];
 static int cfglines;
+static int cfg_loaded = 0;
 
 static int config_line_cmp(const void *a, const void *b)
 {
@@ -25,12 +26,12 @@ void read_config_file()
     char buf[MAXLINE];
     char *ptr;
     while (fgets(buf, sizeof(buf), fp)) {
+        // ltrim the line
+        for (ptr = buf; *ptr && isspace(*ptr); ptr++);
+        memmove(buf, ptr, strlen(ptr) + 1);
+        
         // skip empty and comment lines
         if (!buf[0] || buf[0] == ';' || buf[0] == '#' || (buf[0] == '/' && buf[1] == '/')) continue;
-
-        // skip white space lines
-        for (ptr = buf; *ptr && isspace(*ptr); ptr++);
-        if (!*ptr) continue;
         
         // remove '\n' and end of line
         ptr = strchr(buf, '\n');
@@ -67,6 +68,8 @@ void read_config_file()
         int ret = config_line_cmp(&cfgdata[i - 1], &cfgdata[i]);
         if (ret == 0) fail("duplicate key '%s'.", cfgdata[i].key);
     }
+    
+    cfg_loaded = 1;
 }
 
 const char *get_string_from_configfile(const char *key)
@@ -82,14 +85,15 @@ const char *get_string_from_configfile(const char *key)
 int get_int_from_configfile(const char *key)
 {
     const char *valstr = get_string_from_configfile(key);
-    int result, ret;
-    ret = sscanf(valstr, "%d", &result);
-    if (ret != 1) fail("can't parse '%s' to integer.", valstr);
-    return result;
+    return str2int(valstr);
 }
 
 void get_all_config(char *buf, unsigned size)
 {
+    if (!cfg_loaded) {
+        snprintf(buf, size, "  config file haven't loaded.\n");
+        return;
+    }
     unsigned len = 0;
     int i;
     for (i = 0; i < cfglines; i++) {

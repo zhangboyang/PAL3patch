@@ -33,7 +33,7 @@ R_EAX, R_ECX ... R_ESI, R_EDI
 宏MAKE_PATCHSET(your_patch_set_name)表示建立一个补丁集初始化函数，一般在补丁对应的c源码文件中出现
 宏INIT_PATCHSET(your_patch_set_name)会先读取配置文件，当配置文件中说明启用该补丁后，会调用MAKE_PATCHSET创建的初始化函数进行补丁集的初始化
 
-【补丁框架之PATCH】
+【补丁框架之PATCH】【已改变，见20160813.txt】
 宏MAKE_PATCH(prefix, addr, size)用来建立会被asmentry调用的C函数（有一个参数struct trapframe *tf）
 宏INIT_PATCH(prefix, addr, size, oldcode)用来在addr处打上补丁，将控制流劫持到asmentry，最终调用MAKE_PATCH(prefix, addr, size)构造出的函数
 注意：由于宏内部对prefix, addr, size进行字符串拼接，所以MAKE_PATCH/INIT_PATCH的这三个参数必须完全相同（并且不能使用类似a-b的表达式）。

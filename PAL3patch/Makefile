@@ -1,7 +1,7 @@
 CC := gcc
-CFLAGS := -Wall -Os -finput-charset=cp936 -fexec-charset=cp936
-SFLAGS := -Wall
-LDFLAGS := -Wall -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lcomctl32
+CFLAGS := -Wall -Werror -Os -finput-charset=cp936 -fexec-charset=cp936
+SFLAGS := -Wall -Werror
+LDFLAGS := -Wall -Werror -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lcomctl32 -lwinmm -lgdi32
 
 TARGET_LAUNCHER := launcher.exe
 TARGET_LAUNCHER_USEUNPACKED := launcher_useunpacked.exe

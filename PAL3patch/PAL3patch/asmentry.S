@@ -1,14 +1,16 @@
 #include "common.h"
 
-#define X ((MAX_PUSH_DWORDS - 2) * 4)
+#define X ((MAX_PUSH_DWORDS - 3) * 4)
 #define Y ((MAX_PUSH_DWORDS - 1) * 4)
-#define Z ((MAX_PUSH_DWORDS + 2) * 4)
+#define Z ((MAX_PUSH_DWORDS + 3) * 4)
 
 .text
 .align 0x10
 .globl _asmentry@4
 _asmentry@4:
+	pushf
 	sub $X, %esp
+	pushl Y(%esp)
 	pushl Y(%esp)
 	pushl Y(%esp)
 	pushal
@@ -16,13 +18,16 @@ _asmentry@4:
 	pushl %esp
 	call _patchentry
 	addl $0x4, %esp
-	movl 0x20(%esp), %eax
 	movl 0xc(%esp), %ecx
-	subl $4, %ecx
-	movl %eax, (%ecx)
+	movl 0x24(%esp), %eax
+	movl 0x20(%esp), %edx
+	subl $0x8, %ecx
+	movl %eax, 0x4(%ecx)
+	movl %edx, (%ecx)
 	movl %ecx, 0x20(%esp)
 	popal
 	popl %esp
+	popf
 	ret
 
 /*

@@ -16,6 +16,8 @@
 // common constants
 #define NOP 0x90
 #define INT3 0xCC
+#define PAGE_SIZE 4096
+
 
 #define MAXLINE 4096
 #define MAXLINEFMT "%" TOSTR(MAXLINE) "s"
@@ -23,14 +25,16 @@
 #define EXTERNAL_UNPACKER "PAL3unpack.dll"
 #define EXTERNAL_UNPACKER_FIXED "PAL3unpack_fixed.dll"
 #define ERROR_FILE "PAL3patch.log"
+#define WARNING_FILE "PAL3patch.warning.log"
 #define CONFIG_FILE "PAL3patch.conf"
-#define MAX_CONFIG_LINES 20
+#define MAX_CONFIG_LINES 100
 
 // MAX_PUSH_DWORDS controls how many dwords 'asmentry' will reserve for possible stack pushes
 // this value can't be too large (no more than one page)
+// this value mustn't smaller than 3
 #define MAX_PUSH_DWORDS 16
 
-#define MAKE_PATCHSET_NAME(name) CONCAT(name, _patchset)
+#define MAKE_PATCHSET_NAME(name) CONCAT(patchset_, name)
 #define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
 #define GET_PATCHSET_FLAG(name) (get_int_from_configfile(TOSTR(name)))
 #define INIT_PATCHSET(name) \
@@ -40,13 +44,13 @@
         __flag; \
     })
 
-#define MAKE_PATCH_PROC(funcname) void funcname(struct trapframe *tf)
-#define MAKE_PATCH_NAME(prefix, addr, size) CONCAT5(prefix, _, addr, _, size)
-#define MAKE_PATCH(prefix, addr, size) MAKE_PATCH_PROC(MAKE_PATCH_NAME(prefix, addr, size))
-#define INIT_PATCH(prefix, addr, size, oldcode) \
+#define MAKE_ASMPATCH_PROC(funcname) void funcname(struct trapframe *tf)
+#define MAKE_ASMPATCH_NAME(name) CONCAT(asmpatch_, name)
+#define MAKE_ASMPATCH(name) MAKE_ASMPATCH_PROC(MAKE_ASMPATCH_NAME(name))
+#define INIT_ASMPATCH(name, addr, size, oldcode) \
     do { \
-        check_code(addr, oldcode, size); \
-        make_patch_proc_call(addr, MAKE_PATCH_NAME(prefix, addr, size), size); \
+        check_code((addr), (oldcode), (size)); \
+        make_patch_proc_call((addr), MAKE_ASMPATCH_NAME(name), (size)); \
     } while (0)
 
 
@@ -55,8 +59,11 @@
 // framework.c
 extern void memcpy_to_process(unsigned dest, const void *src, unsigned size);
 extern void memcpy_from_process(void *dest, unsigned src, unsigned size);
+extern void make_branch(unsigned addr, unsigned char opcode, const void *jtarget, unsigned size);
 extern void make_jmp(unsigned addr, const void *jtarget);
+extern void make_call(unsigned addr, const void *jtarget);
 extern void check_code(unsigned addr, const void *code, unsigned size);
+extern unsigned get_module_base(const char *modulename);
 extern void *get_func_address(const char *dllname, const char *funcname);
 extern void hook_iat(void *iatbase, void *oldptr, void *newptr);
 extern void *hook_import_table(void *image_base, const char *dllname, const char *funcname, void *newptr);
@@ -74,9 +81,14 @@ extern void *hook_import_table(void *image_base, const char *dllname, const char
 
 // misc.c
 #define fail(fmt, ...) __fail(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
-extern void __fail(const char *file, int line, const char *func, const char *fmt, ...);
+extern void __attribute__((noreturn)) __fail(const char *file, int line, const char *func, const char *fmt, ...);
+#define warning(fmt, ...) __warning(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
+extern void __warning(const char *file, int line, const char *func, const char *fmt, ...);
 extern const char build_info[];
 extern void show_about();
+extern int str2int(const char *valstr);
+extern double str2double(const char *valstr);
+
 
 // trapframe.c
 struct trapframe;
@@ -90,6 +102,7 @@ struct trapframe {
             unsigned *p_edi, *p_esi, *p_ebp, *p_esp, *p_ebx, *p_edx, *p_ecx, *p_eax;
         };
     };
+    unsigned eflags;
     unsigned ret_addr;
     patch_proc_t patch_proc;
 };
@@ -100,9 +113,10 @@ extern void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigne
 #define PUSH_DWORD(data) __push_dword((tf), (data))
 #define POP_DWORD() __pop_dword((tf))
 #define TOPTR(addr) ((void *)(addr))
-#define MEM_DWORD(addr) (*(unsigned *)(addr))
-#define MEM_WORD(addr) (*(unsigned short *)(addr))
-#define MEM_BYTE(addr) (*(unsigned char *)(addr))
+#define TOUINT(addr) ((unsigned)(addr))
+#define M_DWORD(addr) (*(unsigned *)(addr))
+#define M_WORD(addr) (*(unsigned short *)(addr))
+#define M_BYTE(addr) (*(unsigned char *)(addr))
 #define R_EAX ((tf)->eax)
 #define R_ECX ((tf)->ecx)
 #define R_EDX ((tf)->edx)
@@ -111,6 +125,8 @@ extern void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigne
 #define R_EBP ((tf)->ebp)
 #define R_ESI ((tf)->esi)
 #define R_EDI ((tf)->edi)
+#define RETADDR ((tf)->ret_addr)
+
 
 // asmentry.S
 extern void __stdcall asmentry(unsigned patch_id);
@@ -123,6 +139,18 @@ extern void get_all_config(char *buf, unsigned size);
 
 // PAL3patch.c
 extern const char *unpacker_module_name;
+extern unsigned gboffset;
+
+// gameloophook.c
+#define MAX_GAMELOOP_HOOKS 50
+typedef void (*gameloop_func_t)(int flag);
+extern void add_gameloop_hook(gameloop_func_t funcptr);
+extern void init_gameloop_hook();
+enum game_loop_type {
+    GAMELOOP_NORMAL,
+    GAMELOOP_SLEEP,
+    GAMELOOP_MOVIE,
+};
 
 // all patchs
 MAKE_PATCHSET(testcombat);
@@ -130,9 +158,16 @@ MAKE_PATCHSET(cdpatch);
 MAKE_PATCHSET(regredirect);
 MAKE_PATCHSET(disablekbdhook);
 MAKE_PATCHSET(depcompatible);
-MAKE_PATCHSET(windowed);
 MAKE_PATCHSET(setlocale);
 MAKE_PATCHSET(dpiawareness);
+MAKE_PATCHSET(powersave);
+MAKE_PATCHSET(timerresolution);
+
+MAKE_PATCHSET(graphicspatch);
+    extern int game_width, game_height;
+    MAKE_PATCHSET(windowed);
+    MAKE_PATCHSET(fixfov);
+    MAKE_PATCHSET(nolockablebackbuffer);
 
 #endif // __ASSEMBLER__
 

@@ -8,6 +8,8 @@
 参数值1对应简体中文，参数值2对应繁体中文。
 通过HOOK两个KENREL32.DLL中的函数：WideCharToMultiByte和MultiByteToWideChar（主要是后者）
 HOOK的方法是：在程序运行时修改PAL3.EXE和GBENGINE.DLL的导入表中的IAT对应项。
+此种直接用GetProcessAddress得到的地址去查找并修改IAT表项的方法与KernelEx for Win9x不兼容。
+不过win9x应该不支持unicode，所以这个功能就无所谓了。
 有一点有趣的是：IAT项好像不能使用WriteProcessMemory来修改。
 最终采取先用VirtualProtect修改页面权限，实际修改后再恢复页面权限的方法。
 如果要解决testcombat的乱码问题还需要对COMCTL32.DLL进行HOOK。（详情见下）

@@ -33,12 +33,15 @@ MAKE_PATCHSET(setlocale)
     else fail("unknown language flag %d in setlocale.", flag);
     
     if (system_codepage != target_codepage) {
+        // patch IAT by replacing known function address (address returned by GetProcAddress())
+        // note: this method is not compatible with KernelEx for win9x
+        
         // hook GBENGINE.DLL's IAT
         Real_MultiByteToWideChar = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "KERNEL32.DLL", "MultiByteToWideChar", My_MultiByteToWideChar);
         Real_WideCharToMultiByte = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "KERNEL32.DLL", "WideCharToMultiByte", My_WideCharToMultiByte);
         // hook PAL3.EXE's IAT, note we must hardcode IAT address since PAL3.EXE is packed
-        hook_iat((void *) 0x56A024, Real_MultiByteToWideChar, My_MultiByteToWideChar);
-        hook_iat((void *) 0x56A024, Real_WideCharToMultiByte, My_WideCharToMultiByte);
+        hook_iat(TOPTR(0x56A024), Real_MultiByteToWideChar, My_MultiByteToWideChar);
+        hook_iat(TOPTR(0x56A024), Real_WideCharToMultiByte, My_WideCharToMultiByte);
         
         if (GET_PATCHSET_FLAG(testcombat)) {
             // hook COMCTL32.DLL's IAT for testcombat

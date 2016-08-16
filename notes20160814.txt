@@ -1,0 +1,22 @@
+【在PAL3.EXE使用了Direct3D SDK中的样例代码】
+这些样例代码可以在C:\DX90SDK\Samples\C++\Common中找到
+gbGfxManager_D3D是基于CD3DApplication类(d3dapp.h)的代码所编写的。
+
+
+【GBENGINE在初始化D3D时用到了很多样例代码】
+使用的代码很多是现成的，例如FindBestWindowedMode、FindBestFullscreenMode(d3dapp.c)
+初始化过程中用到的很多类也都是直接用的现成的，例如CListArray，D3DAdapterInfo, D3DDeviceCombo
+我自己编译了一封代码库（用类似miniLZO库的编译选项），生成了签名导入到IDA Pro中，但是效果不太好
+
+【game_zbufferbits: 设置深度缓存】
+样例初始化代码中，把支持的深度缓存存入了一个CListArray中，这方便了补丁的制作。
+选项说明：max代表最好，负数代表原始值的相反数，16,24,32代表相应的深度。
+
+
+【用fastcall模拟thiscall的方式】
+GCC 3.4.2不支持thiscall，但是可以用fastcall来模拟。
+只要把第二个参数空出来即可。
+参考：
+https://gcc.gnu.org/onlinedocs/gcc/x86-Function-Attributes.html
+https://gcc.gnu.org/onlinedocs/gcc-3.4.6/gcc/Function-Attributes.html
+

@@ -1,11 +1,18 @@
 #include <windows.h>
+#include <d3d9.h>
 #include <stdio.h>
 #include <assert.h>
 #include "common.h"
 
+// current offset of default location of GBENGINE.DLL
+unsigned gboffset;
+
 // init_stage1() should be called before unpacker is executed (if exists)
 static void init_stage1()
 {
+    if (D3D_SDK_VERSION != 31) fail("your compiler has wrong DirectX SDK version!");
+    
+    gboffset = get_module_base("GBENGINE.DLL") - 0x10000000;
     read_config_file();
     
     INIT_PATCHSET(depcompatible);
@@ -14,17 +21,26 @@ static void init_stage1()
 // init_stage2() should be called after EXE is unpacked
 static void init_stage2()
 {
+    init_gameloop_hook();
+    
     if (!INIT_PATCHSET(testcombat)) {
         // here are some patches not compatiable with 'testcombat'
         INIT_PATCHSET(dpiawareness);
-        INIT_PATCHSET(windowed);
+        if (INIT_PATCHSET(graphicspatch)) {
+            // these are subpatchs of graphics patch
+            INIT_PATCHSET(windowed);
+            INIT_PATCHSET(fixfov);
+            INIT_PATCHSET(nolockablebackbuffer);
+        }
     }
     
     INIT_PATCHSET(cdpatch);
     INIT_PATCHSET(regredirect);
     INIT_PATCHSET(disablekbdhook);
     INIT_PATCHSET(setlocale);
-    
+    INIT_PATCHSET(powersave);
+    INIT_PATCHSET(timerresolution);
+
     show_about();
 }
 

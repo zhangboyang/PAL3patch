@@ -15,28 +15,49 @@ void memcpy_to_process(unsigned dest, const void *src, unsigned size)
     memcpy((void *) dest, src, size);
     ret = VirtualProtect((void *) dest, size, flOldProtect, &tmp);
     if (!ret) fail("VirtualProtect() failed.");
+    FlushInstructionCache(GetCurrentProcess(), (void *) dest, size);
 }
 void memcpy_from_process(void *dest, unsigned src, unsigned size)
 {
     memcpy(dest, (void *) src, size);
 }
 
-void make_jmp(unsigned addr, const void *jtarget)
+void make_branch(unsigned addr, unsigned char opcode, const void *jtarget, unsigned size)
 {
     unsigned jmpimm = (unsigned) jtarget - (addr + 5);
-    unsigned char instrbuf[5];
-    instrbuf[0] = 0xE9;
+    if (size < 5) fail("size is to small to make a branch instuction");
+    unsigned char *instrbuf = malloc(size);
+    memset(instrbuf + 5, 0x90, size - 5);
+    instrbuf[0] = opcode;
     memcpy(instrbuf + 1, &jmpimm, 4);
-    memcpy_to_process(addr, instrbuf, 5);
+    memcpy_to_process(addr, instrbuf, size);
+    free(instrbuf);
+}
+
+void make_jmp(unsigned addr, const void *jtarget)
+{
+    make_branch(addr, 0xE9, jtarget, 5);
+}
+void make_call(unsigned addr, const void *jtarget)
+{
+    make_branch(addr, 0xE8, jtarget, 5);
 }
 
 void check_code(unsigned addr, const void *code, unsigned size)
 {
+    if (!code) return;
     void *buf = malloc(size);
     memcpy_from_process(buf, addr, size);
     int ret = memcmp(buf, code, size);
     if (ret != 0) fail("Code mismatch at 0x%08X.", addr);
     free(buf);
+}
+
+unsigned get_module_base(const char *modulename)
+{
+    HMODULE hmodule = GetModuleHandle(modulename);
+    if (!hmodule) fail("Can't get base address of module '%s'.", modulename);
+    return TOUINT(hmodule);
 }
 
 void *get_func_address(const char *dllname, const char *funcname)

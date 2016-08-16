@@ -1,0 +1,69 @@
+【PAL3的GBENGINE.DLL采用的DirectX SDK版本】
+PAL3 1.04 最后一版补丁中 GBENGINE.DLL 是采用的 summer 2003 的 DirectX SDK。
+这个版本的发布时间晚于PAL3的发布时间，推测开发者的机器在PAL3发表后进行了软件升级。
+但 PAL3.EXE 采用的SDK版本尚没有确定。也很有可能是同一个版本，但是也有可能是dx90asdk.exe（网上下载不到此SDK）
+该版本的SDK的安装包SHA1校验和如下：
+86eee764eac5d5a0f0864d6ba10d4061184f86ef  dx90update_extras.exe
+51a0edf2859177445279993efb5238b9b157fe52  dx90update_managed.exe
+38a7581d727503f0401cfd2a3bf084418e7eda44  dx90updatesdk.exe
+注意网上有的流传版本数字签名、校验和不正确，要注意分辨。
+
+【GBENGINE.DLL和PAL3.EXE都静态链接了D3DX9.LIB】
+早期SDK中D3DX库是以静态库的方式发布的，在编译时静态链接到可执行文件中。
+使用flair对D3DX9.LIB生成签名并在IDA Pro中应用后可以看到GBENGINE.DLL一大半代码都是D3DX的代码。
+注意生成签名的库的SDK版本必须严格与编译DLL/EXE的版本一致，否则有很多函数会识别不出来。
+
+【IDA Pro中导入PDB】
+突然发现IDA Pro可以通过File->Load File->PDB File导入调试符号。
+由于PAL3A与PAL3的GBENGINE几乎完全相同，所以决定把PAL3A.PDB导入到GBENGINE.DLL的数据库中。
+为了避免出现问题，我新建了IDA数据库，把原来的重命名为.old文件
+导入之后的效果很理想，反编译器有了类型信息之后生成的代码很漂亮。
+但是DirectX相关的函数调用还需要手工操作一下才能显示出来，以IDirect3D为例：
+    (1)把Local Types中的IDirect3D（从PDB导入的）重命名为IDirect3D_cppobj
+    (2)在Structure中，按Ins导入IDirect3D、IDirect3DVtbl两个标准结构体
+    (3)把Local Types中的IDirect3D_cppobj使用Map to another type映射到刚导入的IDirect3D
+    (4)在Local Types中编辑一次IDirect3D结构体（不需修改，但是需要打开编辑窗口并保存一次）
+    (5)此时反编译器应该可以显示函数名了
+
+【IDA Pro中导入DirectInput8的dinput.h头文件】
+IDA Pro中默认没有DirectInput8A的结构体定义。需要自行导入
+首先取得VC6的Include目录，例如C:\VC98\Include
+在Option->Compiler中把Include Directorys设为\VC98\Include;其他...
+然后用File->Load File->Parse C Header导入dinput.h即可
+
+【MAKE_PATCH,INIT_PATCH改为MAKE_ASMPATCH,INIT_ASMPATCH】
+MAKE_PATCH(prefix, addr, size) => MAKE_ASMPATCH(name)
+INIT_PATCH(prefix, addr, size, oldcode) => INIT_ASMPATCH(name, addr, size, oldcode)
+另外不再采用字符串拼接方式，因此addr和size可以用运算来生成了，但是每个ASMPATCH的name必须不同。
+
+【改进的ASMPATCH】
+现在补丁代码由原来的10字节缩短为5字节
+另外现在会保存EFLAGS寄存器了
+
+【powersave: 节能补丁】
+播放动画时：主要耗时位于sub_53c5a0函数中的消息循环，（已较完美解决）
+游戏时：耗时位于WinMain中的那个消息循环
+在某些游戏场景（例如从渝州上部俯瞰竹林时），由于游戏引擎的设计原因，消耗CPU资源较多，此时不容易节省出CPU时间。
+游戏CPU消耗出乎的我的意料，如果将来要写虚拟机做移植，这会是一个很大的障碍
+
+【fixfov: 修正gbCamera中的FOV】
+当游戏宽高比比4:3更宽时，游戏的显示范围会以宽度为准
+也就是说，屏幕上下各有一部分被切到屏幕外围
+这是因为gbengine采用的fov是水平方向的fov所致
+从 gbCamera::GetViewSizeOnNearPlane 函数代码
+    v3 = sin(this->fov * 0.0087266462) * this->zNear / cos(this->fov * 0.0087266462);
+    *a2 = v3;
+    *a3 = (double)this->Viewport.height * v3 / (double)this->Viewport.width;
+可以看出
+    *a2是宽度，由tan(fov/2)*zNear得到 (0.0087266462=2*PI/360/2)
+    *a3是高度
+    这两者均未乘2，得到的是一半的宽和高，应该是程序员故意所为
+因此
+    FOV是指水平的可视角度，与正常的DirectX程序所使用的D3DXMatrixPerspectiveFovLH不同
+修正方法是：
+    对gbCamera类里面所有函数中类似这样的等式
+        宽度 = (double)this->Viewport.height * 近剪裁面 / (double)this->Viewport.width;
+    乘上一个系数 foxmul=width*0.75f/height，这样就把以4:3比例计算的宽度转换为实际比例的宽度了
+    一共有6处需要打补丁，这6处的位置可以通过对常数0.0087266462所在处flt_100F5810交叉引用得到。
+    由于gbengine中透视矩阵的计算也是通过此等式进行一系列计算所得，所以我们只需要改这样的等式即可
+

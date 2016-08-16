@@ -1,0 +1,14 @@
+【multisample与lockable back buffer冲突】
+nolocakablebackbuffer补丁通过重写gbGfxManager_D3D类的LockBackBuffer函数和UnlockBackBuffer函数可以避免lock back buffer操作。
+这两个函数需要处理导致截屏（存档时）和播放动画时的lock buffer操作
+    操作         Lock返回地址    Unlock返回地址
+  init          0x004BDB7B    0x004BDBC0
+  screenshot    0x00406DA2    0x00406E6B/????????（可能多个）
+  movieframe    0x0053C49D    0x0053C512/????????（可能多个）
+判断操作时应以Lock的返回地址为标准，因为根据不同情况可能在不同地方调用Unlock
+init: 什么都没做，只是先Lock然后就立即Unlock了
+screenshot: 打开游戏菜单时截屏，用于存档缩略图，重写截屏时的代码时顺便把截屏相关问题修正了
+    使用GetFrontBufferData()截屏，据手册讲，这是唯一能截取抗锯齿平面的方法。
+    但是，如果游戏是窗口状态，这个函数会截取整个屏幕，不仅仅是游戏画面，需要额外的处理
+movieframe: 播放动画，在重写播放动画的代码时，顺便把视频大小修正了
+
