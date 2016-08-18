@@ -24,7 +24,7 @@ MAKE_PATCHSET(fixfov)
         "\xD9\xF2\xDD\xD8\xD8\x49\x10\xD8\x0D\x00\x00\x00\x00\x90\x90\x90\x90",
     };
     for (i = 0; i < 4; i++) {
-        unsigned base = patch1addr[i];
+        unsigned base = patch1addr[i] + gboffset;
         char *oldcode = patch1data[i * 2];
         char *newcode = patch1data[i * 2 + 1];
         memcpy(newcode + 9, &fovfactor_addr, 4);
@@ -38,7 +38,7 @@ MAKE_PATCHSET(fixfov)
         "\xD9\xF2\xDD\xD8\xD8\x0D\x00\x00\x00\x00\x90\x90\x90\x90",
     };
     for (i = 0; i < 2; i++) {
-        unsigned base = patch2addr[i];
+        unsigned base = patch2addr[i] + gboffset;
         char *oldcode = patch2data[i * 2];
         char *newcode = patch2data[i * 2 + 1];
         memcpy(newcode + 6, &fovfactor_addr, 4);

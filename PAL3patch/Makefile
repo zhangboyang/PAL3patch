@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -Werror -Os -finput-charset=cp936 -fexec-charset=cp936
+CFLAGS := -Wall -Werror -O0 -finput-charset=cp936 -fexec-charset=cp936
 SFLAGS := -Wall -Werror
 LDFLAGS := -Wall -Werror -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lcomctl32 -lwinmm -lgdi32
 

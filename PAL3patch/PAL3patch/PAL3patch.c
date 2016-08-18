@@ -31,6 +31,7 @@ static void init_stage2()
             INIT_PATCHSET(windowed);
             INIT_PATCHSET(fixfov);
             INIT_PATCHSET(nolockablebackbuffer);
+            INIT_PATCHSET(fixreset);
         }
     }
     

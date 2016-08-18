@@ -168,6 +168,7 @@ MAKE_PATCHSET(graphicspatch);
     MAKE_PATCHSET(windowed);
     MAKE_PATCHSET(fixfov);
     MAKE_PATCHSET(nolockablebackbuffer);
+    MAKE_PATCHSET(fixreset);
 
 #endif // __ASSEMBLER__
 

@@ -1,0 +1,19 @@
+【fixreset：修正lost device的处理】
+Reset()不能成功的根本原因是，有资源没有释放。
+用Jun 2010的SDK其中的DirectX Debug Runtime，可以看到没有被释放的资源的*创建时*的栈回溯。
+但是出现泄露的地方可能并不是在创建之处，也许是调用了一些会增加引用计数的方法(例如GetSurfaceLevel)而没有Release
+看引用计数的方法：用PIX或apitrace，看某对象调用Release()方法的返回值，即是剩余的引用计数数量（0表示已释放干净）。
+主要泄露的地方有两个：一个是RenderTarget，另一个是UnderWater
+修正的过程主要参考了PAL3A的处理方式
+对UnderWater：
+    直接把D3DPOOL_DEFAULT改为D3DPOOL_MANAGED
+    另外在Lock是有几个与D3DPOOL_MANAGED不兼容的标志也得改掉
+    可以参照PAL3A中的代码
+对RenderTarget：
+    在PAL3A中，类RenderTarget有RenderTarget_OnDeviceLost方法和RenderTarget_OnResetDevice方法
+    但是PAL3中没有，好在类RenderTarget的各数据成员位置没有变化，所以直接照抄IDA Pro中的PAL3A反编译出的伪代码
+    然后在GBENGINE在LostDevice和ResetDevice处打ASMPATCH，让它调用我们新写的方法
+    还有一点处理与PAL3A不同，就是RenderTarget::End中调用了GetSurfaceLevel但是没有Release
+    注意在PAL3A和PAL3中都没有处理这一点，我直接在End中加补丁让它调用Release，不知道PAL3A怎么搞得
+时间仓促，可能还有没处理好的地方，所以之后可能还要继续修正fixreset这个补丁
+
