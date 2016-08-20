@@ -1,0 +1,28 @@
+【fixmemfree: 修正HeapFree的问题】
+如果使用调试器打开游戏，在游戏过程中会出现一些RtlFreeHeap相关的错误
+错误说明指出：释放内存时，传入了无效的内存指针
+其实，传入的指针并不是无效的。原因在于PAL3.EXE和GBENGINE.DLL有各自不同的CRT（C运行库）
+由于函数内联的原因，申请内存在GBENGINE.DLL中，而释放却在PAL3.EXE中
+因此导致了错误。解决方法也很简单，只要将这函数调用强制改为对GBENGINE.DLL中的free的调用即可。
+
+类继承关系（=>表示继承自）： ? => gbVisNode (含gbCycleQuewue) => gbNBTreeNode
+
+// 由于函数签名不准确的原因，这个函数被认为是C3DMusicSegment的析构函数，但是其实不是！
+// 这样的函数有两处 004b6fb0(004b6fde);  0053d3f0(0053d41e)
+// 从这函数也可以看出C++析构函数的执行方式，类似“降级”，一个子类一个子类地析构
+int __thiscall C3DMusicSegment::~C3DMusicSegment(C3DMusicSegment *this)
+{
+  C3DMusicSegment *v1; // esi@1
+
+  v1 = this;
+  *(_DWORD *)this = &off_570A24;
+  *(_DWORD *)this = gbVisNode::`vftable';
+  operator delete(*((void **)this + 7)); ////////// BUG！！！！
+  /// 这里应该调用class gbCycleQueue MsgBuffer; 的析构函数
+  /// 但是直接内联了进来
+  *(_DWORD *)v1 = gbNBTreeNode::`vftable';
+  gbChain1D::~gbChain1D((gbChain1D *)((char *)v1 + 12));
+  return gbChain1DNode::~gbChain1DNode((gbChain1DNode *)v1);
+}
+
+

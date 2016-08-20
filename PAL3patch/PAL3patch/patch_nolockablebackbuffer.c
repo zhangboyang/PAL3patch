@@ -5,6 +5,7 @@
 
 
 
+
 enum locktype_t {
     LT_UNKNOWN, LT_RENDERTARGET, LT_SCREENSHOT, LT_MOVIEFRAME,
 };
@@ -121,6 +122,16 @@ static void before_movieframe(struct gbSurfaceDesc *surface)
     surface->height = 600;
     if (!mf_init_flag) init_movieframe(surface);
     
+    gbGfxManager_D3D_EnsureCooperativeLevel(gfxmgr);
+    // NOTE: we must set locktype to LT_MOVIEFRAME here, because:
+    // if device lost happends:
+    //   gbGfxManager_D3D::D3D_Reset3DEnvironment() will call:
+    //      RenderTarget::OnResetDevice() will call:
+    //         RenderTarget::Create() will call:
+    //            gbGfxManager_D3D::LockBackBuffer()
+    //                => set locktype=LT_RENDERTARGET (OVERWRITE OUR LOCKTYPE!)
+    locktype = LT_MOVIEFRAME;
+    
     gfxmgr->m_bShowCursor = 0;
     IDirect3DDevice9_ShowCursor(gfxmgr->m_pd3dDevice, FALSE);
     IDirect3DDevice9_Clear(gfxmgr->m_pd3dDevice, 0, NULL, D3DCLEAR_STENCIL | D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0);
@@ -224,7 +235,9 @@ static __fastcall int LockBackBuffer(struct gbGfxManager_D3D *this, int dummy, s
     // save parameters
     gfxmgr = this;
     switch (TOUINT(__builtin_return_address(0))) {
-        case 0x004BDB7B: locktype = LT_RENDERTARGET; break;
+        case 0x004BDB7B: locktype = LT_RENDERTARGET;
+            // NOTE: must do nothing, see before_movieframe() for details
+            break;
         case 0x00406DA2: locktype = LT_SCREENSHOT; break;
         case 0x0053C49D: locktype = LT_MOVIEFRAME; break;
         default: locktype = LT_UNKNOWN; break;
@@ -232,7 +245,9 @@ static __fastcall int LockBackBuffer(struct gbGfxManager_D3D *this, int dummy, s
     
     // do hook
     switch (locktype) {
-        case LT_RENDERTARGET: break;
+        case LT_RENDERTARGET:
+            // NOTE: must do nothing, see before_movieframe() for details
+            break;
         case LT_SCREENSHOT: before_screenshot(surface); break;
         case LT_MOVIEFRAME: before_movieframe(surface); break;
         default: before_unknownlocktype(surface); break;
@@ -243,7 +258,9 @@ static __fastcall int LockBackBuffer(struct gbGfxManager_D3D *this, int dummy, s
 static __fastcall void UnockBackBuffer(struct gbGfxManager_D3D *this, int dummy)
 {
     switch (locktype) {
-        case LT_RENDERTARGET: break;
+        case LT_RENDERTARGET:
+            // NOTE: must do nothing, see before_movieframe() for details
+            break;
         case LT_SCREENSHOT: after_screenshot(); break;
         case LT_MOVIEFRAME: after_movieframe(); break;
         default: after_unknownlocktype(); break;

@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "common.h"
+#include "gbengine.h"
 
 static int timer_res;
 static void reset_timer_res()
@@ -11,5 +12,5 @@ MAKE_PATCHSET(timerresolution)
 {
     timer_res = flag;
     timeBeginPeriod(timer_res);
-    atexit(reset_timer_res); // FIXME: this function seems never called
+    add_atexit_hook(reset_timer_res);
 }

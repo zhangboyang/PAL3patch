@@ -22,6 +22,7 @@ static void init_stage1()
 static void init_stage2()
 {
     init_gameloop_hook();
+    init_atexit_hook();
     
     if (!INIT_PATCHSET(testcombat)) {
         // here are some patches not compatiable with 'testcombat'
@@ -41,6 +42,7 @@ static void init_stage2()
     INIT_PATCHSET(setlocale);
     INIT_PATCHSET(powersave);
     INIT_PATCHSET(timerresolution);
+    INIT_PATCHSET(fixmemfree);
 
     show_about();
 }

@@ -1,6 +1,10 @@
 #ifndef PAL3PATCH_GBENGINE_H
 #define PAL3PATCH_GBENGINE_H
 
+#include <d3d9.h>
+
+// types
+
 struct gbGfxDriverInfo {
     int type;
     int subtype;
@@ -74,5 +78,16 @@ struct RenderTarget {
     int m_nState;
 };
 
+
+
+
+
+
+// functions
+extern void gbGfxManager_D3D_Reset3DEnvironment(struct gbGfxManager_D3D *this);
+extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this);
+
+// function pointers
+extern void (*PAL3_atexit)(void (*)(void));
 
 #endif

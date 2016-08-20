@@ -100,6 +100,18 @@ static MAKE_ASMPATCH(fixreset_resetdevice_hook)
 
 
 
+
+
+static MAKE_ASMPATCH(fixreset_gbGfxManager_D3D_BeginScene_patch)
+{
+    gbGfxManager_D3D_EnsureCooperativeLevel(TOPTR(R_ECX));
+    
+    PUSH_DWORD(R_EBP); // oldcode
+    PUSH_DWORD(R_ESI);
+    PUSH_DWORD(R_EDI);
+    R_ESI = R_ECX;
+}
+
 static MAKE_ASMPATCH(fixreset_UnderWater_1)
 {
     PUSH_DWORD(D3DPOOL_MANAGED);
@@ -125,5 +137,8 @@ MAKE_PATCHSET(fixreset)
     INIT_ASMPATCH(fixreset_UnderWater_1, 0x004BFB6B, 8, "\x53\x6A\x65\x68\x00\x02\x00\x00");
     SIMPLE_PATCH(0x004BFC58, "\x68\x00\x20\x00\x00", "\x68\x00\x00\x00\x00", 5);
     
+    // patch gbGfxManager_D3D::BeginScene
+    INIT_ASMPATCH(fixreset_gbGfxManager_D3D_BeginScene_patch, gboffset + 0x10018CD3, 5, "\x55\x56\x57\x8B\xF1");
+
     // FIXME: may be more patch needed!
 }

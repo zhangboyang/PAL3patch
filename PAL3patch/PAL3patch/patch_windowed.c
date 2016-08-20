@@ -16,7 +16,11 @@ static ATOM WINAPI RegisterClass_wrapper(WNDCLASS *lpWndClass)
 static HWND WINAPI CreateWindowExA_wrapper(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
 {
     if (window_patch_cfg == WINDOW_NORMAL) {
-        x = y = CW_USEDEFAULT;
+        // x = y = CW_USEDEFAULT;
+        x = (GetSystemMetrics(SM_CXSCREEN) - nWidth) / 2;
+        y = (GetSystemMetrics(SM_CYSCREEN) - nHeight) / 2;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
     }
     lpWindowName = winname;
     gamehwnd = CreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
@@ -58,11 +62,16 @@ static void clipcursor(int flag)
     }
 }
 
+static void clipcursor_atexit()
+{
+    clipcursor(0);
+}
+
 static void clipcursor_hook(int flag)
 {
-    if (flag == GAMELOOP_NORMAL) {
+    if (flag == GAMELOOP_NORMAL || flag == GAMELOOP_MOVIE) {
         clipcursor(1);
-    } else if (flag == GAMELOOP_SLEEP || flag == GAMELOOP_MOVIE) {
+    } else if (flag == GAMELOOP_SLEEP) {
         clipcursor(0);
     }
 }
@@ -70,7 +79,7 @@ static void clipcursor_hook(int flag)
 static int confirm_quit()
 {
     ClipCursor(NULL);
-    return MessageBoxW(gamehwnd, L"您确定要退出游戏吗？", L"退出", MB_ICONQUESTION | MB_YESNO) == IDYES;
+    return MessageBoxW(gamehwnd, L"您确定要退出游戏吗？", L"退出", MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2) == IDYES;
 }
 
 static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
@@ -110,18 +119,23 @@ MAKE_PATCHSET(windowed)
     make_jmp(0x004022E0, GetCursorPos_wrapper);
     make_branch(0x00402497, 0xE8, GetCursorPos_wrapper, 6);
     make_branch(0x004021C1, 0xE8, GetCursorPos_wrapper, 6);
+    make_branch(0x004D6216, 0xE8, GetCursorPos_wrapper, 6);
+    // NOTE: No need to hook GetCursorPos() for IDirect3DDevice9::SetCursorPosition()
+    //       see documentation for details.
+    // make_branch(0x00404F2B, 0xE8, GetCursorPos_wrapper, 6);
     make_jmp(0x00402290, SetCursorPos_wrapper);
     
     // clip cursor
-    if (window_patch_cfg == WINDOW_NORMAL && get_int_from_configfile("clipcursor")) {
+    if (get_int_from_configfile("clipcursor")) {
         add_gameloop_hook(clipcursor_hook);
+        add_atexit_hook(clipcursor_atexit);
     }
     
     // hook DefWindowProc
     make_branch(0x00404F8D, 0xE8, DefWindowProcA_wrapper, 6);
     
     // click X to quit game
-    if (window_patch_cfg == WINDOW_NORMAL && get_int_from_configfile("xquit")) {
+    if (get_int_from_configfile("xquit")) {
         SIMPLE_PATCH_NOP(0x00404F57, "\x74\x52", 2);
     }
 }

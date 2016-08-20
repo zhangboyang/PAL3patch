@@ -22,17 +22,25 @@
 #define MAXLINE 4096
 #define MAXLINEFMT "%" TOSTR(MAXLINE) "s"
 
+
+#define PAL3PATCH_VERSION "v1.0 alpha"
 #define EXTERNAL_UNPACKER "PAL3unpack.dll"
 #define EXTERNAL_UNPACKER_FIXED "PAL3unpack_fixed.dll"
 #define ERROR_FILE "PAL3patch.log"
 #define WARNING_FILE "PAL3patch.warning.log"
 #define CONFIG_FILE "PAL3patch.conf"
 #define MAX_CONFIG_LINES 100
+#define MAX_GAMELOOP_HOOKS 50
+#define MAX_ATEXIT_HOOKS 50
 
 // MAX_PUSH_DWORDS controls how many dwords 'asmentry' will reserve for possible stack pushes
 // this value can't be too large (no more than one page)
 // this value mustn't smaller than 3
 #define MAX_PUSH_DWORDS 16
+
+
+
+
 
 #define MAKE_PATCHSET_NAME(name) CONCAT(patchset_, name)
 #define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
@@ -84,11 +92,12 @@ extern void *hook_import_table(void *image_base, const char *dllname, const char
 extern void __attribute__((noreturn)) __fail(const char *file, int line, const char *func, const char *fmt, ...);
 #define warning(fmt, ...) __warning(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
 extern void __warning(const char *file, int line, const char *func, const char *fmt, ...);
-extern const char build_info[];
-extern void show_about();
 extern int str2int(const char *valstr);
 extern double str2double(const char *valstr);
 
+// about.c
+extern const char build_info[];
+extern void show_about();
 
 // trapframe.c
 struct trapframe;
@@ -142,7 +151,6 @@ extern const char *unpacker_module_name;
 extern unsigned gboffset;
 
 // gameloophook.c
-#define MAX_GAMELOOP_HOOKS 50
 typedef void (*gameloop_func_t)(int flag);
 extern void add_gameloop_hook(gameloop_func_t funcptr);
 extern void init_gameloop_hook();
@@ -151,6 +159,11 @@ enum game_loop_type {
     GAMELOOP_SLEEP,
     GAMELOOP_MOVIE,
 };
+
+// atexithook.c
+extern void add_atexit_hook(void (*funcptr)(void));
+extern void init_atexit_hook();
+
 
 // all patchs
 MAKE_PATCHSET(testcombat);
@@ -162,6 +175,7 @@ MAKE_PATCHSET(setlocale);
 MAKE_PATCHSET(dpiawareness);
 MAKE_PATCHSET(powersave);
 MAKE_PATCHSET(timerresolution);
+MAKE_PATCHSET(fixmemfree);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
