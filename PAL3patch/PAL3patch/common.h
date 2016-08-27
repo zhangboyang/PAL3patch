@@ -88,6 +88,7 @@ extern void *hook_import_table(void *image_base, const char *dllname, const char
     } while (0)
 
 // misc.c
+extern int is_win9x();
 #define fail(fmt, ...) __fail(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
 extern void __attribute__((noreturn)) __fail(const char *file, int line, const char *func, const char *fmt, ...);
 #define warning(fmt, ...) __warning(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)

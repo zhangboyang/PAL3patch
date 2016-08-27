@@ -8,4 +8,10 @@
 !*.def
 !*.conf
 !*.bat
-
+!*.cpp
+!*.dsw
+!*.dsp
+!*.rc
+!*.manifest
+!*.rc2
+!*.ico

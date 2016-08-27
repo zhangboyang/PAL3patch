@@ -22,21 +22,18 @@ void show_about()
             L"\n"
             L"本补丁可以修复一些游戏程序的小问题\n"
             L"并且添加了一些实用的小功能\n" 
-            L"详细信息和使用方法请参见 PAL3patch_README.txt\n" 
+            L"详细信息和使用方法请参见补丁说明文件\n"
+            L"\n"
+            L"\n"
+            L"如果您不想每次启动时看到此信息\n"
+            L"请使用补丁配置工具，将“显示关于”设为“禁用”。\n" 
             L"\n"
             L"\n"
             L"源代码:\n"
             L"  https://github.com/zhangboyang/PAL3patch\n"
             L"编译信息:\n%hs"
             L"\n"
-            L"\n"
-            L"如果您不想每次启动时看到此信息\n"
-            L"请将配置文件 %hs 中的\n"
-            L"  showabout=%d\n"
-            L"修改为\n"
-            L"  showabout=0\n"
-            L"\n"
-            , PAL3PATCH_VERSION, build_info, CONFIG_FILE, flag); 
+            , PAL3PATCH_VERSION, build_info); 
             
             
         MessageBoxW(NULL, buf, L"关于", MB_ICONINFORMATION | MB_SETFOREGROUND); 

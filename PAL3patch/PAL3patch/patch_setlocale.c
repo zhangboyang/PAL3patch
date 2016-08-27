@@ -25,7 +25,7 @@ static int WINAPI My_WideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWSTR l
 
 
 MAKE_PATCHSET(setlocale)
-{
+{   
     system_codepage = GetACP();
     
     if (flag == 1) target_codepage = 936;
@@ -35,7 +35,11 @@ MAKE_PATCHSET(setlocale)
     if (system_codepage != target_codepage) {
         // patch IAT by replacing known function address (address returned by GetProcAddress())
         // note: this method is not compatible with KernelEx for win9x
-        
+        if (is_win9x()) {
+            warning("setlocale doesn't support win9x.");
+            return;
+        }
+    
         // hook GBENGINE.DLL's IAT
         Real_MultiByteToWideChar = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "KERNEL32.DLL", "MultiByteToWideChar", My_MultiByteToWideChar);
         Real_WideCharToMultiByte = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "KERNEL32.DLL", "WideCharToMultiByte", My_WideCharToMultiByte);

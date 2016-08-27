@@ -5,6 +5,15 @@
 #include "common.h"
 
 
+int is_win9x()
+{
+    OSVERSIONINFO osvi;
+    memset(&osvi, 0, sizeof(osvi));
+    osvi.dwOSVersionInfoSize = sizeof(osvi);
+    GetVersionEx(&osvi);
+    return osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS;
+}
+
 int str2int(const char *valstr)
 {
     int result, ret;

@@ -1,0 +1,241 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\PatchConfig.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.chs\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\PatchConfig.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PATCHCONFIG_DIALOG DIALOGEX 0, 0, 365, 221
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "补丁配置工具"
+FONT 9, "宋体"
+BEGIN
+    CONTROL         "Tree1",IDC_CFGTREE,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
+                    TVS_SHOWSELALWAYS | TVS_NOTOOLTIPS | WS_BORDER | 
+                    WS_TABSTOP,7,7,116,184
+    CTEXT           "",IDC_CFGTITLE,132,7,226,13,SS_CENTERIMAGE | SS_SUNKEN
+    EDITTEXT        IDC_CFGDESC,132,27,226,38,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_READONLY | ES_WANTRETURN | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    CONTROL         "",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON | WS_GROUP | 
+                    WS_TABSTOP,157,77,176,12
+    CONTROL         "",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,
+                    157,93,176,12
+    CONTROL         "",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,
+                    157,109,176,12
+    EDITTEXT        IDC_CFGVAL,155,129,101,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "从列表中选择",IDC_CHOOSEFROMLIST,264,129,70,14
+    EDITTEXT        IDC_OPTDESC,132,153,226,38,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_READONLY | ES_WANTRETURN | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    DEFPUSHBUTTON   "确定",IDOK,251,200,50,14
+    PUSHBUTTON      "取消",IDCANCEL,308,200,50,14
+    PUSHBUTTON      "",IDC_TOGGLEADVOPTS,7,200,75,14
+END
+
+IDD_CHOOSEFROMLIST DIALOG DISCARDABLE  0, 0, 232, 129
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "从列表中选择"
+FONT 9, "宋体"
+BEGIN
+    LISTBOX         IDC_ENUMLIST,7,7,160,115,LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "确定",IDOK,175,7,50,14
+    PUSHBUTTON      "取消",IDCANCEL,175,25,50,14
+END
+
+IDD_PLEASEWAIT DIALOG DISCARDABLE  0, 0, 187, 57
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "请稍候"
+FONT 9, "宋体"
+BEGIN
+    CTEXT           "",IDC_WAITMESSAGE,7,7,173,43,SS_CENTERIMAGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_PATCHCONFIG_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 358
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 214
+    END
+
+    IDD_CHOOSEFROMLIST, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 225
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 122
+    END
+
+    IDD_PLEASEWAIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 180
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 50
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RCDATA
+//
+
+IDR_DEFCONFIG           RCDATA  DISCARDABLE     "default.conf"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// 24
+//
+
+1                       24      DISCARDABLE     "PatchConfig.manifest"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_SHOWADVOPT          "显示高级选项"
+    IDS_HIDEADVOPT          "隐藏高级选项"
+    IDS_NOCHOOSEN           "请从列表中选择一个选项。"
+    IDS_NODESC              "无说明。"
+    IDS_CORRUPTFILE         "文件 %hs 丢失或损坏，很可能造成补丁无法正常工作，是否继续？"
+    IDS_CORRUPTFILE_TITLE   "文件损坏"
+    IDS_CORRUPTCONFIG       "补丁配置文件已损坏，是否删除并使用默认配置？"
+    IDS_CORRUPTCONFIG_TITLE "无法加载配置"
+    IDS_WAITINGVERIFY       "正在校验补丁文件，请稍候 ..."
+    IDS_WAITINGLOADCFG      "正在加载配置文件，请稍候 ..."
+    IDS_WAITINGENUMD3D      "正在枚举图形设备功能，请稍候 ..."
+    IDS_CONFIRMQUIT         "您真的要退出吗？您刚才所作的更改将会丢失。"
+    IDS_CONFIRMQUIT_TITLE   "取消"
+    IDS_CANTSAVE            "无法写入配置文件，请关闭其他可能正在使用配置文件的程序，然后重试。"
+    IDS_CANTSAVE_TITLE      "写入配置时出错"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_AUTORESOLUTION      "自动选择当前分辨率"
+    IDS_AUTOMAXIMUM         "自动选择最高配置"
+    IDS_AUTOZBUF16          "自动选择 16 位深度缓存"
+    IDS_AUTOZBUF24          "自动选择 24 位深度缓存"
+    IDS_ZBUF_D3DFMT_D16     "仅 16 位深度缓存"
+    IDS_ZBUF_D3DFMT_D15S1   "15 位深度缓存，1 位模板缓存"
+    IDS_ZBUF_D3DFMT_D24X8   "仅 24 位深度缓存"
+    IDS_ZBUF_D3DFMT_D24S8   "24 位深度缓存，8 位模板缓存"
+    IDS_ZBUF_D3DFMT_D24X4S4 "24 位深度缓存，4 位模板缓存"
+    IDS_ZBUF_D3DFMT_D32     "仅 32 位深度缓存"
+    IDS_MSAA_NONE           "关闭多重采样"
+    IDS_MSAA_FORMAT         "%d 级多重采样，质量水平 %d"
+END
+
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE 4, 2
+#pragma code_page(936)
+#endif //_WIN32
+#include "res\PatchConfig.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.chs\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

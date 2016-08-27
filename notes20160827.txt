@@ -1,0 +1,5 @@
+【release: 1.0 alpha】
+现在除了UI没有修正，其他功能应该没有什么大问题了。
+新加了PatchConfig工具，用来配置PAL3patch.conf的图形化工具（使用VC6+MFC编写）。
+默认配置PAL3patch.conf现在位于PatchConfig/default.conf。
+

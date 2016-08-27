@@ -18,6 +18,11 @@ static int config_line_cmp(const void *a, const void *b)
     return stricmp(pa->key, pb->key);
 }
 
+static int is_spacechar(char ch)
+{
+	return !!strchr(" \t\n\v\f\r", ch);
+}
+
 void read_config_file()
 {
     cfglines = 0;
@@ -27,7 +32,7 @@ void read_config_file()
     char *ptr;
     while (fgets(buf, sizeof(buf), fp)) {
         // ltrim the line
-        for (ptr = buf; *ptr && isspace(*ptr); ptr++);
+        for (ptr = buf; *ptr && is_spacechar(*ptr); ptr++);
         memmove(buf, ptr, strlen(ptr) + 1);
         
         // skip empty and comment lines
@@ -45,11 +50,11 @@ void read_config_file()
         
         // rtrim 'key'
         if (ptr > buf) ptr--;
-        while (ptr >= buf && isspace(*ptr)) *ptr-- = '\0';
+        while (ptr >= buf && is_spacechar(*ptr)) *ptr-- = '\0';
         if (!*ptr) fail("keystr is empty");
         
         // ltrim 'value'
-        while (*valstr && isspace(*valstr)) valstr++;
+        while (*valstr && is_spacechar(*valstr)) valstr++;
         
         // save this config line to array
         if (cfglines >= MAX_CONFIG_LINES) fail("too many config lines.");
