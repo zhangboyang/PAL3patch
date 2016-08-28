@@ -63,6 +63,8 @@
 
 
 #ifndef __ASSEMBLER__
+// common includes
+#include <wchar.h>
 
 // framework.c
 extern void memcpy_to_process(unsigned dest, const void *src, unsigned size);
@@ -154,17 +156,27 @@ extern unsigned gboffset;
 // gameloophook.c
 typedef void (*gameloop_func_t)(int flag);
 extern void add_gameloop_hook(gameloop_func_t funcptr);
+extern void call_gameloop_hooks(int flag);
 extern void init_gameloop_hook();
 enum game_loop_type {
     GAMELOOP_NORMAL,
     GAMELOOP_SLEEP,
     GAMELOOP_MOVIE,
+    GAMELOOP_DEVICELOST,
 };
 
 // atexithook.c
 extern void add_atexit_hook(void (*funcptr)(void));
 extern void init_atexit_hook();
 
+// locale.c
+extern unsigned system_codepage;
+extern unsigned target_codepage;
+extern void init_locale();
+extern const wchar_t *wstr_about_title;
+extern const wchar_t *wstr_about_text;
+extern const wchar_t *wstr_confirmquit_text;
+extern const wchar_t *wstr_confirmquit_title;
 
 // all patchs
 MAKE_PATCHSET(testcombat);

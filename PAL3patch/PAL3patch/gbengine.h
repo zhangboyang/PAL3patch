@@ -1,6 +1,7 @@
 #ifndef PAL3PATCH_GBENGINE_H
 #define PAL3PATCH_GBENGINE_H
 
+#include "common.h"
 #include <d3d9.h>
 
 // types
@@ -85,9 +86,12 @@ struct RenderTarget {
 
 // functions
 extern void gbGfxManager_D3D_Reset3DEnvironment(struct gbGfxManager_D3D *this);
-extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this);
+extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
 
 // function pointers
 extern void (*PAL3_atexit)(void (*)(void));
+
+// global variables
+#define is_window_active (*(int *) TOPTR(0x005833B8))
 
 #endif

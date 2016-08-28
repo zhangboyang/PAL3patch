@@ -59,9 +59,10 @@ static MAKE_ASMPATCH(zbuf)
                 if (!result) result = CArrayList_FindInt(this, D3DFMT_D16, NULL);
                 break;
             case 24:
-                if (!result) result = CArrayList_FindInt(this, D3DFMT_D24S8, NULL);
-                if (!result) result = CArrayList_FindInt(this, D3DFMT_D24X4S4, NULL);
+                // there no need to use stencil buffer
                 if (!result) result = CArrayList_FindInt(this, D3DFMT_D24X8, NULL);
+                if (!result) result = CArrayList_FindInt(this, D3DFMT_D24X4S4, NULL);
+                if (!result) result = CArrayList_FindInt(this, D3DFMT_D24S8, NULL);
                 break;
             case 32:
                 if (!result) result = CArrayList_FindInt(this, D3DFMT_D32, NULL);

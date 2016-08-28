@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "common.h"
+#include "gbengine.h"
 
 static int window_patch_cfg;
 #define WINDOW_NORMAL 1
@@ -69,9 +70,9 @@ static void clipcursor_atexit()
 
 static void clipcursor_hook(int flag)
 {
-    if (flag == GAMELOOP_NORMAL || flag == GAMELOOP_MOVIE) {
+    if (is_window_active) {
         clipcursor(1);
-    } else if (flag == GAMELOOP_SLEEP) {
+    } else {
         clipcursor(0);
     }
 }
@@ -79,7 +80,7 @@ static void clipcursor_hook(int flag)
 static int confirm_quit()
 {
     ClipCursor(NULL);
-    return MessageBoxW(gamehwnd, L"您确定要退出游戏吗？", L"退出", MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2) == IDYES;
+    return MessageBoxW(gamehwnd, wstr_confirmquit_text, wstr_confirmquit_title, MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2) == IDYES;
 }
 
 static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)

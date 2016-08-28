@@ -14,8 +14,23 @@ void gbGfxManager_D3D_Reset3DEnvironment(struct gbGfxManager_D3D *this)
 
 // make sure cooperative level is D3D_OK
 // this is my own method! not exists in original GBENGINE
-void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this)
+void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus)
 {
+    if (requirefocus && !is_window_active) {
+        while (1) {
+            MSG msg;
+            // we must process message queue here
+            if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+            if (is_window_active) {
+                break;
+            }
+            Sleep(100);
+            call_gameloop_hooks(GAMELOOP_SLEEP);
+        }
+    }
     if (IDirect3DDevice9_TestCooperativeLevel(this->m_pd3dDevice) != D3D_OK) {
         this->m_bDeviceLost = 1;
         while (1) {
@@ -28,7 +43,8 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this)
             if (IDirect3DDevice9_TestCooperativeLevel(this->m_pd3dDevice) == D3DERR_DEVICENOTRESET) {
                 break;
             }
-            Sleep(10);
+            Sleep(20);
+            call_gameloop_hooks(GAMELOOP_DEVICELOST);
         }
         gbGfxManager_D3D_Reset3DEnvironment(this);
         this->m_bDeviceLost = 0;

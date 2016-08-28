@@ -1,8 +1,6 @@
 #include <windows.h>
 #include "common.h"
 
-static UINT system_codepage;
-static UINT target_codepage;
 
 static UINT hook_codepage(UINT old_codepage)
 {
@@ -26,8 +24,6 @@ static int WINAPI My_WideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWSTR l
 
 MAKE_PATCHSET(setlocale)
 {   
-    system_codepage = GetACP();
-    
     if (flag == 1) target_codepage = 936;
     else if (flag == 2) target_codepage = 950;
     else fail("unknown language flag %d in setlocale.", flag);

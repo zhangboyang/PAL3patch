@@ -104,7 +104,7 @@ static MAKE_ASMPATCH(fixreset_resetdevice_hook)
 
 static MAKE_ASMPATCH(fixreset_gbGfxManager_D3D_BeginScene_patch)
 {
-    gbGfxManager_D3D_EnsureCooperativeLevel(TOPTR(R_ECX));
+    gbGfxManager_D3D_EnsureCooperativeLevel(TOPTR(R_ECX), 0);
     
     PUSH_DWORD(R_EBP); // oldcode
     PUSH_DWORD(R_ESI);

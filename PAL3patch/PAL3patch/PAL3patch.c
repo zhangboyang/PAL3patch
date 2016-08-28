@@ -21,6 +21,10 @@ static void init_stage1()
 // init_stage2() should be called after EXE is unpacked
 static void init_stage2()
 {
+    // init system_codepage
+    // PATCHSET 'setlocale' may overwrite target_codepage
+    target_codepage = system_codepage = GetACP();
+    
     init_gameloop_hook();
     init_atexit_hook();
     
@@ -44,6 +48,9 @@ static void init_stage2()
     INIT_PATCHSET(timerresolution);
     INIT_PATCHSET(fixmemfree);
 
+    // init_locale() must called after INIT_PATCHSET(setlocale)
+    init_locale();
+    
     show_about();
 }
 

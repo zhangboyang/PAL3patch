@@ -122,7 +122,7 @@ static void before_movieframe(struct gbSurfaceDesc *surface)
     surface->height = 600;
     if (!mf_init_flag) init_movieframe(surface);
     
-    gbGfxManager_D3D_EnsureCooperativeLevel(gfxmgr);
+    gbGfxManager_D3D_EnsureCooperativeLevel(gfxmgr, 1);
     // NOTE: we must set locktype to LT_MOVIEFRAME here, because:
     // if device lost happends:
     //   gbGfxManager_D3D::D3D_Reset3DEnvironment() will call:
@@ -134,7 +134,7 @@ static void before_movieframe(struct gbSurfaceDesc *surface)
     
     gfxmgr->m_bShowCursor = 0;
     IDirect3DDevice9_ShowCursor(gfxmgr->m_pd3dDevice, FALSE);
-    IDirect3DDevice9_Clear(gfxmgr->m_pd3dDevice, 0, NULL, D3DCLEAR_STENCIL | D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0);
+    IDirect3DDevice9_Clear(gfxmgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0);
     D3DLOCKED_RECT LockedRect;
     IDirect3DTexture9_LockRect(mf_tex, 0, &LockedRect, NULL, 0);
     surface->pitch = LockedRect.Pitch;

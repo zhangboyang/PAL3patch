@@ -11,7 +11,7 @@ void add_gameloop_hook(gameloop_func_t funcptr)
     hooks[nr_hooks++] = funcptr;
 }
 
-static void call_hooks(int flag)
+void call_gameloop_hooks(int flag)
 {
     int i;
     for (i = 0; i < nr_hooks; i++) {
@@ -21,17 +21,17 @@ static void call_hooks(int flag)
 
 static MAKE_ASMPATCH(gameloop_normal)
 {
-    call_hooks(GAMELOOP_NORMAL);
+    call_gameloop_hooks(GAMELOOP_NORMAL);
     RETADDR = 0x541B18;
 }
 static MAKE_ASMPATCH(gameloop_sleep)
 {
-    call_hooks(GAMELOOP_SLEEP);
+    call_gameloop_hooks(GAMELOOP_SLEEP);
     RETADDR = 0x541B18;
 }
 static MAKE_ASMPATCH(gameloop_movie)
 {
-    call_hooks(GAMELOOP_MOVIE);
+    call_gameloop_hooks(GAMELOOP_MOVIE);
     RETADDR = 0x53C62E;
 }
 
