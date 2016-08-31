@@ -1,0 +1,89 @@
+【asmpatch改进】
+现在会保存并重置x87状态了，在ASMPATCH中可以放心使用浮点指令了
+
+【findimm工具】
+给定一对立即数，找EXE中所有出现，按照一对立即数之间的距离从小到大排序
+算法复杂度n^2
+
+【找坐标的方法】
+1. 数值查找法
+    先获得目标的坐标（例如使用apitrace，或者直接分析UIWnd结构体/树）
+    然后用findimm程序找到距离最短的一对立即数
+2. 纹理路径法（推荐）
+    找到纹理文件，然后xref找到调用之处
+3. 动态调试法
+    找到关键数据结构，设置内存断点，看调用栈
+
+【加载画面花楹进度条的位置】
+sub_4507f0 (UILoadingFrm::Create)
+原始rect：l206,t520,r570,b548
+设置矩形的代码位于 00450832 处4个MOV指令
+
+【sub_479890】
+这个函数里似乎包含了一些屏幕坐标
+但是在这个函数开头下断点并没有触发过
+另外把basedata.cpk解开之后，这个函数所提到的文件很多都没有找到
+推测这是一个被取消的功能的函数
+
+
+【战斗胜利/战斗失败: fixbigwinlose】
+sub_516940  basedata/ui/combat/result/bigwin.tga biglose.tga
+两个地方需修改，分别对应胜利/失败
+原始rect:l150,t-50,r406,b462
+
+【战斗胜利后人物状态: fixresultback】
+sub_517d60  basedata/ui/combat/result/back.tga
+
+【战斗胜利后提示框: fixresultpanel】
+sub_517df0  basedata/ui/combat/result/panel/*
+共8个需要修改
+
+【战斗状态栏】
+sub_516a30  basedata/ui/combat/state/StatePanel.tga
+战斗状态栏的坐标是以数组形式储存的，int a[2][4]，a[0][?]代表left，a[1][?]代表top
+a[0][...] = 0, 207, 403, 600
+a[1][...] = 491, 491, 491, 491
+但是估计由于程序员把这个“常量”数组写到了.h文件里
+这个数组在程序中有超级多份！！！在IDA Pro中搜索以下二进制串可以找到所有的这样的数组：
+00 00 00 00 CF 00 00 00 93 01 00 00 58 02 00 00 EB 01 00 00 EB 01 00 00 EB 01 00 00 EB 01 00 00
+搜索结果：
+0x0056A6EC,
+0x0056B070,
+0x0056FB90,
+0x0056FBB8,
+0x0056FC38,
+0x0056FC60,
+0x0056FC98,
+0x0056FCC8,
+0x0056FD14,
+0x0056FD58,
+0x0056FD8C,
+0x0056FF88,
+0x0056FFF8,
+0x0057002C,
+0x00570058,
+0x00570178,
+把它们都改掉之后，就可以完整地移动战斗状态栏了。
+但是，例外的是，魔剑的粒子特效位置需要手动修改。
+粒子特效：sub_4d6050: 就在行动条的粒子特效的紧挨着的函数！(有两处代码调用这个函数）
+
+
+【战斗控制板】
+主界面：sub_517a50  basedata/ui/combat/contol/back.tga
+技skill：sub_517ba0  basedata/ui/combat/contol/SkillList/SkillPanel.tga (该字符串附近有很多???Panel.tga)
+术magic：sub_517b30
+物item:sub_517ac0
+AI: sub_517c10
+阵lineup: sub_517C80
+援protect: sub_517CF0
+
+【行动条】
+背景：sub_547650，函数中有两个矩形，第一个是背景；第二个用来初始化人物头像（貌似没用）
+粒子效果：sub_4DC3F0 调用sub_4d5f40的参数，根据SetCursorPos这个API一层一层向上找可以找到
+人物头像：sub_4dbb20 通过动态调试设内存断点看调用站的方法可以找到。
+
+
+【剧情对话框  UIRoleDialog】
+相关函数：Create(): sub_450F90  SetFace(): sub_451360
+头像存储在 basedata/ROLE/101/101A.tga
+

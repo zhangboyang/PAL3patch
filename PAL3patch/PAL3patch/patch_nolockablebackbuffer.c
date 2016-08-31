@@ -58,16 +58,12 @@ static void before_screenshot(struct gbSurfaceDesc *surface)
         GameRect.right = GameRect.left + game_width;
         GameRect.bottom = GameRect.top + game_height;
     }
-    if (game_width * 3 >= game_height * 4) {
-        int width_shift = (game_width - game_height * 4 / 3.0) * 0.5;
-        GameRect.left += width_shift;
-        GameRect.right -= width_shift;
-    } else {
-        int height_shift = (game_height - game_width * 0.75) * 0.5;
-        GameRect.top += height_shift;
-        GameRect.bottom -= height_shift;
-    }
-    
+
+    GameRect.left += width_shift;
+    GameRect.right -= width_shift;
+    GameRect.top += height_shift;
+    GameRect.bottom -= height_shift;
+        
     if (GameRect.left < 0) GameRect.left = 0;
     if (GameRect.top < 0) GameRect.top = 0;
     if (GameRect.right > surface_width) GameRect.right = surface_width;
@@ -118,8 +114,8 @@ static void init_movieframe(struct gbSurfaceDesc *surface)
 }
 static void before_movieframe(struct gbSurfaceDesc *surface)
 {
-    surface->width = 800;
-    surface->height = 600;
+    surface->width = GAME_WIDTH_ORG;
+    surface->height = GAME_HEIGHT_ORG;
     if (!mf_init_flag) init_movieframe(surface);
     
     gbGfxManager_D3D_EnsureCooperativeLevel(gfxmgr, 1);

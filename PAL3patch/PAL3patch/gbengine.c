@@ -50,3 +50,4 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
         this->m_bDeviceLost = 0;
     }
 }
+

@@ -1,8 +1,8 @@
 #include "common.h"
 
 // language, see patch_setlocale.c for details
-unsigned system_codepage;
-unsigned target_codepage;
+UINT system_codepage;
+UINT target_codepage;
 
 
 static const wchar_t wstr_about_title_CHS[] = L"¹ØÓÚ";

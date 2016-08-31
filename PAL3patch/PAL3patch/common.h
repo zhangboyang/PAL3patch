@@ -33,6 +33,9 @@
 #define MAX_GAMELOOP_HOOKS 50
 #define MAX_ATEXIT_HOOKS 50
 
+#define GAME_WIDTH_ORG 800
+#define GAME_HEIGHT_ORG 600
+
 // MAX_PUSH_DWORDS controls how many dwords 'asmentry' will reserve for possible stack pushes
 // this value can't be too large (no more than one page)
 // this value mustn't smaller than 3
@@ -61,10 +64,14 @@
         make_patch_proc_call((addr), MAKE_ASMPATCH_NAME(name), (size)); \
     } while (0)
 
+// use fastcall to simulate thiscall
+#define MAKE_THISCALL_FUNCPTR(addr, ret_type, this_type, ...) ((ret_type __fastcall (*)(this_type, int, ##__VA_ARGS__)) TOPTR(addr))
+#define THISCALL_WRAPPER(func, this, ...) func(this, 0, ##__VA_ARGS__)
 
 #ifndef __ASSEMBLER__
+
 // common includes
-#include <wchar.h>
+#include <windows.h>
 
 // framework.c
 extern void memcpy_to_process(unsigned dest, const void *src, unsigned size);
@@ -106,6 +113,7 @@ extern void show_about();
 struct trapframe;
 typedef void (*patch_proc_t)(struct trapframe *tf);
 struct trapframe {
+    unsigned char fpustate[108];
     union {
         struct {
             unsigned edi, esi, ebp, esp, ebx, edx, ecx, eax;
@@ -192,10 +200,43 @@ MAKE_PATCHSET(fixmemfree);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
+    extern int game_width_43, game_height_43;
+    extern int width_shift, height_shift;
+    extern double scalefactor;
     MAKE_PATCHSET(windowed);
     MAKE_PATCHSET(fixfov);
     MAKE_PATCHSET(nolockablebackbuffer);
     MAKE_PATCHSET(fixreset);
+    MAKE_PATCHSET(fixui);
+        enum transform_type {
+            TR_NONE,
+            TR_LOW,
+            TR_HIGH,
+            TR_SCALE,
+            TR_CENTER,
+            TR_CENTERLOW,
+            TR_CENTERHIGH,
+            TR_ALIGNLOW,
+            TR_ALIGNHIGH,
+            TR_SHIFTLOW,
+            TR_SHIFTHIGH,
+            TR_SHIFTLOWSCALE,
+            TR_SHIFTHIGHSCALE,
+        };
+        extern void set_rect(RECT *rect, int left, int top, int right, int bottom);
+        extern void move_rect(RECT *rect, int lr_diff, int tb_diff);
+        extern void locate_rect(RECT *rect, int lr, int tb, int lrflags, int tbflags);
+        extern void adjust_rect(RECT *rect, int new_width, int new_height, int lrflags, int tbflags);
+        extern void extend_rect(RECT *rect, int width_diff, int height_diff, int lrflags, int tbflags);
+        #define get_rect_width(rect) ((rect)->right - (rect)->left)
+        #define get_rect_height(rect) ((rect)->bottom - (rect)->top)
+        extern void get_rect_size(RECT *rect, int *width, int *height);
+        extern void set_rect_size(RECT *rect, int width, int height);
+        extern void transform_point(int *lr, int *tb, int lrflags, int tbflags);
+        extern void transform_rect(RECT *rect, int lrflags, int tbflags, int whflags);
+        MAKE_PATCHSET(fixloadingfrm);
+        MAKE_PATCHSET(fixcombatui);
+        MAKE_PATCHSET(fixroledialog);
 
 #endif // __ASSEMBLER__
 

@@ -15,9 +15,13 @@ _asmentry@4:
 	pushl Y(%esp)
 	pushal
 	addl $Z, 0xc(%esp)
+	subl $0x6c, %esp
+	fnsave (%esp)
 	pushl %esp
 	call _patchentry
 	addl $0x4, %esp
+	frstor (%esp)
+	addl $0x6c, %esp
 	movl 0xc(%esp), %ecx
 	movl 0x24(%esp), %eax
 	movl 0x20(%esp), %edx

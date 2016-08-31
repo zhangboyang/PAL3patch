@@ -37,6 +37,12 @@ static void init_stage2()
             INIT_PATCHSET(fixfov);
             INIT_PATCHSET(nolockablebackbuffer);
             INIT_PATCHSET(fixreset);
+            if (INIT_PATCHSET(fixui)) {
+                // ui fixes
+                INIT_PATCHSET(fixloadingfrm);
+                INIT_PATCHSET(fixcombatui);
+                INIT_PATCHSET(fixroledialog);
+            }
         }
     }
     

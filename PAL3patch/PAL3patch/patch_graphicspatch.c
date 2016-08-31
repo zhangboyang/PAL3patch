@@ -3,8 +3,12 @@
 #include <d3d9.h>
 #include "common.h"
 
-// some global vars
-int game_width, game_height; // game resolution
+// game resolution
+int game_width, game_height;
+int game_width_43, game_height_43;
+int width_shift, height_shift;
+double scalefactor;
+
 
 
 // part of the CArrayList class, from DirectX SDK C++ Sample
@@ -180,9 +184,26 @@ static void patch_resolution_config(const char *cfgstr)
         game_height = GetSystemMetrics(SM_CYSCREEN);
     } else if (sscanf(cfgstr, "%d %*[xX]%d", &game_width, &game_height) != 2) {
         warning("can't parse resolution string, fallback to default configuration.");
-        game_width = 800;
-        game_height = 600;
+        game_width = GAME_WIDTH_ORG;
+        game_height = GAME_HEIGHT_ORG;
     }
+    
+    // calc some parameters
+    if (game_width * 3 >= game_height * 4) {
+        game_width_43 = game_height * 4 / 3.0;
+        game_height_43 = game_height;
+        width_shift = (game_width - game_width_43) / 2;
+        height_shift = 0;
+        scalefactor = game_height / ((double) GAME_HEIGHT_ORG);
+    } else {
+        game_width_43 = game_width;
+        game_height_43 = game_width * 0.75;
+        width_shift = 0;
+        height_shift = (game_height - game_height_43) / 2;
+        scalefactor = game_width / ((double) GAME_WIDTH_ORG);
+    }
+    
+    
     make_call(0x00406436, Readn);
     make_call(0x00406453, Readn);
 }

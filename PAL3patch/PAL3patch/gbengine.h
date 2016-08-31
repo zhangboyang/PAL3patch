@@ -79,8 +79,39 @@ struct RenderTarget {
     int m_nState;
 };
 
+struct gbColorQuad {
+    union {
+        int ColorQuadFmt;
+        struct {
+            BYTE Blue;
+            BYTE Green;
+            BYTE Red;
+            BYTE Alpha;
+        };
+        DWORD Color;
+    };
+};
 
+struct PtrArray {
+    void** m_pData;
+    int m_nSize;
+    int m_nMaxSize;
+    int m_nGrowBy;
+};
 
+struct UIWnd {
+    void **vfptr;
+    struct gbColorQuad m_fontcolor;
+    struct gbColorQuad m_wndcolor;
+    DWORD m_id;
+    RECT m_rect;
+    struct UIWnd* m_pfather;
+    struct PtrArray m_childs;
+    int m_bcreateok;
+    int m_bvisible;
+    int m_benable;
+    int m_bfocus;
+};
 
 
 
@@ -88,8 +119,7 @@ struct RenderTarget {
 extern void gbGfxManager_D3D_Reset3DEnvironment(struct gbGfxManager_D3D *this);
 extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
 
-// function pointers
-extern void (*PAL3_atexit)(void (*)(void));
+#define UIWnd_SetRect(this, rect) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445FA0, void, struct UIWnd *, RECT *), this, rect)
 
 // global variables
 #define is_window_active (*(int *) TOPTR(0x005833B8))
