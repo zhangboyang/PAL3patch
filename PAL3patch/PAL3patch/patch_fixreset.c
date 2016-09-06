@@ -3,32 +3,47 @@
 #include "gbengine.h"
 
 
-// fix gbGfxManager_D3D::SetRenderType, this is decompiled from PAL3A's GBENGINE.DLL
-#define g_pLastRenderTarget (*(IDirect3DSurface9 **) (gboffset + 0x1013BDF4))
+// rewrite gbGfxManager_D3D::SetRenderTarget()
+#define g_pDefaultRenderTarget (*(IDirect3DSurface9 **) (gboffset + 0x1013BDF4))
 static int __fastcall gbGfxManager_D3D_SetRenderTarget(struct gbGfxManager_D3D *this, int dummy, struct gbTexture_D3D *pNewTex)
 {
-    IDirect3DSurface9 *pNewSurface = NULL;
     if (pNewTex) {
-        if (IDirect3DDevice9_GetRenderTarget(this->m_pd3dDevice, 0, &g_pLastRenderTarget) < 0) {
-            g_pLastRenderTarget = NULL;
+        IDirect3DSurface9 *pNewSurface = NULL;
+        int ret;
+        
+        // backup default surface
+        if (g_pDefaultRenderTarget == NULL) {
+            if (FAILED(IDirect3DDevice9_GetRenderTarget(this->m_pd3dDevice, 0, &g_pDefaultRenderTarget))) {
+                g_pDefaultRenderTarget = NULL;
+                return 0;
+            }
+        }
+        
+        // get corresponding surface
+        if (!pNewTex->pTex) return 0;
+        if (FAILED(IDirect3DTexture9_GetSurfaceLevel((IDirect3DTexture9 *) pNewTex->pTex, 0, &pNewSurface))) {
             return 0;
         }
-        IDirect3DSurface9_Release(g_pLastRenderTarget);
-        if (!pNewTex->pTex) return 0;
-        IDirect3DTexture9_GetSurfaceLevel((IDirect3DTexture9 *) pNewTex->pTex, 0, &pNewSurface);
-        if (!pNewSurface) return 0;
-        return IDirect3DDevice9_SetRenderTarget(this->m_pd3dDevice, 0, pNewSurface) >= 0;
+        
+        // set render target
+        ret = IDirect3DDevice9_SetRenderTarget(this->m_pd3dDevice, 0, pNewSurface) >= 0;
+        
+        // release the surface
+        IDirect3DSurface9_Release(pNewSurface);
+        
+        return ret;
     } else {
-        if (g_pLastRenderTarget) {
-            if (IDirect3DDevice9_GetRenderTarget(this->m_pd3dDevice, 0, &pNewSurface) >= 0) {
-                IDirect3DSurface9_Release(pNewSurface); // release twice, since GetRenderTarget() will increase ref count
-                IDirect3DSurface9_Release(pNewSurface);
-            }
-            IDirect3DDevice9_SetRenderTarget(this->m_pd3dDevice, 0, g_pLastRenderTarget);
+        // try restore default surface
+        if (!g_pDefaultRenderTarget) {
+            return 0;
         }
+        IDirect3DDevice9_SetRenderTarget(this->m_pd3dDevice, 0, g_pDefaultRenderTarget);
+        IDirect3DSurface9_Release(g_pDefaultRenderTarget);
+        g_pDefaultRenderTarget = NULL;
         return 1;
     }
 }
+
 
 // these are some function decompiled from PAL3A
 // no need to emulate __thiscall
@@ -41,12 +56,9 @@ static void gbTexture_D3D_ReleaseD3D(struct gbTexture_D3D *this)
     this->pDS = NULL;
     this->m_ImgFormat = 0;
 }
-static void RenderTarget_Create(struct RenderTarget *this)
-{
-    void __fastcall (*RenderTarget_Create_Real)(struct RenderTarget *this); // only 1 argument, no need to add dummy
-    RenderTarget_Create_Real = TOPTR(0x004BDB60);
-    RenderTarget_Create_Real(this);
-}
+
+#define RenderTarget_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004BDB60, void, struct RenderTarget *), this)
+
 static void RenderTarget_OnDeviceLost(struct RenderTarget *this)
 {
     gbTexture_D3D_ReleaseD3D(&this->m_Texture);
@@ -58,7 +70,7 @@ static BYTE RenderTarget_OnResetDevice(struct RenderTarget *this)
     int m_nState_save = this->m_nState;
     RenderTarget_Create(this);
     this->m_iMode = m_iMode_save;
-    this->m_nState =  m_nState_save;
+    this->m_nState = m_nState_save;
     return 1;
 }
 
@@ -69,17 +81,47 @@ static MAKE_ASMPATCH(fixreset_RenderTarget_End_patch)
 }
 
 
+// this is my own method!
+static void CTrail_OnDeviceLost(struct CTrail *this)
+{
+    if (this->m_bSupport) {
+        IDirect3DSurface9_Release(this->m_OriginSurface);
+        this->m_OriginSurface = NULL;
+        int i;
+        for (i = 0; i < 8; i++) {
+            gbTexture_D3D_ReleaseD3D(&this->m_texRT[i]);
+        }
+    }
+}
+static void CTrail_OnResetDevice(struct CTrail *this)
+{
+    if (this->m_bSupport) {
+        IDirect3DDevice9_GetRenderTarget(g_GfxMgr->m_pd3dDevice, 0, &this->m_OriginSurface);
+        enum gbPixelFmtType format = gbGfxManager_D3D_GetBackBufferFormat(g_GfxMgr);
+        int i;
+        for (i = 0; i < 8; i++) {
+            gbTexture_D3D_CreateForRenderTarget(&this->m_texRT[i], 256, 256, format);
+        }
+    }
+}
 
 
 
 #define pRenderTarget ((struct RenderTarget *) 0x00DE7AA0)
+#define pCTrail ((struct CTrail *) 0x00DE93B0)
 static void OnDeviceLost_hook()
 {
+    if (g_pDefaultRenderTarget) {
+        IDirect3DSurface9_Release(g_pDefaultRenderTarget);
+        g_pDefaultRenderTarget = NULL;
+    }
     RenderTarget_OnDeviceLost(pRenderTarget);
+    CTrail_OnDeviceLost(pCTrail);
 }
 static void OnResetDevice_hook()
 {
     RenderTarget_OnResetDevice(pRenderTarget);
+    CTrail_OnResetDevice(pCTrail);
 }
 
 

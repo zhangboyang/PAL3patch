@@ -4,13 +4,22 @@
 
 // here are some common functions related to GBENGINE.DLL or PAL3.EXE
 
-void gbGfxManager_D3D_Reset3DEnvironment(struct gbGfxManager_D3D *this)
+// this is my own method! not exists in original GBENGINE
+enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D *this)
 {
-    void __fastcall (*gbGfxManager_D3D_Reset3DEnvironment_Real)(struct gbGfxManager_D3D *this); // only 1 argument, no need to add dummy
-    gbGfxManager_D3D_Reset3DEnvironment_Real = TOPTR(gboffset + 0x1001AC50);
-    gbGfxManager_D3D_Reset3DEnvironment_Real(this);
+    enum gbPixelFmtType type;
+    switch (this->m_d3dsdBackBuffer.Format) {
+        case D3DFMT_A8R8G8B8: type = GB_PFT_A8R8G8B8; break;
+        case D3DFMT_R5G6B5:   type = GB_PFT_R5G6B5;   break;
+        case D3DFMT_A1R5G5B5: type = GB_PFT_A1R5G5B5; break;
+        case D3DFMT_A4R4G4B4: type = GB_PFT_A4R4G4B4; break;
+        case D3DFMT_X8R8G8B8: type = GB_PFT_X8R8G8B8; break;
+        case D3DFMT_X1R5G5B5: type = GB_PFT_X1R5G5B5; break;
+        case D3DFMT_X4R4G4B4: type = GB_PFT_X4R4G4B4; break;
+        default:              type = GB_PFT_R8G8B8;   break;
+    }
+    return type;
 }
-
 
 // make sure cooperative level is D3D_OK
 // this is my own method! not exists in original GBENGINE
@@ -46,7 +55,9 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
             Sleep(20);
             call_gameloop_hooks(GAMELOOP_DEVICELOST);
         }
-        gbGfxManager_D3D_Reset3DEnvironment(this);
+        if (gbGfxManager_D3D_Reset3DEnvironment(this) < 0) {
+            fail("Reset3DEnvironment error!");
+        }
         this->m_bDeviceLost = 0;
     }
 }

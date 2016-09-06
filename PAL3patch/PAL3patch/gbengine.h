@@ -93,7 +93,7 @@ struct gbColorQuad {
 };
 
 struct PtrArray {
-    void** m_pData;
+    void **m_pData;
     int m_nSize;
     int m_nMaxSize;
     int m_nGrowBy;
@@ -105,7 +105,7 @@ struct UIWnd {
     struct gbColorQuad m_wndcolor;
     DWORD m_id;
     RECT m_rect;
-    struct UIWnd* m_pfather;
+    struct UIWnd *m_pfather;
     struct PtrArray m_childs;
     int m_bcreateok;
     int m_bvisible;
@@ -113,15 +113,42 @@ struct UIWnd {
     int m_bfocus;
 };
 
+struct gbUIQuad {
+    float sx;
+    float sy;
+    float ex;
+    float ey;
+    float su;
+    float sv;
+    float eu;
+    float ev;
+    float z;
+    struct gbColorQuad color;
+};
+
+struct CTrail {
+    float m_fTime;
+    BYTE m_bSupport;
+    BYTE m_bEnable;
+    struct gbCamera *m_pCam;
+    struct gbUIQuad m_ScreenQuad;
+    ULONG m_dwRenderCounter;
+    ULONG m_dwRT;
+    struct gbTexture_D3D m_texRT[0x8];
+    struct gbRenderEffect *m_eft;
+    struct IDirect3DSurface9 *m_OriginSurface;
+};
 
 
 // functions
-extern void gbGfxManager_D3D_Reset3DEnvironment(struct gbGfxManager_D3D *this);
+#define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
+extern enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D *this);
 extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
-
 #define UIWnd_SetRect(this, rect) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445FA0, void, struct UIWnd *, RECT *), this, rect)
+#define gbTexture_D3D_CreateForRenderTarget(this, width, height, format) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001BF80, int, struct gbTexture_D3D *, int, int, enum gbPixelFmtType), this, width, height, format)
 
 // global variables
 #define is_window_active (*(int *) TOPTR(0x005833B8))
+#define g_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)
 
 #endif

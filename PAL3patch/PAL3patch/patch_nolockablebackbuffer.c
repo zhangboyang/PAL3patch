@@ -211,20 +211,10 @@ static __fastcall int LockBackBuffer(struct gbGfxManager_D3D *this, int dummy, s
     // fill the surface structure
     // note: surface->pitch and surface->pbits will be filled later
     //       and these paramters may be overwrited by hook functions
-    enum gbPixelFmtType type;
-    switch (this->m_d3dsdBackBuffer.Format) {
-        case D3DFMT_A8R8G8B8: type = GB_PFT_A8R8G8B8; break;
-        case D3DFMT_R5G6B5:   type = GB_PFT_R5G6B5;   break;
-        case D3DFMT_A1R5G5B5: type = GB_PFT_A1R5G5B5; break;
-        case D3DFMT_A4R4G4B4: type = GB_PFT_A4R4G4B4; break;
-        case D3DFMT_X8R8G8B8: type = GB_PFT_X8R8G8B8; break;
-        case D3DFMT_X1R5G5B5: type = GB_PFT_X1R5G5B5; break;
-        case D3DFMT_X4R4G4B4: type = GB_PFT_X4R4G4B4; break;
-        default:              type = GB_PFT_R8G8B8;   break;
-    }
+
     surface->width = this->m_d3dsdBackBuffer.Width;
     surface->height = this->m_d3dsdBackBuffer.Height;
-    surface->format = type;
+    surface->format = gbGfxManager_D3D_GetBackBufferFormat(this);
     surface->pitch = 0;
     surface->pbits = NULL;
     
@@ -251,7 +241,7 @@ static __fastcall int LockBackBuffer(struct gbGfxManager_D3D *this, int dummy, s
     return 1;
 }
 
-static __fastcall void UnockBackBuffer(struct gbGfxManager_D3D *this, int dummy)
+static __fastcall void UnlockBackBuffer(struct gbGfxManager_D3D *this, int dummy)
 {
     switch (locktype) {
         case LT_RENDERTARGET:
@@ -268,5 +258,5 @@ MAKE_PATCHSET(nolockablebackbuffer)
     SIMPLE_PATCH(gboffset + 0x1001A20F, "\xC7\x81\x08\x07\x00\x00\x03\x00\x00\x00", "\xC7\x81\x08\x07\x00\x00\x02\x00\x00\x00", 10);
     SIMPLE_PATCH(gboffset + 0x1001A23F, "\xC7\x81\x08\x07\x00\x00\x01\x00\x00\x00", "\xC7\x81\x08\x07\x00\x00\x00\x00\x00\x00", 10);
     make_jmp(gboffset + 0x10018F40, LockBackBuffer);
-    make_jmp(gboffset + 0x10019030, UnockBackBuffer);
+    make_jmp(gboffset + 0x10019030, UnlockBackBuffer);
 }

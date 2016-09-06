@@ -19,6 +19,12 @@ Reset()不能成功的根本原因是，有资源没有释放。
     注意刚刚device lost时，可能并不能立即恢复执行，但此时不能让函数返回
     我重写了一个小函数EnsureCooperativeLevel，用来确保当前设备状态正常（若LostDevice会自动等待恢复）
     对gbGfxManager_D3D::BeginScene进行补丁，在函数调用调用这个函数即可。
-    
+动态模糊CTrail
+    这个类PAL3相比PAL3A少了一个m_bReady
+    动态模糊在CTrail::Create()使用了GetRenderTarget(...&this->m_OriginSurface)需要修正
+    m_OriginSurface在CTrail::End()中也被使用
+    并且还创建了用于RenderTarget的Texture也需要修正（修正SetRenderTarget的引用计数问题）
+    从PAL3A中抄来的gbGfxManager_D3D::SetRenderTarget()有bug，重写了一个
+
 时间仓促，可能还有没处理好的地方，所以之后可能还要继续修正fixreset这个补丁
 
