@@ -1,0 +1,23 @@
+【fixgameover：修正“重新来过”的位置】
+很简单，参照fixloadfrm改写
+
+【UI_opt.tli / _TextureLib_Data类】
+位于basedata.cpk/ui/UILib
+维护大贴图中很多小贴图的路径和对应关系
+    t_name    ui\GameMainUI\Communal\lk_name.tga
+    t_lib     5.tga
+    ...其他略...
+表示ui\GameMainUI\Communal\lk_name.tga实际与其他很多贴图一起存储在/ui/UILib/5.tga中
+应用举例：UIStatic::SetBk的第三个参数flag
+  若flag非零，则表示从TextureLib中取纹理，否则表示直接从vfs文件系统中取纹理
+所以，basedata中找不到的贴图，可能是被这样“压缩”处理了
+
+【加载贴图: gbTexture::LoadTexture】
+不论贴图扩展名如何，程序首先尝试强制改扩展名为.dds查找对应文件
+若没找到，才用gbImage2D::LoadImageFile/gbTexture::LoadFromImage2D去加载图片文件
+
+【一次典型的vfs读取文件的流程】
+参照gbTexture::LoadTexture
+
+【gbImage2D::LoadImageFile支持的文件类型】
+tga bmp pcx bit jpg
