@@ -1,0 +1,23 @@
+【查找虚函数的方法】
+通过OD在运行时找到某个类的示例，直接查看虚函数表
+以UIStatic为例
+00445E70
+00442890
+00442AD0
+00442420
+00445B90
+....
+可以看到函数指针分布“不均匀”，可以判断某些虚函数继承自基类，某些虚函数被派生类重载
+再结合IDA的反汇编功能，根据参数个数和函数内容，推断函数名字
+
+【PAL3texunpack】
+纹理解包器：从CPK文件中解出纹理（即.dds tga bmp pcx bit jpg文件）
+这个解包器直接使用GBENGINE导出的类CPK，理论上可以完整解开CPK文件
+CPK格式参考资料：https://github.com/xurubin/PAL3CPKUnpack
+使用方法：
+    编译，然后把exe和附带的bat脚本复制到游戏目录下
+    编辑bat，修改EXTRACT_PATH为解压文件的目录
+    然后在游戏目录下执行bat脚本，所有纹理都会被解压到EXTRACT_PATH\cpk目录下，文件名格式 [..SHA1..].EXT
+    EXTRACT_PATH\cpk\texmap.txt文件是路径到具体文件的映射关系
+    注意：由于文件过多，都放在一个目录之下，所以不要在FAT32文件系统上使用本程序，建议使用内存盘！
+
