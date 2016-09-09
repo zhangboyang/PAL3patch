@@ -1,0 +1,17 @@
+【ZPKpacker】
+编译（需openssl）： gcc -Wall -O2 ZPKpacker.c -o ZPKpacker -lcrypto
+ZPK是自己创造的简单的文件打包格式，通过排序好的SHA1散列值进行文件索引。
+打包后，文件名信息会丢失，只能通过SHA1哈希来索引。
+
+文件格式：
+    [ZPK头]: 4bytes 'Z' 'P' 'K' '\0'
+    [文件个数]: 4bytes
+    [文件信息]: struct fileinfo_t { unsigned char hash[20]; unsigned offset; unsigned len; }
+    [文件数据]
+使用方法:
+    ZPKpacker [ZPK输出文件名]
+    将要打包的文件名用换行符隔开通入stdin即可
+生成两个文件
+    yourname.zpk yourname.zpk.list
+    zpk是最终的ZPK包，zpk.list是文件信息列表，可用于后续处理
+
