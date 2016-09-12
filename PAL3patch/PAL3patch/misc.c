@@ -1,7 +1,4 @@
 // misc functions
-#include <stdio.h>
-#include <string.h>
-#include <windows.h>
 #include "common.h"
 
 
@@ -69,7 +66,8 @@ void __attribute__((noreturn)) __fail(const char *file, int line, const char *fu
     va_end(ap);
 }
 
-void __warning(const char *file, int line, const char *func, const char *fmt, ...)
+static int plog_flag = 0;
+void __plog(int is_warning, const char *file, int line, const char *func, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -80,14 +78,17 @@ void __warning(const char *file, int line, const char *func, const char *fmt, ..
     len = strlen(msgbuf);
     vsnprintf(msgbuf + len, sizeof(msgbuf) - len, fmt, ap);
     OutputDebugString(msgbuf);
-    FILE *fp = fopen(WARNING_FILE, "a");
+    FILE *fp = fopen(WARNING_FILE, plog_flag ? "a" : "w");
     if (fp) {
-        fputs("build information:\n", fp);
-        fputs(build_info, fp);
-        
-        get_all_config(buf, sizeof(buf));
-        fputs("patch configuration:\n", fp);
-        fputs(buf, fp);
+        if (!plog_flag) {
+            fputs("build information:\n", fp);
+            fputs(build_info, fp);
+            
+            get_all_config(buf, sizeof(buf));
+            fputs("patch configuration:\n", fp);
+            fputs(buf, fp);
+            fputs("========== start ==========\n", fp);
+        }
         
         SYSTEMTIME SystemTime;
         GetLocalTime(&SystemTime);
@@ -95,11 +96,14 @@ void __warning(const char *file, int line, const char *func, const char *fmt, ..
         fputs("timestamp:\n", fp);
         fputs(buf, fp);
         
-        fputs("warning details:\n", fp);
+        fputs("details:\n", fp);
         fputs(msgbuf, fp);
         fputs("\n\n\n", fp);
         fclose(fp);
     }
-    MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONWARNING);
+    plog_flag = 1;
+    if (is_warning) {
+        MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONWARNING);
+    }
     va_end(ap);
 }

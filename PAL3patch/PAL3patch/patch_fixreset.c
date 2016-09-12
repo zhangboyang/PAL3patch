@@ -1,6 +1,4 @@
-#include <d3d9.h>
 #include "common.h"
-#include "gbengine.h"
 
 
 // rewrite gbGfxManager_D3D::SetRenderTarget()

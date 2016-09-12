@@ -1,6 +1,4 @@
-#include <windows.h>
 #include "common.h"
-#include "gbengine.h"
 
 static int timer_res;
 static void reset_timer_res()

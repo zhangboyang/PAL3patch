@@ -13,6 +13,10 @@
 所以，basedata中找不到的贴图，可能是被这样“压缩”处理了
 
 【加载贴图: gbTexture::LoadTexture】
+第二个参数的含义
+    TLOAD_ONLYIMG = 0x0 （不适用于dds）
+    TLOAD_ONLYTEX = 0x1
+    TLOAD_BOTH = 0x2
 不论贴图扩展名如何，程序首先尝试强制改扩展名为.dds查找对应文件
 若没找到，才用gbImage2D::LoadImageFile/gbTexture::LoadFromImage2D去加载图片文件
 
@@ -21,3 +25,8 @@
 
 【gbImage2D::LoadImageFile支持的文件类型】
 tga bmp pcx bit jpg
+
+【读CPK的负下标索引的问题】
+应该是gbVFile 是一个多集成的类，在使用时有自动指针调整功能
+class gbVFile : public gbVFile1, public CPKFile // 0x140
+

@@ -1,6 +1,4 @@
-#include <windows.h>
 #include "common.h"
-#include <stdio.h>
 
 struct cycle_info_t {
     DWORD lasttime;

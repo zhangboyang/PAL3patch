@@ -1,6 +1,4 @@
 // patch framework
-#include <windows.h>
-#include <string.h>
 #include "common.h"
 
 

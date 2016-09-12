@@ -1,6 +1,4 @@
-#include <d3d9.h>
 #include "common.h"
-#include "gbengine.h"
 
 // here are some common functions related to GBENGINE.DLL or PAL3.EXE
 

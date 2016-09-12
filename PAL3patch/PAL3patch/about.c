@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <windows.h>
 #include "common.h"
 
 const char build_info[] =

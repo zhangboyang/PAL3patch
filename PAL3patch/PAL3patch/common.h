@@ -26,8 +26,8 @@
 #define PAL3PATCH_VERSION "v1.0 alpha"
 #define EXTERNAL_UNPACKER "PAL3unpack.dll"
 #define EXTERNAL_UNPACKER_FIXED "PAL3unpack_fixed.dll"
-#define ERROR_FILE "PAL3patch.log"
-#define WARNING_FILE "PAL3patch.warning.log"
+#define ERROR_FILE "PAL3patch.error.txt"
+#define WARNING_FILE "PAL3patch.log.txt"
 #define CONFIG_FILE "PAL3patch.conf"
 #define MAX_CONFIG_LINES 100
 #define MAX_GAMELOOP_HOOKS 50
@@ -71,7 +71,31 @@
 #ifndef __ASSEMBLER__
 
 // common includes
+
+// for InitCommonControlsEx
+#define _WIN32_IE	0x0300
+// for SHA1
+#define _WIN32_WINNT 0x0400
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <math.h>
+#include <limits.h>
 #include <windows.h>
+#include <wincrypt.h>
+#include <commctrl.h>
+#include <d3d9.h>
+#include "gbengine.h"
+#include "zpk.h"
+#include "sha1.h"
+
+
+// common typedefs
+typedef void *(*malloc_funcptr_t)(size_t);
+typedef void (*free_funcptr_t)(void *);
+
 
 // framework.c
 extern void memcpy_to_process(unsigned dest, const void *src, unsigned size);
@@ -100,8 +124,9 @@ extern void *hook_import_table(void *image_base, const char *dllname, const char
 extern int is_win9x();
 #define fail(fmt, ...) __fail(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
 extern void __attribute__((noreturn)) __fail(const char *file, int line, const char *func, const char *fmt, ...);
-#define warning(fmt, ...) __warning(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
-extern void __warning(const char *file, int line, const char *func, const char *fmt, ...);
+#define warning(fmt, ...) __plog(1, __FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
+#define plog(fmt, ...) __plog(0, __FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
+extern void __plog(int is_warning, const char *file, int line, const char *func, const char *fmt, ...);
 extern int str2int(const char *valstr);
 extern double str2double(const char *valstr);
 
@@ -232,11 +257,15 @@ MAKE_PATCHSET(graphicspatch);
         #define get_rect_height(rect) ((rect)->bottom - (rect)->top)
         extern void get_rect_size(RECT *rect, int *width, int *height);
         extern void set_rect_size(RECT *rect, int width, int height);
+        extern void scale_rect(RECT *rect, int lrflags, int rbflags);
+        extern int get_trflag_direction(int flags);
         extern void transform_point(int *lr, int *tb, int lrflags, int tbflags);
         extern void transform_rect(RECT *rect, int lrflags, int tbflags, int whflags);
         MAKE_PATCHSET(fixloadingfrm);
         MAKE_PATCHSET(fixcombatui);
         MAKE_PATCHSET(fixroledialog);
+        MAKE_PATCHSET(fixgameover);
+        MAKE_PATCHSET(replacetexture);
 
 #endif // __ASSEMBLER__
 

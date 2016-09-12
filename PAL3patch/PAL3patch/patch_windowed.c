@@ -1,6 +1,4 @@
-#include <windows.h>
 #include "common.h"
-#include "gbengine.h"
 
 static int window_patch_cfg;
 #define WINDOW_NORMAL 1

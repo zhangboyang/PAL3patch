@@ -1,0 +1,27 @@
+【预编译头】
+随着代码大小的膨胀，编译速度也越来越慢，因此决定开启预编译头文件功能
+现在，所有头文件全部被common.h，其他.c源代码文件开头只#include "common.h"
+
+【替换2x贴图后有些人物变黑的问题】
+例如： (1)渝州北部江边靠北的屋子前 (2)雪见找爷爷时，进唐家堡演武堂
+原因：这几个人物的贴图，Alpha通道全为0（即全透明），但是RGB通道上却有颜色！
+游戏显示时会忽略Alpha通道。但waifu2x放大拉伸时，会把它当做一张完全透明的图片来处理，自然结果就不正确了。
+解决方案：
+    (1) 找到有问题的贴图
+        方法：在patch_replacetexture.c中有专门检测这样图片的代码
+            #define DETECT_FAKE_FULL_TRANSPARENT_IMAGES
+        开启后，在补丁启动后，正式启动游戏前，会将texpack中所有文件处理一遍，
+        找到含有alpha为0但rgb有颜色的像素（坏像素）的图片，结果输出在ffti.log文件中：
+            TYPE: FULL=>所有像素Alpha全透明，PART=>图片存在“坏像素”
+            RATIO: “坏像素”占所有像素的比例
+            BAD: 坏像素个数
+            TOTAL: 总像素个数
+            SHA1, CPK, PATH: 文件路径
+    (2) 排序 ffti.log 文件，手动查看有问题的图片
+        仙剑3的有问题的图片如下：
+            TYPE FULL RATIO 0.934525 BAD 61245 TOTAL 65536 SHA1 5ac09b8ec0880e934c6f7c7cd9fd50ee14e1963d CPK "basedata.cpk" PATH "ROLE\B32\B32.tga"
+            TYPE FULL RATIO 0.970657 BAD 63613 TOTAL 65536 SHA1 24ea9d9eb0b1ec740b6a6a837f9d30a326dac587 CPK "basedata.cpk" PATH "ROLE\215\215.tga"
+            TYPE FULL RATIO 0.976364 BAD 63987 TOTAL 65536 SHA1 91a1a8df1b6ad0b8a6c7b6b11c9f1280916021e7 CPK "basedata.cpk" PATH "ROLE\239\239.tga"
+            TYPE FULL RATIO 0.994629 BAD 65184 TOTAL 65536 SHA1 644e7ca9fcaffa6dd6dc50bf6ee8e2f1f3ce1210 CPK "basedata.cpk" PATH "ROLE\228\228.tga"        
+    (3) 在拉伸图片时特殊处理一下这些图片。
+

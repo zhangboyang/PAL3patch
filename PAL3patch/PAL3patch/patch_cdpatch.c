@@ -1,4 +1,3 @@
-#include <string.h>
 #include "common.h"
 
 static MAKE_ASMPATCH(cdpatch)

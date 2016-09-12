@@ -1,5 +1,4 @@
 #include "common.h"
-#include "gbengine.h"
 
 
 #define FACE_LRSHIFT 18

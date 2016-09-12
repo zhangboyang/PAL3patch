@@ -1,11 +1,4 @@
-#include <string.h>
 #include "common.h"
-
-// for InitCommonControlsEx
-#define _WIN32_IE	0x0300
-#include <windows.h>
-#include <commctrl.h>
-
 
 static MAKE_ASMPATCH(testcombat)
 {

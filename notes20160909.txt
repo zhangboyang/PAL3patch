@@ -14,4 +14,26 @@ ZPK是自己创造的简单的文件打包格式，通过排序好的SHA1散列�
 生成两个文件
     yourname.zpk yourname.zpk.list
     zpk是最终的ZPK包，zpk.list是文件信息列表，可用于后续处理
+使用样例（linux）
+    find /dev/shm/png -name '*.png' | ./ZPKpacker png.zpk
+
+【PAL3texpackgen】
+读入PAL3texunpack输出的texmap.txt文件，读入ZPKpakcer输出的.zpk.list文件
+输出将文件名进行匹配后的文件，匹配过程像数据库中的“自然连接”
+使用样例（linux）
+    ./PAL3texpackgen ../texmap_parser/texmap.txt ../png2x.zpk.lis > png2x.texpack
+
+
+【替换纹理文件的流程】
+用PAL3texunpack程序，将*.CPK解包得一大堆[SHA1 hash].(jpg|tga|bmp|dds)文件，和列表文件texmap.txt （需使用windows）
+将这些纹理文件格式全部转换为PNG文件，使用ImageMagick    （需使用linux）
+    ls | xargs mogrify -format png
+用waifu2x将PNG文件拉伸    （需使用linux）
+    find ../png -type f | head > pal3.txt
+    th waifu2x.lua -m scale -l pal3.txt -o ../png2x/%s.png
+然后将这些png文件打包为ZPK文件    （需使用linux）
+    find /dev/shm/png -name '*.png' | ./ZPKpacker png.zpk
+最后生成texpack列表文件    （需使用linux）
+    ./PAL3texpackgen ../texmap_parser/texmap.txt ../png2x.zpk.lis > png2x.texpack
+
 

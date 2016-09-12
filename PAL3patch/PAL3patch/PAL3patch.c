@@ -1,7 +1,3 @@
-#include <windows.h>
-#include <d3d9.h>
-#include <stdio.h>
-#include <assert.h>
 #include "common.h"
 
 // current offset of default location of GBENGINE.DLL
@@ -14,7 +10,8 @@ static void init_stage1()
     
     gboffset = get_module_base("GBENGINE.DLL") - 0x10000000;
     read_config_file();
-    
+ 
+    show_about();
     INIT_PATCHSET(depcompatible);
 }
 
@@ -42,7 +39,9 @@ static void init_stage2()
                 INIT_PATCHSET(fixloadingfrm);
                 INIT_PATCHSET(fixcombatui);
                 INIT_PATCHSET(fixroledialog);
+                INIT_PATCHSET(fixgameover);
             }
+            INIT_PATCHSET(replacetexture);
         }
     }
     
@@ -56,8 +55,6 @@ static void init_stage2()
 
     // init_locale() must called after INIT_PATCHSET(setlocale)
     init_locale();
-    
-    show_about();
 }
 
 

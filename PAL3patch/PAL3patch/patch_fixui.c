@@ -1,4 +1,3 @@
-#include <windows.h>
 #include "common.h"
 
 // transform functions
@@ -93,6 +92,35 @@ void set_rect_size(RECT *rect, int width, int height)
 {
     adjust_rect(rect, width, height, TR_LOW, TR_LOW);
 }
+void scale_rect(RECT *rect, int lrflags, int tbflags)
+{
+    int width, height;
+    get_rect_size(rect, &width, &height);
+    width *= scalefactor;
+    height *= scalefactor;
+    adjust_rect(rect, width, height, lrflags, tbflags);
+}
+int get_trflag_direction(int flags)
+{
+    switch (flags) {
+        case TR_NONE:
+            return TR_NONE;
+        case TR_CENTER:
+        case TR_LOW:
+        case TR_CENTERLOW:
+        case TR_ALIGNLOW:
+        case TR_SHIFTLOW:
+        case TR_SHIFTLOWSCALE:
+            return TR_LOW;
+        case TR_HIGH:
+        case TR_CENTERHIGH:
+        case TR_ALIGNHIGH:
+        case TR_SHIFTHIGH:
+        case TR_SHIFTHIGHSCALE:
+            return TR_HIGH;
+        default: fail("unknown transform method: %d\n", flags);
+    }
+}
 
 /*
     transform segment
@@ -174,25 +202,22 @@ void transform_point(int *lr, int *tb, int lrflags, int tbflags)
 */
 void transform_rect(RECT *rect, int lrflags, int tbflags, int whflags)
 {
-    // calc parameters
-    int left = rect->left;
-    int top = rect->top;
-    int width = rect->right - rect->left;
-    int height = rect->bottom - rect->top;
-    
     // transform length
     switch (whflags) {
         case TR_NONE:
             break;
         case TR_SCALE:
-            width *= scalefactor;
-            height *= scalefactor;
+            scale_rect(rect, get_trflag_direction(lrflags), get_trflag_direction(tbflags));
             break;
         default:
             fail("unknown length transform method: %d", whflags);
     }
     
-    
+    // calc parameters
+    int left = rect->left, top = rect->top;
+    int width, height;
+    get_rect_size(rect, &width, &height);
+
     // transform position
     left = transform_segment_lr(left, width, lrflags);
     top = transform_segment_tb(top, height, tbflags);

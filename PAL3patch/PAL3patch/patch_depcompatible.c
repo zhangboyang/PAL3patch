@@ -1,4 +1,3 @@
-#include <windows.h>
 #include "common.h"
 
 MAKE_PATCHSET(depcompatible)

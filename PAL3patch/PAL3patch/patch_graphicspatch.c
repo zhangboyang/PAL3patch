@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <limits.h>
-#include <d3d9.h>
 #include "common.h"
 
 // game resolution
