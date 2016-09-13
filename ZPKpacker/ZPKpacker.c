@@ -8,11 +8,17 @@
 /*
     the ZPK packer
     
+    compile:
+        gcc -O2 -Wall -o ZPKpacker ZPKpacker.c -lcrypto
+    
     file format:
         [HEADER]: 'Z' 'P' 'K' '\0'
         [file_count]: sizeof(int)
-        [fileinfo_list]: sizeof(fileinfo_t) * file_count
+        [fileinfo_list (index)]: sizeof(fileinfo_t) * file_count
         [filedata]
+    
+    the files will be saved in input order
+    but the file index will be saved in hash order
 */
 static void fail(const char *fmt, ...)
 {
@@ -101,21 +107,22 @@ int main(int argc, char *argv[])
     }
     
     
-    // sort
+    
+    // calc offset
+    unsigned header_size = sizeof(zpkheader) + sizeof(int) + file_cnt * sizeof(struct fileinfo_t);
+    unsigned totsize = header_size;
+    for (i = 0; i < file_cnt; i++) {
+        fileinfo[i].offset = totsize;
+        totsize += fileinfo[i].len;
+    }
+    
+
+    // sort by hash
     for (i = 0; i < file_cnt; i++) {
         filerank[i] = i;
     }
     qsort(filerank, file_cnt, sizeof(int), filerankcmp);
     
-    
-    // calc offset
-    unsigned header_size = sizeof(zpkheader) + sizeof(int) + file_cnt * sizeof(struct fileinfo_t);
-    unsigned totsize = header_size;
-    for (rank = 0; rank < file_cnt; rank++) {
-        i = filerank[rank];
-        fileinfo[i].offset = totsize;
-        totsize += fileinfo[i].len;
-    }
     
     printf("writing files ...\n");
     
@@ -133,12 +140,8 @@ int main(int argc, char *argv[])
     }
     assert(ftell(zpkfp) == header_size);
     
-    fprintf(lstfp, "COUNT %d\n", file_cnt);
-    fprintf(lstfp, "SIZE %08X\n", totsize);
-     
-    // copy file contents, write info to list
-    for (rank = 0; rank < file_cnt; rank++) {
-        i = filerank[rank];
+    // copy file contents
+    for (i = 0; i < file_cnt; i++) {
         FILE *fp = fopen(filepath[i], "rb");
         if (!fp) fail("can't open file '%s'", filepath[i]);
         unsigned int len;
@@ -148,14 +151,23 @@ int main(int argc, char *argv[])
             }
         }
         fclose(fp);
-        
+    }
+    assert(ftell(zpkfp) == totsize);
+    
+    
+    // write index info to list
+    fprintf(lstfp, "COUNT %d\n", file_cnt);
+    fprintf(lstfp, "SIZE %08X\n", totsize);
+    for (rank = 0; rank < file_cnt; rank++) {
+        i = filerank[rank];
         fprintf(lstfp, "HASH ");
         for (j = 0; j < SHA_DIGEST_LENGTH; j++) {
             fprintf(lstfp, "%02x", fileinfo[i].hash[j]);
         }
         fprintf(lstfp, " OFFSET %08X LENGTH %08X PATH %s\n", fileinfo[i].offset, fileinfo[i].len, filepath[i]);
     }
-    assert(ftell(zpkfp) == totsize);
+    
+    
     
     // free memory
     for (i = 0; i < file_cnt; i++) {
