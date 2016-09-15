@@ -3,7 +3,8 @@
 #define TEXPACK_MAXFILES 200000
 #define TEXPACK_MAXCPKS 100
 
-#define DETECT_FAKE_FULL_TRANSPARENT_IMAGES
+// uncomment to find out fake full transparent images
+//#define DETECT_FAKE_FULL_TRANSPARENT_IMAGES
 
 
 
@@ -89,6 +90,7 @@ static void load_texture_pack(const char *tpname)
     fclose(fp);
 }
 
+// don't forget to free memory when calling get_alternative_texture()
 static int get_alternative_texture(const char *cpkname, const char *fpath, void *olddata, unsigned oldlen, void **newdata, unsigned *newlen)
 {
     struct tpinfo_t key;
@@ -242,6 +244,7 @@ static void __fastcall gbTexture_D3D_CreateFromFileMemory_wrapper(struct gbTextu
     }
 
     gbTexture_D3D_CreateFromFileMemory(this, fdataptr, fdatalen);
+    free(fdataptr);
 }
 
 static MAKE_ASMPATCH(gbimage2d_loadimage_hook)
@@ -272,7 +275,6 @@ static MAKE_ASMPATCH(gbimage2d_loadimage_hook)
                 flag = 1; // set success flag
                 M_DWORD(R_ESP + 0x10) = 2; // set type to TGA
                 RETADDR = gboffset + 0x1001E6C9; // finish image loading, jump to processing
-
             } // else success flag is still 0
             free(fdataptr); // free file contents        
         }

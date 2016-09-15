@@ -28,12 +28,14 @@ ZPK是自己创造的简单的文件打包格式，通过排序好的SHA1散列�
 用PAL3texunpack程序，将*.CPK解包得一大堆[SHA1 hash].(jpg|tga|bmp|dds)文件，和列表文件texmap.txt （需使用windows）
 将这些纹理文件格式全部转换为PNG文件，使用ImageMagick    （需使用linux）
     ls | xargs mogrify -format png
+打补丁（见notes20160912.txt, 替换2x贴图后有些人物变黑的问题)
 用waifu2x将PNG文件拉伸    （需使用linux）
-    find ../png -type f | head > pal3.txt
-    th waifu2x.lua -m scale -l pal3.txt -o ../png2x/%s.png
+    find ../png -type f > pal3.txt
+    th waifu2x.lua -m scale -force_cudnn 1 -tta 1 -tta_level 8 -l pal3.txt -o ../png2x_tta/%s.png
+
 然后将这些png文件打包为ZPK文件    （需使用linux）
-    find /dev/shm/png -name '*.png' | ./ZPKpacker png.zpk
+    ./PAL3texpackgen ../texmap_parser/texmap.txt | grep -o '.\{40\}$' | sed -e 's/^/..\/png2x\//' -e 's/$/.png/' | ./ZPKpacker png2x.zpk
 最后生成texpack列表文件    （需使用linux）
-    ./PAL3texpackgen ../texmap_parser/texmap.txt ../png2x.zpk.lis > png2x.texpack
+    ./PAL3texpackgen ../texmap_parser/texmap.txt png2x.zpk.list > png2x.texpack
 
 

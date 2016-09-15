@@ -18,8 +18,9 @@ static void try_sleep(struct cycle_info_t *info)
     info->lasttime = curtime;
 }
 
-static void powersave_hook(int flag)
+static void powersave_hook()
 {
+    int flag = gameloop_hookflag;
     if (flag == GAMELOOP_NORMAL) {
         try_sleep(&cycle_info[0]);
     } else if (flag == GAMELOOP_MOVIE) {

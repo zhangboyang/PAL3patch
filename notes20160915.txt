@@ -1,0 +1,5 @@
+【Reset3DEnvironment函数现在可以重试了】
+有时候因为一些特殊原因和状况，Reset()函数有可能会暂时失败。
+例如在MBA外接显示器时，按电源键休眠，恢复后会暂时失败。
+现在Reset3DEnvironment在Reset()失败时会弹出对话框询问是否重试。
+

@@ -66,7 +66,7 @@ static void clipcursor_atexit()
     clipcursor(0);
 }
 
-static void clipcursor_hook(int flag)
+static void clipcursor_hook()
 {
     if (is_window_active) {
         clipcursor(1);

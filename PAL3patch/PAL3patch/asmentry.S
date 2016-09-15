@@ -1,4 +1,4 @@
-#include "common.h"
+#include "asmpatch.h"
 
 #define X ((MAX_PUSH_DWORDS - 3) * 4)
 #define Y ((MAX_PUSH_DWORDS - 1) * 4)

@@ -4,6 +4,7 @@
 #include <cstring>
 #include <string>
 #include <map>
+#include <vector>
 using namespace std;
 
 #define _TOSTR(x) #x
@@ -25,22 +26,39 @@ static void fail(const char *fmt, ...)
 int main(int argc, char *argv[])
 {
     char buf[MAXLINE];
+    char *texfn;
+    char *zpkfn;
     
-    if (argc != 3) {
-        printf("usage: PAL3texpackgen TEXMAP_FROM_PAL3ZPKUNPACK ZPKLIST_FROM_ZPKPACKER\n"
+    if (argc != 3 && argc != 2) {
+        printf("usage: \n"
+               "       PAL3texpackgen TEXMAP_FROM_PAL3ZPKUNPACK\n"
+               "                  ===>  Generate ZPK input list\n" 
+               "       PAL3texpackgen TEXMAP_FROM_PAL3ZPKUNPACK ZPKLIST_FROM_ZPKPACKER\n"
+               "                  ===>  Generate Texure Pack\n"
+               "\n"
                "       output will be write to stdout\n");
         return 1;
     }
     
-    char *texfn = argv[1];
-    char *zpkfn = argv[2];
-    
-    FILE *texfp, *zpkfp;
-    texfp = fopen(texfn, "r"); if (!texfp) fail("can't open '%s'", texfn);
-    zpkfp = fopen(zpkfn, "r"); if (!zpkfp) fail("can't open '%s'", zpkfn);
+    texfn = argv[1];
+    if (argc == 3) {
+        zpkfn = argv[2];
+    }
 
-    // read texmap
+    
+    FILE *texfp, *zpkfp = NULL;
+    texfp = fopen(texfn, "r"); if (!texfp) fail("can't open '%s'", texfn);
+    if (zpkfn) { zpkfp = fopen(zpkfn, "r"); if (!zpkfp) fail("can't open '%s'", zpkfn); }
+
+
+
     map<string, map<string, string> > texmap; // CPK => (PATH => HASH)
+    map<string, string> zpklist;
+    map<string, map<string, string> >::iterator cpkit;
+    map<string, string>::iterator texit, zpkit;
+    
+    
+    // read texmap
     char cpk[MAXLINE];
     char texpath[MAXLINE];
     char hash[MAXLINE];
@@ -64,8 +82,42 @@ int main(int argc, char *argv[])
         }
     }
     
+    // if we are generating ZPK input list
+    if (!zpkfn) {
+        map<string, int> fileset;
+        vector<string> commonfiles;
+        vector<string>::iterator sit;
+        
+        // find duplicated files
+        for (cpkit = texmap.begin(); cpkit != texmap.end(); cpkit++) {
+            for (texit = cpkit->second.begin(); texit != cpkit->second.end(); texit++) {
+                if (++fileset[texit->second] == 2) {
+                    commonfiles.push_back(texit->second);
+                }
+            }
+        }
+        
+        // write duplicated files first
+        for (sit = commonfiles.begin(); sit != commonfiles.end(); sit++) {
+            printf("SHARED SHA1 %s\n", sit->c_str());
+        }
+        
+        // write other files
+        for (cpkit = texmap.begin(); cpkit != texmap.end(); cpkit++) {
+            for (texit = cpkit->second.begin(); texit != cpkit->second.end(); texit++) {
+                if (fileset[texit->second] == 1) {
+                    printf("CPK \"%s\" FILE \"%s\" SHA1 %s\n", cpkit->first.c_str(), texit->first.c_str(), texit->second.c_str());
+                }
+            }
+        }
+        goto done;
+    }
+    
+    
+    // if we are generating Generate Texure Pack file
+    
     // read zpklist
-    map<string, string> zpklist;
+    
     fscanf(zpkfp, "%*s%*s%*s%*s");
     char newhash[MAXLINE];
     char orgpath[MAXLINE];
@@ -83,8 +135,6 @@ int main(int argc, char *argv[])
     }
     
     // write output
-    map<string, map<string, string> >::iterator cpkit;
-    map<string, string>::iterator texit, zpkit;
     if (strrchr(zpkfn, '/')) zpkfn = strrchr(zpkfn, '/') + 1;
     if (strrchr(zpkfn, '\\')) zpkfn = strrchr(zpkfn, '\\') + 1;
     if (strstr(zpkfn, ".list")) *strstr(zpkfn, ".list") = 0;
@@ -100,8 +150,9 @@ int main(int argc, char *argv[])
         } 
         printf("END CPK\n");
     }
-    
-    fclose(zpkfp);
+
+done:
+    if (zpkfp) fclose(zpkfp);
     fclose(texfp);
     return 0;
 }

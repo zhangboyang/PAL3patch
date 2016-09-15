@@ -1,18 +1,31 @@
 #include "common.h"
 
+static HCRYPTPROV hProv;
+
+void sha1_init()
+{
+    // use CryptAcquireContextA to make this program KernelEx (for Win9X) compatible
+    if (!CryptAcquireContextA(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+		hProv = 0;
+	}
+}
+
+void sha1_cleanup()
+{
+    if (hProv) {
+        CryptReleaseContext(hProv, 0);
+        hProv = 0;
+    }
+}
 
 void sha1_hash_buffer(const void *databuf, int datalen, unsigned char *hashbuf)
 {
 	int ret = 0;
 	DWORD hashlen = SHA1_BYTE;
-	HCRYPTPROV hProv;
 	HCRYPTHASH hHash;
 
-	// use CryptAcquireContextA to make this program KernelEx (for Win9X) compatible
-	if (!CryptAcquireContextA(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
-		hProv = 0;
-		goto done;
-	}
+    if (!hProv) goto done;
+    
 	if (!CryptCreateHash(hProv, CALG_SHA1, 0, 0, &hHash)) {
 		hHash = 0;
 		goto done;
@@ -29,8 +42,6 @@ void sha1_hash_buffer(const void *databuf, int datalen, unsigned char *hashbuf)
 	ret = 1;
 done:
 	if (hHash) CryptDestroyHash(hHash);
-	if (hProv) CryptReleaseContext(hProv, 0);
-	
 	if (!ret) fail("sha1 hash failed.");
 }
 

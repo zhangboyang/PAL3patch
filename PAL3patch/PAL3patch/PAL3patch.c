@@ -9,7 +9,11 @@ static void init_stage1()
     if (D3D_SDK_VERSION != 31) fail("your compiler has wrong DirectX SDK version!");
     
     gboffset = get_module_base("GBENGINE.DLL") - 0x10000000;
+    
     read_config_file();
+
+    sha1_init();
+    add_atexit_hook(sha1_cleanup);
  
     show_about();
     INIT_PATCHSET(depcompatible);

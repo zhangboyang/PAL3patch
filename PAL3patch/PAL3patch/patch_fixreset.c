@@ -159,6 +159,18 @@ static MAKE_ASMPATCH(fixreset_UnderWater_1)
     PUSH_DWORD(D3DUSAGE_WRITEONLY);
 }
 
+
+static MAKE_ASMPATCH(retryreset)
+{
+    if (R_EAX >> 31) {
+        if (MessageBox(NULL, "Reset() failed, retry?", "PAL3patch", MB_RETRYCANCEL | MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND | MB_SYSTEMMODAL) == IDCANCEL) {
+            RETADDR = gboffset + 0x1001AD76; // oldcode
+        } else {
+            RETADDR = gboffset + 0x1001AC78; // try Reset() again
+        }
+    }
+}
+
 MAKE_PATCHSET(fixreset)
 {
     // fix gbGfxManager_D3D::SetRenderTarget
@@ -180,5 +192,9 @@ MAKE_PATCHSET(fixreset)
     // patch gbGfxManager_D3D::BeginScene
     INIT_ASMPATCH(fixreset_gbGfxManager_D3D_BeginScene_patch, gboffset + 0x10018CD3, 5, "\x55\x56\x57\x8B\xF1");
 
+    // patch Reset3DEnvironment
+    INIT_ASMPATCH(retryreset, gboffset + 0x1001AC8D, 6, "\x0F\x8C\xE3\x00\x00\x00");
+    
+    
     // FIXME: may be more patch needed!
 }

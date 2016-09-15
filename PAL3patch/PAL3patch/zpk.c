@@ -58,6 +58,7 @@ void load_zpk(const char *zpkfn)
     }
 }
 
+// don't forget to free memory when calling zpk_getfile()
 int zpk_getfile(const void *sha1buf, void **dataptr, unsigned *datalen)
 {
     struct fileinfo_t key;
@@ -80,6 +81,7 @@ int zpk_getfile(const void *sha1buf, void **dataptr, unsigned *datalen)
     if (fread(*dataptr, 1, *datalen, zpkfp) != *datalen) {
         plog("failed to read zpk.");
         free(*dataptr);
+        *dataptr = NULL;
         return 0;
     }
     
@@ -88,7 +90,8 @@ int zpk_getfile(const void *sha1buf, void **dataptr, unsigned *datalen)
     if (memcmp(sha1buf, datahash, SHA1_BYTE) != 0) {
         plog("corrupt data in zpk entry '%s'.", sha1_tostr(sha1buf));
         free(*dataptr);
-        return 1;//FIXME
+        *dataptr = NULL;
+        return 0;
     }
     return 1;
 }
