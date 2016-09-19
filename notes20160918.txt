@@ -1,0 +1,22 @@
+【UIStatic::Render()会根据“比例”参数调整矩形位置】
+
+UIStatic上来会使用两个矩形
+一个是m_Rect，只用到了大小，用来控制纹理中要绘制的部分的大小
+另一个是“位置矩形”，根据m_Rect和比例值m_ratiow和m_ratioh计算得出，用来控制窗口显示位置
+计算方法是保持窗口矩形中间点位置不变，仅改变矩形的长和宽。
+下面是一段python模拟此功能的过程，这里只计算了top和bottom，left和right原理类似。
+>>> def f(r, top, bottom):
+...     tbshift=(1-r)*(top+bottom)/2
+...     top=top*r+tbshift
+...     bottom=bottom*r+tbshift
+...     return (top, bottom)
+... 
+>>> f(1,10,20)
+(10, 20)
+>>> f(0.5,10,20)
+(12.5, 17.5)
+>>> f(0.1,10,20)
+(14.5, 15.5)
+>>> f(2,10,20)
+(5, 25)
+
