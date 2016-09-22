@@ -251,6 +251,13 @@ struct gbVFileSystem {
 
 
 
+struct gbDynVertBuf;
+struct gbRenderEffect;
+struct gbTextureArray;
+
+
+
+
 
 
 

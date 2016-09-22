@@ -2,10 +2,8 @@
 
 // game resolution
 int game_width, game_height;
-int game_width_43, game_height_43;
-int width_shift, height_shift;
-double scalefactor;
-
+fRECT game_frect, game_frect_43, game_frect_original;
+double game_scalefactor;
 
 
 // part of the CArrayList class, from DirectX SDK C++ Sample
@@ -185,21 +183,11 @@ static void patch_resolution_config(const char *cfgstr)
         game_height = GAME_HEIGHT_ORG;
     }
     
-    // calc some parameters
-    if (game_width * 3 >= game_height * 4) {
-        game_width_43 = game_height * 4 / 3.0;
-        game_height_43 = game_height;
-        width_shift = (game_width - game_width_43) / 2;
-        height_shift = 0;
-        scalefactor = game_height / ((double) GAME_HEIGHT_ORG);
-    } else {
-        game_width_43 = game_width;
-        game_height_43 = game_width * 0.75;
-        width_shift = 0;
-        height_shift = (game_height - game_height_43) / 2;
-        scalefactor = game_width / ((double) GAME_WIDTH_ORG);
-    }
-    
+    set_frect_ltwh(&game_frect_original, 0, 0, GAME_WIDTH_ORG, GAME_HEIGHT_ORG);
+    set_frect_ltwh(&game_frect, 0, 0, game_width, game_height);
+    get_43_frect(&game_frect_43, &game_frect);
+    game_scalefactor = fmin(get_frect_width(&game_frect_43) / get_frect_width(&game_frect_original),
+                            get_frect_height(&game_frect_43) / get_frect_height(&game_frect_original));
     
     make_call(0x00406436, Readn);
     make_call(0x00406453, Readn);

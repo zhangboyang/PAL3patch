@@ -28,6 +28,10 @@ double str2double(const char *valstr)
     return result;
 }
 
+double fmin(double a, double b)
+{
+    return a < b ? a : b;
+}
 
 void __attribute__((noreturn)) __fail(const char *file, int line, const char *func, const char *fmt, ...)
 {

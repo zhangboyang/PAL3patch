@@ -28,6 +28,7 @@ static void init_stage2()
     
     init_gameloop_hook();
     init_atexit_hook();
+    init_getcursorpos_hook();
     
     if (!INIT_PATCHSET(testcombat)) {
         // here are some patches not compatiable with 'testcombat'
@@ -38,12 +39,14 @@ static void init_stage2()
             INIT_PATCHSET(fixfov);
             INIT_PATCHSET(nolockablebackbuffer);
             INIT_PATCHSET(fixreset);
-            if (INIT_PATCHSET(fixui)) {
+            if (INIT_PATCHSET(fixui)) { 
+                // must called after INIT_PATCHSET(graphicspatch)
+                // must called after INIT_PATCHSET(windowed) because of getcursorpos hook
                 // ui fixes
-                INIT_PATCHSET(fixloadingfrm);
+                /*INIT_PATCHSET(fixloadingfrm);
                 INIT_PATCHSET(fixcombatui);
                 INIT_PATCHSET(fixroledialog);
-                INIT_PATCHSET(fixgameover);
+                INIT_PATCHSET(fixgameover);*/
             }
             INIT_PATCHSET(replacetexture);
         }

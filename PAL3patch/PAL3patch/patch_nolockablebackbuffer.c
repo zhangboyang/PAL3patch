@@ -56,10 +56,10 @@ static void before_screenshot(struct gbSurfaceDesc *surface)
         GameRect.bottom = GameRect.top + game_height;
     }
 
-    GameRect.left += width_shift;
-    GameRect.right -= width_shift;
-    GameRect.top += height_shift;
-    GameRect.bottom -= height_shift;
+    fRECT frect;
+    set_frect_rect(&frect, &GameRect);
+    get_43_frect(&frect, &frect);
+    set_rect_frect(&GameRect, &frect);
         
     if (GameRect.left < 0) GameRect.left = 0;
     if (GameRect.top < 0) GameRect.top = 0;
@@ -134,8 +134,12 @@ static void before_movieframe(struct gbSurfaceDesc *surface)
     surface->pbits = LockedRect.pBits;
     memset(surface->pbits, 0, surface->height * surface->pitch);
 }
-static void mf_fillvbuf_rect(struct mf_vertex_t *vbuf, float left, float top, float right, float bottom)
+static void mf_fillvbuf_rect(struct mf_vertex_t *vbuf, const fRECT *frect)
 {
+    float left = frect->left;
+    float top = frect->top;
+    float right = frect->right;
+    float bottom = frect->bottom;
     left = floor(left) - 0.5f;
     right = floor(right) - 0.5f;
     top = floor(top) - 0.5f;
@@ -162,15 +166,7 @@ static void after_movieframe()
     IDirect3DTexture9_UnlockRect(mf_tex, 0);
     
     IDirect3DVertexBuffer9_Lock(mf_vbuf, 0, 0, (void *) &vbuf, 0);
-    if (game_width * 3 >= game_height * 4) {
-        float movie_width = game_height / 3.0f * 4.0f;
-        float movie_left = (game_width - movie_width) * 0.5f;
-        mf_fillvbuf_rect(vbuf, movie_left, 0, movie_left + movie_width, game_height);
-    } else {
-        float movie_height = game_width * 0.75f;
-        float movie_top = (game_height - movie_height) * 0.5f;
-        mf_fillvbuf_rect(vbuf, 0, movie_top, game_width, movie_top + movie_height);
-    }
+    mf_fillvbuf_rect(vbuf, &game_frect_43);
     IDirect3DVertexBuffer9_Unlock(mf_vbuf);
     
     IDirect3DDevice9_SetRenderState(gfxmgr->m_pd3dDevice, D3DRS_CULLMODE, D3DCULL_NONE);

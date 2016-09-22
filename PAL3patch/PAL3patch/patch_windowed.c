@@ -26,11 +26,9 @@ static HWND WINAPI CreateWindowExA_wrapper(DWORD dwExStyle, LPCSTR lpClassName, 
     return gamehwnd;
 }
 
-static BOOL WINAPI GetCursorPos_wrapper(LPPOINT lpPoint)
+static void getcursorpos_window_hookfunc()
 {
-    BOOL ret = GetCursorPos(lpPoint);
-    ScreenToClient(gamehwnd, lpPoint);
-    return ret;
+    ScreenToClient(gamehwnd, getcursorpos_hook_lppoint);
 }
 
 static BOOL WINAPI SetCursorPos_wrapper(int X, int Y)
@@ -115,12 +113,7 @@ MAKE_PATCHSET(windowed)
     SIMPLE_PATCH(0x00541925, "\xC4\x39\x58\x00", &titleaddr, 4);
     
     // cursor hook
-    make_jmp(0x004022E0, GetCursorPos_wrapper);
-    make_branch(0x00402497, 0xE8, GetCursorPos_wrapper, 6);
-    make_branch(0x004021C1, 0xE8, GetCursorPos_wrapper, 6);
-    make_branch(0x004D6216, 0xE8, GetCursorPos_wrapper, 6);
-    // NOTE: No need to hook GetCursorPos() for IDirect3DDevice9::SetCursorPosition()
-    //       see documentation for details.
+    add_getcursorpos_hook(getcursorpos_window_hookfunc);
     // make_branch(0x00404F2B, 0xE8, GetCursorPos_wrapper, 6);
     make_jmp(0x00402290, SetCursorPos_wrapper);
     

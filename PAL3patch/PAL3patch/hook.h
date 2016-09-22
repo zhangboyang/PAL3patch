@@ -8,6 +8,7 @@
 enum hook_type {
     HOOKID_ATEXIT,
     HOOKID_GAMELOOP,
+    HOOKID_GETCURSORPOS,
 };
 
 // atexit hooks
@@ -26,5 +27,13 @@ enum game_loop_type {
     GAMELOOP_MOVIE,
     GAMELOOP_DEVICELOST,
 };
+
+
+// GetCursorPos hook
+extern LPPOINT getcursorpos_hook_lppoint;
+extern BOOL getcursorpos_hook_ret;
+extern void add_getcursorpos_hook(void (*funcptr)(void));
+extern void init_getcursorpos_hook();
+
 
 #endif

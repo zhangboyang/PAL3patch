@@ -77,3 +77,29 @@ void init_gameloop_hook()
     SIMPLE_PATCH(0x53C67A, "\xB3", "\x67", 1);
     INIT_ASMPATCH(gameloop_movie, 0x53C6E2, 5, "\x90\x90\x90\x90\x90");
 }
+
+
+
+// GetCursorPos hook
+LPPOINT getcursorpos_hook_lppoint;
+BOOL getcursorpos_hook_ret;
+static BOOL WINAPI GetCursorPos_wrapper(LPPOINT lpPoint)
+{
+    getcursorpos_hook_ret = GetCursorPos(lpPoint);
+    getcursorpos_hook_lppoint = lpPoint;
+    run_hooks(HOOKID_GETCURSORPOS);
+    return getcursorpos_hook_ret;
+}
+void add_getcursorpos_hook(void (*funcptr)(void))
+{
+    add_hook(HOOKID_GETCURSORPOS, funcptr);
+}
+void init_getcursorpos_hook()
+{
+    make_jmp(0x004022E0, GetCursorPos_wrapper);
+    make_branch(0x00402497, 0xE8, GetCursorPos_wrapper, 6);
+    make_branch(0x004021C1, 0xE8, GetCursorPos_wrapper, 6);
+    make_branch(0x004D6216, 0xE8, GetCursorPos_wrapper, 6);
+    // NOTE: No need to hook GetCursorPos() for IDirect3DDevice9::SetCursorPosition()
+    //       see documentation for details.
+}

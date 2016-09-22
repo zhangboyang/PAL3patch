@@ -59,6 +59,7 @@
 #include "cfgreader.h"
 #include "locale.h"
 #include "framework.h"
+#include "transform.h"
 #include "patch_common.h"
 #include "PAL3patch.h"
 

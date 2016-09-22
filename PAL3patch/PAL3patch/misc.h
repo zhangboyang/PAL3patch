@@ -13,5 +13,6 @@ extern void __attribute__((noreturn)) __fail(const char *file, int line, const c
 extern void __plog(int is_warning, const char *file, int line, const char *func, const char *fmt, ...);
 extern int str2int(const char *valstr);
 extern double str2double(const char *valstr);
+extern double fmin(double a, double b);
 
 #endif
