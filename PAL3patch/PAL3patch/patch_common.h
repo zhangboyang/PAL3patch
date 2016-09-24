@@ -25,17 +25,6 @@ MAKE_PATCHSET(graphicspatch);
     MAKE_PATCHSET(nolockablebackbuffer);
     MAKE_PATCHSET(fixreset);
     MAKE_PATCHSET(fixui);
-        enum UIadjust_screen_type {
-            UI_ADJUST_FULLSCREEN,
-            UI_ADJUST_BORDERED,
-        };
-        enum UIadjust_mouse_type {
-            UI_MOUSE_NORMAL,
-            UI_MOUSE_VIRTUALIZED,
-        };
-        extern void UIadjust_setstate(int screen_type, int lr_method, int tb_method, double len_factor);
-        extern void UIadjust_gbUIQuad(struct gbUIQuad *out_uiquad, const struct gbUIQuad *uiquad);
-        extern void UIadjust_RECT(RECT *out_rect, const RECT *rect);
         MAKE_PATCHSET(fixloadingfrm);
         MAKE_PATCHSET(fixcombatui);
         MAKE_PATCHSET(fixroledialog);

@@ -3,6 +3,19 @@
 
 // types
 
+enum GAME_STATE {
+    GAME_NONE,
+    GAME_UI,
+    GAME_SCENE,
+    GAME_COMBAT,
+    GAME_SUBGAME_ENCAMPMENT,
+    GAME_SUBGAME_SKEE,
+    GAME_HIDE_FIGHT_FIXME, // FIXME: unsure
+    GAME_SUBGAME_HIDEANDSEEK,
+    GAME_SUBGAME_NIGHTADVENTURE,
+    GAME_OVER,
+};
+
 struct gbGfxDriverInfo {
     int type;
     int subtype;
@@ -254,6 +267,7 @@ struct gbVFileSystem {
 struct gbDynVertBuf;
 struct gbRenderEffect;
 struct gbTextureArray;
+struct gbPrintFont;
 
 
 
@@ -326,7 +340,12 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gbmalloc ((malloc_funcptr_t) (gboffset + 0x100E4B0D))
 #define gbfree ((free_funcptr_t) (gboffset + 0x100E4B99))
 
+// PAL3 functions
+#define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
+
+
 // global variables
+#define game_state (*(int *) TOPTR(0x00BFDA6C))
 #define is_window_active (*(int *) TOPTR(0x005833B8))
 #define g_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)
 #define g_pVFileSys (*(struct gbVFileSystem **) (gboffset + 0x1015D3A8))

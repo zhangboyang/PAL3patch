@@ -28,6 +28,7 @@ static HWND WINAPI CreateWindowExA_wrapper(DWORD dwExStyle, LPCSTR lpClassName, 
 
 static void getcursorpos_window_hookfunc()
 {
+    if (!getcursorpos_hook_ret) return;
     ScreenToClient(gamehwnd, getcursorpos_hook_lppoint);
 }
 

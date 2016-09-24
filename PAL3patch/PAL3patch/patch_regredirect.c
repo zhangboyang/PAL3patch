@@ -51,6 +51,7 @@ static void load_reg()
 }
 static void save_reg()
 {
+    PrepareDir(); // call PrepareDir() to create the "./save" Directory
     qsort(reg, nr_reg, sizeof(struct reg_item), reg_cmp);
     FILE *fp = fopen(MY_REG_FILE, "w");
     if (!fp) fail("can't save registry file.");

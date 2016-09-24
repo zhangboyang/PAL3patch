@@ -1,0 +1,51 @@
+【创建save目录的函数】
+之前，注册表重定向不会自动创建save目录，所以在没有save目录的情况下会崩溃
+可以直接利用PAL3中现成的PrepareDir()函数，位置0x00538320
+
+【GAME_STATE的含义】
+GAME_STATE存储在 0x00BFDA6C 处（类型DWORD）
+从xref看，取值范围为[0,9]
+由于PAL3到PAL3A的游戏内容有变化，从PDB中只能得出部分含义
+GAME_STATE不区分很多细小的情况：如许多显示UI的界面都为GAME_UI，另外也不区分动画CG
+
+GAME_NONE = 0x0      // 未知
+GAME_UI = 0x1        // 欢迎界面（含前尘忆梦等）
+                        游戏内部菜单（人物状态、读档存档）
+                        读条画面
+                        鉴定小游戏
+                        打苍蝇小游戏
+                        御剑飞行大地图
+                        买物品卖物品，当铺经营
+                        
+GAME_SCENE = 0x2     // 一般游戏中场景（如城镇、迷宫）、星森
+GAME_COMBAT = 0x3    // 战斗界面
+0x4                  // 四方四象枢
+0x5                  // 滑雪小游戏
+0x6                       // PAL3A 中是 GAME_HIDE_FIGHT，PAL3尚未遇到过。。。待测！
+0x7                  // 山洞的初体验
+0x8                  // 夜探刺史府，永安当找衣服
+GAME_OVER = 0x9      // 战斗失败
+
+p.s. basedata/SubGame/Row这个小游戏好像没有见过？？？？
+
+
+【新的代码框架】
+在之前规划的基础上，设计了如下框架：
+(0)变换的描述
+    一种变换可以由这些参数描述
+    fRECT src_frect, dst_frect; // 源矩形空间，目标矩形空间
+    int lr_method, tb_method; // 左右对齐方式、上下对齐方式
+    double len_factor; // 大小倍数
+(1)两种默认变换方式
+    FIXUI_MANUAL_TRANSFORM   //手动变换，这是大多数游戏状态的默认方式
+    FIXUI_AUTO_TRANSFORM     //自动变换，用于GAME_UI游戏状态下
+        可以指定UI放大倍数，具体的矩形和参数存储在这两个变量中
+            static fRECT game_frect_ui;
+            static double ui_scalefactor;
+(2)堆栈式矩形变换状态：
+    利用堆栈维护矩形变换状态，这样适合像UIStatic::Render这样递归绘制中状态的维护
+    栈底是默认变换方式，不可弹出
+(3)默认/自定义鼠标变换状态
+    如果定义了自定义鼠标变换，则采用自定义变换方式，适合像UIStatic::Update中单个GetCursorPos的包装
+    没有定义自定义变换（即两个参数都为NULL）时，采用默认变换方式，矩形由def_fs的src_frect和dst_frect描述
+
