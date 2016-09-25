@@ -5,8 +5,10 @@ void set_rect_frect(RECT *rect, const fRECT *frect)
 {
     rect->left = frect->left;
     rect->top = frect->top;
-    rect->right = frect->right;
-    rect->bottom = frect->bottom;
+    
+    // use ceiling
+    rect->right = rect->left + ceil(get_frect_width(frect));
+    rect->bottom = rect->top + ceil(get_frect_height(frect));
 }
 void set_frect_rect(fRECT *frect, const RECT *rect)
 {

@@ -1,12 +1,16 @@
 #include "common.h"
 
-// ui configuration
-static fRECT game_frect_ui;
-static double ui_scalefactor;
+// ui configuration (automatic transform)
+static fRECT game_frect_ui_auto;
+static double ui_scalefactor; // parameter
+
+// ui configuration (manual transform)
+static fRECT game_frect_ui_manual;
+static int ui_borderflag; // parameter
+
 
 
 // fixui state
-
 struct fixui_state {
     fRECT src_frect, dst_frect;
     int lr_method, tb_method;
@@ -17,7 +21,7 @@ static struct fixui_state def_fs; // default fixui state, at stack bottom, also 
 static struct fixui_state *fs = &def_fs; // fixui state
 
 // set default fixui state
-void fixui_setdefaultstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor)
+static void fixui_setdefaultstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor)
 {
     def_fs.src_frect = *src_frect;
     def_fs.dst_frect = *dst_frect;
@@ -27,7 +31,7 @@ void fixui_setdefaultstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, in
     def_fs.prev = NULL;
 }
 // push a new state to stack, use this state for current state
-void fixui_pushstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor)
+static void fixui_pushstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor)
 {
     struct fixui_state *cur = malloc(sizeof(struct fixui_state));
     cur->src_frect = *src_frect;
@@ -39,7 +43,7 @@ void fixui_pushstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_m
     fs = cur;
 }
 // pop current state from stack
-void fixui_popstate()
+static void fixui_popstate()
 {
     if (fs == &def_fs) { plog("can't pop default state from stack."); return; }
     // remove stack top item
@@ -48,11 +52,11 @@ void fixui_popstate()
     free(cur);
 }
 // adjust structures
-void fixui_adjust_fRECT(fRECT *out_frect, fRECT *frect)
+static void fixui_adjust_fRECT(fRECT *out_frect, fRECT *frect)
 {
     transform_frect(out_frect, frect, &fs->src_frect, &fs->dst_frect, fs->lr_method, fs->tb_method, fs->len_factor);
 }
-void fixui_adjust_gbUIQuad(struct gbUIQuad *out_uiquad, const struct gbUIQuad *uiquad)
+static void fixui_adjust_gbUIQuad(struct gbUIQuad *out_uiquad, const struct gbUIQuad *uiquad)
 {
     fRECT frect;
     set_frect_ltrb(&frect, uiquad->sx, uiquad->ey, uiquad->ex, uiquad->sy);
@@ -63,7 +67,7 @@ void fixui_adjust_gbUIQuad(struct gbUIQuad *out_uiquad, const struct gbUIQuad *u
     out_uiquad->ex = frect.right;
     out_uiquad->ey = frect.top;
 }
-void fixui_adjust_RECT(RECT *out_rect, const RECT *rect)
+static void fixui_adjust_RECT(RECT *out_rect, const RECT *rect)
 {
     fRECT frect;
     set_frect_rect(&frect, rect);
@@ -89,7 +93,7 @@ static void fixui_setdefaultransform(int new_def)
                 fixui_setdefaultstate(&game_frect, &game_frect, TR_LOW, TR_LOW, 1.0); 
                 break;
             case FIXUI_AUTO_TRANSFORM:
-                fixui_setdefaultstate(&game_frect_original, &game_frect_ui, TR_SCALE, TR_SCALE, ui_scalefactor);
+                fixui_setdefaultstate(&game_frect_original, &game_frect_ui_auto, TR_SCALE, TR_SCALE, ui_scalefactor);
                 break;
             default: fail("invalid default transform method: %d", new_def);
         }
@@ -138,14 +142,72 @@ static void hook_gbDynVertBuf_RenderUIQuad()
     memcpy_to_process(func_iat_entry, &warpper_ptr, sizeof(void *));
 }
 
+
+
+static int uifontscaleflag;
+static int fixui_map_fontsize(int fontsize)
+{
+    if (!uifontscaleflag) {
+        // user request no fontscale
+        return fontsize;
+    }
+    
+    if (fontsize != 12 && fontsize != 16 && fontsize != 20) {
+        // unknown fontsize, we should return fontsize directly
+        return fontsize;
+    }
+    
+    double ideal_fontsize;
+    
+    switch (cur_def) {
+        case FIXUI_MANUAL_TRANSFORM: ideal_fontsize = fontsize; break;
+        case FIXUI_AUTO_TRANSFORM: ideal_fontsize = fontsize * ui_scalefactor; break;
+        default: fail("invalid default transform method: %d", cur_def);
+    }
+    
+    if (ideal_fontsize >= 20) return 20;
+    if (ideal_fontsize >= 16) return 16;
+    if (ideal_fontsize >= 12) return 12;
+    return 16; // if fontsize is too small, default to 12
+}
+
+static struct gbPrintFont *fixui_get_gbprintfont(int fontsize)
+{
+    switch (fontsize) { // according to UIDrawText() in PAL3
+        case 12: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_UNICODE12);
+        case 16: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_UNICODE16);
+        case 20: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_UNICODE20);
+        case 24: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_NUMBER);
+        // FIXME: where is GB_FONT_ASC
+        default: return NULL;
+    }
+}
+
 // hook UIDrawTextEx()
 #define UIDrawTextEx ((void (*)(const char *, RECT *, struct gbPrintFont *, int, int)) TOPTR(0x00541210))
 static void UIDrawTextEx_wrapper(const char *str, RECT *rect, struct gbPrintFont *font, int fontsize, int middleflag)
 {
     fixui_check_gamestate();
-    RECT tmp_rect;
-    fixui_adjust_RECT(&tmp_rect, rect);
-    UIDrawTextEx(str, &tmp_rect, font, fontsize, middleflag);
+    
+    // scale fontsize
+    int new_fontsize = fixui_map_fontsize(fontsize);
+    double font_scalefactor = (double) new_fontsize / fontsize;
+    
+    // scale rect using normal method
+    fRECT old_frect, new_frect;
+    set_frect_rect(&old_frect, rect);
+    fixui_adjust_fRECT(&new_frect, &old_frect);
+    
+    // scale rect by font_scalefactor
+    transform_frect(&new_frect, &old_frect, &old_frect, &new_frect, TR_CENTER, TR_CENTER, font_scalefactor);
+    
+    // call original UIDrawTextEx()
+    RECT new_rect;
+    set_rect_frect(&new_rect, &new_frect);
+    struct gbPrintFont *new_font = fixui_get_gbprintfont(new_fontsize);
+    if (!new_font) new_font = font;
+    new_font->curColor = font->curColor; // copy color
+    UIDrawTextEx(str, &new_rect, new_font, new_fontsize, middleflag);
 }
 static void hook_UIDrawTextEx()
 {
@@ -162,6 +224,8 @@ static void UIPrint_wrapper(int x, int y, char *str, struct gbColorQuad *color, 
     RECT tmp_rect;
     SetRect(&tmp_rect, x, y, 0, 0);
     fixui_adjust_RECT(&tmp_rect, &tmp_rect);
+    fontsize = fixui_map_fontsize(fontsize);
+    // UIPrint() will automaticly select gbPrintFont by fontsize
     UIPrint(tmp_rect.left, tmp_rect.top, str, color, fontsize);
 }
 static void hook_UIPrint()
@@ -188,7 +252,7 @@ static void hook_UIPrint()
 static fRECT src_cursor_frect, dst_cursor_frect;
 static int cursor_virt_flag = 0;
 
-void set_cursor_virtualization(fRECT *src_frect, fRECT *dst_frect)
+static void set_cursor_virtualization(fRECT *src_frect, fRECT *dst_frect)
 {
     if (src_frect && dst_frect) {
         cursor_virt_flag = 1;
@@ -211,17 +275,30 @@ static void getcursorpos_virtualization_hookfunc()
         src_frect = &def_fs.src_frect;
         dst_frect = &def_fs.dst_frect;
     }
-    getcursorpos_hook_lppoint->x = (getcursorpos_hook_lppoint->x - dst_frect->left) / get_frect_width(dst_frect) * get_frect_width(src_frect) + src_frect->left;
-    getcursorpos_hook_lppoint->y = (getcursorpos_hook_lppoint->y - dst_frect->top) / get_frect_height(dst_frect) * get_frect_height(src_frect) + src_frect->top;
+    getcursorpos_hook_lppoint->x = round((getcursorpos_hook_lppoint->x - dst_frect->left) / get_frect_width(dst_frect) * get_frect_width(src_frect) + src_frect->left);
+    getcursorpos_hook_lppoint->y = round((getcursorpos_hook_lppoint->y - dst_frect->top) / get_frect_height(dst_frect) * get_frect_height(src_frect) + src_frect->top);
+}
+
+void haha()
+{
+    printf("%p %p\n", fixui_pushstate, fixui_popstate);
 }
 
 
 MAKE_PATCHSET(fixui)
 {
-    // calc game_ui_frect
-    game_frect_ui = game_frect_original;
-    ui_scalefactor = fmin(game_scalefactor, str2double(get_string_from_configfile("uiscalefactor")));
-    transform_frect(&game_frect_ui, &game_frect_ui, &game_frect, &game_frect, TR_CENTER, TR_CENTER, ui_scalefactor);
+    // calc game_frect_ui_auto
+    game_frect_ui_auto = game_frect_original;
+    const char *usf = get_string_from_configfile("uiscalefactor");
+    ui_scalefactor = stricmp(usf, "max") == 0 ? game_scalefactor : fmin(game_scalefactor, str2double(usf));
+    transform_frect(&game_frect_ui_auto, &game_frect_ui_auto, &game_frect, &game_frect, TR_CENTER, TR_CENTER, ui_scalefactor);
+    
+    // calc game_frect_ui_manual
+    ui_borderflag = get_int_from_configfile("uiborder");
+    game_frect_ui_manual = ui_borderflag ? game_frect_43 : game_frect;
+    
+    // read font scale configuration
+    uifontscaleflag = get_int_from_configfile("uifontscale");
     
     // init fixui, use identity transform
     fixui_setdefaultransform(FIXUI_MANUAL_TRANSFORM);

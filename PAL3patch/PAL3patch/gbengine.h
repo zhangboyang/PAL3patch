@@ -37,7 +37,12 @@ struct gbGfxDriverInfo {
 struct gbGfxManager_D3D {
     char padding1[0xC];
     struct gbGfxDriverInfo DrvInfo;
-    char padding2[0x5A4];
+    struct gbVertPoolMgr *pVertPoolMgr;
+    struct gbEffectMgr *pEffectMgr;
+    struct gbResManager *pTexResMgr;
+    struct gbPrintFontMgr *pFontMgr;
+    struct gbMatrixStack *pMatrixStack[0x4];
+    char padding2[0x584];
     int m_bShowCursor;
     char padding3[0x70];
     D3DPRESENT_PARAMETERS m_d3dpp;
@@ -267,12 +272,36 @@ struct gbVFileSystem {
 struct gbDynVertBuf;
 struct gbRenderEffect;
 struct gbTextureArray;
-struct gbPrintFont;
+struct gbPrintFontMgr;
 
+enum gbFontType {
+    GB_FONT_UNICODE12,
+    GB_FONT_UNICODE16,
+    GB_FONT_UNICODE20,
+    GB_FONT_NUMBER,
+    GB_FONT_ASC,
+};
 
-
-
-
+struct gbPrintFont {
+    struct gbPrintFontVtbl *vfptr;
+    struct FontPrintInfo *ptInfo;
+    struct FontSortInfoObj *pSortInfo;
+    int maxInfo;
+    int numInfo;
+    struct FontPrint3DInfo *pt3DInfo;
+    int num3DInfo;
+    int max3DInfo;
+    char *strBuffer;
+    int maxStrBuffer;
+    int curStrLoc;
+    struct gbColorQuad curColor;
+    float ScaleX;
+    float ScaleY;
+    float PitchX;
+    float PitchY;
+    float ZValue;
+    struct gbRenderEffect *pEffect[2];
+};
 
 
 // D3DX types and functions
@@ -337,6 +366,7 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define UIWnd_SetRect(this, rect) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445FA0, void, struct UIWnd *, RECT *), this, rect)
 #define gbTexture_D3D_CreateForRenderTarget(this, width, height, format) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001BF80, int, struct gbTexture_D3D *, int, int, enum gbPixelFmtType), this, width, height, format)
 #define gbTexture_D3D_CreateFromFileMemory(this, data, len) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001C010, void, struct gbTexture_D3D *, void *, int), this, data, len)
+#define gbPrintFontMgr_GetFont(this, fonttype) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10004450, struct gbPrintFont *, struct gbPrintFontMgr *, enum gbFontType), this, fonttype)
 #define gbmalloc ((malloc_funcptr_t) (gboffset + 0x100E4B0D))
 #define gbfree ((free_funcptr_t) (gboffset + 0x100E4B99))
 
