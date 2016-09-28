@@ -29,7 +29,7 @@ extern void set_frect_ltrb(fRECT *frect, double left, double top, double right, 
 extern void set_frect_ltwh(fRECT *frect, double left, double top, double width, double height);
 extern void translate_frect_rel(fRECT *out_frect, fRECT *frect, double lr, double tb);
 extern void scale_frect_fixlt(fRECT *out_frect, fRECT *frect, double wf, double hf);
-extern void get_43_frect(fRECT *out_frect, const fRECT *frect);
+extern void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double rwidth, double rheight);
 extern double get_frect_min_scalefactor(fRECT *dst_frect, fRECT *src_frect);
 
 // segment functions

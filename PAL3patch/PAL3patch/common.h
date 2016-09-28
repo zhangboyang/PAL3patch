@@ -41,7 +41,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include <math.h>
+#include <time.h>
 #include <limits.h>
+
 #include <windows.h>
 #include <wincrypt.h>
 #include <commctrl.h>

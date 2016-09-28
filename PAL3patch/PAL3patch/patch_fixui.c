@@ -279,7 +279,7 @@ static void getcursorpos_virtualization_hookfunc()
     getcursorpos_hook_lppoint->y = round((getcursorpos_hook_lppoint->y - dst_frect->top) / get_frect_height(dst_frect) * get_frect_height(src_frect) + src_frect->top);
 }
 
-void haha()
+void haha()//////////////////////////////////////////////////////FIXME
 {
     printf("%p %p\n", fixui_pushstate, fixui_popstate);
 }

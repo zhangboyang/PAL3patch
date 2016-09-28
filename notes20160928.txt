@@ -1,0 +1,17 @@
+【新的动画CG播放代码】
+原有的动画CG播放代码是基于LockBackBuffer/Unlock的钩子的，有些缺点：
+（1）无法获取CG名字，无法或者何时播放开始何时播放完毕，因此每次都要memset
+（2）分辨率固定800x600，很多情况下有很大的、且完全可以去除的黑边
+（3）鼠标闪烁问题（因为WM_SETCURSOR会设置光标，与播放代码设置光标竞争）
+这些缺点都在新代码中解决了
+在逆向出gbBinkVideo的播放代码后，可以直接覆盖掉原来的实现，这样代码简洁清晰很多！
+
+
+【ollydbg的find referance功能在大部分情况下能够显示函数调用的参数】
+例如对UIGameFrm::SwitchFrame查询引用，即可显示ARG=x，表示切换状态到x
+
+
+【PAL3.EXE程序中用StarForce加密的函数都标有SFLB】
+脱壳时有四个函数，是在PAL3.DLL中的，也就是说是用StarForce进行加密了（还好已经有人破解过啦）
+在PAL3patch中hook这些函数的时候，注意要动态获取地址
+

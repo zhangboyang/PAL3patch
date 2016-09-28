@@ -51,29 +51,31 @@ void scale_frect_fixlt(fRECT *out_frect, fRECT *frect, double wf, double hf)
     set_frect_ltwh(out_frect, frect->left, frect->top, get_frect_width(frect) * wf, get_frect_height(frect) * hf);
 }
 
-// get maximum 4:3 rect inside an existing rect, the out rect is centered
-// out_rect == frect is allowed
-void get_43_frect(fRECT *out_frect, const fRECT *frect)
+// get maximum rect at a ratio of rwidth:rheight inside an existing rect
+// the out_frect in centered in frect
+// out_frect == frect is allowed
+void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double rwidth, double rheight)
 {
     double width = get_frect_width(frect);
     double height = get_frect_height(frect);
-    double width_43, height_43;
-    double width_43_shift, height_43_shift;
+    double new_width, new_height;
+    double new_width_shift, new_height_shift;
     
-    if (width * 3 >= height * 4) {
-        width_43 = height * (4.0 / 3.0);
-        height_43 = height;
-        width_43_shift = (width - width_43) / 2;
-        height_43_shift = 0;
+    if (width * rheight >= height * rwidth) {
+        new_width = height * (rwidth / rheight);
+        new_height = height;
+        new_width_shift = (width - new_width) / 2;
+        new_height_shift = 0;
     } else {
-        width_43 = width;
-        height_43 = width * (3.0 / 4.0);
-        width_43_shift = 0;
-        height_43_shift = (height - height_43) / 2;
+        new_width = width;
+        new_height = width * (rheight / rwidth);
+        new_width_shift = 0;
+        new_height_shift = (height - new_height) / 2;
     }
     
-    set_frect_ltwh(out_frect, frect->left + width_43_shift, frect->top + height_43_shift, width_43, height_43);
+    set_frect_ltwh(out_frect, frect->left + new_width_shift, frect->top + new_height_shift, new_width, new_height);
 }
+
 
 double get_frect_min_scalefactor(fRECT *dst_frect, fRECT *src_frect)
 {

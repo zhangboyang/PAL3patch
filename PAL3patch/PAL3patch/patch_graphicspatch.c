@@ -185,7 +185,7 @@ static void patch_resolution_config(const char *cfgstr)
     
     set_frect_ltwh(&game_frect_original, 0, 0, GAME_WIDTH_ORG, GAME_HEIGHT_ORG);
     set_frect_ltwh(&game_frect, 0, 0, game_width, game_height);
-    get_43_frect(&game_frect_43, &game_frect);
+    get_ratio_frect(&game_frect_43, &game_frect, 4.0, 3.0);
     game_scalefactor = get_frect_min_scalefactor(&game_frect_43, &game_frect_original);
     make_call(0x00406436, Readn);
     make_call(0x00406453, Readn);

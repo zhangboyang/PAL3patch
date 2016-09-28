@@ -14,7 +14,8 @@ static void add_hook(int hookid, void (*funcptr)(void))
 static void run_hooks(int hookid)
 {
     int i;
-    for (i = nr_hooks[hookid] - 1; i >= 0; i--) {
+    // run hooks by add order
+    for (i = 0; i < nr_hooks[hookid]; i++) {
         hookfunc[hookid][i]();
     }
 }
@@ -45,6 +46,7 @@ void init_atexit_hook()
 int gameloop_hookflag;
 void add_gameloop_hook(void (*funcptr)(void))
 {
+    // you need to check gameloop_hookflag in your hook function
     add_hook(HOOKID_GAMELOOP, funcptr);
 }
 void call_gameloop_hooks(int flag)
@@ -67,6 +69,11 @@ static MAKE_ASMPATCH(gameloop_movie)
     call_gameloop_hooks(GAMELOOP_MOVIE);
     RETADDR = 0x53C62E;
 }
+static MAKE_ASMPATCH(gameloop_movie_atexit)
+{
+    call_gameloop_hooks(GAMELOOP_MOVIE_ATEXIT);
+    // we use simple patch to do RETN 4 (the old code)
+}
 void init_gameloop_hook()
 {    
     // patch main game loop
@@ -75,7 +82,13 @@ void init_gameloop_hook()
 
     // patch movie loop
     SIMPLE_PATCH(0x53C67A, "\xB3", "\x67", 1);
+    SIMPLE_PATCH(0x53C687, "\xA6", "\x5A", 1);
     INIT_ASMPATCH(gameloop_movie, 0x53C6E2, 5, "\x90\x90\x90\x90\x90");
+    // patch movie loop atexit
+    SIMPLE_PATCH(0x53C6B6, "\xC2\x04\x00", "\xEB\x2F\x90", 3); // first RETN 4
+    SIMPLE_PATCH(0x53C6DF, "\xC2\x04\x00", "\xEB\x06\x90", 3); // second RETN 4
+    INIT_ASMPATCH(gameloop_movie_atexit, 0x53C6E7, 5, "\x90\x90\x90\x90\x90");
+    SIMPLE_PATCH(0x53C6EC, "\x90\x90\x90", "\xC2\x04\x00", 3); // place RETN 4 after ASMPATCH
 }
 
 

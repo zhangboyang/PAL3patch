@@ -304,6 +304,11 @@ struct gbPrintFont {
 };
 
 
+struct gbBinkVideo;
+
+
+
+
 // D3DX types and functions
 typedef enum _D3DXIMAGE_FILEFORMAT {
     D3DXIFF_BMP = 0,
@@ -356,6 +361,10 @@ struct D3DXTex_CImage {
 
 
 
+// external D3DX, for debugging and testing purpose only
+#define EXTERNAL_D3DX_DLL "D3DX_summer2003.dll"
+#define hD3DXDLL ({ HMODULE h = GetModuleHandle(EXTERNAL_D3DX_DLL); if (!h) h = LoadLibrary(EXTERNAL_D3DX_DLL); if (!h) fail("can't load D3DX library '%s'", EXTERNAL_D3DX_DLL); h; })
+#define D3DXSaveTextureToFile(pDestFile, DestFormat, pSrcTexture, pSrcPalette) (((HRESULT WINAPI (*)(LPCTSTR, D3DXIMAGE_FILEFORMAT, LPDIRECT3DBASETEXTURE9, const PALETTEENTRY *))(GetProcAddress(hD3DXDLL, "D3DXSaveTextureToFile")))(pDestFile, DestFormat, pSrcTexture, pSrcPalette))
 
 
 
@@ -372,7 +381,9 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 
 // PAL3 functions
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
-
+#define gbBinkVideo_Width(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C710, int, struct gbBinkVideo *), this)
+#define gbBinkVideo_Height(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C720, int, struct gbBinkVideo *), this)
+#define gbBinkVideo_DrawFrameEx(this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C530, int, struct gbBinkVideo *, void *, int, int, int, int, int), this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType)
 
 // global variables
 #define game_state (*(int *) TOPTR(0x00BFDA6C))
