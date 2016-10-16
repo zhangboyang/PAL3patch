@@ -303,69 +303,15 @@ struct gbPrintFont {
     struct gbRenderEffect *pEffect[2];
 };
 
+struct gbPrintFont_UNICODE {
+    struct gbPrintFont;
+    DWORD gap4C[24];
+    int fontsize;
+    DWORD gapB0[5];
+};
+
 
 struct gbBinkVideo;
-
-
-
-
-// D3DX types and functions
-typedef enum _D3DXIMAGE_FILEFORMAT {
-    D3DXIFF_BMP = 0,
-    D3DXIFF_JPG = 1,
-    D3DXIFF_TGA = 2,
-    D3DXIFF_PNG = 3,
-    D3DXIFF_DDS = 4,
-    D3DXIFF_PPM = 5,
-    D3DXIFF_DIB = 6,
-    D3DXIFF_HDR = 7,
-    D3DXIFF_PFM = 8,
-    D3DXIFF_FORCE_DWORD = 0x7fffffff
-} D3DXIMAGE_FILEFORMAT;
-typedef struct _D3DXIMAGE_INFO {
-    UINT Width;
-    UINT Height;
-    UINT Depth;
-    UINT MipLevels;
-    D3DFORMAT Format;
-    D3DRESOURCETYPE ResourceType;
-    D3DXIMAGE_FILEFORMAT ImageFileFormat;
-} D3DXIMAGE_INFO;
-#define D3DX_DEFAULT ((UINT) -1)
-
-#define D3DXCreateTextureFromFileInMemoryEx ((HRESULT WINAPI (*)(LPDIRECT3DDEVICE9 pDevice, LPCVOID pSrcData, UINT SrcDataSize, UINT Width, UINT Height, UINT MipLevels, DWORD Usage, D3DFORMAT Format, D3DPOOL Pool, DWORD Filter, DWORD MipFilter, D3DCOLOR ColorKey, D3DXIMAGE_INFO *pSrcInfo, PALETTEENTRY *pPalette, LPDIRECT3DTEXTURE9 *ppTexture)) (gboffset + 0x10034211))
-#define D3DXGetImageInfoFromFileInMemory ((HRESULT WINAPI (*)(LPCVOID pSrcData, UINT SrcDataSize, D3DXIMAGE_INFO *pSrcInfo)) (gboffset + 0x10032E69))
-
-// D3DX internels (summer 2003 SDK)
-struct D3DXTex_CImage {
-    D3DFORMAT Format;
-    void *pBits;
-    DWORD *pPalette; // A8B8G8R8, byte0 = B, byte1 = G, byte2 = R, byte3 = A
-    UINT Width;
-    UINT Height;
-    UINT Depth;
-    DWORD gap18[6];
-    INT Pitch;
-    DWORD gap34[1];
-    INT pBits_Valid;
-    INT pPalette_Valid;
-    INT Valid;
-    D3DRESOURCETYPE ResourceType;
-    D3DXIMAGE_FILEFORMAT ImageFileFormat;
-    struct D3DXTex_CImage *pNext1;
-    struct D3DXTex_CImage *pNext2;
-};
-#define D3DXTex_CImage_ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346CA, void, struct D3DXTex_CImage *), this)
-#define D3DXTex_CImage_dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346E3, void, struct D3DXTex_CImage *), this)
-#define D3DXTex_CImage_Load(this, data, len, pinfo, flag) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10037159, int, struct D3DXTex_CImage *, const void *, unsigned, D3DXIMAGE_INFO *, int), this, data, len, pinfo, flag)
-
-
-
-// external D3DX, for debugging and testing purpose only
-#define EXTERNAL_D3DX_DLL "D3DX_summer2003.dll"
-#define hD3DXDLL ({ HMODULE h = GetModuleHandle(EXTERNAL_D3DX_DLL); if (!h) h = LoadLibrary(EXTERNAL_D3DX_DLL); if (!h) fail("can't load D3DX library '%s'", EXTERNAL_D3DX_DLL); h; })
-#define D3DXSaveTextureToFile(pDestFile, DestFormat, pSrcTexture, pSrcPalette) (((HRESULT WINAPI (*)(LPCTSTR, D3DXIMAGE_FILEFORMAT, LPDIRECT3DBASETEXTURE9, const PALETTEENTRY *))(GetProcAddress(hD3DXDLL, "D3DXSaveTextureToFile")))(pDestFile, DestFormat, pSrcTexture, pSrcPalette))
-
 
 
 // functions
@@ -384,10 +330,14 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gbBinkVideo_Width(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C710, int, struct gbBinkVideo *), this)
 #define gbBinkVideo_Height(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C720, int, struct gbBinkVideo *), this)
 #define gbBinkVideo_DrawFrameEx(this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C530, int, struct gbBinkVideo *, void *, int, int, int, int, int), this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType)
+#define PAL3_InitGFX ((void (*)(void)) TOPTR(0x00404FF0))
+#define gbGfxManager_D3D_EndScene(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10018F00, void, struct gbGfxManager_D3D *), this)
 
 // global variables
+#define gfxdrvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))
 #define game_state (*(int *) TOPTR(0x00BFDA6C))
 #define is_window_active (*(int *) TOPTR(0x005833B8))
+#define config_flags (*(int *) TOPTR(0x005833BC))
 #define g_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)
 #define g_pVFileSys (*(struct gbVFileSystem **) (gboffset + 0x1015D3A8))
 

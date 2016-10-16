@@ -3,13 +3,33 @@
 
 
 // hook framework
-#define MAX_HOOK_TYPES 5
-#define MAX_HOOKS 10
+#define MAX_HOOKS 20
 enum hook_type {
     HOOKID_ATEXIT,
     HOOKID_GAMELOOP,
     HOOKID_GETCURSORPOS,
+    HOOKID_POSTD3DCREATE,
+    HOOKID_ONLOSTDEVICE,
+    HOOKID_ONRESETDEVICE,
+    HOOKID_PREENDSCENE,
+    MAX_HOOK_TYPES // EOF
 };
+
+// EndScene hooks
+void add_preendscene_hook(void (*funcptr)(void));
+void call_preendscene_hooks();
+void init_preendscene_hook();
+
+// OnLostDevice and OnResetDevice hooks
+void add_onlostdevice_hook(void (*funcptr)(void));
+void call_onlostdevice_hooks();
+void add_onresetdevice_hook(void (*funcptr)(void));
+void call_onresetdevice_hooks();
+
+// post d3d create hooks
+void add_postd3dcreate_hook(void (*funcptr)(void));
+void init_postd3dcreate_hook();
+
 
 // atexit hooks
 extern void add_atexit_hook(void (*funcptr)(void));

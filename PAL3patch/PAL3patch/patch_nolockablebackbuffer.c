@@ -38,7 +38,6 @@ static void mf_fillvbuf_rect(struct mf_vertex_t *vbuf, const fRECT *frect, float
     right = floor(right) - 0.5f;
     top = floor(top) - 0.5f;
     bottom = floor(bottom) - 0.5f;
-    memset(vbuf, 0, MF_VBUF_SIZE_BYTES);
     vbuf[0].x = vbuf[5].x = left;
     vbuf[0].y = vbuf[5].y = top;
     vbuf[0].u = vbuf[5].u = u1;
@@ -57,6 +56,7 @@ static void mf_fillvbuf_rect(struct mf_vertex_t *vbuf, const fRECT *frect, float
     vbuf[4].v = v1;
     vbuf[0].color = vbuf[1].color = vbuf[2].color = vbuf[3].color = vbuf[4].color = vbuf[5].color = 0x00FFFFFF;
     vbuf[0].rhw = vbuf[1].rhw = vbuf[2].rhw = vbuf[3].rhw = vbuf[4].rhw = vbuf[5].rhw = 1.0f;
+    vbuf[0].z = vbuf[1].z = vbuf[2].z = vbuf[3].z = vbuf[4].z = vbuf[5].z = 0.0f;
 }
 
 
@@ -92,10 +92,10 @@ static void get_movie_uv(const char *filename)
                     5     Perfact     *      Sub
         */
         { "Movie\\END1.bik",   0.0f, (75.0 / 600.0), 1.0f, (525.0 / 600.0) },
-        { "Movie\\END2.bik",   0.0f, (75.0 / 600.0), 1.0f, 1.0f },
-        { "Movie\\END3.bik",   0.0f, (75.0 / 600.0), 1.0f, 1.0f },
-        { "Movie\\END4.bik",   0.0f, (75.0 / 600.0), 1.0f, 1.0f },
-        { "Movie\\END5.bik",   0.0f, (75.0 / 600.0), 1.0f, 1.0f },
+        { "Movie\\END2.bik",   0.0f, (75.0 / 600.0), 1.0f, (575.0 / 600.0) },
+        { "Movie\\END3.bik",   0.0f, (75.0 / 600.0), 1.0f, (575.0 / 600.0) },
+        { "Movie\\END4.bik",   0.0f, (75.0 / 600.0), 1.0f, (575.0 / 600.0) },
+        { "Movie\\END5.bik",   0.0f, (75.0 / 600.0), 1.0f, (585.0 / 600.0) },
         
         { NULL } // EOF
     };
@@ -118,6 +118,7 @@ static void get_movie_uv(const char *filename)
         mf_tex_u2 = mf_tex_v2 = 1.0f;
     }
 }
+
 static void init_movieframe_texture(const char *filename, int movie_width, int movie_height)
 {
     // if texture exists, free it
@@ -151,7 +152,6 @@ static int __fastcall gbBinkVideo_OpenFile(struct gbBinkVideo *this, int dummy, 
     int ret = gbBinkVideo_SFLB_OpenFile(this, szFileName, hWnd, bChangeScreenMode, nOpenFlag);
 
     // init vertex buffer and texture
-    init_movieframe_vertbuf();
     init_movieframe_texture(szFileName, gbBinkVideo_Width(this), gbBinkVideo_Height(this));
     
     // fill the texture with zeros
@@ -212,6 +212,9 @@ static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
     IDirect3DDevice9_SetFVF(g_GfxMgr->m_pd3dDevice, MF_VERTEX_FVF);
     IDirect3DDevice9_SetStreamSource(g_GfxMgr->m_pd3dDevice, 0, mf_vbuf, 0, MF_VERTEX_SIZE);
     IDirect3DDevice9_DrawPrimitive(g_GfxMgr->m_pd3dDevice, D3DPT_TRIANGLELIST, 0, MF_VBUF_TRANGLE_COUNT);
+    
+    // end scene
+    call_preendscene_hooks();
     IDirect3DDevice9_EndScene(g_GfxMgr->m_pd3dDevice);
     
     // present
@@ -232,7 +235,7 @@ static void movie_playback_atstop()
     char fnbuf[MAXLINE];
     snprintf(fnbuf, sizeof(fnbuf), "movie_%u.bmp", (unsigned) time(NULL));
     OutputDebugString(fnbuf);
-    D3DXSaveTextureToFile(fnbuf, D3DXIFF_BMP, (void *) mf_tex, NULL);
+    D3DXSaveTextureToFileA(fnbuf, D3DXIFF_BMP, (void *) mf_tex, NULL);
 #endif
 }
 
@@ -394,4 +397,5 @@ MAKE_PATCHSET(nolockablebackbuffer)
     
     // gbBinkVideo hooks
     hook_gbBinkVideo();
+    add_postd3dcreate_hook(init_movieframe_vertbuf);
 }

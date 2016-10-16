@@ -1,0 +1,42 @@
+【PAL3cpkunpacker】
+又一个CPK解包工具
+用法 PAL3cpkunpacker X.cpk
+会解压X.cpk到当前目录下的X文件夹下
+附：PAL3应有的目录结构：（符号 => 表示解压，后接相对路径）
+    游戏根目录
+        basedata
+            basedata\basedata.cpk => .\
+        scene
+            scene\*.cpk => .\*\
+        movie
+            movie => ..\
+            movie => ..\
+        music
+            music => ..\
+
+【nocpk：让游戏使用解包后的文件】
+所有使用虚拟文件系统(gbVFileSystem)的地方都会判断
+ if (config_flags & 2) useCPK; else noCPK;
+所以只需要在程序初始化的时候把config_flags的第二位改成0即可
+
+【编译D3DX9_21.DLL】
+sum2003的SDK中D3DX是以静态库发布的，从February 2005才以动态库形式发布（feb2005对应24）
+为了在PAL3patch中使用D3DX相关的函数，需要把它编译成DLL（因为我不想在VC与MinGW的库文件直接转换。。）
+D3DX对应的版本号（sum2003对应21）可以从d3dx9core.h中的D3DX_SDK_VERSION看到
+D3DX9_21.DLL这个名字是我模仿着其他D3DX的DLL起的
+导出表的内容是直接拷贝的D3DX9_24.DLL中的（把找不到的符号删了）
+D3DX中CImage类相关函数还是使用gbengine.dll中的（为了保持DLL的导出表干净）
+使用这个DLL之后，补丁的大小再也无法维持在几十KB这个数量级（经UPX压缩），变成了几MB这个数量级了。
+不过考虑到之后可能还要增加2x贴图，估计还得增加好几个数量级
+
+【showfps：显示fps】
+添加了EndScene的hook框架，使用ID3DXFont来显示字符串
+显示FPS文字时，通过SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS)让文字中的像素一定通过深度测试
+这样可以防止文字被其他像素盖掉
+另外手动设置了Alpha混合，从而使得文字字符有黑色背景
+
+【uireplacefont：替换字体】
+这个补丁可以替换游戏中的字体，由于可以随意指定字体，字体大小可以随意变化，不再受游戏自带的字体限制了
+有了这个补丁，原来的uifontscale补丁就失去意义了，已经移除
+目前这个补丁还不完善，字体名称、大小映射需要改为能够被用户配置的
+

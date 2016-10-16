@@ -9,13 +9,12 @@ static void init_stage1()
     if (D3D_SDK_VERSION != 31) fail("your compiler has wrong DirectX SDK version!");
     
     gboffset = get_module_base("GBENGINE.DLL") - 0x10000000;
-    
+    d3dx9_dynlink();
     read_config_file();
-
     sha1_init();
     add_atexit_hook(sha1_cleanup);
- 
-    show_about();
+
+    MessageBox(NULL, "stage1", "PAL3patch", 0);
     INIT_PATCHSET(depcompatible);
 }
 
@@ -29,6 +28,8 @@ static void init_stage2()
     init_gameloop_hook();
     init_atexit_hook();
     init_getcursorpos_hook();
+    init_postd3dcreate_hook();
+    init_preendscene_hook();
     
     if (!INIT_PATCHSET(testcombat)) {
         // here are some patches not compatiable with 'testcombat'
@@ -59,9 +60,14 @@ static void init_stage2()
     INIT_PATCHSET(powersave);
     INIT_PATCHSET(timerresolution);
     INIT_PATCHSET(fixmemfree);
+    INIT_PATCHSET(nocpk);
+    INIT_PATCHSET(showfps);
 
     // init_locale() must called after INIT_PATCHSET(setlocale)
     init_locale();
+    
+    // show_about() must called after init_locale()
+    show_about();
 }
 
 
@@ -128,7 +134,7 @@ unsigned sforce_unpacker_init()
     // we should load the real unpacker, patch it, and execute it
     HMODULE unpacker = LoadLibrary(EXTERNAL_UNPACKER);
     if (!unpacker && try_fix_unpacker()) unpacker = LoadLibrary(EXTERNAL_UNPACKER_FIXED);
-    if (!unpacker) fail("Can't load unpacker.");
+    if (!unpacker) fail("can't load external unpacker '%s'.", EXTERNAL_UNPACKER);
     patch_unpacker((unsigned) unpacker);
     
     // we should return unpacker entry address to out asm code

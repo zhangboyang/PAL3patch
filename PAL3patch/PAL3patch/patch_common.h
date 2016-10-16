@@ -15,6 +15,8 @@ MAKE_PATCHSET(dpiawareness);
 MAKE_PATCHSET(powersave);
 MAKE_PATCHSET(timerresolution);
 MAKE_PATCHSET(fixmemfree);
+MAKE_PATCHSET(nocpk);
+MAKE_PATCHSET(showfps);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;

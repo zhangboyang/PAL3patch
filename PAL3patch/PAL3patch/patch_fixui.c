@@ -67,13 +67,13 @@ static void fixui_adjust_gbUIQuad(struct gbUIQuad *out_uiquad, const struct gbUI
     out_uiquad->ex = frect.right;
     out_uiquad->ey = frect.top;
 }
-static void fixui_adjust_RECT(RECT *out_rect, const RECT *rect)
+/*static void fixui_adjust_RECT(RECT *out_rect, const RECT *rect)
 {
     fRECT frect;
     set_frect_rect(&frect, rect);
     fixui_adjust_fRECT(&frect, &frect);
     set_rect_frect(out_rect, &frect);
-}
+}*/
 
 
 
@@ -144,34 +144,7 @@ static void hook_gbDynVertBuf_RenderUIQuad()
 
 
 
-static int uifontscaleflag;
-static int fixui_map_fontsize(int fontsize)
-{
-    if (!uifontscaleflag) {
-        // user request no fontscale
-        return fontsize;
-    }
-    
-    if (fontsize != 12 && fontsize != 16 && fontsize != 20) {
-        // unknown fontsize, we should return fontsize directly
-        return fontsize;
-    }
-    
-    double ideal_fontsize;
-    
-    switch (cur_def) {
-        case FIXUI_MANUAL_TRANSFORM: ideal_fontsize = fontsize; break;
-        case FIXUI_AUTO_TRANSFORM: ideal_fontsize = fontsize * ui_scalefactor; break;
-        default: fail("invalid default transform method: %d", cur_def);
-    }
-    
-    if (ideal_fontsize >= 20) return 20;
-    if (ideal_fontsize >= 16) return 16;
-    if (ideal_fontsize >= 12) return 12;
-    return 16; // if fontsize is too small, default to 12
-}
-
-static struct gbPrintFont *fixui_get_gbprintfont(int fontsize)
+/*static struct gbPrintFont *fixui_get_gbprintfont(int fontsize)
 {
     switch (fontsize) { // according to UIDrawText() in PAL3
         case 12: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_UNICODE12);
@@ -181,69 +154,195 @@ static struct gbPrintFont *fixui_get_gbprintfont(int fontsize)
         // FIXME: where is GB_FONT_ASC
         default: return NULL;
     }
-}
+}*/
 
-// hook UIDrawTextEx()
-#define UIDrawTextEx ((void (*)(const char *, RECT *, struct gbPrintFont *, int, int)) TOPTR(0x00541210))
-static void UIDrawTextEx_wrapper(const char *str, RECT *rect, struct gbPrintFont *font, int fontsize, int middleflag)
-{
-    fixui_check_gamestate();
-    
-    // scale fontsize
-    int new_fontsize = fixui_map_fontsize(fontsize);
-    double font_scalefactor = (double) new_fontsize / fontsize;
-    
-    // scale rect using normal method
-    fRECT old_frect, new_frect;
-    set_frect_rect(&old_frect, rect);
-    fixui_adjust_fRECT(&new_frect, &old_frect);
-    
-    // scale rect by font_scalefactor
-    transform_frect(&new_frect, &old_frect, &old_frect, &new_frect, TR_CENTER, TR_CENTER, font_scalefactor);
-    
-    // call original UIDrawTextEx()
-    RECT new_rect;
-    set_rect_frect(&new_rect, &new_frect);
-    struct gbPrintFont *new_font = fixui_get_gbprintfont(new_fontsize);
-    if (!new_font) new_font = font;
-    new_font->curColor = font->curColor; // copy color
-    UIDrawTextEx(str, &new_rect, new_font, new_fontsize, middleflag);
-}
-static void hook_UIDrawTextEx()
-{
-    // xref of UIDrawTextEx()
-    make_call(0x00450533, UIDrawTextEx_wrapper);
-    make_call(0x005411F2, UIDrawTextEx_wrapper);
-}
 
-// hook UIPrint()
-#define UIPrint ((void (*)(int, int, char *, struct gbColorQuad *, int)) TOPTR(0x00540FD0))
-static void UIPrint_wrapper(int x, int y, char *str, struct gbColorQuad *color, int fontsize)
+
+
+
+
+static int uireplacefontflag;
+enum {
+    D3DXFONT_U12, // UNICODE 12
+    D3DXFONT_U16,
+    D3DXFONT_U20,
+    D3DXFONT_U12S, // UNICODE 12 scaled
+    D3DXFONT_U16S,
+    D3DXFONT_U20S,
+    D3DXFONT_COUNT // EOF
+};
+static int d3dxfont_sizelist_orig[D3DXFONT_COUNT] = {12, 16, 20, 12, 16, 20};
+static int d3dxfont_sizelist[D3DXFONT_COUNT];
+static int d3dxfont_boldflag[D3DXFONT_COUNT];
+static ID3DXFont *d3dxfont_fontlist[D3DXFONT_COUNT] = {};
+static ID3DXSprite *d3dxfont_sprite = NULL;
+static IDirect3DStateBlock9 *d3dxfont_stateblock = NULL;
+
+static int d3dxfont_selectbysize(int fontsize)
 {
-    fixui_check_gamestate();
-    RECT tmp_rect;
-    SetRect(&tmp_rect, x, y, 0, 0);
-    fixui_adjust_RECT(&tmp_rect, &tmp_rect);
-    fontsize = fixui_map_fontsize(fontsize);
-    // UIPrint() will automaticly select gbPrintFont by fontsize
-    UIPrint(tmp_rect.left, tmp_rect.top, str, color, fontsize);
+    int scale_flag;
+    switch (cur_def) {
+        case FIXUI_MANUAL_TRANSFORM: scale_flag = 0; break;
+        case FIXUI_AUTO_TRANSFORM: scale_flag = 1; break;
+        default: fail("invalid default transform method: %d", cur_def);
+    }
+    
+    if (fontsize == d3dxfont_sizelist_orig[D3DXFONT_U12]) {
+        return scale_flag ? D3DXFONT_U12S : D3DXFONT_U12;
+    }
+    if (fontsize == d3dxfont_sizelist_orig[D3DXFONT_U16]) {
+        return scale_flag ? D3DXFONT_U16S : D3DXFONT_U16;
+    }
+    if (fontsize == d3dxfont_sizelist_orig[D3DXFONT_U20]) {
+        return scale_flag ? D3DXFONT_U20S : D3DXFONT_U20;
+    }
+    
+    return scale_flag ? D3DXFONT_U16S : D3DXFONT_U16;
 }
-static void hook_UIPrint()
+static void d3dxfont_init()
 {
-    unsigned funcptr[] = { // xref of UIPrint()
-        0x0043E8A0 + 0x11F,
-        0x0043E8A0 + 0x13B,
-        0x0044DAC0 + 0x66,
-        0x0053C990 + 0xE6,
-        0x0053C990 + 0x10A,
-        0x0053C990 + 0x143,
-        0 // eof
-    };
-    unsigned *ptr;
-    for (ptr = funcptr; *ptr; ptr++) {
-        make_call(*ptr, UIPrint_wrapper);
+    DWORD charset = DEFAULT_CHARSET; // FIXME
+    DWORD quality = 5;
+    LPWSTR facename = L"¿¬Ìå_GB2312";
+    // the init function must called after IDirect3DDevice is initialized
+    int i;
+    for (i = 0; i < D3DXFONT_COUNT; i++) {
+        int fontsize = d3dxfont_sizelist[i];
+        int boldflag = d3dxfont_boldflag[i];
+        if (FAILED(D3DXCreateFontW(g_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, charset, OUT_DEFAULT_PRECIS, quality, DEFAULT_PITCH | FF_DONTCARE, facename, &d3dxfont_fontlist[i]))) {
+            fail("can't create ID3DXFont for size '%d'.", fontsize);
+        }
+    }
+    
+    if (FAILED(D3DXCreateSprite(g_GfxMgr->m_pd3dDevice, &d3dxfont_sprite))) {
+        fail("can't create sprite for font replacing.");
+    }
+    
+    if (FAILED(IDirect3DDevice9_CreateStateBlock(g_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &d3dxfont_stateblock))) {
+        fail("can't create state block for font replacing.");
     }
 }
+static void d3dxfont_printwstr(ID3DXSprite *sprite, int fontid, LPWSTR wstr, int left, int top, D3DCOLOR color)
+{
+    RECT rc;
+    SetRect(&rc, left, top, 0, 0);
+    ID3DXFont_DrawTextW(d3dxfont_fontlist[fontid], sprite, wstr, -1, &rc, DT_NOCLIP, color);
+}
+
+static void d3dxfont_onlostdevice()
+{
+    int i;
+    for (i = 0; i < D3DXFONT_COUNT; i++) {
+        ID3DXFont_OnLostDevice(d3dxfont_fontlist[i]);
+    }
+    ID3DXSprite_OnLostDevice(d3dxfont_sprite);
+    IDirect3DStateBlock9_Release(d3dxfont_stateblock);
+}
+static void d3dxfont_onresetdevice()
+{
+    int i;
+    for (i = 0; i < D3DXFONT_COUNT; i++) {
+        ID3DXFont_OnResetDevice(d3dxfont_fontlist[i]);
+    }
+    ID3DXSprite_OnResetDevice(d3dxfont_sprite);
+    if (FAILED(IDirect3DDevice9_CreateStateBlock(g_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &d3dxfont_stateblock))) {
+        fail("can't create state block for font replacing.");
+    }
+}
+
+struct d3dxfont_strnode {
+    int fontid;
+    wchar_t *wstr;
+    int left;
+    int top;
+    D3DCOLOR color;
+    struct d3dxfont_strnode *next;
+};
+
+struct d3dxfont_strnode *d3dxfont_strlist_head = NULL, *d3dxfont_strlist_tail = NULL;
+
+static void __fastcall gbPrintFont_UNICODE_PrintString(struct gbPrintFont_UNICODE *this, int dummy, const char *str, float x, float y, float endx, float endy)
+{
+    fixui_check_gamestate();
+    
+    // make a node
+    struct d3dxfont_strnode *node = malloc(sizeof(struct d3dxfont_strnode));
+    node->fontid = d3dxfont_selectbysize(this->fontsize);
+    node->wstr = cs2wcs(str, target_codepage);
+    node->color = this->curColor.Color | 0xFF000000; // FIXME: is this OK?
+        
+    // calc coord
+    fRECT frect;
+    set_frect_ltwh(&frect, (x + 1.0) * gfxdrvinfo.width / 2.0, (1.0 - y) * gfxdrvinfo.height / 2.0 - d3dxfont_sizelist_orig[node->fontid], 0, 0);
+    fixui_adjust_fRECT(&frect, &frect);
+    node->left = round(frect.left);
+    node->top = round(frect.top);
+    
+
+    // append to linked-list
+    node->next = NULL;
+    if (d3dxfont_strlist_head == NULL || d3dxfont_strlist_tail == NULL) {
+        d3dxfont_strlist_head = d3dxfont_strlist_tail = node;
+    } else {
+        d3dxfont_strlist_tail->next = node;
+        d3dxfont_strlist_tail = node;
+    }
+}
+
+static void __fastcall gbPrintFont_UNICODE_Flush(struct gbPrintFont_UNICODE *this, int dummy)
+{
+    struct d3dxfont_strnode *node, *nextnode;
+    
+    // save device state
+    IDirect3DStateBlock9_Capture(d3dxfont_stateblock);
+    
+    // make text in front of other pixels
+    IDirect3DDevice9_SetRenderState(g_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
+    
+    // draw strings in linked-list
+    ID3DXSprite_Begin(d3dxfont_sprite, D3DXSPRITE_ALPHABLEND);
+    for (node = d3dxfont_strlist_head; node; node = node->next) {
+        d3dxfont_printwstr(d3dxfont_sprite, node->fontid, node->wstr, node->left, node->top, node->color);
+    }
+    ID3DXSprite_End(d3dxfont_sprite);
+    
+    // restore device state
+    IDirect3DStateBlock9_Apply(d3dxfont_stateblock);
+    
+    
+    // clear the linked-list and free memory
+    for (node = d3dxfont_strlist_head; node; node = nextnode) {
+        nextnode = node->next;
+        free(node->wstr);
+        free(node);
+    }
+    d3dxfont_strlist_head = d3dxfont_strlist_tail = NULL;
+}
+
+static void ui_replacefont_init()
+{
+    // init sizes
+    d3dxfont_sizelist[D3DXFONT_U12] = 12; // FIXME: let user config these values
+    d3dxfont_sizelist[D3DXFONT_U16] = 16;
+    d3dxfont_sizelist[D3DXFONT_U20] = 20;
+    d3dxfont_sizelist[D3DXFONT_U12S] = floor(d3dxfont_sizelist[D3DXFONT_U12] * ui_scalefactor);
+    d3dxfont_sizelist[D3DXFONT_U16S] = floor(d3dxfont_sizelist[D3DXFONT_U16] * ui_scalefactor);
+    d3dxfont_sizelist[D3DXFONT_U20S] = floor(d3dxfont_sizelist[D3DXFONT_U20] * ui_scalefactor);
+    
+    // init boldflags
+    memset(d3dxfont_boldflag, -1, sizeof(d3dxfont_boldflag));
+    
+    // add hooks
+    add_postd3dcreate_hook(d3dxfont_init);
+    add_onlostdevice_hook(d3dxfont_onlostdevice);
+    add_onresetdevice_hook(d3dxfont_onresetdevice);
+    
+    // hook gbPrintFont_UNICODE's member function
+    make_jmp(gboffset + 0x10023A90, gbPrintFont_UNICODE_Flush);
+    make_jmp(gboffset + 0x10023FD0, gbPrintFont_UNICODE_PrintString);
+}
+
+
 
 
 // hook GetCursorPos for cursor virtualization
@@ -298,13 +397,15 @@ MAKE_PATCHSET(fixui)
     game_frect_ui_manual = ui_borderflag ? game_frect_43 : game_frect;
     
     // read font scale configuration
-    uifontscaleflag = get_int_from_configfile("uifontscale");
+    uireplacefontflag = get_int_from_configfile("uireplacefont");
+    if (uireplacefontflag) {
+        // this function must called when uiscalefactor is set
+        ui_replacefont_init();
+    }
     
     // init fixui, use identity transform
     fixui_setdefaultransform(FIXUI_MANUAL_TRANSFORM);
     hook_gbDynVertBuf_RenderUIQuad();
-    hook_UIDrawTextEx();
-    hook_UIPrint();
     
     // init cursor virtualization
     set_cursor_virtualization(NULL, NULL);

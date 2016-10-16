@@ -28,9 +28,51 @@ double str2double(const char *valstr)
     return result;
 }
 
+int str_iendwith(const char *a, const char *b)
+{
+    int lena = strlen(a), lenb = strlen(b);
+    return lena >= lenb && stricmp(a + lena - lenb, b) == 0;
+}
+
 double fmin(double a, double b)
 {
     return a < b ? a : b;
+}
+
+HMODULE LoadLibrary_safe(LPCTSTR lpFileName)
+{
+    HMODULE ret = LoadLibrary(lpFileName);
+    if (!ret) fail("can't load library '%s'.", lpFileName);
+    return ret;
+}
+
+FARPROC GetProcAddress_safe(HMODULE hModule, LPCSTR lpProcName)
+{
+    FARPROC ret = GetProcAddress(hModule, lpProcName);
+    if (!ret) fail("can't find proc address for '%s'.", lpProcName);
+    return ret;
+}
+
+// convert a c-string to c-wide-string, alloc memory, don't forget to free()
+wchar_t *cs2wcs(const char *cstr, UINT src_cp)
+{
+    wchar_t *ret;
+    size_t len;
+    
+    // get string length first
+    len = MultiByteToWideChar(src_cp, 0, cstr, -1, NULL, 0);
+    if (len == 0) goto fail;
+    
+    // alloc buffer
+    ret = malloc(sizeof(wchar_t) * len);
+    if (!ret) goto fail;
+    
+    MultiByteToWideChar(src_cp, 0, cstr, -1, ret, len);
+    return ret;
+    
+fail:
+    // no need to free(ret)
+    return wcsdup(L"cs2wcs failed.");
 }
 
 void __attribute__((noreturn)) __fail(const char *file, int line, const char *func, const char *fmt, ...)

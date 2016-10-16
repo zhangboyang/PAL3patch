@@ -222,16 +222,39 @@ done:
     return ret;
 }
 
+char *adjust_cpkname(char *cpkname, char *cpknamebuf, int cpknamebuf_len)
+{
+    if (cpkname && (str_iendwith(cpkname, "\\") || str_iendwith(cpkname, "/"))) {
+        // cpkname is illegal, possiblly nocpk is enabled
+        // try convert to legal cpkname
+        snprintf(cpknamebuf, cpknamebuf_len, "%.*s.cpk", strlen(cpkname) - 1, cpkname);
+        cpkname = cpknamebuf;
+    }
+    
+    // cut cpkname
+    if (cpkname) {
+        char *separator = strrchr(cpkname, '\\');
+        if (separator) cpkname = separator + 1;
+    }
+    
+    return cpkname;
+}
+
 static void __fastcall gbTexture_D3D_CreateFromFileMemory_wrapper(struct gbTexture_D3D *this, int dummy, void *pSrcData, int SrcDataSize)
 {
     char *fpath = TOPTR(gboffset + 0x10140C68);
     char *cpkname = g_pVFileSys->rtDirectory;
-    if (cpkname && strrchr(cpkname, '\\')) cpkname = strrchr(cpkname, '\\') + 1;
+    
+    char cpknamebuf[MAXLINE];
+    cpkname = adjust_cpkname(cpkname, cpknamebuf, sizeof(cpknamebuf));
 
     void *fdataptr;
     unsigned fdatalen;
+    void *mem_tobefree = NULL;
     
-    if (!cpkname || !get_alternative_texture(cpkname, fpath, pSrcData, SrcDataSize, &fdataptr, &fdatalen)) {
+    if (cpkname && get_alternative_texture(cpkname, fpath, pSrcData, SrcDataSize, &fdataptr, &fdatalen)) {
+        mem_tobefree = fdataptr;
+    } else {
         // failed to load
         
         if (cpkname) {
@@ -244,7 +267,7 @@ static void __fastcall gbTexture_D3D_CreateFromFileMemory_wrapper(struct gbTextu
     }
 
     gbTexture_D3D_CreateFromFileMemory(this, fdataptr, fdatalen);
-    free(fdataptr);
+    free(mem_tobefree);
 }
 
 static MAKE_ASMPATCH(gbimage2d_loadimage_hook)
@@ -255,7 +278,9 @@ static MAKE_ASMPATCH(gbimage2d_loadimage_hook)
     struct gbImage2D *this = TOPTR(R_EBP);
     char *fpath = TOPTR(R_EBX);
     char *cpkname = g_pVFileSys->rtDirectory;
-    if (cpkname && strrchr(cpkname, '\\')) cpkname = strrchr(cpkname, '\\') + 1;
+    
+    char cpknamebuf[MAXLINE];
+    cpkname = adjust_cpkname(cpkname, cpknamebuf, sizeof(cpknamebuf));
     
     // file data buffer and length
     void *fdataptr;
@@ -263,7 +288,7 @@ static MAKE_ASMPATCH(gbimage2d_loadimage_hook)
     
     int flag = 0; // success flag
     
-    if (cpkname) { // check if we are using CPK
+    if (cpkname) { // check if we are using CPK, for example, loading save/PAL3_abcd.JPG will not use CPK
         if (get_alternative_texture(cpkname, fpath, NULL, 0, &fdataptr, &fdatalen)) { // find alternative texture in ZPK
             int width, height, bitcount;
             void *pbits = load_png(fdataptr, fdatalen, &width, &height, &bitcount, gbmalloc, gbfree); // uncompress PNG
@@ -353,10 +378,10 @@ MAKE_PATCHSET(replacetexture)
     INIT_ASMPATCH(gbimage2d_loadimage_hook, gboffset + 0x1001E517, 7, "\x83\xC4\x10\x85\xC0\x75\x26");
     
     // hook gbTexture::LoadTexture
-    SIMPLE_PATCH(0x10020658, "\x8B\x13\x50\x8B\x86\x30\x01\x00\x00\x8B", "\x89\xD9\x50\x8B\x86\x30\x01\x00\x00\x50", 0xA);
-    SIMPLE_PATCH(0x100206A4, "\x8B\x13", "\x89\xD9", 0x2);
-    make_call(0x10020662, gbTexture_D3D_CreateFromFileMemory_wrapper);
-    make_call(0x100206A8, gbTexture_D3D_CreateFromFileMemory_wrapper);
+    SIMPLE_PATCH(gboffset + 0x10020658, "\x8B\x13\x50\x8B\x86\x30\x01\x00\x00\x8B", "\x89\xD9\x50\x8B\x86\x30\x01\x00\x00\x50", 0xA);
+    SIMPLE_PATCH(gboffset + 0x100206A4, "\x8B\x13", "\x89\xD9", 0x2);
+    make_call(gboffset + 0x10020662, gbTexture_D3D_CreateFromFileMemory_wrapper);
+    make_call(gboffset + 0x100206A8, gbTexture_D3D_CreateFromFileMemory_wrapper);
     
     // add cleanup hook
     add_atexit_hook(unload_texture_pack);

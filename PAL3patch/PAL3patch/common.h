@@ -64,6 +64,7 @@
 #include "transform.h"
 #include "patch_common.h"
 #include "PAL3patch.h"
+#include "d3dx9.h"
 
 
 // common typedefs

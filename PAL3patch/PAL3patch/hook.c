@@ -22,6 +22,64 @@ static void run_hooks(int hookid)
 
 
 
+// EndScene hooks
+void add_preendscene_hook(void (*funcptr)(void))
+{
+    add_hook(HOOKID_PREENDSCENE, funcptr);
+}
+void call_preendscene_hooks()
+{
+    run_hooks(HOOKID_PREENDSCENE);
+}
+static void __fastcall gbGfxManager_D3D_EndScene_wrapper(struct gbGfxManager_D3D *this, int dummy)
+{
+    call_preendscene_hooks();
+    gbGfxManager_D3D_EndScene(this);
+}
+void init_preendscene_hook()
+{
+    // hook the vfptr of gbGfxManager_D3D
+    void *ptrtowrapper = gbGfxManager_D3D_EndScene_wrapper;
+    memcpy_to_process(gboffset + 0x100F56E8, &ptrtowrapper, 4);
+}
+
+
+
+// OnLostDevice and OnResetDevice hooks
+void add_onlostdevice_hook(void (*funcptr)(void))
+{
+    add_hook(HOOKID_ONLOSTDEVICE, funcptr);
+}
+void call_onlostdevice_hooks()
+{
+    run_hooks(HOOKID_ONLOSTDEVICE);
+}
+void add_onresetdevice_hook(void (*funcptr)(void))
+{
+    add_hook(HOOKID_ONRESETDEVICE, funcptr);
+}
+void call_onresetdevice_hooks()
+{
+    run_hooks(HOOKID_ONRESETDEVICE);
+}
+
+
+// post d3d create hooks
+void add_postd3dcreate_hook(void (*funcptr)(void))
+{
+    add_hook(HOOKID_POSTD3DCREATE, funcptr);
+}
+static void PAL3_InitGFX_wrapper()
+{
+    PAL3_InitGFX();
+    run_hooks(HOOKID_POSTD3DCREATE);
+}
+void init_postd3dcreate_hook()
+{
+    make_call(0x00404840, PAL3_InitGFX_wrapper);
+}
+
+
 
 
 // atexit hook

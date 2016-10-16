@@ -115,11 +115,13 @@ static void OnDeviceLost_hook()
     }
     RenderTarget_OnDeviceLost(pRenderTarget);
     CTrail_OnDeviceLost(pCTrail);
+    call_onlostdevice_hooks();
 }
 static void OnResetDevice_hook()
 {
     RenderTarget_OnResetDevice(pRenderTarget);
     CTrail_OnResetDevice(pCTrail);
+    call_onresetdevice_hooks();
 }
 
 

@@ -22,7 +22,7 @@ static const wchar_t wstr_about_text_CHS[] =
     L"  https://github.com/zhangboyang/PAL3patch\n"
     L"编译信息:\n%hs"
 ;
-static const wchar_t wstr_confirmquit_text_CHS[] = L"您确定要退出游戏吗？";
+static const wchar_t wstr_confirmquit_text_CHS[] = L"您确定要退出游戏吗？\n未保存的游戏进度将会丢失。";
 static const wchar_t wstr_confirmquit_title_CHS[] = L"退出";
 
 
