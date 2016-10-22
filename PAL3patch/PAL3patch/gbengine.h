@@ -16,6 +16,13 @@ enum GAME_STATE {
     GAME_OVER,
 };
 
+enum VertexProcessingType {
+    SOFTWARE_VP,
+    MIXED_VP,
+    HARDWARE_VP,
+    PURE_HARDWARE_VP
+};
+
 struct gbGfxDriverInfo {
     int type;
     int subtype;
@@ -34,6 +41,33 @@ struct gbGfxDriverInfo {
     int waitforverticalblank;
 };
 
+struct CD3DEnumeration {
+    IDirect3D9 *m_pD3D;
+    struct CArrayList *m_pAdapterInfoList;
+    char (__cdecl *ConfirmDeviceCallback)(D3DCAPS9 *, enum VertexProcessingType, D3DFORMAT, D3DFORMAT);
+    unsigned int AppMinFullscreenWidth;
+    unsigned int AppMinFullscreenHeight;
+    unsigned int AppMinColorChannelBits;
+    unsigned int AppMinAlphaChannelBits;
+    unsigned int AppMinDepthBits;
+    unsigned int AppMinStencilBits;
+    char AppUsesDepthBuffer;
+    char AppUsesMixedVP;
+    char AppRequiresWindowed;
+    char AppRequiresFullscreen;
+    struct CArrayList *m_pAllowedAdapterFormatList;
+};
+
+struct D3DDriverBug {
+    int Gamma_LowByte;
+};
+
+struct gbResManager {
+    struct gbResource **pBuffer;
+    int MaxNum;
+    int CurNum;
+};
+
 struct gbGfxManager_D3D {
     char padding1[0xC];
     struct gbGfxDriverInfo DrvInfo;
@@ -42,7 +76,22 @@ struct gbGfxManager_D3D {
     struct gbResManager *pTexResMgr;
     struct gbPrintFontMgr *pFontMgr;
     struct gbMatrixStack *pMatrixStack[0x4];
-    char padding2[0x584];
+    char padding2[0x50C];
+    struct CD3DEnumeration m_d3dEnumeration;
+    int m_bWindowed;
+    RECT m_rcWindowClient;
+    RECT m_rcWindowBounds;
+    ULONG m_dwWindowStyle;
+    HWND m_hWnd;
+    BYTE m_bMinimized;
+    BYTE m_bMaximized;
+    BYTE m_bClipCursorWhenFullscreen;
+    BYTE m_bShowCursorWhenFullscreen;
+    BYTE m_bActive;
+    ULONG m_dwCreateFlags;
+    struct D3DDriverBug m_DriverBug;
+    struct gbResManager m_CursorMgr;
+    struct gbCursorRes *m_pActiveCursor;
     int m_bShowCursor;
     char padding3[0x70];
     D3DPRESENT_PARAMETERS m_d3dpp;
@@ -115,7 +164,7 @@ struct PtrArray {
 };
 
 struct UIWnd {
-    void **vfptr;
+    struct UIWndVtbl *vfptr;
     struct gbColorQuad m_fontcolor;
     struct gbColorQuad m_wndcolor;
     DWORD m_id;
@@ -127,6 +176,17 @@ struct UIWnd {
     int m_benable;
     int m_bfocus;
 };
+struct UIWndVtbl {
+    void (__fastcall *ShowWindow)(struct UIWnd *this, int dummy, int);
+    void (__fastcall *Render)(struct UIWnd *this, int dummy);
+    int (__fastcall *Update)(struct UIWnd *this, int dummy, float, int);
+    void (__fastcall *Destroy)(struct UIWnd *this, int dummy);
+    void (__fastcall *Create)(struct UIWnd *this, int dummy, unsigned int, RECT *, struct UIWnd *, char);
+    void *scalar_deleting_destructor;
+    int (__fastcall *OnMessage)(struct UIWnd *this, int dummy, unsigned int, unsigned int, unsigned int);
+};
+#define UIWnd_vfptr_Render(this) THISCALL_WRAPPER((this)->vfptr->Render, this)
+
 
 struct gbUIQuad {
     float sx;
@@ -316,6 +376,7 @@ struct gbBinkVideo;
 
 // functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
+#define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A190, void, struct gbGfxManager_D3D *), this)
 extern enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D *this);
 extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
 #define UIWnd_SetRect(this, rect) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445FA0, void, struct UIWnd *, RECT *), this, rect)

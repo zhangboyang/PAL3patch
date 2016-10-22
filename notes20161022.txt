@@ -1,0 +1,25 @@
+【查找为UIWnd及其派生类标定窗口位置类型的方法】
+经过一番测试，UIWnd::m_bcreateok这个成员变量
+在UIWnd::Create()中被置1，并且只在UIWnd::ShowWindow中使用（判断非零）
+我尝试把置1替换为置AABBCCDD，游戏运行似乎并没有异常
+尝试在Create()处设置magic，并在Render处自动检测magic，初步检测没有发生magic被破坏的情况
+因此决定使用m_bcreateok这个位置作为ptag（位置标记）的存储位置
+
+【手动修改的意义和目的】
+(1) 有些原来就位置正确的窗口，自动修改后会发生错误
+(2) 自动修改不能修改放大比例
+(3) 自动修改不能选择去除边框
+(4) 自动修改不能单独处理鼠标位置
+
+【标定窗口位置】
+因为对ptag（即position tag）赋初值是在UIWnd::Create中，
+因此需要在程序调用SomeUIClass::Create()后进行hook
+
+【战斗界面CCBUI】
+类CCBUI的成员已经基本上确定了
+相关的函数标定了一半左右，这已经足够进行UI的修正工作了，有时间可以继续标定
+
+【CCBSystem】
+PAL3中类CCBSystem的大小与PAL3A中的一致，都是 0x162D8
+这意味着可以标定函数名字啦，有时间可以进行标定
+

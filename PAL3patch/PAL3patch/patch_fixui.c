@@ -18,7 +18,7 @@ struct fixui_state {
     struct fixui_state *prev;
 };
 static struct fixui_state def_fs; // default fixui state, at stack bottom, also for default cursor rect
-static struct fixui_state *fs = &def_fs; // fixui state
+static struct fixui_state *fs = &def_fs; // fixui state, stack top
 
 // set default fixui state
 static void fixui_setdefaultstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor)
@@ -144,23 +144,154 @@ static void hook_gbDynVertBuf_RenderUIQuad()
 
 
 
-/*static struct gbPrintFont *fixui_get_gbprintfont(int fontsize)
+
+
+
+
+
+
+
+
+
+// hook GetCursorPos for cursor virtualization
+// src_frect should be original rect in game
+// dst_frect should be rect on screen
+static fRECT src_cursor_frect, dst_cursor_frect;
+static int cursor_virt_flag = 0;
+
+static void set_cursor_virtualization(fRECT *src_frect, fRECT *dst_frect)
 {
-    switch (fontsize) { // according to UIDrawText() in PAL3
-        case 12: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_UNICODE12);
-        case 16: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_UNICODE16);
-        case 20: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_UNICODE20);
-        case 24: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_NUMBER);
-        // FIXME: where is GB_FONT_ASC
-        default: return NULL;
+    if (src_frect && dst_frect) {
+        cursor_virt_flag = 1;
+        src_cursor_frect = *src_frect;
+        dst_cursor_frect = *dst_frect;
+    } else {
+        cursor_virt_flag = 0;
     }
-}*/
+}
+
+static void getcursorpos_virtualization_hookfunc()
+{
+    if (!getcursorpos_hook_ret) return;
+    fixui_check_gamestate();
+    fRECT *src_frect, *dst_frect;
+    if (cursor_virt_flag) {
+        src_frect = &src_cursor_frect;
+        dst_frect = &dst_cursor_frect;
+    } else { // use rect in def_fs for default
+        src_frect = &def_fs.src_frect;
+        dst_frect = &def_fs.dst_frect;
+    }
+    getcursorpos_hook_lppoint->x = round((getcursorpos_hook_lppoint->x - dst_frect->left) / get_frect_width(dst_frect) * get_frect_width(src_frect) + src_frect->left);
+    getcursorpos_hook_lppoint->y = round((getcursorpos_hook_lppoint->y - dst_frect->top) / get_frect_height(dst_frect) * get_frect_height(src_frect) + src_frect->top);
+}
 
 
 
 
 
 
+
+
+
+
+
+
+// UIWnd position-tag patch,  ptag = position tag
+#define UIWND_PTAG_MAGIC "PT"
+#define UIWND_PTAG_MAGIC_LEN 2
+#define get_ptag_with_magic(this) ((unsigned)((this)->m_bcreateok))
+#define get_ptag(this) (*(struct uiwnd_ptag *)(((char *) &(this)->m_bcreateok) + UIWND_PTAG_MAGIC_LEN))
+static int verify_ptag_magic(struct UIWnd *this)
+{
+    if (memcmp(&(this)->m_bcreateok, UIWND_PTAG_MAGIC, UIWND_PTAG_MAGIC_LEN) == 0) {
+        return 1;
+    } else {
+        plog("position tag %08X for UIWnd %p is broken.", get_ptag_with_magic(this), this);
+        return 0;
+    }
+}
+
+static void push_ptag_state(struct UIWnd *father, struct UIWnd *child, struct uiwnd_ptag ptag)
+{
+    if (!ptag.enabled) return;
+
+    fRECT src_frect, dst_frect;
+    double len_factor;
+    set_frect_rect(&src_frect, &child->m_rect);
+    len_factor = scalefactor_table[ptag.scalefactor_index];
+    
+    fRECT *trans_src_frect, *trans_dst_frect;
+    switch (ptag.self_srcrect_type) {
+        case PTR_GAMERECT:           trans_src_frect = &game_frect; break;
+        case PTR_GAMERECT_43:        trans_src_frect = &game_frect_43; break;
+        case PTR_GAMERECT_ORIGINAL:  trans_src_frect = &game_frect_original; break;
+        case PTR_INHERIT: default:   trans_src_frect = &fs->src_frect; break;
+    }
+    switch (ptag.self_dstrect_type) {
+        case PTR_GAMERECT:           trans_dst_frect = &game_frect; break;
+        case PTR_GAMERECT_43:        trans_dst_frect = &game_frect_43; break;
+        case PTR_GAMERECT_ORIGINAL:  trans_dst_frect = &game_frect_original; break;
+        case PTR_INHERIT: default:   trans_dst_frect = &fs->dst_frect; break;
+    }
+    
+    set_frect_rect(&dst_frect, &child->m_rect);
+    transform_frect(&dst_frect, &dst_frect, trans_src_frect, trans_dst_frect, ptag.self_lr_method, ptag.self_tb_method, len_factor);
+    
+    fixui_pushstate(&src_frect, &dst_frect, TR_SCALE, TR_SCALE, len_factor);
+}
+static void pop_ptag_state(struct UIWnd *father, struct UIWnd *child, struct uiwnd_ptag ptag)
+{
+    if (!ptag.enabled) return;
+    fixui_popstate();
+}
+
+void set_uiwnd_ptag(struct UIWnd *this, struct uiwnd_ptag ptag)
+{
+    if (verify_ptag_magic(this)) {
+        get_ptag(this) = ptag;
+    }
+}
+static void __fastcall UIWnd_Render(struct UIWnd *this, int dummy)
+{
+    if (!this->m_bvisible) return;
+    int i;
+    for (i = 0; i < this->m_childs.m_nSize; i++) {
+        struct UIWnd *pwnd = this->m_childs.m_pData[i];
+        if (!pwnd->m_bvisible) continue;
+        if (!verify_ptag_magic(pwnd)) {
+            // the magic is broken due to unknown reasons
+            // for safety, render only
+            UIWnd_vfptr_Render(pwnd);
+        } else {
+            // push state, render, pop state
+            push_ptag_state(this, pwnd, get_ptag(pwnd));
+            UIWnd_vfptr_Render(pwnd);
+            pop_ptag_state(this, pwnd, get_ptag(pwnd));
+        }
+    }
+}
+
+static void init_uiwnd_positiontag_patch()
+{
+    // asserts
+    if (sizeof(struct uiwnd_ptag) != 2) fail("struct uiwnd_ptag is too big!");
+    
+    // modify UIWnd::Create
+    SIMPLE_PATCH(0x00445BDA, "\x89\x46\x34", "\xEB\x0B\x90", 3);
+    SIMPLE_PATCH(0x00445BE7, "\x90\x90\x90\x90\x90\x90\x90\x90\x90", "\xC7\x46\x34" UIWND_PTAG_MAGIC "\x00\x00\xEB\xED", 9);
+
+    // replace UIWnd::Render
+    make_jmp(0x00445CD0, UIWnd_Render);
+}
+
+
+
+
+
+
+
+// replacefont
 static int uireplacefontflag;
 enum {
     D3DXFONT_U12, // UNICODE 12
@@ -171,6 +302,9 @@ enum {
     D3DXFONT_U20S,
     D3DXFONT_COUNT // EOF
 };
+static DWORD d3dxfont_charset;
+static DWORD d3dxfont_quality;
+static LPWSTR d3dxfont_facename;
 static int d3dxfont_sizelist_orig[D3DXFONT_COUNT] = {12, 16, 20, 12, 16, 20};
 static int d3dxfont_sizelist[D3DXFONT_COUNT];
 static int d3dxfont_boldflag[D3DXFONT_COUNT];
@@ -201,15 +335,12 @@ static int d3dxfont_selectbysize(int fontsize)
 }
 static void d3dxfont_init()
 {
-    DWORD charset = DEFAULT_CHARSET; // FIXME
-    DWORD quality = 5;
-    LPWSTR facename = L"¿¬Ìå_GB2312";
     // the init function must called after IDirect3DDevice is initialized
     int i;
     for (i = 0; i < D3DXFONT_COUNT; i++) {
         int fontsize = d3dxfont_sizelist[i];
         int boldflag = d3dxfont_boldflag[i];
-        if (FAILED(D3DXCreateFontW(g_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, charset, OUT_DEFAULT_PRECIS, quality, DEFAULT_PITCH | FF_DONTCARE, facename, &d3dxfont_fontlist[i]))) {
+        if (FAILED(D3DXCreateFontW(g_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, d3dxfont_quality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &d3dxfont_fontlist[i]))) {
             fail("can't create ID3DXFont for size '%d'.", fontsize);
         }
     }
@@ -269,7 +400,7 @@ static void __fastcall gbPrintFont_UNICODE_PrintString(struct gbPrintFont_UNICOD
     struct d3dxfont_strnode *node = malloc(sizeof(struct d3dxfont_strnode));
     node->fontid = d3dxfont_selectbysize(this->fontsize);
     node->wstr = cs2wcs(str, target_codepage);
-    node->color = this->curColor.Color | 0xFF000000; // FIXME: is this OK?
+    node->color = this->curColor.Color;
         
     // calc coord
     fRECT frect;
@@ -321,16 +452,30 @@ static void __fastcall gbPrintFont_UNICODE_Flush(struct gbPrintFont_UNICODE *thi
 
 static void ui_replacefont_init()
 {
+    // read configurations
+    switch (target_codepage) {
+        case 936: d3dxfont_charset = GB2312_CHARSET; break;
+        case 950: d3dxfont_charset = CHINESEBIG5_CHARSET; break;
+        default:  d3dxfont_charset = DEFAULT_CHARSET; break;
+    }
+    d3dxfont_quality = get_int_from_configfile("uireplacefont_quality");
+    d3dxfont_facename = cs2wcs(get_string_from_configfile("uireplacefont_facename"), CP_ACP); // let it leak
+    if (sscanf(get_string_from_configfile("uireplacefont_size"), "%d,%d,%d", &d3dxfont_sizelist[D3DXFONT_U12], &d3dxfont_sizelist[D3DXFONT_U16], &d3dxfont_sizelist[D3DXFONT_U20]) != 3) {
+        fail("can't parse font size string.");
+    }
+    if (sscanf(get_string_from_configfile("uireplacefont_bold"), "%d,%d,%d", &d3dxfont_boldflag[D3DXFONT_U12], &d3dxfont_boldflag[D3DXFONT_U16], &d3dxfont_boldflag[D3DXFONT_U20]) != 3) {
+        fail("can't parse font bold flag string.");
+    }
+    
     // init sizes
-    d3dxfont_sizelist[D3DXFONT_U12] = 12; // FIXME: let user config these values
-    d3dxfont_sizelist[D3DXFONT_U16] = 16;
-    d3dxfont_sizelist[D3DXFONT_U20] = 20;
     d3dxfont_sizelist[D3DXFONT_U12S] = floor(d3dxfont_sizelist[D3DXFONT_U12] * ui_scalefactor);
     d3dxfont_sizelist[D3DXFONT_U16S] = floor(d3dxfont_sizelist[D3DXFONT_U16] * ui_scalefactor);
     d3dxfont_sizelist[D3DXFONT_U20S] = floor(d3dxfont_sizelist[D3DXFONT_U20] * ui_scalefactor);
     
     // init boldflags
-    memset(d3dxfont_boldflag, -1, sizeof(d3dxfont_boldflag));
+    d3dxfont_boldflag[D3DXFONT_U12S] = d3dxfont_boldflag[D3DXFONT_U12];
+    d3dxfont_boldflag[D3DXFONT_U16S] = d3dxfont_boldflag[D3DXFONT_U16];
+    d3dxfont_boldflag[D3DXFONT_U20S] = d3dxfont_boldflag[D3DXFONT_U20];
     
     // add hooks
     add_postd3dcreate_hook(d3dxfont_init);
@@ -345,38 +490,24 @@ static void ui_replacefont_init()
 
 
 
-// hook GetCursorPos for cursor virtualization
-// src_frect should be original rect in game
-// dst_frect should be rect on screen
-static fRECT src_cursor_frect, dst_cursor_frect;
-static int cursor_virt_flag = 0;
 
-static void set_cursor_virtualization(fRECT *src_frect, fRECT *dst_frect)
-{
-    if (src_frect && dst_frect) {
-        cursor_virt_flag = 1;
-        src_cursor_frect = *src_frect;
-        dst_cursor_frect = *dst_frect;
-    } else {
-        cursor_virt_flag = 0;
-    }
-}
 
-static void getcursorpos_virtualization_hookfunc()
-{
-    if (!getcursorpos_hook_ret) return;
-    fixui_check_gamestate();
-    fRECT *src_frect, *dst_frect;
-    if (cursor_virt_flag) {
-        src_frect = &src_cursor_frect;
-        dst_frect = &dst_cursor_frect;
-    } else { // use rect in def_fs for default
-        src_frect = &def_fs.src_frect;
-        dst_frect = &def_fs.dst_frect;
-    }
-    getcursorpos_hook_lppoint->x = round((getcursorpos_hook_lppoint->x - dst_frect->left) / get_frect_width(dst_frect) * get_frect_width(src_frect) + src_frect->left);
-    getcursorpos_hook_lppoint->y = round((getcursorpos_hook_lppoint->y - dst_frect->top) / get_frect_height(dst_frect) * get_frect_height(src_frect) + src_frect->top);
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void haha()//////////////////////////////////////////////////////FIXME
 {
@@ -410,4 +541,7 @@ MAKE_PATCHSET(fixui)
     // init cursor virtualization
     set_cursor_virtualization(NULL, NULL);
     add_getcursorpos_hook(getcursorpos_virtualization_hookfunc);
+    
+    // init uiwnd position tag patch
+    init_uiwnd_positiontag_patch();
 }

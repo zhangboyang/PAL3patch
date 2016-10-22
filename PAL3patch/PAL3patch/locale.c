@@ -26,13 +26,17 @@ static const wchar_t wstr_confirmquit_text_CHS[] = L"ÄúÈ·¶¨ÒªÍË³öÓÎÏ·Âð£¿\nÎ´±£´
 static const wchar_t wstr_confirmquit_title_CHS[] = L"ÍË³ö";
 
 
-const wchar_t *wstr_about_title = wstr_about_title_CHS;
-const wchar_t *wstr_about_text = wstr_about_text_CHS;
-const wchar_t *wstr_confirmquit_text = wstr_confirmquit_text_CHS;
-const wchar_t *wstr_confirmquit_title = wstr_confirmquit_title_CHS;
+const wchar_t *wstr_about_title;
+const wchar_t *wstr_about_text;
+const wchar_t *wstr_confirmquit_text;
+const wchar_t *wstr_confirmquit_title;
 
 
 void init_locale()
 {
     // no translations yet
+    wstr_about_title = wstr_about_title_CHS;
+    wstr_about_text = wstr_about_text_CHS;
+    wstr_confirmquit_text = wstr_confirmquit_text_CHS;
+    wstr_confirmquit_title = wstr_confirmquit_title_CHS;
 }

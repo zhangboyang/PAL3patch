@@ -3,6 +3,7 @@ CFLAGS := -Wall -Werror -O0 -finput-charset=cp936 -fexec-charset=cp936 -fms-exte
 SFLAGS := -Wall -Werror
 LDFLAGS := -Wall -Werror -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lcomctl32 -lwinmm -lgdi32
 
+TARGET_LAUNCHER_CFILES := launcher/launcher.c
 TARGET_LAUNCHER := launcher.exe
 TARGET_LAUNCHER_USEUNPACKED := launcher_useunpacked.exe
 TARGET_EXE := $(TARGET_LAUNCHER) $(TARGET_LAUNCHER_USEUNPACKED)
@@ -29,12 +30,12 @@ all: $(TARGET_EXE) $(TARGET_DLL)
 clean:
 	rm -f $(TARGET_EXE) $(TARGET_DLL) $(TARGET_DLL_OBJS) $(TARGET_DLL_GCH)
 
-$(TARGET_LAUNCHER):
-	$(CC) $(CFLAGS) -Wl,--subsystem,windows -o $@ launcher/launcher.c
+$(TARGET_LAUNCHER): $(TARGET_LAUNCHER_CFILES)
+	$(CC) $(CFLAGS) -Wl,--subsystem,windows -o $@ $(TARGET_LAUNCHER_CFILES)
 	strip $@
 
-$(TARGET_LAUNCHER_USEUNPACKED):
-	$(CC) $(CFLAGS) -DUSE_UNPACKED_EXE -Wl,--subsystem,windows -o $@ launcher/launcher.c
+$(TARGET_LAUNCHER_USEUNPACKED): $(TARGET_LAUNCHER_CFILES)
+	$(CC) $(CFLAGS) -DUSE_UNPACKED_EXE -Wl,--subsystem,windows -o $@ $(TARGET_LAUNCHER_CFILES)
 	strip $@
 
 $(TARGET_DLL_GCH): $(TARGET_DLL_HFILES)

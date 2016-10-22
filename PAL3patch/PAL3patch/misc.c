@@ -106,7 +106,7 @@ void __attribute__((noreturn)) __fail(const char *file, int line, const char *fu
         fputc('\n', fp);
         fclose(fp);
     }
-    MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONERROR);
+    MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
     TerminateProcess(GetCurrentProcess(), 1);
     while (1);
     va_end(ap);
@@ -149,7 +149,7 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
     }
     plog_flag = 1;
     if (is_warning) {
-        MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONWARNING);
+        MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
     }
     va_end(ap);
 }

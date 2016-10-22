@@ -151,9 +151,9 @@ void transform_fseg(fSEG *out_fseg, const fSEG *fseg, double src_total, double d
 void transform_frect(fRECT *out_frect, const fRECT *frect, const fRECT *src_frect, const fRECT *dst_frect, int lr_method, int tb_method, double len_factor)
 {
     fSEG lr, tb;
-    set_fseg(&lr, frect->left, get_frect_width(frect));
+    set_fseg(&lr, frect->left - src_frect->left, get_frect_width(frect));
     transform_fseg(&lr, &lr, get_frect_width(src_frect), get_frect_width(dst_frect), lr_method, len_factor);
-    set_fseg(&tb, frect->top, get_frect_height(frect));
+    set_fseg(&tb, frect->top - src_frect->top, get_frect_height(frect));
     transform_fseg(&tb, &tb, get_frect_height(src_frect), get_frect_height(dst_frect), tb_method, len_factor);
     set_frect_ltwh(out_frect, lr.start + dst_frect->left, tb.start + dst_frect->top, lr.length, tb.length);
 }

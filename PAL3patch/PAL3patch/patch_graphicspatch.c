@@ -6,6 +6,8 @@ fRECT game_frect, game_frect_43, game_frect_original;
 double game_scalefactor;
 
 
+
+
 // part of the CArrayList class, from DirectX SDK C++ Sample
 enum ArrayListType { AL_VALUE, AL_REFERENCE };
 struct CArrayList {
@@ -35,6 +37,9 @@ static int *CArrayList_FindInt(struct CArrayList *this, int target, int *subscri
     if (subscript) *subscript = -1;
     return NULL;
 }
+
+
+
 
 
 
@@ -83,6 +88,9 @@ static void patch_depth_buffer_config(const char *cfgstr)
         INIT_ASMPATCH(zbuf, gboffset + 0x1001A12E, 7, "\x6A\x00\xE8\x7B\xCD\xFF\xFF");
     }
 }
+
+
+
 
 
 
@@ -165,6 +173,13 @@ static void patch_multisample_config(const char *cfgstr)
     }
 }
 
+
+
+
+
+
+
+
 // resolution patch
 static char __fastcall Readn(void *this, int dummy, char *appname, char *keyname, int *ret, int defvalue)
 {
@@ -191,9 +206,208 @@ static void patch_resolution_config(const char *cfgstr)
     make_call(0x00406453, Readn);
 }
 
+
+
+
+
+
+// scalefactor table
+double scalefactor_table[SCALEFACTOR_COUNT];
+static void init_scalefactor_table()
+{
+    // set default value for scalefactors
+    // may be overwritten by other init functions
+    int i;
+    for (i = 0; i < SCALEFACTOR_COUNT; i++) {
+        scalefactor_table[i] = 1.0;
+    }
+    
+    // two special scale factor
+    scalefactor_table[SF_IDENTITY] = 1.0;
+    scalefactor_table[SF_GAMEFACTOR] = game_scalefactor;
+}
+
+
+
+
+
+
+
+
+// window patch
+#define WINDOW_FULLSCREEN 0
+#define WINDOW_NORMAL 1
+#define WINDOW_NOBORDER 2
+static char winname[0x80];
+static HWND gamehwnd;
+static int window_patch_cfg;
+
+static ATOM WINAPI RegisterClass_wrapper(WNDCLASS *lpWndClass)
+{
+    lpWndClass->hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+    return RegisterClass(lpWndClass);
+}
+static HWND WINAPI CreateWindowExA_wrapper(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
+{
+    if (window_patch_cfg == WINDOW_NORMAL) {
+        // x = y = CW_USEDEFAULT;
+        x = (GetSystemMetrics(SM_CXSCREEN) - nWidth) / 2;
+        y = (GetSystemMetrics(SM_CYSCREEN) - nHeight) / 2;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+    }
+    lpWindowName = winname;
+    gamehwnd = CreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+    return gamehwnd;
+}
+static void getcursorpos_window_hookfunc()
+{
+    if (!getcursorpos_hook_ret) return;
+    ScreenToClient(gamehwnd, getcursorpos_hook_lppoint);
+}
+static BOOL WINAPI SetCursorPos_wrapper(int X, int Y)
+{
+    POINT cpos;
+    cpos.x = X;
+    cpos.y = Y;
+    ClientToScreen(gamehwnd, &cpos);
+    return SetCursorPos(cpos.x, cpos.y);
+}
+static int clipcursor_enabled = 1;
+static void clipcursor(int flag)
+{
+    if (clipcursor_enabled && flag) {
+        RECT Rect;
+        POINT Point;
+        Point.x = Point.y = 0;
+        ClientToScreen(gamehwnd, &Point);
+        GetClientRect(gamehwnd, &Rect);
+        Rect.left = Point.x;
+        Rect.top = Point.y;
+        Rect.right += Point.x;
+        Rect.bottom += Point.y;
+        ClipCursor(&Rect);
+    } else {
+        ClipCursor(NULL);
+    }
+}
+static void clipcursor_atexit()
+{
+    clipcursor(0);
+}
+static void clipcursor_hook()
+{
+    if (is_window_active) {
+        clipcursor(1);
+    } else {
+        clipcursor(0);
+    }
+}
+static int confirm_quit()
+{
+    ClipCursor(NULL);
+    return MessageBoxW(gamehwnd, wstr_confirmquit_text, wstr_confirmquit_title, MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES;
+}
+static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    if (Msg == WM_CLOSE) {
+        if (window_patch_cfg == WINDOW_FULLSCREEN) ShowWindow(gamehwnd, SW_MINIMIZE);
+        if (!confirm_quit()) return 0;
+    }
+    if (Msg == WM_KEYUP && wParam == VK_F12) { clipcursor_enabled ^= 1; return 0; }
+    return DefWindowProcA(hWnd, Msg, wParam, lParam);
+}
+static void __fastcall gbGfxManager_D3D_BuildPresentParamsFromSettings_wrapper(struct gbGfxManager_D3D *this, int dummy)
+{
+    // by default, windowed mode ignore vsync settings
+    // this wrapper add vsync feature to windowed mode
+
+    gbGfxManager_D3D_BuildPresentParamsFromSettings(this);
+    if (this->m_bWindowed) {
+        if (this->DrvInfo.waitforverticalblank == 1) {
+            this->m_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+        }
+    }
+}
+
+static void init_window_patch(int flag)
+{
+    window_patch_cfg = flag;
+    
+    if (window_patch_cfg != WINDOW_FULLSCREEN && window_patch_cfg != WINDOW_NORMAL && window_patch_cfg != WINDOW_NOBORDER) {
+        fail("unknown window patch configuration.");
+    }
+
+    // patch gfxdrvinfo
+    if (window_patch_cfg != WINDOW_FULLSCREEN) {
+        SIMPLE_PATCH(0x004064DA, "\xC7\x05\xE8\xD6\xBF\x00\x01\x00\x00\x00", "\xC7\x05\xE8\xD6\xBF\x00\x00\x00\x00\x00", 10);
+    }
+
+    // change window style
+    unsigned newstyle;
+    if (window_patch_cfg == WINDOW_FULLSCREEN) {
+        // the window style for fullscreen is modified by gbengine after window created
+        // 0x96000000 = WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS
+        newstyle = WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_SYSMENU;
+        memcpy_to_process(gboffset + 0x1011F4B4, &newstyle, 4);
+    }
+    if (window_patch_cfg == WINDOW_NORMAL) {
+        // modify the code which create the window
+        newstyle = WS_OVERLAPPED | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+        SIMPLE_PATCH(0x0040652D, "\x00\x00\x08\x96", &newstyle, 4);
+        SIMPLE_PATCH(0x00406559, "\x00\x00\x08\x96", &newstyle, 4);
+    }
+    
+
+    // hook CreateWindowEx
+    make_branch(0x004063A7, 0xE8, RegisterClass_wrapper, 6);
+    make_branch(0x00406564, 0xE8, CreateWindowExA_wrapper, 6);
+
+    // modify window title
+    strncpy(winname, get_string_from_configfile("windowtitle"), sizeof(winname));
+    winname[sizeof(winname) - 1] = 0;
+    unsigned titleaddr = TOUINT(winname);
+    SIMPLE_PATCH(0x00541925, "\xC4\x39\x58\x00", &titleaddr, 4);
+    
+    // cursor hook
+    add_getcursorpos_hook(getcursorpos_window_hookfunc);
+    // make_branch(0x00404F2B, 0xE8, GetCursorPos_wrapper, 6);
+    make_jmp(0x00402290, SetCursorPos_wrapper);
+    
+    // clip cursor
+    if (get_int_from_configfile("clipcursor")) {
+        add_gameloop_hook(clipcursor_hook);
+        add_atexit_hook(clipcursor_atexit);
+    }
+    
+    // hook DefWindowProc
+    make_branch(0x00404F8D, 0xE8, DefWindowProcA_wrapper, 6);
+    
+    // click X to quit game
+    if (get_int_from_configfile("xquit")) {
+        SIMPLE_PATCH_NOP(0x00404F57, "\x74\x52", 2);
+    }
+    
+    // hook gbGfxManager_D3D_BuildPresentParamsFromSettings()
+    make_call(0x1001A828, gbGfxManager_D3D_BuildPresentParamsFromSettings_wrapper);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 MAKE_PATCHSET(graphicspatch)
 {
     patch_depth_buffer_config(get_string_from_configfile("game_zbufferbits"));
     patch_multisample_config(get_string_from_configfile("game_multisample"));
     patch_resolution_config(get_string_from_configfile("game_resolution"));
+    init_scalefactor_table();
+    init_window_patch(get_int_from_configfile("game_windowed"));
 }

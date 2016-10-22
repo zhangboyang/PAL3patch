@@ -18,6 +18,7 @@ enum transform_method {
     TR_HIGH,
     TR_CENTER,
     TR_SCALE,
+    // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
 };
 
 // rect functions

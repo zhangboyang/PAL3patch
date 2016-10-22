@@ -47,5 +47,7 @@ MAKE_PATCHSET(setlocale)
             hook_import_table(GetModuleHandle("COMCTL32.DLL"), "KERNEL32.DLL", "MultiByteToWideChar", My_MultiByteToWideChar);
             hook_import_table(GetModuleHandle("COMCTL32.DLL"), "KERNEL32.DLL", "WideCharToMultiByte", My_WideCharToMultiByte);
         }
+        
+        // no need (and shouldn't) to hook myself!
     }
 }

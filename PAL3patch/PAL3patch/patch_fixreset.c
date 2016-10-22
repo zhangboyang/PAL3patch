@@ -165,7 +165,7 @@ static MAKE_ASMPATCH(fixreset_UnderWater_1)
 static MAKE_ASMPATCH(retryreset)
 {
     if (R_EAX >> 31) {
-        if (MessageBox(NULL, "Reset() failed, retry?", "PAL3patch", MB_RETRYCANCEL | MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND | MB_SYSTEMMODAL) == IDCANCEL) {
+        if (MessageBox(NULL, "Reset() failed, retry?\n\npress ENTER to retry.\npress ESC to exit game.", "PAL3patch", MB_RETRYCANCEL | MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND | MB_SYSTEMMODAL) == IDCANCEL) {
             RETADDR = gboffset + 0x1001AD76; // oldcode
         } else {
             RETADDR = gboffset + 0x1001AC78; // try Reset() again

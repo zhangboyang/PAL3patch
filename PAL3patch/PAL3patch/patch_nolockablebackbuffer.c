@@ -327,8 +327,14 @@ static void before_screenshot(struct gbSurfaceDesc *surface)
         
     if (GameRect.left < 0) GameRect.left = 0;
     if (GameRect.top < 0) GameRect.top = 0;
-    if (GameRect.right > surface_width) GameRect.right = surface_width;
-    if (GameRect.bottom > surface_height) GameRect.bottom = surface_height;
+    if (GameRect.left > surface_width - 1) GameRect.left = surface_width - 1;
+    if (GameRect.top > surface_height - 1) GameRect.top = surface_height - 1;
+    
+    if (GameRect.right < 0) GameRect.right = 0;
+    if (GameRect.bottom < 0) GameRect.bottom = 0;
+    if (GameRect.right > surface_width - 1) GameRect.right = surface_width - 1;
+    if (GameRect.bottom > surface_height - 1) GameRect.bottom = surface_height - 1;
+    
     if (GameRect.right <= GameRect.left) GameRect.right = GameRect.left + 1;
     if (GameRect.bottom <= GameRect.top) GameRect.bottom = GameRect.top + 1;
     
