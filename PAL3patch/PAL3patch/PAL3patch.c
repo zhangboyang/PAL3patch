@@ -40,6 +40,7 @@ static void init_stage2()
     INIT_PATCHSET(fixmemfree);
     INIT_PATCHSET(nocpk);
     INIT_PATCHSET(showfps);
+    INIT_PATCHSET(console);
     
     if (!INIT_PATCHSET(testcombat)) {
         // here are some patches not compatiable with 'testcombat'
@@ -53,6 +54,7 @@ static void init_stage2()
                 // must called after INIT_PATCHSET(graphicspatch)
                 // must called after INIT_PATCHSET(setlocale) because of D3DXCreateFont need charset information
                 // ui fixes
+                INIT_PATCHSET(uireplacefont);
                 //INIT_PATCHSET(fixloadingfrm);
                 INIT_PATCHSET(fixcombatui);
                 //INIT_PATCHSET(fixroledialog);
@@ -103,7 +105,7 @@ void launcher_entry(unsigned oep_addr)
     }
 }
 
-// fix unpacker entry for Windows 98
+// fix unpacker entry for Windows 98/Me
 // see notes20160721.txt for details
 static int try_fix_unpacker()
 {

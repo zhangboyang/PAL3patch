@@ -1,6 +1,11 @@
 #ifndef PAL3PATCH_TRANSFORM_H
 #define PAL3PATCH_TRANSFORM_H
 
+typedef struct _fPOINT {
+    double x;
+    double y;
+} fPOINT;
+
 typedef struct _fRECT { // rect
     double left;
     double top;
@@ -21,7 +26,14 @@ enum transform_method {
     // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
 };
 
+// point functions
+extern void set_point(POINT *point, LONG x, LONG y);
+extern void set_fpoint(fPOINT *fpoint, double x, double y);
+extern void set_point_fpoint(POINT *point, const fPOINT *fpoint);
+extern void set_fpoint_point(fPOINT *fpoint, const POINT *point);
+
 // rect functions
+#define set_rect SetRect
 extern void set_rect_frect(RECT *rect, const fRECT *frect);
 extern void set_frect_rect(fRECT *frect, const RECT *rect);
 extern double get_frect_width(const fRECT *frect);

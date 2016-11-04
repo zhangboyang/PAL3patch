@@ -1,5 +1,27 @@
 #include "common.h"
 
+// convert betwenn fPOINT and POINT
+void set_point(POINT *point, LONG x, LONG y)
+{
+    point->x = x;
+    point->y = y;
+}
+void set_fpoint(fPOINT *fpoint, double x, double y)
+{
+    fpoint->x = x;
+    fpoint->y = y;
+}
+void set_point_fpoint(POINT *point, const fPOINT *fpoint)
+{
+    point->x = fpoint->x;
+    point->y = fpoint->y;
+}
+void set_fpoint_point(fPOINT *fpoint, const POINT *point)
+{
+    fpoint->x = point->x;
+    fpoint->y = point->y;
+}
+
 // convert between fRECT and RECT
 void set_rect_frect(RECT *rect, const fRECT *frect)
 {

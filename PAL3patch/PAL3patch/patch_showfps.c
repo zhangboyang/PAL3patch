@@ -46,7 +46,7 @@ static void showfps_onendscene()
     
     ID3DXSprite_Begin(pFPSSprite, 0);
     RECT rc;
-    SetRect(&rc, 10, 10, 0, 0);
+    set_rect(&rc, 10, 10, 0, 0);
     ID3DXFont_DrawTextW(pFPSFont, pFPSSprite, buf, -1, &rc, DT_NOCLIP, 0xFFFFFFFF);
     ID3DXSprite_End(pFPSSprite);
     
