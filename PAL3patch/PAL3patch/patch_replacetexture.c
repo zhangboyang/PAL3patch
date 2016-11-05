@@ -299,7 +299,7 @@ static MAKE_ASMPATCH(gbimage2d_loadimage_hook)
                 this->pBits = pbits;
                 flag = 1; // set success flag
                 M_DWORD(R_ESP + 0x10) = 2; // set type to TGA
-                RETADDR = gboffset + 0x1001E6C9; // finish image loading, jump to processing
+                RETNADDR = gboffset + 0x1001E6C9; // finish image loading, jump to processing
             } // else success flag is still 0
             free(fdataptr); // free file contents        
         }
@@ -313,7 +313,7 @@ static MAKE_ASMPATCH(gbimage2d_loadimage_hook)
         }
         
         if (!is_tga) { // oldcode
-            RETADDR = gboffset + 0x1001E544; // jump to next extension checking
+            RETNADDR = gboffset + 0x1001E544; // jump to next extension checking
         } // else fallthrough the TGA processing procdure
     }
 }
@@ -380,8 +380,10 @@ MAKE_PATCHSET(replacetexture)
     // hook gbTexture::LoadTexture
     SIMPLE_PATCH(gboffset + 0x10020658, "\x8B\x13\x50\x8B\x86\x30\x01\x00\x00\x8B", "\x89\xD9\x50\x8B\x86\x30\x01\x00\x00\x50", 0xA);
     SIMPLE_PATCH(gboffset + 0x100206A4, "\x8B\x13", "\x89\xD9", 0x2);
-    make_call(gboffset + 0x10020662, gbTexture_D3D_CreateFromFileMemory_wrapper);
-    make_call(gboffset + 0x100206A8, gbTexture_D3D_CreateFromFileMemory_wrapper);
+    INIT_WRAPPER_CALL(gbTexture_D3D_CreateFromFileMemory_wrapper, {
+            gboffset + 0x10020662,
+            gboffset + 0x100206A8,
+    });
     
     // add cleanup hook
     add_atexit_hook(unload_texture_pack);

@@ -132,7 +132,7 @@ static int regredirect_flag;
 
 
 // patch functions
-static BOOL save_dword(LPCSTR lpSubKey, LPCSTR lpValueName, DWORD Data)
+static bool save_dword(LPCSTR lpSubKey, LPCSTR lpValueName, DWORD Data)
 {
     // write file
     assign_reg(lpSubKey, lpValueName, Data);
@@ -140,10 +140,10 @@ static BOOL save_dword(LPCSTR lpSubKey, LPCSTR lpValueName, DWORD Data)
         // always write windows registry is sync is enabled
         write_winreg(lpSubKey, lpValueName, Data);
     }
-    return TRUE;
+    return true;
 }
 
-static BOOL query_dword(LPCSTR lpSubKey, LPCSTR lpValueName, LPDWORD lpData)
+static bool query_dword(LPCSTR lpSubKey, LPCSTR lpValueName, LPDWORD lpData)
 {
     // read file
     int ret = query_reg(lpSubKey, lpValueName, (unsigned *) lpData);
@@ -161,7 +161,7 @@ static BOOL query_dword(LPCSTR lpSubKey, LPCSTR lpValueName, LPDWORD lpData)
     } else {
         if (!ret) *lpData = 0;
     }
-    return TRUE;
+    return true;
 }
 
 

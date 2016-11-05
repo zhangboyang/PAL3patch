@@ -1,0 +1,11 @@
+【wrapper框架】
+一般来说，能用wrapper就用wrapper，实在不行再用asmpatch
+INIT_WRAPPER_CALL: 用于初始化一系列调用被wrapper函数的地方，使它们指向wrapper (往往和IDA/OD的xref功能同时使用, OD的xref还可看到具体指令)
+INIT_WRAPPER_VFPTR: 用于初始化虚函数表中的指针，使其指向wrapper
+
+【为UIWnd打ptag的方法】
+打ptag需要在程序调用Create方法之后
+一般来说，在调用Create方法后，都会对相同的对象调用SetBk或者类似的方法
+一般向上寻找this指针较为麻烦，此时可以看SetBk的this指针在哪里，这样比较方便
+或者直接替换掉SetBk的CALL指令，将其偷梁换柱为我们的ASMPATCH(注意CALL指令大小)，此时一般ECX即是this指针，不过特殊情况下也有例外，需要仔细验证
+

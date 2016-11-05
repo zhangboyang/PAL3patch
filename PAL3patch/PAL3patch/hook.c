@@ -38,9 +38,7 @@ static void __fastcall gbGfxManager_D3D_EndScene_wrapper(struct gbGfxManager_D3D
 }
 void init_preendscene_hook()
 {
-    // hook the vfptr of gbGfxManager_D3D
-    void *ptrtowrapper = gbGfxManager_D3D_EndScene_wrapper;
-    memcpy_to_process(gboffset + 0x100F56E8, &ptrtowrapper, 4);
+    INIT_WRAPPER_VFPTR(gbGfxManager_D3D_EndScene_wrapper, gboffset + 0x100F56E8);
 }
 
 
@@ -76,7 +74,7 @@ static void PAL3_InitGFX_wrapper()
 }
 void init_postd3dcreate_hook()
 {
-    make_call(0x00404840, PAL3_InitGFX_wrapper);
+    INIT_WRAPPER_CALL(PAL3_InitGFX_wrapper, { 0x00404840 });
 }
 
 
@@ -87,8 +85,7 @@ static MAKE_ASMPATCH(atexit)
 {
     run_hooks(HOOKID_ATEXIT);
     
-    RETADDR = POP_DWORD(); // oldcode
-    R_ESP += 0x10;
+    LINK_RETN(0x10);
 }
 void add_atexit_hook(void (*funcptr)(void))
 {
@@ -115,17 +112,17 @@ void call_gameloop_hooks(int flag)
 static MAKE_ASMPATCH(gameloop_normal)
 {
     call_gameloop_hooks(GAMELOOP_NORMAL);
-    RETADDR = 0x541B18;
+    LINK_JMP(0x00541B18);
 }
 static MAKE_ASMPATCH(gameloop_sleep)
 {
     call_gameloop_hooks(GAMELOOP_SLEEP);
-    RETADDR = 0x541B18;
+    LINK_JMP(0x00541B18);
 }
 static MAKE_ASMPATCH(gameloop_movie)
 {
     call_gameloop_hooks(GAMELOOP_MOVIE);
-    RETADDR = 0x53C62E;
+    LINK_JMP(0x0053C62E);
 }
 static MAKE_ASMPATCH(gameloop_movie_atexit)
 {

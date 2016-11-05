@@ -1,6 +1,17 @@
 #ifndef PAL3PATCH_PATCH_COMMON_H
 #define PAL3PATCH_PATCH_COMMON_H
 
+#define MAKE_PATCHSET_NAME(name) CONCAT(patchset_, name)
+#define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
+#define GET_PATCHSET_FLAG(name) (get_int_from_configfile(TOSTR(name)))
+#define INIT_PATCHSET(name) \
+    ({ \
+        int __flag = GET_PATCHSET_FLAG(name); \
+        if (__flag) MAKE_PATCHSET_NAME(name)(__flag); \
+        __flag; \
+    })
+
+
 #define GAME_WIDTH_ORG 800
 #define GAME_HEIGHT_ORG 600
 
@@ -57,9 +68,9 @@ MAKE_PATCHSET(graphicspatch);
         extern void fixui_update_gamestate();
         
         enum uiwnd_rect_type { // PTR = pos tag rect
-            PTR_GAMERECT,
-            PTR_GAMERECT_43,
-            PTR_GAMERECT_ORIGINAL,
+            PTR_GAMERECT,          // game_frect
+            PTR_GAMERECT_43,       // game_frect_43
+            PTR_GAMERECT_ORIGINAL, // game_frect_original
             PTR_INHERIT,
             // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
         };
@@ -76,7 +87,8 @@ MAKE_PATCHSET(graphicspatch);
             unsigned short self_tb_method : 2;
             unsigned short enabled : 1;
         };
-        #define PWND(addr) TOPTR(M_DWORD(addr))
+        #define M_PWND(addr) TOPTR(M_DWORD(addr))
+        #define PWND TOPTR
         #define MAKE_PTAG(sf_idx, src_type, dst_type, lr, tb) \
             ((struct uiwnd_ptag) { \
                 .scalefactor_index = (sf_idx), \
@@ -94,6 +106,13 @@ MAKE_PATCHSET(graphicspatch);
         extern void fixui_adjust_RECT(RECT *out_rect, const RECT *rect);
         extern void fixui_adjust_fPOINT(fPOINT *out_fpoint, const fPOINT *fpoint);
         extern void fixui_adjust_POINT(POINT *out_point, const POINT *point);
+        
+        #define MAKE_ASMPATCH_ADD_PTAG_WHEN_UISTATIC_SETBK(patch_name, ptag) \
+            MAKE_ASMPATCH(patch_name) \
+            { \
+                set_uiwnd_ptag(PWND(R_ECX), (ptag)); \
+                LINK_CALL(0x004426B0); \
+            }
         
         MAKE_PATCHSET(uireplacefont);
         MAKE_PATCHSET(fixloadingfrm);

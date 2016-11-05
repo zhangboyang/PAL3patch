@@ -10,16 +10,6 @@
 
 
 
-#define MAKE_PATCHSET_NAME(name) CONCAT(patchset_, name)
-#define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
-#define GET_PATCHSET_FLAG(name) (get_int_from_configfile(TOSTR(name)))
-#define INIT_PATCHSET(name) \
-    ({ \
-        int __flag = GET_PATCHSET_FLAG(name); \
-        if (__flag) MAKE_PATCHSET_NAME(name)(__flag); \
-        __flag; \
-    })
-
 #define MAKE_ASMPATCH_PROC(funcname) void funcname(struct trapframe *tf)
 #define MAKE_ASMPATCH_NAME(name) CONCAT(asmpatch_, name)
 #define MAKE_ASMPATCH(name) MAKE_ASMPATCH_PROC(MAKE_ASMPATCH_NAME(name))
@@ -42,7 +32,7 @@ struct trapframe {
         };
     };
     unsigned eflags;
-    unsigned ret_addr;
+    unsigned retn_addr;
     patch_proc_t patch_proc;
 };
 
@@ -65,7 +55,12 @@ extern void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigne
 #define R_EBP ((tf)->ebp)
 #define R_ESI ((tf)->esi)
 #define R_EDI ((tf)->edi)
-#define RETADDR ((tf)->ret_addr)
+#define RETNADDR ((tf)->retn_addr)
+
+// these helpers must be call at end of asmpatch
+#define LINK_CALL(addr) do { PUSH_DWORD(RETNADDR); RETNADDR = (addr); } while (0)
+#define LINK_JMP(addr) do { RETNADDR = (addr); } while (0)
+#define LINK_RETN(arg_bytes) do { RETNADDR = POP_DWORD(); R_ESP += (arg_bytes); } while (0)
 
 // asmentry.S
 extern void __stdcall asmentry(unsigned patch_id);

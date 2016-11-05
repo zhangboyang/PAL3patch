@@ -374,6 +374,143 @@ struct gbPrintFont_UNICODE {
 struct gbBinkVideo;
 
 
+struct C2DSpark_tagSpark {
+    float fx;
+    float fy;
+    float fVx;
+    float fVy;
+    float fAx;
+    float fAy;
+    float fLum;
+    float fLumInc;
+    float fSize;
+    float fSizeInc;
+    char byColor;
+    char bValid;
+};
+
+struct C2DSpark {
+    struct C2DSpark_tagSpark m_Spark[512];
+    float m_fDisplayWidth;
+    float m_fDisplayHeight;
+    int m_nCurrentSpark;
+    float m_fBigLum;
+    int m_nBigLumX;
+    int m_nBigLumY;
+    char m_bMouseTrack;
+    struct gbRenderEffect *m_pAdditiveBlend;
+    struct gbTexture *m_pRedBig;
+    struct gbTextureArray *m_pRedBigArray;
+    struct gbTexture *m_pBlue16;
+    struct gbTextureArray *m_pBlue16Array;
+    struct gbTexture *m_pGreen16;
+    struct gbTextureArray *m_pGreen16Array;
+    struct gbTexture *m_pRed16;
+    struct gbTextureArray *m_pRed16Array;
+    struct gbTexture *m_pYellow16;
+    struct gbTextureArray *m_pYellow16Array;
+    struct gbUIQuad m_Quad;
+};
+
+
+struct UIFrameWnd {
+    struct UIWnd baseclass;
+    struct gbTexture *m_pbktex;
+};
+
+struct CCBUI;
+
+struct CCBUI_funcptr_t {
+    unsigned long (__fastcall *fp)(struct CCBUI *this, int dummy, unsigned long);
+    DWORD fp_data[3];
+};
+
+struct tagUIParam {
+    struct UIWnd *pUI;
+    float fFromX;
+    float fFromY;
+    float fEndX;
+    float fEndY;
+    float fSpeed;
+    float fEnergy;
+    int nTimes;
+};
+
+struct tagUITask {
+    struct CCBUI_funcptr_t fp;
+    char bValid;
+    char bExecuted;
+    char bFinished;
+    unsigned int dwID;
+    float fStartTime;
+    float fExpectStartTime;
+    float fExpectEndTime;
+    struct tagUIParam param;
+    DWORD padding;
+};
+
+struct CCBUI {
+    struct UIFrameWnd baseclass;
+    struct UIStatic *m_pAttackSequenBack;
+    struct UIStatic *m_pAttackSequenFace[11];
+    struct UIStatic *m_pRoleStatePanel[4];
+    struct UIStatic *m_pRoleStateFace[5];
+    struct UIStatic *m_pRoleStateFaceName[5];
+    struct UIStatic *m_pRoleStateAttackInc[11];
+    struct UIStatic *m_pRoleStateAttackDec[11];
+    struct UIStatic *m_pRoleStateDefenceInc[11];
+    struct UIStatic *m_pRoleStateDefenceDec[11];
+    struct UIStatic *m_pRoleStateLuckInc[11];
+    struct UIStatic *m_pRoleStateLuckDec[11];
+    struct UIStatic *m_pRoleStateSpeedInc[11];
+    struct UIStatic *m_pRoleStateSpeedDec[11];
+    struct UIStatic *m_pRoleStateStable[11];
+    struct UIStatic *m_pRoleStateBlank[11];
+    struct UIStatic *m_pRoleStateForbid[11];
+    struct UIStatic *m_pRoleStateSleep[11];
+    struct UIStatic *m_pRoleStateChaos[11];
+    struct UIStatic *m_pRoleStateMad[11];
+    struct UIStatic *m_pRoleStateMirror[11];
+    struct UIStatic *m_pRoleStateWall[11];
+    struct UIStatic *m_pRoleStateBound[11];
+    struct UIStatic *m_pRoleStateHermit[11];
+    struct UIStatic *m_pRoleStateImmunity[11];
+    struct UIStatic *m_pWinPanel;
+    struct UIStatic *m_pLosePanel;
+    struct UIProgressBar *m_pRoleStateHP[4];
+    struct UIProgressBar *m_pRoleStateGP[4];
+    struct UIProgressBar *m_pRoleStateMP[4];
+    struct UIProgressBar *m_pRoleStateSword;
+    struct UIStaticCB *m_pTrickName;
+    struct UIStaticCB *m_pTrickName2;
+    struct UIStatic *m_pDialogBack;
+    struct UIStatic *m_pResultLevelup;
+    struct UIStatic *m_pResultWindLvup;
+    struct UIStatic *m_pResultThunderLvup;
+    struct UIStatic *m_pResultWaterLvup;
+    struct UIStatic *m_pResultFireLvup;
+    struct UIStatic *m_pResultEarthLvup;
+    struct UIStatic *m_pResultDoubleLvup;
+    struct UIStatic *m_pResultGetItem;
+    struct CCBControlWindow *m_pMain;
+    struct CCBItemWindow *m_pItemWindow;
+    struct CCBMagicWindow *m_pMagicWindow;
+    struct CCBSkillWindow *m_pSkillWindow;
+    struct CCBAIWindow *m_pAIWindow;
+    struct CCBLineupWindow *m_pLineupWindow;
+    struct CCBProtectWindow *m_pProtectWindow;
+    struct CCBResultWindow *m_pResultWindow[4];
+    struct CCBSystem *m_pCBSystem;
+    struct CUtil *m_pUtil;
+    struct tagUITask m_Task[20];
+    struct CCBUI_funcptr_t fp;
+    int m_nTask;
+    int m_nCurTask;
+};
+
+
+
+
 // functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
 #define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A190, void, struct gbGfxManager_D3D *), this)
@@ -395,6 +532,10 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gbGfxManager_D3D_EndScene(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10018F00, void, struct gbGfxManager_D3D *), this)
 #define UIDrawTextEx ((void (*)(const char *, RECT *, struct gbPrintFont *, int, int)) TOPTR(0x00541210))
 #define UIPrint ((void (*)(int, int, char *, struct gbColorQuad *, int)) TOPTR(0x00540FD0))
+#define C2DSpark_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004D61C0, void, struct C2DSpark *), this)
+#define C2DSpark_CreateSingle(this, pSpark) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004D5EC0, bool, struct C2DSpark *, struct C2DSpark_tagSpark *), this, pSpark)
+#define C2DSpark_CreateStars(this, x, y, nWidth, fStarSize) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004D6050, void, struct C2DSpark *, int, int, int, float), this, x, y, nWidth, fStarSize)
+#define CCBUI_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005163D0, bool, struct CCBUI *), this)
 
 // global variables
 #define gfxdrvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))

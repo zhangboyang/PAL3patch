@@ -51,6 +51,10 @@ void make_call(unsigned addr, const void *jtarget)
 {
     make_branch(addr, 0xE8, jtarget, 5);
 }
+void make_call_batch(unsigned *addr_list, int count, const void *jtarget)
+{
+    while (count--) make_call(*addr_list++, jtarget);
+}
 
 void check_code(unsigned addr, const void *code, unsigned size)
 {

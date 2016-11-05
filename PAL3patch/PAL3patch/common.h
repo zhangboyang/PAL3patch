@@ -27,6 +27,10 @@
 #define MAXLINEFMT "%" TOSTR(MAXLINE) "s"
 
 
+// bool
+typedef unsigned char bool;
+#define true 1
+#define false 0
 
 
 // for InitCommonControlsEx
@@ -66,10 +70,8 @@
 #include "PAL3patch.h"
 #include "d3dx9_21.h"
 
-
 // common typedefs
 typedef void *(*malloc_funcptr_t)(size_t);
 typedef void (*free_funcptr_t)(void *);
-
 
 #endif

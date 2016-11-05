@@ -378,6 +378,9 @@ static void init_window_patch(int flag)
     if (get_int_from_configfile("clipcursor")) {
         add_gameloop_hook(clipcursor_hook);
         add_atexit_hook(clipcursor_atexit);
+    } else {
+        // patch gbGfxManager_D3D::m_bClipCursorWhenFullscreen
+        SIMPLE_PATCH(gboffset + 0x10018A1B, "\xC6\x86\x4A\x06\x00\x00\x01", "\xC6\x86\x4A\x06\x00\x00\x00", 7);
     }
     
     // hook DefWindowProc
@@ -389,7 +392,7 @@ static void init_window_patch(int flag)
     }
     
     // hook gbGfxManager_D3D_BuildPresentParamsFromSettings()
-    make_call(0x1001A828, gbGfxManager_D3D_BuildPresentParamsFromSettings_wrapper);
+    INIT_WRAPPER_CALL(gbGfxManager_D3D_BuildPresentParamsFromSettings_wrapper, { gboffset + 0x1001A828 });
 }
 
 

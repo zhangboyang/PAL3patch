@@ -311,8 +311,10 @@ static void UIDrawTextEx_wrapper(const char *str, RECT *rect, struct gbPrintFont
 static void hook_UIDrawTextEx()
 {
     // xref of UIDrawTextEx()
-    make_call(0x00450533, UIDrawTextEx_wrapper);
-    make_call(0x005411F2, UIDrawTextEx_wrapper);
+    INIT_WRAPPER_CALL(UIDrawTextEx_wrapper, {
+        0x00450533,
+        0x005411F2,
+    });
 }
 
 // hook UIPrint()
@@ -328,19 +330,14 @@ static void UIPrint_wrapper(int x, int y, char *str, struct gbColorQuad *color, 
 }
 static void hook_UIPrint()
 {
-    unsigned funcptr[] = { // xref of UIPrint()
+    INIT_WRAPPER_CALL(UIPrint_wrapper, {
         0x0043E8A0 + 0x11F,
         0x0043E8A0 + 0x13B,
         0x0044DAC0 + 0x66,
         0x0053C990 + 0xE6,
         0x0053C990 + 0x10A,
         0x0053C990 + 0x143,
-        0 // eof
-    };
-    unsigned *ptr;
-    for (ptr = funcptr; *ptr; ptr++) {
-        make_call(*ptr, UIPrint_wrapper);
-    }
+    });
 }
 
 static void ui_replacefont_bitmapfont_init()
