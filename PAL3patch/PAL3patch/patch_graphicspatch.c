@@ -371,21 +371,21 @@ static void init_window_patch(int flag)
     
     // cursor hook
     add_getcursorpos_hook(getcursorpos_window_hookfunc);
-    // make_branch(0x00404F2B, 0xE8, GetCursorPos_wrapper, 6);
     make_jmp(0x00402290, SetCursorPos_wrapper);
     
     // clip cursor
     if (get_int_from_configfile("clipcursor")) {
         add_gameloop_hook(clipcursor_hook);
         add_atexit_hook(clipcursor_atexit);
-    } else {
-        // patch gbGfxManager_D3D::m_bClipCursorWhenFullscreen
-        SIMPLE_PATCH(gboffset + 0x10018A1B, "\xC6\x86\x4A\x06\x00\x00\x01", "\xC6\x86\x4A\x06\x00\x00\x00", 7);
     }
     
+    // patch gbGfxManager_D3D::m_bClipCursorWhenFullscreen
+    // the game will use our clip cursor framework
+    SIMPLE_PATCH(gboffset + 0x10018A1B, "\xC6\x86\x4A\x06\x00\x00\x01", "\xC6\x86\x4A\x06\x00\x00\x00", 7);
+
     // hook DefWindowProc
     make_branch(0x00404F8D, 0xE8, DefWindowProcA_wrapper, 6);
-    
+
     // click X to quit game
     if (get_int_from_configfile("xquit")) {
         SIMPLE_PATCH_NOP(0x00404F57, "\x74\x52", 2);

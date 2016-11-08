@@ -30,7 +30,7 @@ static void showfps_onendscene()
     showfps_calcfps();
     
     wchar_t buf[MAXLINE];
-    snwprintf(buf, sizeof(buf) / sizeof(wchar_t), L"PAL3patch %hs\n%hs\nFPS = %.1f\n", PAL3PATCH_VERSION, build_info, fps);
+    snwprintf(buf, sizeof(buf) / sizeof(wchar_t), L"PAL3patch %hs\n%hs\nFPS = %.1f\n", patch_version, build_info, fps);
     
     IDirect3DStateBlock9_Capture(pFPSStateBlock);
     

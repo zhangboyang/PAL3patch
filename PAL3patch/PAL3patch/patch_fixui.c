@@ -127,25 +127,65 @@ static void *gbDynVertBuf_RenderUIQuad_original;
 static void __fastcall gbDynVertBuf_RenderUIQuad_wrapper(struct gbDynVertBuf *this, int dummy, struct gbUIQuad *uiquad, int count, struct gbRenderEffect *render_effect, struct gbTextureArray *tex_array)
 {
     fixui_update_gamestate();
-    struct gbUIQuad tmp_uiquad;
-    fixui_adjust_gbUIQuad(&tmp_uiquad, uiquad);
-    gbDynVertBuf_RenderUIQuad(this, &tmp_uiquad, count, render_effect, tex_array);
+    struct gbUIQuad *tmp_uiquad = malloc(sizeof(struct gbUIQuad) * count);
+    int i;
+    for (i = 0; i < count; i++) {
+        fixui_adjust_gbUIQuad(&tmp_uiquad[i], &uiquad[i]);
+    }
+    gbDynVertBuf_RenderUIQuad(this, tmp_uiquad, count, render_effect, tex_array);
+    free(tmp_uiquad);
 }
 static void hook_gbDynVertBuf_RenderUIQuad()
 {
     unsigned func_iat_entry = 0x0056A36C;
-    void *warpper_ptr = gbDynVertBuf_RenderUIQuad_wrapper;
     
     // save original function pointer to gbDynVertBuf_RenderUIQuad_original
     memcpy_from_process(&gbDynVertBuf_RenderUIQuad_original, func_iat_entry, sizeof(void *));
     
     // copy wrapper function pointer to IAT entry
-    memcpy_to_process(func_iat_entry, &warpper_ptr, sizeof(void *));
+    INIT_WRAPPER_VFPTR(gbDynVertBuf_RenderUIQuad_wrapper, func_iat_entry);
+    
+    // fix calls inside GBENGINE.DLL
+    INIT_WRAPPER_CALL(gbDynVertBuf_RenderUIQuad_wrapper, {
+        gboffset + 0x10015476,
+        gboffset + 0x100229A7,
+        gboffset + 0x10023462,
+        gboffset + 0x10023A87,
+    });
 }
 
 
 
 
+
+
+// FIXME: may be should remove these code?
+// because printing number string is totally a different way in CCBSystem
+// patch gbPrintFont::PrintString
+static void __fastcall gbPrintFont_PrintString_wrapper(struct gbPrintFont *this, int dummy, const char *str, float x, float y, float endx, float endy)
+{
+    fPOINT a = {x, y}, b = {endx, endy};
+    fixui_adjust_fPOINT(&a, &a);
+    fixui_adjust_fPOINT(&b, &b);
+    x = a.x; y = a.y;
+    if (endx < 10000.0) endx = b.x;
+    if (endy < 10000.0) endy = b.y;
+    
+    float ScaleX_sv = this->ScaleX, ScaleY_sv = this->ScaleY;
+    this->ScaleX *= fs->len_factor;
+    this->ScaleY *= fs->len_factor;
+    gbPrintFont_PrintString(this, str, x, y, endx, endy);
+    this->ScaleX = ScaleX_sv;
+    this->ScaleY = ScaleY_sv;
+}
+
+static void hook_gbPrintFont_PrintString()
+{
+    // we only patch gbPrintFont_NUM here
+    // FIXME: should we patch more classes? (e.g. gbPrintFont_ASC)
+    
+    INIT_WRAPPER_VFPTR(gbPrintFont_PrintString_wrapper, gboffset + 0x100F586C); // vfptr for gbPrintFont_NUM
+}
 
 
 
@@ -318,6 +358,7 @@ MAKE_PATCHSET(fixui)
     // init fixui, use identity transform
     fixui_setdefaultransform(FIXUI_MANUAL_TRANSFORM);
     hook_gbDynVertBuf_RenderUIQuad();
+    hook_gbPrintFont_PrintString(); 
     
     // init cursor virtualization
     set_cursor_virtualization(NULL, NULL);
