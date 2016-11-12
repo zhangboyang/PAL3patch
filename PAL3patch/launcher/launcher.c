@@ -104,8 +104,8 @@ struct entry_code_data {
     unsigned LoadLibrary;              // +0x18
     unsigned GetProcAddress;           // +0x1C
     
-    unsigned char dllname[0x30];       // +0x20
-    unsigned char dllfunc[0x30];       // +0x50
+    char dllname[0x30];       // +0x20
+    char dllfunc[0x30];       // +0x50
 }; // size 0x80
 
 

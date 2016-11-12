@@ -205,6 +205,10 @@ void *load_png(void *fdata, unsigned flen, int *width, int *height, int *bitcoun
                     }
                 }
                 break;
+            
+            // fallback
+            default:
+                memset(dest, -1, pitch);
         }
     }
 
