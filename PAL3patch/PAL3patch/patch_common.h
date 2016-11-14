@@ -71,12 +71,15 @@ MAKE_PATCHSET(graphicspatch);
             PTR_GAMERECT,          // game_frect
             PTR_GAMERECT_43,       // game_frect_43
             PTR_GAMERECT_ORIGINAL, // game_frect_original
-            PTR_INHERIT,
             // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
         };
         int parse_uiwnd_rect_type(const char *str);
         
-        extern void fixui_pushstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor);
+        struct fixui_state *fixui_newstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor);
+        struct fixui_state *fixui_dupstate();
+        extern void fixui_pushstate_node(struct fixui_state *cur);
+        #define fixui_pushstate(src_frect, dst_frect, lr_method, tb_method, len_factor) \
+            fixui_pushstate_node(fixui_newstate(src_frect, dst_frect, lr_method, tb_method, len_factor))
         extern void fixui_popstate();
         
         struct uiwnd_ptag {
@@ -85,6 +88,7 @@ MAKE_PATCHSET(graphicspatch);
             unsigned short self_dstrect_type : 2;
             unsigned short self_lr_method : 2;
             unsigned short self_tb_method : 2;
+            unsigned short : 3;
             unsigned short enabled : 1;
         };
         #define M_PWND(addr) TOPTR(M_DWORD(addr))

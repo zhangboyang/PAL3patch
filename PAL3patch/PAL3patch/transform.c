@@ -125,7 +125,7 @@ void set_fseg(fSEG *fseg, double start, double length)
     
     method:
         TR_LOW, TR_HIGH: segment is low/high-aligned, length and offset is scaled by len_factor
-        TR_CENTER: segment is center-aligned, legth is scaled by len_factor
+        TR_CENTER: segment is center-aligned, length is scaled by len_factor
         TR_SCALE: length is scaled by len_factor (keep middle point), offset is scaled by (dst_total / total)
     
     out_seg == seg is allowed

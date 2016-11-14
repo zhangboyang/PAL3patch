@@ -66,6 +66,40 @@ static MAKE_ASMPATCH(fix_statuspanel_c2dspark)
 }
 
 
+// fix CCBDisplayChain
+static int CCBDisplayChain_Render_popflag;
+static MAKE_ASMPATCH(CCBDisplayChain_Render_PreEachItem)
+{
+    struct tagShowItem *cur = TOPTR(R_ESI - 0x114);
+    switch (cur->eKind) {
+        case CBSIK_Txt:
+            fixui_pushstate(&game_frect, &game_frect, TR_SCALE, TR_SCALE, cb_scalefactor);
+            CCBDisplayChain_Render_popflag = 1;
+            break;
+        case CBSIK_RoleState:
+            if (gby2y(cur->fY) < 600 / 2) {
+                // top half, result window
+                CB_PUSHSTATE(TR_LOW, TR_LOW);
+            } else {
+                // bottom half, status panel
+                CB_PUSHSTATE(TR_LOW, TR_HIGH);
+            }
+            CCBDisplayChain_Render_popflag = 1;
+            break;
+        default: CCBDisplayChain_Render_popflag = 0; break;
+    }
+    R_EAX = M_DWORD(R_ESI - 0x114); // oldcode
+}
+static MAKE_ASMPATCH(CCBDisplayChain_Render_PostEachItem)
+{
+    if (CCBDisplayChain_Render_popflag) {
+        fixui_popstate();
+        CCBDisplayChain_Render_popflag = 0;
+    }
+    R_ESI += 0x118; // oldcode
+}
+
+
 // fix others
 static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
 {
@@ -136,6 +170,15 @@ static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
         set_uiwnd_ptag((struct UIWnd *) this->m_pResultWindow[i], ptag);
     }
     
+    // fix other windows
+    ptag = CB_PTAG(TR_LOW, TR_HIGH);
+    set_uiwnd_ptag((struct UIWnd *) this->m_pMain, ptag);
+    set_uiwnd_ptag((struct UIWnd *) this->m_pItemWindow, ptag);
+    set_uiwnd_ptag((struct UIWnd *) this->m_pMagicWindow, ptag);
+    set_uiwnd_ptag((struct UIWnd *) this->m_pSkillWindow, ptag);
+    set_uiwnd_ptag((struct UIWnd *) this->m_pAIWindow, ptag);
+    set_uiwnd_ptag((struct UIWnd *) this->m_pLineupWindow, ptag);
+    set_uiwnd_ptag((struct UIWnd *) this->m_pProtectWindow, ptag);
     
     return true;
 }
@@ -153,6 +196,10 @@ MAKE_PATCHSET(fixcombatui)
     INIT_ASMPATCH(fixattacksequen_c2dspark, 0x004DC4F0, 0x7, "\x6A\x24\x68\xB3\x02\x00\x00");
     INIT_ASMPATCH(fix_statuspanel_c2dspark, 0x004F85F5, 0x7, "\x68\x3A\x02\x00\x00\x6A\x19");
     INIT_ASMPATCH(fix_statuspanel_c2dspark, 0x004F862F, 0x7, "\x68\x3A\x02\x00\x00\x6A\x19");
+    
+    // fix CCBDisplayChain::Render
+    INIT_ASMPATCH(CCBDisplayChain_Render_PreEachItem, 0x004DF732, 0x6, "\x8B\x86\xEC\xFE\xFF\xFF");
+    INIT_ASMPATCH(CCBDisplayChain_Render_PostEachItem, 0x004DF981, 0x6, "\x81\xC6\x18\x01\x00\x00");
     
     // hook CCBUI::Create
     INIT_WRAPPER_CALL(CCBUI_Create_wrapper, { 0x0051270B });

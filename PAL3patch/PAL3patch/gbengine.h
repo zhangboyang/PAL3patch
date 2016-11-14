@@ -412,6 +412,29 @@ struct C2DSpark {
     struct gbUIQuad m_Quad;
 };
 
+enum ECBShowItemKind {
+    CBSIK_Null,
+    CBSIK_Txt,
+    CBSIK_RoleState,
+    CBSIK_PrintTxt,
+    CBSIK_Pic,
+    CBSIK_FiveLineup,
+    CBSIK_EnemyFiveLineup,
+    CBSIK_CombatDialog,
+    CBSIK_ScreenQuad,
+    CBSIK_End,
+};
+
+struct tagShowItem {
+    enum ECBShowItemKind eKind;
+    char sTxt[256];
+    RGBQUAD color;
+    float fX;
+    float fY;
+    float fZ;
+    float fSize;
+};
+
 
 struct UIFrameWnd {
     struct UIWnd baseclass;
@@ -523,6 +546,10 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gbPrintFont_PrintString(this, str, x, y, endx, endy) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10022BF0, void, struct gbPrintFont *, const char *, float, float, float, float), this, str, x, y, endx, endy)
 #define gbmalloc ((malloc_funcptr_t) (gboffset + 0x100E4B0D))
 #define gbfree ((free_funcptr_t) (gboffset + 0x100E4B99))
+#define gbx2x(gbx) (((gbx) + 1.0) * gfxdrvinfo.width / 2.0)
+#define gby2y(gby) ((1.0 - (gby)) * gfxdrvinfo.height / 2.0)
+#define x2gbx(x) ((x) * 2.0 / gfxdrvinfo.width - 1.0)
+#define y2gby(y) (1.0 - (y) * 2.0 / gfxdrvinfo.height)
 
 // PAL3 functions
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))

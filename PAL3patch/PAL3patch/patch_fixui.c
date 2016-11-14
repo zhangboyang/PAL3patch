@@ -17,8 +17,8 @@ static void fixui_setdefaultstate(fRECT *src_frect, fRECT *dst_frect, int lr_met
     def_fs.len_factor = len_factor;
     def_fs.prev = NULL;
 }
-// push a new state to stack, use this state for current state
-void fixui_pushstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor)
+// allocate and construct a new state struct
+struct fixui_state *fixui_newstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor)
 {
     struct fixui_state *cur = malloc(sizeof(struct fixui_state));
     cur->src_frect = *src_frect;
@@ -26,6 +26,21 @@ void fixui_pushstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_m
     cur->lr_method = lr_method;
     cur->tb_method = tb_method;
     cur->len_factor = len_factor;
+    cur->prev = NULL;
+    return cur;
+}
+// duplicate current state
+struct fixui_state *fixui_dupstate()
+{
+    struct fixui_state *ptr = malloc(sizeof(struct fixui_state));
+    *ptr = *fs;
+    ptr->prev = NULL;
+    return ptr;
+}
+// push a new state to stack, use this state for current state
+void fixui_pushstate_node(struct fixui_state *cur)
+{
+    if (cur->prev != NULL) fail("double push detected.");
     cur->prev = fs;
     fs = cur;
 }
@@ -159,22 +174,17 @@ static void hook_gbDynVertBuf_RenderUIQuad()
 
 
 
-// FIXME: may be should remove these code?
-// because printing number string is totally a different way in CCBSystem
-// patch gbPrintFont::PrintString
+// gbPrintFont::PrintString wrapper for derived classes (not for gbPrintFont_UNICODE)
 static void __fastcall gbPrintFont_PrintString_wrapper(struct gbPrintFont *this, int dummy, const char *str, float x, float y, float endx, float endy)
 {
-    fPOINT a = {x, y}, b = {endx, endy};
+    fPOINT a = {gbx2x(x), gby2y(y)}, b = {gbx2x(endx), gby2y(endy)};
     fixui_adjust_fPOINT(&a, &a);
     fixui_adjust_fPOINT(&b, &b);
-    x = a.x; y = a.y;
-    if (endx < 10000.0) endx = b.x;
-    if (endy < 10000.0) endy = b.y;
     
     float ScaleX_sv = this->ScaleX, ScaleY_sv = this->ScaleY;
     this->ScaleX *= fs->len_factor;
     this->ScaleY *= fs->len_factor;
-    gbPrintFont_PrintString(this, str, x, y, endx, endy);
+    gbPrintFont_PrintString(this, str, x2gbx(a.x), y2gby(a.y), x2gbx(b.x), y2gby(b.y));
     this->ScaleX = ScaleX_sv;
     this->ScaleY = ScaleY_sv;
 }
@@ -183,7 +193,6 @@ static void hook_gbPrintFont_PrintString()
 {
     // we only patch gbPrintFont_NUM here
     // FIXME: should we patch more classes? (e.g. gbPrintFont_ASC)
-    
     INIT_WRAPPER_VFPTR(gbPrintFont_PrintString_wrapper, gboffset + 0x100F586C); // vfptr for gbPrintFont_NUM
 }
 
@@ -274,10 +283,10 @@ static void push_ptag_state(struct UIWnd *father, struct UIWnd *child, struct ui
     
     fRECT *trans_src_frect, *trans_dst_frect;
     trans_src_frect = get_ptag_frect(ptag.self_srcrect_type);
-    if (!trans_src_frect) trans_src_frect = &fs->src_frect;
+    if (!trans_src_frect) fail("invalid ptag srcrect type %d.", ptag.self_srcrect_type);
     
     trans_dst_frect = get_ptag_frect(ptag.self_dstrect_type);
-    if (!trans_dst_frect) trans_dst_frect = &fs->dst_frect;
+    if (!trans_dst_frect) fail("invalid ptag dstrect type %d.", ptag.self_dstrect_type);
     
     set_frect_rect(&dst_frect, &child->m_rect);
     transform_frect(&dst_frect, &dst_frect, trans_src_frect, trans_dst_frect, ptag.self_lr_method, ptag.self_tb_method, len_factor);

@@ -403,10 +403,12 @@ static void init_window_patch(int flag)
 double str2scalefactor(const char *str)
 {
     if (stricmp(str, "large") == 0) return game_scalefactor;
-    if (stricmp(str, "medium") == 0) return (game_scalefactor + 1) / 2;
-    if (stricmp(str, "small") == 0) return 1.0;
-    return str2double(str);
-    // return fmin(game_scalefactor, str2double(str)); // should we limit max factor?
+    if (stricmp(str, "medium") == 0) return fmax(game_scalefactor * 0.75, 1.0);
+    if (stricmp(str, "small") == 0) return fmax(game_scalefactor * 0.5, 1.0);
+    if (stricmp(str, "none") == 0) return 1.0;
+
+    // the input should be a relative factor    
+    return game_scalefactor * str2double(str);
 }
 
 
