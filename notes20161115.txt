@@ -1,0 +1,53 @@
+【逆向CCBSystem相关的类】
+确认大小已对应上的类(含调整后)：
+CCBSystem
+CUtil //这个类是空的，大概没用
+CCBUI
+CCBStage
+CCBControl
+CCBAI
+C2DSpark
+C3DSpark
+CCBRoleState/tagRoleState
+tagCmdData
+
+
+【fixui state新函数】
+fixui_newstate: 分配内存，根据参数构造新struct fixui_state
+fixui_dupstate: 分配内存，复制栈顶状态
+fixui_pushstate_node(ptr): 将ptr指向的结构体压入栈中，注意在pop时会free，所以调用此函数后不要对结构体做任何操作(包括free)
+
+【CCBDisplayChain文字显示修正】
+PDB中有很多函数，在PAL3中没有出现，应该是这些函数被实现了但是没有用到，链接时优化掉了
+这个类中文字相关的有三种类型(tagShowItem.eKind)
+    CBSIK_Txt 普通文本，显示当前血量（%d/%d），或者伤害血量（-%d）
+    CBSIK_RoleState 状态条HP/MP/GP对应的“艺术字”，使用gbPrintFont_NUM类显示
+    CBSIK_PrintTxt 调试相关文字
+
+【gbPrintFont_NUM修正】
+通过包装PrintString()函数，在内部进行位置、大小、比例变换完成
+
+【str2scalefactor】
+这个函数提供scalefactor的解析功能
+ large    大，所有UI按原始比例进行放大，相当于“rel1.0”
+ medium   中，所有UI按原始比例的75%进行放大，相当于“rel0.75”
+ small    小，所有UI按原始比例的50%进行放大，相当于“rel0.50”
+ none     不缩放，所有UI保持原始像素大小，相当于“abs1.0”
+ rel+数值      所有UI按原始比例*“数值”进行放大
+ abs+数值  所有UI按绝对比例“数值”进行放大
+
+【tagRoleState结构体】
+通过战斗编辑器动态调试可以测出
+    删除 float fGPIncPerRoundBak;
+    数组大小[9]全改为[8]
+    byMagicUseTime 类型改为 unsigned char
+    删除 BYTE bDeadImbibeNimbus; ... int nMaxBFARound;
+
+【修正战斗界面怪物增益/减益状态小图标】
+图标的位置在CCBStageRole::ShowSpecState()函数中生成
+显示文字使用左下角坐标，而显示图标使用左上角图标
+
+【TR_SCALE区分为TR_SCALE_LOW和TR_SCALE_CENTER和TR_SCALE_HIGH】
+在变换线段时，线段内部，LOW按照左/上对齐，CENTER按照中点对齐，HIGH按右/下对齐
+修正uireplacefont中处理上下位置未按照tb_method的问题（为了配合增益/减益状态小图标）
+

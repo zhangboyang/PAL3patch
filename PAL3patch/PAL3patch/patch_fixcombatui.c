@@ -11,7 +11,7 @@ static int ccbui_dstrect_type;
 // FIXME: there may be better ways to do the same job using transform framework
 static void __fastcall C2DSpark_Render_wrapper(struct C2DSpark *this, int dummy)
 {
-    fixui_pushstate(&game_frect, &game_frect, TR_SCALE, TR_SCALE, cb_scalefactor);
+    fixui_pushstate(&game_frect, &game_frect, TR_SCALE_CENTER, TR_SCALE_CENTER, cb_scalefactor);
     C2DSpark_Render(this);
     fixui_popstate();
 }
@@ -73,7 +73,7 @@ static MAKE_ASMPATCH(CCBDisplayChain_Render_PreEachItem)
     struct tagShowItem *cur = TOPTR(R_ESI - 0x114);
     switch (cur->eKind) {
         case CBSIK_Txt:
-            fixui_pushstate(&game_frect, &game_frect, TR_SCALE, TR_SCALE, cb_scalefactor);
+            fixui_pushstate(&game_frect, &game_frect, TR_SCALE_LOW, TR_SCALE_HIGH, cb_scalefactor);
             CCBDisplayChain_Render_popflag = 1;
             break;
         case CBSIK_RoleState:
@@ -105,38 +105,31 @@ static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
 {
     if (!CCBUI_Create(this)) return false;
     
-    int i;
+    int i, j;
     struct uiwnd_ptag ptag;
     
     // fix rolestate panel
     ptag = CB_PTAG(TR_LOW, TR_HIGH);
     set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateSword, ptag);
     for (i = 0; i < 4; i++) {
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStatePanel[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateFace[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateFaceName[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateAttackInc[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateAttackDec[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateDefenceInc[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateDefenceDec[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateLuckInc[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateLuckDec[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateSpeedInc[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateSpeedDec[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateStable[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateBlank[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateForbid[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateSleep[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateChaos[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateMad[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateMirror[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateWall[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateBound[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateHermit[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateImmunity[i], ptag);
         set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateHP[i], ptag);
         set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateGP[i], ptag);
         set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateMP[i], ptag);
+        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStatePanel[i], ptag);
+        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateFace[i], ptag);
+        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateFaceName[i], ptag);
+    }
+    
+    // fix rolestate icons
+    for (i = 0; i < 11; i++) {
+        if (i < 4) {
+            ptag = CB_PTAG(TR_LOW, TR_HIGH);
+        } else {
+            ptag = MAKE_PTAG(SF_COMBAT, PTR_GAMERECT, PTR_GAMERECT, TR_SCALE_LOW, TR_SCALE_LOW);
+        }
+        for (j = 0; j < 19; j++) {
+            set_uiwnd_ptag((struct UIWnd *) this->m_pRoleSpecState[j][i], ptag);
+        }
     }
     
     // fix trickname
@@ -172,22 +165,49 @@ static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
     
     // fix other windows
     ptag = CB_PTAG(TR_LOW, TR_HIGH);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pMain, ptag);
+    /*set_uiwnd_ptag((struct UIWnd *) this->m_pMain, ptag);
     set_uiwnd_ptag((struct UIWnd *) this->m_pItemWindow, ptag);
     set_uiwnd_ptag((struct UIWnd *) this->m_pMagicWindow, ptag);
     set_uiwnd_ptag((struct UIWnd *) this->m_pSkillWindow, ptag);
     set_uiwnd_ptag((struct UIWnd *) this->m_pAIWindow, ptag);
     set_uiwnd_ptag((struct UIWnd *) this->m_pLineupWindow, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pProtectWindow, ptag);
+    set_uiwnd_ptag((struct UIWnd *) this->m_pProtectWindow, ptag);*/
     
     return true;
 }
 
+// CCBUI use baseclass's Render(), we write a vitual function for it as a wrapper
+static void __fastcall CCBUI_Render(struct CCBUI *this, int dummy)
+{
+    int i, j, k;
+    
+    // recalculate spec state icon positions for monsters
+    int icon_seq[]   = {  0,  1,  2,  3,  6,  7,  4,  5,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
+    int icon_width[] = { 24, 24, 24, 24, 24, 24, 24, 24, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20}; 
+    for (i = 5; i < 11; i++) {
+        int left, top;
+        int firstflag = 1;
+        for (k = 0; k < 19; k++) {
+            j = icon_seq[k];
+            struct UIStatic *pWnd = this->m_pRoleSpecState[j][i];
+            if (pWnd->baseclass.m_bcreateok && pWnd->baseclass.m_bvisible) {
+                if (firstflag) {
+                    left = pWnd->baseclass.m_rect.left;
+                    top = pWnd->baseclass.m_rect.top;
+                    firstflag = 0;
+                }
+                UIWnd_MoveWindow(&pWnd->baseclass, left, top);
+                left += ceil(icon_width[j] * cb_scalefactor);
+            }
+        }
+    }
+    
+    // call baseclass's method
+    UIFrameWnd_Render((struct UIFrameWnd *) this);
+}
 
 MAKE_PATCHSET(fixcombatui)
 {
-    if (sizeof(struct CCBUI) != 0xA48) fail("sizeof(struct CCBUI) mismatch.");
-    
     cb_scalefactor = str2scalefactor(get_string_from_configfile("fixcombatui_scalefactor"));
     ccbui_dstrect_type = parse_uiwnd_rect_type(get_string_from_configfile("fixcombatui_scaletype"));
 
@@ -203,4 +223,7 @@ MAKE_PATCHSET(fixcombatui)
     
     // hook CCBUI::Create
     INIT_WRAPPER_CALL(CCBUI_Create_wrapper, { 0x0051270B });
+    
+    // hook CCBUI::Render
+    INIT_WRAPPER_VFPTR(CCBUI_Render, 0x005704AC);
 }

@@ -47,6 +47,7 @@ typedef unsigned char bool;
 #include <math.h>
 #include <time.h>
 #include <limits.h>
+#include <assert.h>
 
 #include <windows.h>
 #include <wincrypt.h>

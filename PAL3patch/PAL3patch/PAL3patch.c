@@ -3,10 +3,19 @@
 // current offset of default location of GBENGINE.DLL
 unsigned gboffset;
 
+static void self_check()
+{
+    // asserts
+    if (D3D_SDK_VERSION != 31) fail("your compiler has wrong DirectX SDK version!");
+    if (sizeof(struct uiwnd_ptag) != 2) fail("struct uiwnd_ptag is too big!");
+    if (sizeof(struct CCBUI) != 0xA48) fail("sizeof(struct CCBUI) mismatch.");
+    assert(sizeof(struct UIStatic) == 0x98);
+}
+
 // init_stage1() should be called before unpacker is executed (if exists)
 static void init_stage1()
 {
-    if (D3D_SDK_VERSION != 31) fail("your compiler has wrong DirectX SDK version!");
+    self_check();
     
     gboffset = get_module_base("GBENGINE.DLL") - 0x10000000;
     d3dx9_dynlink();
@@ -14,7 +23,7 @@ static void init_stage1()
     sha1_init();
     add_atexit_hook(sha1_cleanup);
 
-    MessageBox(NULL, "stage1", "PAL3patch", 0);
+    MessageBox(NULL, "stage1", "stage1", 0);
     INIT_PATCHSET(depcompatible);
 }
 

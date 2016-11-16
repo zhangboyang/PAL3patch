@@ -187,7 +187,6 @@ struct UIWndVtbl {
 };
 #define UIWnd_vfptr_Render(this) THISCALL_WRAPPER((this)->vfptr->Render, this)
 
-
 struct gbUIQuad {
     float sx;
     float sy;
@@ -435,6 +434,27 @@ struct tagShowItem {
     float fSize;
 };
 
+struct UIStatic {
+    struct UIWnd baseclass;
+    int m_bordersize;
+    int m_align;
+    float m_ratiow;
+    float m_ratioh;
+    int m_textx;
+    int m_texty;
+    enum gbFontType m_fonttype;
+    DWORD m_text[4]; // should be std::basic_string<char,std::char_traits<char>,std::allocator<char> >
+    struct gbTexture *m_pbk;
+    struct _Texture_Info *m_pbkInfo;
+    struct gbTexture *m_ppic;
+    struct _Texture_Info *m_ppicInfo;
+    struct gbTexture *m_disablepic;
+    struct _Texture_Info *m_disablepicInfo;
+    struct gbTexture *m_pbk2;
+    char m_mouseoff;
+    int m_FVF;
+    int m_nTextW;
+};
 
 struct UIFrameWnd {
     struct UIWnd baseclass;
@@ -479,25 +499,30 @@ struct CCBUI {
     struct UIStatic *m_pRoleStatePanel[4];
     struct UIStatic *m_pRoleStateFace[5];
     struct UIStatic *m_pRoleStateFaceName[5];
-    struct UIStatic *m_pRoleStateAttackInc[11];
-    struct UIStatic *m_pRoleStateAttackDec[11];
-    struct UIStatic *m_pRoleStateDefenceInc[11];
-    struct UIStatic *m_pRoleStateDefenceDec[11];
-    struct UIStatic *m_pRoleStateLuckInc[11];
-    struct UIStatic *m_pRoleStateLuckDec[11];
-    struct UIStatic *m_pRoleStateSpeedInc[11];
-    struct UIStatic *m_pRoleStateSpeedDec[11];
-    struct UIStatic *m_pRoleStateStable[11];
-    struct UIStatic *m_pRoleStateBlank[11];
-    struct UIStatic *m_pRoleStateForbid[11];
-    struct UIStatic *m_pRoleStateSleep[11];
-    struct UIStatic *m_pRoleStateChaos[11];
-    struct UIStatic *m_pRoleStateMad[11];
-    struct UIStatic *m_pRoleStateMirror[11];
-    struct UIStatic *m_pRoleStateWall[11];
-    struct UIStatic *m_pRoleStateBound[11];
-    struct UIStatic *m_pRoleStateHermit[11];
-    struct UIStatic *m_pRoleStateImmunity[11];
+    union {
+        struct {
+            struct UIStatic *m_pRoleStateAttackInc[11];
+            struct UIStatic *m_pRoleStateAttackDec[11];
+            struct UIStatic *m_pRoleStateDefenceInc[11];
+            struct UIStatic *m_pRoleStateDefenceDec[11];
+            struct UIStatic *m_pRoleStateLuckInc[11];
+            struct UIStatic *m_pRoleStateLuckDec[11];
+            struct UIStatic *m_pRoleStateSpeedInc[11];
+            struct UIStatic *m_pRoleStateSpeedDec[11];
+            struct UIStatic *m_pRoleStateStable[11];
+            struct UIStatic *m_pRoleStateBlank[11];
+            struct UIStatic *m_pRoleStateForbid[11];
+            struct UIStatic *m_pRoleStateSleep[11];
+            struct UIStatic *m_pRoleStateChaos[11];
+            struct UIStatic *m_pRoleStateMad[11];
+            struct UIStatic *m_pRoleStateMirror[11];
+            struct UIStatic *m_pRoleStateWall[11];
+            struct UIStatic *m_pRoleStateBound[11];
+            struct UIStatic *m_pRoleStateHermit[11];
+            struct UIStatic *m_pRoleStateImmunity[11];
+        };
+        struct UIStatic *m_pRoleSpecState[19][11];
+    };
     struct UIStatic *m_pWinPanel;
     struct UIStatic *m_pLosePanel;
     struct UIProgressBar *m_pRoleStateHP[4];
@@ -564,6 +589,8 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define C2DSpark_CreateSingle(this, pSpark) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004D5EC0, bool, struct C2DSpark *, struct C2DSpark_tagSpark *), this, pSpark)
 #define C2DSpark_CreateStars(this, x, y, nWidth, fStarSize) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004D6050, void, struct C2DSpark *, int, int, int, float), this, x, y, nWidth, fStarSize)
 #define CCBUI_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005163D0, bool, struct CCBUI *), this)
+#define UIFrameWnd_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0043DDF0, void, struct UIFrameWnd *), this)
+#define UIWnd_MoveWindow(this, x, y) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445D20, void, struct UIWnd *, int, int), this, x, y)
 
 // global variables
 #define gfxdrvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))

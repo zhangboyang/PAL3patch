@@ -27,8 +27,11 @@ FIXED: 更换字体后，战斗对话渐变效果错误，可能与颜色的Alph
 进入系统界面，背景拉伸问题
 FIXED: launcher无法在某些系统中使用，因为API的地址发生了变化，需要动态获取
 很有可能出现用到GBENGINE.DLL中的地址却忘记加gboffset的情况。可以通过将gbengine重定位(rebase)到0x40000000然后在memcpy_to_process系列函数中判断来测试，需要枚举选项。（也许有更好方法）
-战斗界面gbPrintFont_NUM类显示的文字位置仍然错误，需要对CCBDisplayChain类、CCBSystem类（次要）进行逆向
-战斗界面中各个操作窗口位置不对（注意需要解决UI鼠标问题）
+FIXED: 战斗界面gbPrintFont_NUM类显示的文字位置仍然错误，需要对CCBDisplayChain类、CCBSystem类（次要）进行逆向
+战斗界面中各个操作窗口UI鼠标位置问题
+战斗对话框位置大小不正确
+FIXED: 敌人增益/减益图标位置大小不正确
+代码注释中缺少TR_SCALE_系列的说明
 
 ===== TODO =====
 DONE: 根据播放剧情动画的内容，自动切掉动画的黑边（注意字幕问题）
@@ -43,4 +46,5 @@ DONE: 允许不输入密码就直接调出游戏内置控制台
 能让用户选择特定游戏状态是否对4:3比例留白，而不是只有一个统一的选项uiborder
 增强ZPK功能（例如根据原文件名/原哈希找文件），并且允许同时打开多个ZPK
 建立通用的gbVFileSystem的HOOK框架
+日志截断（防止大量warning持续写硬盘）
 

@@ -34,6 +34,11 @@ int str_iendwith(const char *a, const char *b)
     return lena >= lenb && stricmp(a + lena - lenb, b) == 0;
 }
 
+double fbound(double x, double low, double high)
+{
+    return fmin(fmax(x, low), high);
+}
+
 HMODULE LoadLibrary_safe(LPCTSTR lpFileName)
 {
     HMODULE ret = LoadLibrary(lpFileName);

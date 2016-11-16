@@ -14,6 +14,7 @@ extern void __plog(int is_warning, const char *file, int line, const char *func,
 extern int str2int(const char *valstr);
 extern double str2double(const char *valstr);
 extern int str_iendwith(const char *a, const char *b);
+extern double fbound(double x, double low, double high);
 extern HMODULE LoadLibrary_safe(LPCTSTR lpFileName);
 extern FARPROC GetProcAddress_safe(HMODULE hModule, LPCSTR lpProcName);
 extern wchar_t *cs2wcs(const char *cstr, UINT src_cp);

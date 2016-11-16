@@ -126,7 +126,8 @@ void set_fseg(fSEG *fseg, double start, double length)
     method:
         TR_LOW, TR_HIGH: segment is low/high-aligned, length and offset is scaled by len_factor
         TR_CENTER: segment is center-aligned, length is scaled by len_factor
-        TR_SCALE: length is scaled by len_factor (keep middle point), offset is scaled by (dst_total / total)
+        TR_SCALE: length is scaled by len_factor (keep middle point), offset is scaled by (dst_total / src_total)
+        TR_SCALE_LOW: length is scaled by len_factor (keep lower point), offset is scaled by (dst_total / src_total)
     
     out_seg == seg is allowed
 */
@@ -146,7 +147,15 @@ void transform_fseg(fSEG *out_fseg, const fSEG *fseg, double src_total, double d
             start = (dst_total - length * len_factor) / 2.0;
             length *= len_factor;
             break;
-        case TR_SCALE:
+        case TR_SCALE_LOW:
+            start *= dst_total / src_total;
+            length *= len_factor;
+            break;
+        case TR_SCALE_HIGH:
+            start = (start + length) * (dst_total / src_total) - length * len_factor;
+            length *= len_factor;
+            break;
+        case TR_SCALE_CENTER:
             start = (start + length / 2.0) * (dst_total / src_total) - length * len_factor / 2.0;
             length *= len_factor;
             break;

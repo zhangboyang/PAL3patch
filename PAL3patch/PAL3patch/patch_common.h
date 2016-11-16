@@ -83,12 +83,11 @@ MAKE_PATCHSET(graphicspatch);
         extern void fixui_popstate();
         
         struct uiwnd_ptag {
-            unsigned short scalefactor_index : 4;
-            unsigned short self_srcrect_type : 2;
-            unsigned short self_dstrect_type : 2;
-            unsigned short self_lr_method : 2;
-            unsigned short self_tb_method : 2;
-            unsigned short : 3;
+            unsigned short scalefactor_index : 3;
+            unsigned short self_srcrect_type : 3;
+            unsigned short self_dstrect_type : 3;
+            unsigned short self_lr_method : 3;
+            unsigned short self_tb_method : 3;
             unsigned short enabled : 1;
         };
         #define M_PWND(addr) TOPTR(M_DWORD(addr))

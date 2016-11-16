@@ -22,7 +22,10 @@ enum transform_method {
     TR_LOW,
     TR_HIGH,
     TR_CENTER,
-    TR_SCALE,
+    TR_SCALE_LOW,
+    TR_SCALE_HIGH,
+    TR_SCALE_CENTER,
+
     // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
 };
 

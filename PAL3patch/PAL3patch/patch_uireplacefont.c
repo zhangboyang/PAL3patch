@@ -173,7 +173,8 @@ static void __fastcall gbPrintFont_UNICODE_PrintString(struct gbPrintFont_UNICOD
 
     // calc coord
     fRECT frect;
-    set_frect_ltwh(&frect, gbx2x(x), gby2y(y) - d3dxfont_sizelist_orig[d3dxfont_getfontid_orig(this->fontsize)], 0, 0);
+    int fontheight = d3dxfont_sizelist_orig[d3dxfont_getfontid_orig(this->fontsize)];
+    set_frect_ltwh(&frect, gbx2x(x), gby2y(y) - fontheight, 0, fontheight);
     fixui_adjust_fRECT(&frect, &frect);
     node->left = round(frect.left);
     node->top = round(frect.top);

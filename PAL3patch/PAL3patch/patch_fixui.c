@@ -109,7 +109,7 @@ static void fixui_setdefaultransform(int new_def)
                 fixui_setdefaultstate(&game_frect, &game_frect, TR_LOW, TR_LOW, 1.0); 
                 break;
             case FIXUI_AUTO_TRANSFORM:
-                fixui_setdefaultstate(&game_frect_original, &game_frect_ui_auto, TR_SCALE, TR_SCALE, ui_scalefactor);
+                fixui_setdefaultstate(&game_frect_original, &game_frect_ui_auto, TR_SCALE_LOW, TR_SCALE_LOW, ui_scalefactor);
                 break;
             default: fail("invalid default transform method: %d", new_def);
         }
@@ -275,23 +275,24 @@ static int verify_ptag_magic(struct UIWnd *this)
 static void push_ptag_state(struct UIWnd *father, struct UIWnd *child, struct uiwnd_ptag ptag)
 {
     if (!ptag.enabled) return;
-
+    
+    // read rect information from ptag
+    fRECT *trans_src_frect, *trans_dst_frect;
+    trans_src_frect = get_ptag_frect(ptag.self_srcrect_type);
+    if (!trans_src_frect) fail("invalid ptag srcrect type %d.", ptag.self_srcrect_type);
+    trans_dst_frect = get_ptag_frect(ptag.self_dstrect_type);
+    if (!trans_dst_frect) fail("invalid ptag dstrect type %d.", ptag.self_dstrect_type);
+    
+    // transform window rect using ptag
     fRECT src_frect, dst_frect;
     double len_factor;
     set_frect_rect(&src_frect, &child->m_rect);
     len_factor = scalefactor_table[ptag.scalefactor_index];
-    
-    fRECT *trans_src_frect, *trans_dst_frect;
-    trans_src_frect = get_ptag_frect(ptag.self_srcrect_type);
-    if (!trans_src_frect) fail("invalid ptag srcrect type %d.", ptag.self_srcrect_type);
-    
-    trans_dst_frect = get_ptag_frect(ptag.self_dstrect_type);
-    if (!trans_dst_frect) fail("invalid ptag dstrect type %d.", ptag.self_dstrect_type);
-    
     set_frect_rect(&dst_frect, &child->m_rect);
     transform_frect(&dst_frect, &dst_frect, trans_src_frect, trans_dst_frect, ptag.self_lr_method, ptag.self_tb_method, len_factor);
     
-    fixui_pushstate(&src_frect, &dst_frect, TR_SCALE, TR_SCALE, len_factor);
+    // scale window contents
+    fixui_pushstate(&src_frect, &dst_frect, TR_SCALE_LOW, TR_SCALE_LOW, len_factor);
 }
 static void pop_ptag_state(struct UIWnd *father, struct UIWnd *child, struct uiwnd_ptag ptag)
 {
@@ -327,9 +328,6 @@ static void __fastcall UIWnd_Render(struct UIWnd *this, int dummy)
 
 static void init_uiwnd_positiontag_patch()
 {
-    // asserts
-    if (sizeof(struct uiwnd_ptag) != 2) fail("struct uiwnd_ptag is too big!");
-    
     // modify UIWnd::Create
     SIMPLE_PATCH(0x00445BDA, "\x89\x46\x34", "\xEB\x0B\x90", 3);
     SIMPLE_PATCH(0x00445BE7, "\x90\x90\x90\x90\x90\x90\x90\x90\x90", "\xC7\x46\x34" UIWND_PTAG_MAGIC "\x00\x00\xEB\xED", 9);

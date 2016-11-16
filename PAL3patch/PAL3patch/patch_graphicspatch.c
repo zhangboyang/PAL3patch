@@ -402,13 +402,24 @@ static void init_window_patch(int flag)
 
 double str2scalefactor(const char *str)
 {
-    if (stricmp(str, "large") == 0) return game_scalefactor;
-    if (stricmp(str, "medium") == 0) return fmax(game_scalefactor * 0.75, 1.0);
-    if (stricmp(str, "small") == 0) return fmax(game_scalefactor * 0.5, 1.0);
-    if (stricmp(str, "none") == 0) return 1.0;
-
-    // the input should be a relative factor    
-    return game_scalefactor * str2double(str);
+    double ret;
+    if (stricmp(str, "large") == 0) {
+        ret = game_scalefactor;
+    } else if (stricmp(str, "medium") == 0) {
+        ret = game_scalefactor * 0.75;
+    } else if (stricmp(str, "small") == 0) {
+        ret = game_scalefactor * 0.5;
+    } else if (stricmp(str, "none") == 0) {
+        ret = 1.0;
+    } else if (strnicmp(str, "abs", 3) == 0) {
+        ret = str2double(str + 3);
+    } else if (strnicmp(str, "rel", 3) == 0) {
+        ret = game_scalefactor * str2double(str + 3);
+    } else {
+        fail("unknown scalefactor string %s.", str);
+    }
+//return ret;
+    return fbound(ret, 1.0, game_scalefactor);
 }
 
 
