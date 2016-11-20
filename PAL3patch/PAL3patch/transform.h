@@ -33,6 +33,7 @@ enum transform_method {
 extern void set_point(POINT *point, LONG x, LONG y);
 extern void set_fpoint(fPOINT *fpoint, double x, double y);
 extern void set_point_fpoint(POINT *point, const fPOINT *fpoint);
+extern void set_point_fpoint_round(POINT *point, const fPOINT *fpoint);
 extern void set_fpoint_point(fPOINT *fpoint, const POINT *point);
 
 // rect functions

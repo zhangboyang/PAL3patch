@@ -23,13 +23,13 @@ static int WINAPI My_WideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWSTR l
 
 MAKE_PATCHSET(setlocale)
 {   
-    if (flag == 1) target_codepage = 936;
-    else if (flag == 2) target_codepage = 950;
+    if (flag == 1) target_codepage = 936; // CHS
+    else if (flag == 2) target_codepage = 950; // CHT
     else fail("unknown language flag %d in setlocale.", flag);
     
     if (system_codepage != target_codepage) {
         // patch IAT by replacing known function address (address returned by GetProcAddress())
-        // note: this method is not compatible with KernelEx for win9x
+        // note: this method is not compatible with KernelEx for win9x (also, win9x doesn't support unicode)
         if (is_win9x()) {
             warning("setlocale doesn't support win9x.");
             return;
@@ -39,8 +39,8 @@ MAKE_PATCHSET(setlocale)
         Real_MultiByteToWideChar = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "KERNEL32.DLL", "MultiByteToWideChar", My_MultiByteToWideChar);
         Real_WideCharToMultiByte = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "KERNEL32.DLL", "WideCharToMultiByte", My_WideCharToMultiByte);
         // hook PAL3.EXE's IAT, note we must hardcode IAT address since PAL3.EXE is packed
-        hook_iat(TOPTR(0x56A024), Real_MultiByteToWideChar, My_MultiByteToWideChar);
-        hook_iat(TOPTR(0x56A024), Real_WideCharToMultiByte, My_WideCharToMultiByte);
+        hook_iat(PAL3_KERNEL32_IATBASE, Real_MultiByteToWideChar, My_MultiByteToWideChar);
+        hook_iat(PAL3_KERNEL32_IATBASE, Real_WideCharToMultiByte, My_WideCharToMultiByte);
         
         if (GET_PATCHSET_FLAG(testcombat)) {
             // hook COMCTL32.DLL's IAT for testcombat

@@ -93,21 +93,31 @@ void hook_iat(void *iatbase, void *oldptr, void *newptr)
             cnt++;
         }
     }
-    if (cnt != 1) fail("unable to find iat item %08X", oldptr);
+    if (cnt != 1) {
+        warning("unable to find iat item %08X, iat hook failed.", oldptr);
+    }
 }
 
 void *hook_import_table(void *image_base, const char *dllname, const char *funcname, void *newptr)
 {
     // hook import table of module 'image_base'
     // return value is original function ptr
+    void *oldptr = get_func_address(dllname, funcname);
+    if (!oldptr) {
+        fail("can't find address of %s in dll %s.", funcname, dllname);
+    }
     PIMAGE_DOS_HEADER pdoshdr = image_base;
     PIMAGE_NT_HEADERS pnthdr = image_base + pdoshdr->e_lfanew;
     PIMAGE_IMPORT_DESCRIPTOR pimpdesc;
     IMAGE_IMPORT_DESCRIPTOR zeroimpdesc;
     memset(&zeroimpdesc, 0, sizeof(IMAGE_IMPORT_DESCRIPTOR));
-    for (pimpdesc = image_base + pnthdr->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress; memcmp(pimpdesc, &zeroimpdesc, sizeof(IMAGE_IMPORT_DESCRIPTOR)) && stricmp(image_base + pimpdesc->Name, dllname); pimpdesc++);
-    if (!pimpdesc->Name) fail("can't find import descriptor for module '%s'.", dllname);
-    void *oldptr = get_func_address(dllname, funcname);
-    hook_iat(image_base + pimpdesc->FirstThunk, oldptr, newptr);
+    for (pimpdesc = image_base + pnthdr->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
+        memcmp(pimpdesc, &zeroimpdesc, sizeof(IMAGE_IMPORT_DESCRIPTOR)) && stricmp(image_base + pimpdesc->Name, dllname);
+        pimpdesc++);
+    if (!pimpdesc->Name) {
+        warning("can't find import descriptor for dll '%s' in module %p, iat hook failed.", dllname, image_base);
+    } else {
+        hook_iat(image_base + pimpdesc->FirstThunk, oldptr, newptr);
+    }
     return oldptr;
 }

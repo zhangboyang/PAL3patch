@@ -16,6 +16,11 @@ void set_point_fpoint(POINT *point, const fPOINT *fpoint)
     point->x = fpoint->x;
     point->y = fpoint->y;
 }
+void set_point_fpoint_round(POINT *point, const fPOINT *fpoint)
+{
+    point->x = round(fpoint->x);
+    point->y = round(fpoint->y);
+}
 void set_fpoint_point(fPOINT *fpoint, const POINT *point)
 {
     fpoint->x = point->x;
@@ -128,6 +133,8 @@ void set_fseg(fSEG *fseg, double start, double length)
         TR_CENTER: segment is center-aligned, length is scaled by len_factor
         TR_SCALE: length is scaled by len_factor (keep middle point), offset is scaled by (dst_total / src_total)
         TR_SCALE_LOW: length is scaled by len_factor (keep lower point), offset is scaled by (dst_total / src_total)
+        TR_SCALE_HIGH: length is scaled by len_factor (keep higher point), offset is scaled by (dst_total / src_total)
+        TR_SCALE_CENTER: length is scaled by len_factor (keep middle point), offset is scaled by (dst_total / src_total)
     
     out_seg == seg is allowed
 */

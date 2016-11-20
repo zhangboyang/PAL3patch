@@ -186,6 +186,7 @@ struct UIWndVtbl {
     int (__fastcall *OnMessage)(struct UIWnd *this, int dummy, unsigned int, unsigned int, unsigned int);
 };
 #define UIWnd_vfptr_Render(this) THISCALL_WRAPPER((this)->vfptr->Render, this)
+#define UIWnd_vfptr_Update(this, deltatime, haveinput) THISCALL_WRAPPER((this)->vfptr->Update, this, deltatime, haveinput)
 
 struct gbUIQuad {
     float sx;
@@ -556,7 +557,17 @@ struct CCBUI {
     int m_nCurTask;
 };
 
+struct CCBLineupWindow {
+    struct UIFrameWnd baseclass;
+    int m_nInitRoleFaceLineup[5];
+    struct UIStatic *m_pBack;
+    struct UIStatic *m_pFace[5];
+    int m_nSelected;
+    struct CCBUI *m_pUI;
+};
 
+
+struct UICursor;
 
 
 // functions
@@ -591,6 +602,7 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define CCBUI_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005163D0, bool, struct CCBUI *), this)
 #define UIFrameWnd_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0043DDF0, void, struct UIFrameWnd *), this)
 #define UIWnd_MoveWindow(this, x, y) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445D20, void, struct UIWnd *, int, int), this, x, y)
+#define UICursor_IRender(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00541640, void, struct UICursor *), this)
 
 // global variables
 #define gfxdrvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))

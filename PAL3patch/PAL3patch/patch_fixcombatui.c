@@ -165,13 +165,34 @@ static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
     
     // fix other windows
     ptag = CB_PTAG(TR_LOW, TR_HIGH);
-    /*set_uiwnd_ptag((struct UIWnd *) this->m_pMain, ptag);
+    set_uiwnd_ptag((struct UIWnd *) this->m_pMain, ptag);
     set_uiwnd_ptag((struct UIWnd *) this->m_pItemWindow, ptag);
     set_uiwnd_ptag((struct UIWnd *) this->m_pMagicWindow, ptag);
     set_uiwnd_ptag((struct UIWnd *) this->m_pSkillWindow, ptag);
     set_uiwnd_ptag((struct UIWnd *) this->m_pAIWindow, ptag);
     set_uiwnd_ptag((struct UIWnd *) this->m_pLineupWindow, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pProtectWindow, ptag);*/
+    set_uiwnd_ptag((struct UIWnd *) this->m_pProtectWindow, ptag);
+    
+    // fix lineup faces positions
+    ptag = MAKE_PTAG(SF_COMBAT, PTR_GAMERECT, PTR_GAMERECT, TR_SCALE_LOW, TR_SCALE_LOW);
+    for (i = 0; i < 5; i++) {
+        set_uiwnd_ptag((struct UIWnd *) this->m_pLineupWindow->m_pFace[i], ptag);
+    }
+    int *lineup_head_left = TOPTR(0x0057024C);
+    int *lineup_head_top = TOPTR(0x00570268);
+    CB_PUSHSTATE(TR_LOW, TR_HIGH);
+    for (i = 1; i <= 6; i++) {
+        int xoffset = 9, yoffset = 232;
+        POINT pt = { .x = lineup_head_left[i] + xoffset, .y = lineup_head_top[i] + yoffset };
+        fixui_adjust_POINT(&pt, &pt);
+        lineup_head_left[i] = pt.x - xoffset;
+        lineup_head_top[i] = pt.y - yoffset;
+    }
+    CB_POPSTATE();
+    
+    // fix combat dialog
+    ptag = MAKE_PTAG(SF_COMBAT, PTR_GAMERECT, PTR_GAMERECT, TR_SCALE_CENTER, TR_SCALE_HIGH);
+    set_uiwnd_ptag((struct UIWnd *) this->m_pDialogBack, ptag);
     
     return true;
 }
@@ -206,6 +227,36 @@ static void __fastcall CCBUI_Render(struct CCBUI *this, int dummy)
     UIFrameWnd_Render((struct UIFrameWnd *) this);
 }
 
+
+// rewrite CCBLineupWindow::Render
+static void __fastcall CCBLineupWindow_Render(struct CCBLineupWindow *this, int dummy)
+{
+    UIFrameWnd_Render((struct UIFrameWnd *) this);
+    struct UIWnd *pSelectedFace = (struct UIWnd *) this->m_pFace[this->m_nSelected];
+    push_ptag_state(pSelectedFace);
+    UIWnd_vfptr_Render(pSelectedFace);
+    pop_ptag_state(pSelectedFace);
+}
+// rewrite CCBLineupWindow::IsPtOnFace
+static bool __fastcall CCBLineupWindow_IsPtOnFace(struct CCBLineupWindow *this, int dummy, int nFaceIndex, POINT pt)
+{
+    struct UIWnd *pFace = (struct UIWnd *) this->m_pFace[nFaceIndex];
+    RECT rc = pFace->m_rect;
+    push_ptag_state(pFace);
+    fixui_adjust_RECT(&rc, &rc);
+    pop_ptag_state(pFace);
+    return PtInRect(&rc, pt);
+}
+
+static void setcursorpos_ccbcontrol_hookfunc()
+{
+    // SetCursorPos is called only in CCBControl::Control
+    // so we just translate the cursor position without any judgements
+    CB_PUSHSTATE(TR_LOW, TR_HIGH);
+    fixui_adjust_POINT(&setcursorpos_hook_point, &setcursorpos_hook_point);
+    CB_POPSTATE();
+}
+
 MAKE_PATCHSET(fixcombatui)
 {
     cb_scalefactor = str2scalefactor(get_string_from_configfile("fixcombatui_scalefactor"));
@@ -226,4 +277,11 @@ MAKE_PATCHSET(fixcombatui)
     
     // hook CCBUI::Render
     INIT_WRAPPER_VFPTR(CCBUI_Render, 0x005704AC);
+    
+    // hook SetCursorPos
+    add_setcursorpos_hook(setcursorpos_ccbcontrol_hookfunc);
+    
+    // patch CCBLineupWindow
+    make_jmp(0x0051B920, CCBLineupWindow_Render);
+    make_jmp(0x0051B950, CCBLineupWindow_IsPtOnFace);
 }

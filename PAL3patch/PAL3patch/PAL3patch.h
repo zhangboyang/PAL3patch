@@ -5,5 +5,7 @@
 #define EXTERNAL_UNPACKER_FIXED "PAL3unpack_fixed.dll"
 extern const char *unpacker_module_name;
 extern unsigned gboffset;
+#define PAL3_KERNEL32_IATBASE TOPTR(0x0056A024)
+#define PAL3_WINMM_IATBASE TOPTR(0x0056A1C0)
 
 #endif

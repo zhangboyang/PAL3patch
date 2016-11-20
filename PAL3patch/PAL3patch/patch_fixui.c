@@ -92,6 +92,21 @@ void fixui_adjust_POINT(POINT *out_point, const POINT *point)
 }
 
 
+// point scale functions
+void fixui_scale_fPOINT(fPOINT *out_fpoint, fPOINT *fpoint, fRECT *src_frect, fRECT *dst_frect)
+{
+    // note: out_fpoint might equals to fpoint
+    out_fpoint->x = (fpoint->x - dst_frect->left) / get_frect_width(dst_frect) * get_frect_width(src_frect) + src_frect->left;
+    out_fpoint->y = (fpoint->y - dst_frect->top) / get_frect_height(dst_frect) * get_frect_height(src_frect) + src_frect->top;
+}
+void fixui_scale_POINT_round(POINT *out_point, POINT *point, fRECT *src_frect, fRECT *dst_frect)
+{
+    fPOINT fpoint;
+    set_fpoint_point(&fpoint, point);
+    fixui_scale_fPOINT(&fpoint, &fpoint, src_frect, dst_frect);
+    set_point_fpoint_round(out_point, &fpoint);
+}
+
 
 // fixui default transform method functions
 // default transform method will be applied when there is no other state in stack
@@ -229,16 +244,26 @@ static void getcursorpos_virtualization_hookfunc()
         src_frect = &src_cursor_frect;
         dst_frect = &dst_cursor_frect;
     } else { // use rect in def_fs for default
-        src_frect = &def_fs.src_frect;
-        dst_frect = &def_fs.dst_frect;
+        src_frect = &fs->src_frect;
+        dst_frect = &fs->dst_frect;
     }
-    getcursorpos_hook_lppoint->x = round((getcursorpos_hook_lppoint->x - dst_frect->left) / get_frect_width(dst_frect) * get_frect_width(src_frect) + src_frect->left);
-    getcursorpos_hook_lppoint->y = round((getcursorpos_hook_lppoint->y - dst_frect->top) / get_frect_height(dst_frect) * get_frect_height(src_frect) + src_frect->top);
+    fixui_scale_POINT_round(getcursorpos_hook_lppoint, getcursorpos_hook_lppoint, src_frect, dst_frect);
 }
 
 
 
-
+// hook UICursor_IRender to change cursor size (only in soft-cursor mode)
+static void __fastcall UICursor_IRender_wrapper(struct UICursor *this, int dummy)
+{
+    fixui_pushstate(&game_frect, &game_frect, TR_SCALE_LOW, TR_SCALE_LOW, softcursor_scalefactor);
+    UICursor_IRender(this);
+    fixui_popstate();
+}
+static void init_softcursor_sizepatch()
+{
+    softcursor_scalefactor = str2scalefactor(get_string_from_configfile("softcursor_scalefactor"));
+    INIT_WRAPPER_CALL(UICursor_IRender_wrapper, { 0x004061D2 });
+}
 
 
 
@@ -272,8 +297,9 @@ static int verify_ptag_magic(struct UIWnd *this)
     }
 }
 
-static void push_ptag_state(struct UIWnd *father, struct UIWnd *child, struct uiwnd_ptag ptag)
+void push_ptag_state(struct UIWnd *pwnd)
 {
+    struct uiwnd_ptag ptag = get_ptag(pwnd);
     if (!ptag.enabled) return;
     
     // read rect information from ptag
@@ -286,17 +312,17 @@ static void push_ptag_state(struct UIWnd *father, struct UIWnd *child, struct ui
     // transform window rect using ptag
     fRECT src_frect, dst_frect;
     double len_factor;
-    set_frect_rect(&src_frect, &child->m_rect);
+    set_frect_rect(&src_frect, &pwnd->m_rect);
     len_factor = scalefactor_table[ptag.scalefactor_index];
-    set_frect_rect(&dst_frect, &child->m_rect);
+    set_frect_rect(&dst_frect, &pwnd->m_rect);
     transform_frect(&dst_frect, &dst_frect, trans_src_frect, trans_dst_frect, ptag.self_lr_method, ptag.self_tb_method, len_factor);
     
     // scale window contents
     fixui_pushstate(&src_frect, &dst_frect, TR_SCALE_LOW, TR_SCALE_LOW, len_factor);
 }
-static void pop_ptag_state(struct UIWnd *father, struct UIWnd *child, struct uiwnd_ptag ptag)
+void pop_ptag_state(struct UIWnd *pwnd)
 {
-    if (!ptag.enabled) return;
+    if (!get_ptag(pwnd).enabled) return;
     fixui_popstate();
 }
 
@@ -319,11 +345,31 @@ static void __fastcall UIWnd_Render(struct UIWnd *this, int dummy)
             UIWnd_vfptr_Render(pwnd);
         } else {
             // push state, render, pop state
-            push_ptag_state(this, pwnd, get_ptag(pwnd));
+            push_ptag_state(pwnd);
             UIWnd_vfptr_Render(pwnd);
-            pop_ptag_state(this, pwnd, get_ptag(pwnd));
+            pop_ptag_state(pwnd);
         }
     }
+}
+static int __fastcall UIWnd_Update(struct UIWnd *this, float deltatime, int haveinput)
+{
+    if (!this->m_bvisible || !this->m_benable) return 0;
+    int i;
+    for (i = this->m_childs.m_nSize - 1; i >= 0; i--) {
+        struct UIWnd *pwnd = this->m_childs.m_pData[i];
+        int ret;
+        if (!verify_ptag_magic(pwnd)) {
+            // fallback    
+            ret = UIWnd_vfptr_Update(pwnd, deltatime, haveinput);
+        } else {
+            // push state, update, pop state
+            push_ptag_state(pwnd);
+            ret = UIWnd_vfptr_Update(pwnd, deltatime, haveinput);
+            pop_ptag_state(pwnd);
+        }
+        if (ret) haveinput = 0;
+    }
+    return !haveinput;
 }
 
 static void init_uiwnd_positiontag_patch()
@@ -332,7 +378,8 @@ static void init_uiwnd_positiontag_patch()
     SIMPLE_PATCH(0x00445BDA, "\x89\x46\x34", "\xEB\x0B\x90", 3);
     SIMPLE_PATCH(0x00445BE7, "\x90\x90\x90\x90\x90\x90\x90\x90\x90", "\xC7\x46\x34" UIWND_PTAG_MAGIC "\x00\x00\xEB\xED", 9);
 
-    // replace UIWnd::Render
+    // replace UIWnd::Update and UIWnd::Render
+    make_jmp(0x00445C60, UIWnd_Update);
     make_jmp(0x00445CD0, UIWnd_Render);
 }
 
@@ -373,4 +420,7 @@ MAKE_PATCHSET(fixui)
     
     // init uiwnd position tag patch
     init_uiwnd_positiontag_patch();
+    
+    // init soft-cursor size patch
+    init_softcursor_sizepatch();
 }

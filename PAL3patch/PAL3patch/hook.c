@@ -14,8 +14,14 @@ static void add_hook(int hookid, void (*funcptr)(void))
 static void run_hooks(int hookid)
 {
     int i;
-    // run hooks by add order
     for (i = 0; i < nr_hooks[hookid]; i++) {
+        hookfunc[hookid][i]();
+    }
+}
+static void run_hooks_reverse(int hookid)
+{
+    int i;
+    for (i = nr_hooks[hookid] - 1; i >= 0; i--) {
         hookfunc[hookid][i]();
     }
 }
@@ -170,4 +176,33 @@ void init_getcursorpos_hook()
     make_branch(0x004D6216, 0xE8, GetCursorPos_wrapper, 6);
     // NOTE: No need to hook GetCursorPos() for IDirect3DDevice9::SetCursorPosition()
     //       see documentation for details.
+}
+
+// SetCursorPos hook
+POINT setcursorpos_hook_point;
+static BOOL WINAPI SetCursorPos_wrapper(int X, int Y)
+{
+    setcursorpos_hook_point = (POINT) { .x = X, .y = Y };
+    run_hooks_reverse(HOOKID_SETCURSORPOS);
+    return SetCursorPos(setcursorpos_hook_point.x, setcursorpos_hook_point.y);
+}
+void add_setcursorpos_hook(void (*funcptr)(void))
+{
+    add_hook(HOOKID_SETCURSORPOS, funcptr);
+}
+void init_setcursorpos_hook()
+{
+    make_jmp(0x00402290, SetCursorPos_wrapper);
+}
+
+
+// init all hooks
+void init_hooks()
+{
+    init_gameloop_hook();
+    init_atexit_hook();
+    init_getcursorpos_hook();
+    init_setcursorpos_hook();
+    init_postd3dcreate_hook();
+    init_preendscene_hook();
 }

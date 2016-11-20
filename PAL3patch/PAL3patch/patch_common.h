@@ -29,6 +29,7 @@ MAKE_PATCHSET(fixmemfree);
 MAKE_PATCHSET(nocpk);
 MAKE_PATCHSET(showfps);
 MAKE_PATCHSET(console); 
+MAKE_PATCHSET(relativetimer);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
@@ -43,7 +44,8 @@ MAKE_PATCHSET(graphicspatch);
         SF_GAMEFACTOR,
         
         // these values need initinialize by their own init functions
-        SF_UIFACTOR,
+        SF_UI,
+        SF_SOFTCURSOR,
         SF_COMBAT,
         
         // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
@@ -64,7 +66,8 @@ MAKE_PATCHSET(graphicspatch);
         };
         extern struct fixui_state *fs;
 
-        #define ui_scalefactor (scalefactor_table[SF_UIFACTOR])
+        #define softcursor_scalefactor (scalefactor_table[SF_SOFTCURSOR])
+        #define ui_scalefactor (scalefactor_table[SF_UI])
         extern void fixui_update_gamestate();
         
         enum uiwnd_rect_type { // PTR = pos tag rect
@@ -110,13 +113,12 @@ MAKE_PATCHSET(graphicspatch);
         extern void fixui_adjust_fPOINT(fPOINT *out_fpoint, const fPOINT *fpoint);
         extern void fixui_adjust_POINT(POINT *out_point, const POINT *point);
         
-        #define MAKE_ASMPATCH_ADD_PTAG_WHEN_UISTATIC_SETBK(patch_name, ptag) \
-            MAKE_ASMPATCH(patch_name) \
-            { \
-                set_uiwnd_ptag(PWND(R_ECX), (ptag)); \
-                LINK_CALL(0x004426B0); \
-            }
+        extern void fixui_scale_fPOINT(fPOINT *out_fpoint, fPOINT *fpoint, fRECT *src_frect, fRECT *dst_frect);
+        extern void fixui_scale_POINT_round(POINT *out_point, POINT *point, fRECT *src_frect, fRECT *dst_frect);
         
+        extern void push_ptag_state(struct UIWnd *pwnd);
+        extern void pop_ptag_state(struct UIWnd *pwnd);
+
         MAKE_PATCHSET(uireplacefont);
         MAKE_PATCHSET(fixloadingfrm);
         MAKE_PATCHSET(fixcombatui);

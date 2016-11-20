@@ -4,6 +4,8 @@
 
 #define ERROR_FILE "PAL3patch.error.txt"
 #define WARNING_FILE "PAL3patch.log.txt"
+#define MAXLOGLINES 10000
+#define MAXWARNMSGBOXES 3
 
 extern int is_win9x();
 #define fail(fmt, ...) __fail(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)

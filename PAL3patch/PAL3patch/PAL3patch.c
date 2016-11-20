@@ -6,17 +6,17 @@ unsigned gboffset;
 static void self_check()
 {
     // asserts
-    if (D3D_SDK_VERSION != 31) fail("your compiler has wrong DirectX SDK version!");
-    if (sizeof(struct uiwnd_ptag) != 2) fail("struct uiwnd_ptag is too big!");
-    if (sizeof(struct CCBUI) != 0xA48) fail("sizeof(struct CCBUI) mismatch.");
+    assert(D3D_SDK_VERSION == 31);
+    assert(sizeof(struct uiwnd_ptag) == 2);
+    assert(sizeof(struct CCBUI) == 0xA48);
     assert(sizeof(struct UIStatic) == 0x98);
+    assert(sizeof(struct CCBLineupWindow) == 0x7C);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
 static void init_stage1()
 {
     self_check();
-    
     gboffset = get_module_base("GBENGINE.DLL") - 0x10000000;
     d3dx9_dynlink();
     read_config_file();
@@ -34,11 +34,7 @@ static void init_stage2()
     // PATCHSET 'setlocale' may overwrite target_codepage
     target_codepage = system_codepage = GetACP();
     
-    init_gameloop_hook();
-    init_atexit_hook();
-    init_getcursorpos_hook();
-    init_postd3dcreate_hook();
-    init_preendscene_hook();
+    init_hooks();
     
     INIT_PATCHSET(cdpatch);
     INIT_PATCHSET(regredirect);
@@ -50,6 +46,7 @@ static void init_stage2()
     INIT_PATCHSET(nocpk);
     INIT_PATCHSET(showfps);
     INIT_PATCHSET(console);
+    INIT_PATCHSET(relativetimer);
     
     if (!INIT_PATCHSET(testcombat)) {
         // here are some patches not compatiable with 'testcombat'

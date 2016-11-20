@@ -265,14 +265,12 @@ static void getcursorpos_window_hookfunc()
     if (!getcursorpos_hook_ret) return;
     ScreenToClient(gamehwnd, getcursorpos_hook_lppoint);
 }
-static BOOL WINAPI SetCursorPos_wrapper(int X, int Y)
+static void setcursorpos_window_hookfunc()
 {
-    POINT cpos;
-    cpos.x = X;
-    cpos.y = Y;
-    ClientToScreen(gamehwnd, &cpos);
-    return SetCursorPos(cpos.x, cpos.y);
+    ClientToScreen(gamehwnd, &setcursorpos_hook_point);
 }
+
+
 static int clipcursor_enabled = 1;
 static void clipcursor(int flag)
 {
@@ -371,7 +369,7 @@ static void init_window_patch(int flag)
     
     // cursor hook
     add_getcursorpos_hook(getcursorpos_window_hookfunc);
-    make_jmp(0x00402290, SetCursorPos_wrapper);
+    add_setcursorpos_hook(setcursorpos_window_hookfunc);
     
     // clip cursor
     if (get_int_from_configfile("clipcursor")) {

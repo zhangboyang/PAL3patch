@@ -112,7 +112,8 @@ void __attribute__((noreturn)) __fail(const char *file, int line, const char *fu
     va_end(ap);
 }
 
-static int plog_flag = 0;
+static long long plog_lines = 0;
+static long long plog_msgboxes = 0;
 void __plog(int is_warning, const char *file, int line, const char *func, const char *fmt, ...)
 {
     va_list ap;
@@ -124,32 +125,45 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
     len = strlen(msgbuf);
     vsnprintf(msgbuf + len, sizeof(msgbuf) - len, fmt, ap);
     OutputDebugString(msgbuf);
-    FILE *fp = fopen(WARNING_FILE, plog_flag ? "a" : "w");
-    if (fp) {
-        if (!plog_flag) {
-            fputs("build information:\n", fp);
-            fputs(build_info, fp);
+    plog_lines++;
+    if (plog_lines <= MAXLOGLINES) {
+        FILE *fp = fopen(WARNING_FILE, plog_lines > 1 ? "a" : "w");
+        if (fp) {
+            if (plog_lines == 1) {
+                fputs("build information:\n", fp);
+                fputs(build_info, fp);
+                
+                get_all_config(buf, sizeof(buf));
+                fputs("patch configuration:\n", fp);
+                fputs(buf, fp);
+                fputs("========== start ==========\n\n", fp);
+            }
             
-            get_all_config(buf, sizeof(buf));
-            fputs("patch configuration:\n", fp);
+            SYSTEMTIME SystemTime;
+            GetLocalTime(&SystemTime);
+            snprintf(buf, sizeof(buf), "  %04hd-%02hd-%02hd %02hd:%02hd:%02hd.%03hd\n", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
+            fputs("timestamp:\n", fp);
             fputs(buf, fp);
-            fputs("========== start ==========\n", fp);
+            
+            fputs("details:\n", fp);
+            fputs(msgbuf, fp);
+            fputs("\n\n\n", fp);
+            if (plog_lines >= MAXLOGLINES) {
+                fputs("too many messages, log truncated.\n", fp);
+            }
+            fclose(fp);
         }
-        
-        SYSTEMTIME SystemTime;
-        GetLocalTime(&SystemTime);
-        snprintf(buf, sizeof(buf), "  %04hd-%02hd-%02hd %02hd:%02hd:%02hd.%03hd\n", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
-        fputs("timestamp:\n", fp);
-        fputs(buf, fp);
-        
-        fputs("details:\n", fp);
-        fputs(msgbuf, fp);
-        fputs("\n\n\n", fp);
-        fclose(fp);
+        if (is_warning) {
+            plog_msgboxes++;
+            if (plog_msgboxes <= MAXWARNMSGBOXES) {
+                if (plog_msgboxes >= MAXWARNMSGBOXES) {
+                    strncat(msgbuf, "\n\nmax messagebox limit reached.", sizeof(msgbuf));
+                    msgbuf[sizeof(msgbuf) - 1] = '\0';
+                }
+                MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
+            }
+        }
     }
-    plog_flag = 1;
-    if (is_warning) {
-        MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
-    }
+    
     va_end(ap);
 }
