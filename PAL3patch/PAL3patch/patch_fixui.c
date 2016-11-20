@@ -351,7 +351,7 @@ static void __fastcall UIWnd_Render(struct UIWnd *this, int dummy)
         }
     }
 }
-static int __fastcall UIWnd_Update(struct UIWnd *this, float deltatime, int haveinput)
+static int __fastcall UIWnd_Update(struct UIWnd *this, int dummy, float deltatime, int haveinput)
 {
     if (!this->m_bvisible || !this->m_benable) return 0;
     int i;

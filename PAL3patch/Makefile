@@ -1,4 +1,6 @@
 CC := gcc
+STRIP := strip
+
 CFLAGS := -Wall -Werror -O0 -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions
 SFLAGS := -Wall -Werror
 LDFLAGS := -Wall -Werror -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lcomctl32 -lwinmm -lgdi32
@@ -32,11 +34,11 @@ clean:
 
 $(TARGET_LAUNCHER): $(TARGET_LAUNCHER_CFILES)
 	$(CC) $(CFLAGS) -Wl,--subsystem,windows -o $@ $(TARGET_LAUNCHER_CFILES)
-	strip $@
+	$(STRIP) $@
 
 $(TARGET_LAUNCHER_USEUNPACKED): $(TARGET_LAUNCHER_CFILES)
 	$(CC) $(CFLAGS) -DUSE_UNPACKED_EXE -Wl,--subsystem,windows -o $@ $(TARGET_LAUNCHER_CFILES)
-	strip $@
+	$(STRIP) $@
 
 $(TARGET_DLL_GCH): $(TARGET_DLL_HFILES)
 	$(CC) $(CFLAGS) $(TARGET_DLL_COMMONHEADER)
@@ -51,4 +53,4 @@ $(TARGET_DLL_SRCPATH)/%.o: $(TARGET_DLL_SRCPATH)/%.S
 
 $(TARGET_DLL): $(TARGET_DLL_OBJS)
 	$(CC) -shared -o $@ $(TARGET_DLL_OBJS) $(TARGET_DLL_SRCPATH)/$(@:.dll=.def) $(LDFLAGS)
-	strip $@
+	$(STRIP) $@
