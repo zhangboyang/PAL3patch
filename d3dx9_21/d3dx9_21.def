@@ -49,6 +49,7 @@ EXPORTS
 	D3DXCreateEffectCompilerFromFileW
 	D3DXCreateEffectCompilerFromResourceA
 	D3DXCreateEffectCompilerFromResourceW
+	D3DXCreateEffectFromFileA
 	D3DXCreateEffectFromFileW
 	D3DXCreateEffectFromResourceA
 	D3DXCreateEffectFromResourceW
@@ -233,8 +234,23 @@ EXPORTS
 	D3DXSHEvalDirectionalLight
 	D3DXSHEvalHemisphereLight
 	D3DXSHEvalSphericalLight
+	D3DXSHPRTCompExtractBasis
+	D3DXSHPRTCompExtractClusterIDs
+	D3DXSHPRTCompExtractDesc
+	D3DXSHPRTCompExtractPCA
+	D3DXSHPRTCompExtractTexture
+	D3DXSHPRTCompExtractToMesh
+	D3DXSHPRTCompNormalizeData
 	D3DXSHPRTCompSplitMeshSC
 	D3DXSHPRTCompSuperCluster
+	D3DXSHPRTCompress
+	D3DXSHPRTExtractChannel
+	D3DXSHPRTExtractDesc
+	D3DXSHPRTExtractTexture
+	D3DXSHPRTExtractToMesh
+	D3DXSHPRTGetRawDataPointer
+	D3DXSHPRTSimulation
+	D3DXSHPRTSimulationTex
 	D3DXSHProjectCubeMap
 	D3DXSHRotate
 	D3DXSHRotateZ

@@ -32,6 +32,8 @@ typedef unsigned char bool;
 #define true 1
 #define false 0
 
+// avoid libmoldname.a
+#define _NO_OLDNAMES
 
 // for InitCommonControlsEx
 #define _WIN32_IE	0x0300
@@ -74,5 +76,11 @@ typedef unsigned char bool;
 // common typedefs
 typedef void *(*malloc_funcptr_t)(size_t);
 typedef void (*free_funcptr_t)(void *);
+
+// patch oldnames
+#define stricmp _stricmp
+#define strnicmp _strnicmp
+#define strdup _strdup
+#define wcsdup _wcsdup
 
 #endif

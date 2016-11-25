@@ -206,7 +206,7 @@ static void __fastcall CCBUI_Render(struct CCBUI *this, int dummy)
     int icon_seq[]   = {  0,  1,  2,  3,  6,  7,  4,  5,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
     int icon_width[] = { 24, 24, 24, 24, 24, 24, 24, 24, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20}; 
     for (i = 5; i < 11; i++) {
-        int left, top;
+        int left = 0, top = 0;
         int firstflag = 1;
         for (k = 0; k < 19; k++) {
             j = icon_seq[k];

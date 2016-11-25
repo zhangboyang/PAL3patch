@@ -287,10 +287,15 @@ struct D3DXTex_CImage {
 #define D3DXTex_CImage_Load(this, data, len, pinfo, flag) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10037159, int, struct D3DXTex_CImage *, const void *, unsigned, D3DXIMAGE_INFO *, int), this, data, len, pinfo, flag)
 
 
+#ifndef USE_MSVC_LINKER
+#define PAL3PATCH_D3DX9FUNC(func) (WINAPI *func)
+#else
+#define PAL3PATCH_D3DX9FUNC(func) (WINAPI func)
+#endif
 
 // function pointers for D3DX9
-extern HRESULT (WINAPI *D3DXSaveTextureToFileA)(LPCTSTR pDestFile, D3DXIMAGE_FILEFORMAT DestFormat, LPDIRECT3DBASETEXTURE9 pSrcTexture, const PALETTEENTRY *pSrcPalette);
-extern HRESULT (WINAPI *D3DXCreateFontW)(
+extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXSaveTextureToFileA)(LPCTSTR pDestFile, D3DXIMAGE_FILEFORMAT DestFormat, LPDIRECT3DBASETEXTURE9 pSrcTexture, const PALETTEENTRY *pSrcPalette);
+extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXCreateFontW)(
     LPDIRECT3DDEVICE9       pDevice,  
     UINT                    Height,
     UINT                    Width,
@@ -303,7 +308,7 @@ extern HRESULT (WINAPI *D3DXCreateFontW)(
     DWORD                   PitchAndFamily,
     LPCWSTR                 pFaceName,
     LPD3DXFONT*             ppFont);
-extern HRESULT (WINAPI *D3DXCreateSprite)( 
+extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXCreateSprite)( 
     LPDIRECT3DDEVICE9   pDevice, 
     LPD3DXSPRITE*       ppSprite);
 

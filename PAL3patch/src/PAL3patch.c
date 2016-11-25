@@ -18,7 +18,11 @@ static void init_stage1()
 {
     self_check();
     gboffset = get_module_base("GBENGINE.DLL") - 0x10000000;
+    
+#ifndef USE_MSVC_LINKER
     d3dx9_dynlink();
+#endif
+
     read_config_file();
     sha1_init();
     add_atexit_hook(sha1_cleanup);

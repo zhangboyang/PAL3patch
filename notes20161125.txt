@@ -1,0 +1,30 @@
+【d3dx9_21.dll导出表的修正】
+由于微软官方从未发布d3dx9_21.dll所以导出表只能靠猜
+DUMPBIN /SYMBOLS D3DX9.LIB > symbols.txt
+grep 'External' symbols.txt | sed -e 's/^.*| //g' -e 's/ .*$//g' -e 's/ .*$//g' | grep '^.D3DX' | sed -e 's/@.*$//g' -e 's/^_//g' -e 's/^\?//g'  | sort -u > export.txt
+for i in `cat export.txt`; do if grep -q "$i" ../Include/*.h; then echo "$i"; fi; done > header.txt
+
+结合dxdx9_24.dll的导出表可以发现
+DLL中有而头文件中没有的函数：
+    D3DXCpuOptimizations
+    D3DXDebugMute
+    D3DXGetTargetDescByName
+    D3DXGetTargetDescByVersion
+头文件中有而DLL中没有的函数：
+    一些inline函数（头文件中标注）
+    D3DXCreateEffectFromFileA
+    D3DXSHPRT开头的一些函数
+这次将后二者添加进了导出表
+
+
+【新的编译方式】
+对makefile进行了大修改，将launcher移出
+现在默认使用gcc编译，msvc链接生成DLL，也支持原来的只使用gcc编译链接的方式
+需要在vc中设置好dxsdk，并且在环境变量中添加msdev.exe的路径
+这样的好处是，既可以使用gcc的扩展语法，又可以把d3dx9静态链接到程序中，不再需要外挂d3dx9_21.dll了
+具体做法是，先把各个.c编译成.o，在用“部分链接/增量链接”的方式把这些.o和用到的一些mingw静态库打包
+命令： gcc -o PAL3patch.obj -r -nostdlib *.o -lgcc -lmingwex
+参数-r表示部分链接，-nostdlib表示不要默认的静态库，-lgcc和-lmingwex表示显式链接需要的静态库libgcc和libmingwex
+有一个遇到的奇怪问题是，提供把strdup转换成_strdup的静态库libmoldname.a似乎不支持部分链接，因此在代码中定义_NO_OLDNAMES，并且用宏替换了这类函数的名字
+经过测试，目前这样链接出来的程序大概300k，经过upx压缩后可压缩到90k左右，缩减程序体积的效果很好。
+

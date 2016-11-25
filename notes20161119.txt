@@ -13,7 +13,7 @@
 永久解决办法就是把这两个函数HOOK掉，在我们自己的代码中为程序做“相对化”处理。
 当然这两个解决方案是有缺陷的，理论上，如果程序运行了好几周，仍然会出现此问题（不过这不太可能发生）
 经过测试发现，如果timeGetTime函数返回值加上一个较大数值后，紫萱、雪见的武器仍然是正常的。
-但是把QueryPerformanceCounter加上一个较大书之后，武器就会出现拖影。
+但是把QueryPerformanceCounter加上一个较大数之后，武器就会出现拖影。
 所以QueryPerformanceCounter需要进行HOOK，而timeGetTime不一定需要。
 但是为了安全起见，这两个函数在relativetimer中都进行了“相对化”HOOK。
 

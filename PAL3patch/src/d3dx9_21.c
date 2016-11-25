@@ -1,5 +1,7 @@
 #include "common.h"
 
+#ifndef USE_MSVC_LINKER
+
 #define DECLARE_D3DX9_FUNCPTR(funcptr) typeof(funcptr) funcptr
 #define IMPORT_D3DX9_FUNCPTR(funcptr) ((funcptr) = (void *) GetProcAddress_safe(hD3DX9, TOSTR(funcptr)))
 
@@ -16,3 +18,5 @@ void d3dx9_dynlink()
     IMPORT_D3DX9_FUNCPTR(D3DXCreateFontW);
     IMPORT_D3DX9_FUNCPTR(D3DXCreateSprite);
 }
+
+#endif
