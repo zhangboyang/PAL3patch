@@ -7,11 +7,13 @@ CC := gcc
 CCLD := gcc
 STRIP := strip
 
-CFLAGS := -Wall -Werror -Os -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions
+CFLAGS := -Wall -Werror -O0 -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions
 SFLAGS := -Wall -Werror
-CCLDFLAGS := -Wall -Werror -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lcomctl32 -lwinmm -lgdi32
+CCLDFLAGS := -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lgdi32 -lcomctl32 -lwinmm
 
 MSDEV := msdev
+MSDEVFLAGS := -make -rebuild
+CCLDFLAGS_MSVC :=
 
 ifeq ($(USE_MSVC_LINKER), 1)
 	CFLAGS += -DUSE_MSVC_LINKER
@@ -36,6 +38,7 @@ TARGET_DLL_OBJS := $(TARGET_DLL_COBJS) $(TARGET_DLL_SOBJS)
 
 TARGET_DLL_MSVC_DSP := $(TARGET_DLL:.dll=.dsp)
 TARGET_DLL_MSVC_OBJ := $(TARGET_DLL:.dll=.obj)
+TARGET_DLL_MSVC_SYMBOLS := $(TARGET_DLL_SRCPATH)/msvc_symbols.txt
 TARGET_DLL_MSVC_TMPFILES := $(TARGET_DLL_MSVC_OBJ) $(TARGET_DLL:.dll=.exp) $(TARGET_DLL:.dll=.lib) $(TARGET_DLL:.dll=.plg) $(TARGET_DLL:.dll=.dsw) $(TARGET_DLL:.dll=.ncb) $(TARGET_DLL:.dll=.opt)
 
 .PHONY: clean $(TARGET_DLL_CFILES_ABOUT)
@@ -58,8 +61,8 @@ $(TARGET_DLL_SRCPATH)/%.o: $(TARGET_DLL_SRCPATH)/%.S
 
 $(TARGET_DLL): $(TARGET_DLL_OBJS)
 ifeq ($(USE_MSVC_LINKER), 1)
-	$(CCLD) -o $(TARGET_DLL_MSVC_OBJ) -r -nostdlib $(TARGET_DLL_OBJS) -lgcc -lmingwex
-	$(MSDEV) $(TARGET_DLL_MSVC_DSP) -make
+	$(CCLD) $(CCLDFLAGS_MSVC) -o $(TARGET_DLL_MSVC_OBJ) -r -Wl,--retain-symbols-file $(TARGET_DLL_MSVC_SYMBOLS) -nostdlib $(TARGET_DLL_OBJS) -lmingwex -lgcc
+	$(MSDEV) $(TARGET_DLL_MSVC_DSP) $(MSDEVFLAGS)
 else
 	$(CCLD) -shared -o $@ $(TARGET_DLL_OBJS) $(TARGET_DLL_SRCPATH)/$(@:.dll=.def) $(CCLDFLAGS)
 	$(STRIP) $@
