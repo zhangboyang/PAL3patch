@@ -28,21 +28,30 @@ static void run_hooks_reverse(int hookid)
 
 
 
-// EndScene hooks
+// pre-EndScene and post-Present hooks
 void add_preendscene_hook(void (*funcptr)(void))
 {
     add_hook(HOOKID_PREENDSCENE, funcptr);
+}
+void add_postpresent_hook(void (*funcptr)(void))
+{
+    add_hook(HOOKID_POSTPRESENT, funcptr);
 }
 void call_preendscene_hooks()
 {
     run_hooks(HOOKID_PREENDSCENE);
 }
+void call_postpresent_hooks()
+{
+    run_hooks(HOOKID_POSTPRESENT);
+}
 static void __fastcall gbGfxManager_D3D_EndScene_wrapper(struct gbGfxManager_D3D *this, int dummy)
 {
     call_preendscene_hooks();
     gbGfxManager_D3D_EndScene(this);
+    call_postpresent_hooks();
 }
-void init_preendscene_hook()
+static void init_preendscene_postpresent_hook()
 {
     INIT_WRAPPER_VFPTR(gbGfxManager_D3D_EndScene_wrapper, gboffset + 0x100F56E8);
 }
@@ -78,7 +87,7 @@ static void PAL3_InitGFX_wrapper()
     PAL3_InitGFX();
     run_hooks(HOOKID_POSTD3DCREATE);
 }
-void init_postd3dcreate_hook()
+static void init_postd3dcreate_hook()
 {
     INIT_WRAPPER_CALL(PAL3_InitGFX_wrapper, { 0x00404840 });
 }
@@ -97,7 +106,7 @@ void add_atexit_hook(void (*funcptr)(void))
 {
     add_hook(HOOKID_ATEXIT, funcptr);
 }
-void init_atexit_hook()
+static void init_atexit_hook()
 {
     INIT_ASMPATCH(atexit, 0x00541C35, 5, "\xC2\x10\x00\x90\x90");
 }
@@ -135,7 +144,7 @@ static MAKE_ASMPATCH(gameloop_movie_atexit)
     call_gameloop_hooks(GAMELOOP_MOVIE_ATEXIT);
     // we use simple patch to do RETN 4 (the old code)
 }
-void init_gameloop_hook()
+static void init_gameloop_hook()
 {    
     // patch main game loop
     INIT_ASMPATCH(gameloop_normal, 0x541BCD, 5, "\xE9\x46\xFF\xFF\xFF");
@@ -168,7 +177,7 @@ void add_getcursorpos_hook(void (*funcptr)(void))
 {
     add_hook(HOOKID_GETCURSORPOS, funcptr);
 }
-void init_getcursorpos_hook()
+static void init_getcursorpos_hook()
 {
     make_jmp(0x004022E0, GetCursorPos_wrapper);
     make_branch(0x00402497, 0xE8, GetCursorPos_wrapper, 6);
@@ -190,7 +199,7 @@ void add_setcursorpos_hook(void (*funcptr)(void))
 {
     add_hook(HOOKID_SETCURSORPOS, funcptr);
 }
-void init_setcursorpos_hook()
+static void init_setcursorpos_hook()
 {
     make_jmp(0x00402290, SetCursorPos_wrapper);
 }
@@ -204,5 +213,5 @@ void init_hooks()
     init_getcursorpos_hook();
     init_setcursorpos_hook();
     init_postd3dcreate_hook();
-    init_preendscene_hook();
+    init_preendscene_postpresent_hook();
 }

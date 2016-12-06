@@ -56,6 +56,7 @@ MAKE_PATCHSET(graphicspatch);
     
     MAKE_PATCHSET(fixfov);
     MAKE_PATCHSET(nolockablebackbuffer);
+    MAKE_PATCHSET(reduceinputlatency);
     MAKE_PATCHSET(fixreset);
     MAKE_PATCHSET(fixui);
         struct fixui_state {

@@ -14,7 +14,7 @@ Reset()不能成功的根本原因是，有资源没有释放。
     但是PAL3中没有，好在类RenderTarget的各数据成员位置没有变化，所以直接照抄IDA Pro中的PAL3A反编译出的伪代码
     然后在GBENGINE在LostDevice和ResetDevice处打ASMPATCH，让它调用我们新写的方法
     还有一点处理与PAL3A不同，就是RenderTarget::End中调用了GetSurfaceLevel但是没有Release
-    注意在PAL3A和PAL3中都没有处理这一点，我直接在End中加补丁让它调用Release，不知道PAL3A怎么搞得GetProcessHeap
+    注意在PAL3A和PAL3中都没有处理这一点，我直接在End中加补丁让它调用Release，不知道PAL3A怎么搞的
 针对gbGfxManager_D3D::BeginScene在reset device后直接返回，导致未BeginScene就开始绘制的情况：
     注意刚刚device lost时，可能并不能立即恢复执行，但此时不能让函数返回
     我重写了一个小函数EnsureCooperativeLevel，用来确保当前设备状态正常（若LostDevice会自动等待恢复）

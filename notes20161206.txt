@@ -1,0 +1,35 @@
+【垂直同步、软件光标、输入延迟、预渲染帧】
+开启垂直同步会导致输入延迟增大
+  输入延迟的测量：战斗胜利时鼠标火花特效是否跟随鼠标
+    Win10下 / Win7下(开启DWM)：无论全屏幕还是窗口化，都有一点输入延迟
+    Win7下，关闭DWM：全屏幕有延迟，窗口化后延迟几乎消失
+如果将帧率限制在59FPS附近，可以感觉明显输入延迟几乎消失，但是也能明显感觉出掉帧
+如果在NVIDIA控制面板中将预渲染帧数限制在1则会减小该延迟，但是还是会有一定延迟
+  也许可以使用IDirect3DDevice9Ex::SetMaximumFrameLatency()达到同样效果，但需要D3D9EX
+
+
+【Direct3D 9.0b 9.0c 9Ex】
+初步测试发现，如果将Direct3DCreate9()函数中的D3D_SDK_VERSION由31（9.0b）换成32（9.0c）
+游戏运行似乎并不会出现太大问题（初步测试结果）
+但是如果使用Direct3D 9Ex则会由于D3DPOOL_MANAGED不可用导致失败。
+
+
+【垂直同步】
+这里垂直同步特指60HZ的垂直同步，由于现在已经有120HZ、144HZ的显示器出现，更高的刷新率也需要考虑进来。
+垂直同步/FPS限制会影响的部分：龙葵攻击卡住、游戏时间走动太快或不动、列表鼠标滚轮敏感度、主界面中合成物品和魔剑粒子特效
+开启垂直同步：
+    好处：画面顺畅；无BUG；省电
+    坏处：输入延迟增加，导致软件光标之后，火花特效滞后且不流畅
+关闭垂直同步：
+    好处：输入延迟小；软件光标
+    坏处：有BUG；耗电
+
+
+【reduceinputlatency: 减少延迟】
+通过使用一个循环向GPU发送查询（query），强制GPU不要缓冲任何帧，这样可以减少延迟。
+代价是：
+  由于GPU不能缓冲多帧，因此对机器性能要求较高
+  需要忙等待查询结果的返回，这样很消耗CPU资源。（如果在等待期间调用Sleep有时会导致帧率下降很厉害）
+一份比较好的资料：
+  https://developer.nvidia.com/sites/default/files/akamai/gameworks/CN/Stuttering_Analysis_EN.pdf
+  https://developer.nvidia.com/sites/default/files/akamai/gameworks/CN/Stuttering_Analysis_CN.pdf

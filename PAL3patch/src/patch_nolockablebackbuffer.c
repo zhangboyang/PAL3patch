@@ -219,6 +219,7 @@ static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
     
     // present
     IDirect3DDevice9_Present(g_GfxMgr->m_pd3dDevice, NULL, NULL, NULL, NULL);
+    call_postpresent_hooks();
     
     return ret;
 }
