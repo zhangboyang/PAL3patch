@@ -44,7 +44,6 @@ static void init_stage2()
     INIT_PATCHSET(regredirect);
     INIT_PATCHSET(disablekbdhook);
     INIT_PATCHSET(setlocale);
-    INIT_PATCHSET(powersave);
     INIT_PATCHSET(timerresolution);
     INIT_PATCHSET(fixmemfree);
     INIT_PATCHSET(nocpk);

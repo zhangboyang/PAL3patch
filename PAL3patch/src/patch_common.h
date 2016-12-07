@@ -23,7 +23,6 @@ MAKE_PATCHSET(disablekbdhook);
 MAKE_PATCHSET(depcompatible);
 MAKE_PATCHSET(setlocale);
 MAKE_PATCHSET(dpiawareness);
-MAKE_PATCHSET(powersave);
 MAKE_PATCHSET(timerresolution);
 MAKE_PATCHSET(fixmemfree);
 MAKE_PATCHSET(nocpk);

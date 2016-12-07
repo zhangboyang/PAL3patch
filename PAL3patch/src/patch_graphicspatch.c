@@ -6,6 +6,39 @@ fRECT game_frect, game_frect_43, game_frect_original;
 double game_scalefactor;
 
 
+// fps limiter
+
+static LARGE_INTEGER fpslimit_qwTicksPerSec;
+static LARGE_INTEGER fpslimit_qwLast;
+static double fpslimit_target_period;
+static void fpslimit_hook()
+{
+    if (fpslimit_qwTicksPerSec.QuadPart > 0) {
+        LARGE_INTEGER qwTime;
+        while (1) {
+            QueryPerformanceCounter(&qwTime);
+            double diff = (qwTime.QuadPart - fpslimit_qwLast.QuadPart) / (double) fpslimit_qwTicksPerSec.QuadPart;
+            if (diff >= fpslimit_target_period) break;
+            if (diff > 5.0) Sleep(1);
+        }
+        fpslimit_qwLast.QuadPart = qwTime.QuadPart;
+    }
+}
+static void fpslimit_init()
+{
+    double target_fps = str2double(get_string_from_configfile("game_fpslimit"));
+    if (target_fps != 0) {
+        fpslimit_target_period = 1.0 / target_fps;
+        if (!QueryPerformanceFrequency(&fpslimit_qwTicksPerSec)) {
+            warning("can't query performance frequency.");
+            fpslimit_qwTicksPerSec.QuadPart = 0;
+        }
+        fpslimit_qwLast.QuadPart = 0;
+        
+        add_postpresent_hook(fpslimit_hook);
+    }
+}
+
 
 
 // part of the CArrayList class, from DirectX SDK C++ Sample
@@ -431,4 +464,5 @@ MAKE_PATCHSET(graphicspatch)
     patch_resolution_config(get_string_from_configfile("game_resolution"));
     init_scalefactor_table();
     init_window_patch(get_int_from_configfile("game_windowed"));
+    fpslimit_init();
 }
