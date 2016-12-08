@@ -10,27 +10,76 @@ static double last_time = 0;
 static LARGE_INTEGER qwTicksPerSec;
 static LARGE_INTEGER qwTime;
 static LARGE_INTEGER qwStartTime;
+static LARGE_INTEGER qwLastTime;
+
+#define JITTER_LIMIT 0.03 // relative factor
+
+#define MAX_JITTER_QUEUE 10
+#define MAX_JITTER_SHOWTIME 3.0
+struct jitter_info_t {
+    LARGE_INTEGER dwTimeStamp;
+    double period;
+    double fps;
+};
+static struct jitter_info_t jitter_info[MAX_JITTER_QUEUE];
 
 static void showfps_calcfps()
 {
     fcnt++;
     QueryPerformanceCounter(&qwTime);
     cur_time = (qwTime.QuadPart - qwStartTime.QuadPart) / (double) qwTicksPerSec.QuadPart;
+    
+    // update fps
     if (cur_time - last_time >= 0.5) {
         fps = fcnt / (cur_time - last_time);
         fcnt = 0;
         last_time = cur_time;
     }
+    
+    // update jitter info
+    double cur_period = (qwTime.QuadPart - qwLastTime.QuadPart) / (double) qwTicksPerSec.QuadPart;
+    int i;
+    for (i = 0; i < MAX_JITTER_QUEUE; i++) {
+        if ((qwTime.QuadPart - jitter_info[i].dwTimeStamp.QuadPart) / (double) qwTicksPerSec.QuadPart > MAX_JITTER_SHOWTIME) {
+            jitter_info[i].dwTimeStamp.QuadPart = 0;
+        }
+    }
+    if (fabs(cur_period * fps - 1.0) >= JITTER_LIMIT) {
+        memmove(&jitter_info[0], &jitter_info[1], sizeof(struct jitter_info_t) * (MAX_JITTER_QUEUE - 1));
+        jitter_info[MAX_JITTER_QUEUE - 1] = (struct jitter_info_t) {
+            .dwTimeStamp = qwTime,
+            .period = cur_period,
+            .fps = fps,
+        };
+    }
+    qwLastTime = qwTime;
 }
 
+static void showfps_postpresent()
+{
+    showfps_calcfps();
+}
 static void showfps_onendscene()
 {
     if (!pFPSFont) return;
+
+    char str[MAXLINE];
+    char *ptr = str;
+    *ptr = '\0';
     
-    showfps_calcfps();
+    // generate jitter info
+    int i;
+    for (i = 0; i < MAX_JITTER_QUEUE; i++) {
+        struct jitter_info_t *ji = &jitter_info[i];
+        if (ji->dwTimeStamp.QuadPart > 0) {
+            snprintf(ptr, str + sizeof(str) - ptr, " %+.3fms (%+.2f%%)\n", (ji->period - 1.0 / ji->fps) * 1000.0, (ji->period * ji->fps - 1.0) * 100.0);
+            ptr += strlen(ptr);
+        }
+    }
     
     wchar_t buf[MAXLINE];
-    snwprintf(buf, sizeof(buf) / sizeof(wchar_t), L"PAL3patch %hs\n%hs\nFPS = %.3f\n", patch_version, build_info, fps);
+    snwprintf(buf, sizeof(buf) / sizeof(wchar_t), L"PAL3patch %hs\n%hs\nFPS = %.3f\n\n%hs", patch_version, build_info, fps, str);
+
     
     IDirect3DStateBlock9_Capture(pFPSStateBlock);
     
@@ -97,4 +146,7 @@ MAKE_PATCHSET(showfps)
     add_onlostdevice_hook(showfps_onlostdevice);
     add_onresetdevice_hook(showfps_onresetdevice);
     add_preendscene_hook(showfps_onendscene);
+    add_postpresent_hook(showfps_postpresent);
+    
+    memset(jitter_info, 0, sizeof(jitter_info));
 }
