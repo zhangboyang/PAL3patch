@@ -1,5 +1,7 @@
 #include "common.h"
 
+static int showver_flag;
+
 static ID3DXFont *pFPSFont = NULL;
 static ID3DXSprite *pFPSSprite = NULL;
 static IDirect3DStateBlock9 *pFPSStateBlock = NULL;
@@ -12,15 +14,15 @@ static LARGE_INTEGER qwTime;
 static LARGE_INTEGER qwStartTime;
 static LARGE_INTEGER qwLastTime;
 
-#define JITTER_LIMIT 0.03 // relative factor
-
-#define MAX_JITTER_QUEUE 10
-#define MAX_JITTER_SHOWTIME 3.0
+#define MAX_JITTER_QUEUE 20
+#define MAX_JITTER_SHOWTIME 5.0
 struct jitter_info_t {
     LARGE_INTEGER dwTimeStamp;
     double period;
-    double fps;
+    double standard_fps;
 };
+static double jitter_limit;
+static double standard_fps1, standard_fps2;
 static struct jitter_info_t jitter_info[MAX_JITTER_QUEUE];
 
 static void showfps_calcfps()
@@ -29,29 +31,37 @@ static void showfps_calcfps()
     QueryPerformanceCounter(&qwTime);
     cur_time = (qwTime.QuadPart - qwStartTime.QuadPart) / (double) qwTicksPerSec.QuadPart;
     
+    if (jitter_limit >= 0 && qwLastTime.QuadPart != 0) {
+        // update jitter info
+        double cur_period = (qwTime.QuadPart - qwLastTime.QuadPart) / (double) qwTicksPerSec.QuadPart;
+        double standard_fps = 
+            fabs(standard_fps1 - fps) <= fabs(standard_fps2 - fps) ||
+            fabs(1.0 / cur_period - standard_fps1) <= fabs(1.0 / cur_period - standard_fps2)
+                ? standard_fps1 : standard_fps2;
+        
+        int i;
+        for (i = 0; i < MAX_JITTER_QUEUE; i++) {
+            if ((qwTime.QuadPart - jitter_info[i].dwTimeStamp.QuadPart) / (double) qwTicksPerSec.QuadPart > MAX_JITTER_SHOWTIME) {
+                jitter_info[i].dwTimeStamp.QuadPart = 0;
+            }
+        }
+        if (fabs(cur_period * standard_fps - 1.0) >= jitter_limit) {
+            memmove(&jitter_info[0], &jitter_info[1], sizeof(struct jitter_info_t) * (MAX_JITTER_QUEUE - 1));
+            jitter_info[MAX_JITTER_QUEUE - 1] = (struct jitter_info_t) {
+                .dwTimeStamp = qwTime,
+                .period = cur_period,
+                .standard_fps = standard_fps,
+            };
+        }
+    }
+
     // update fps
     if (cur_time - last_time >= 0.5) {
         fps = fcnt / (cur_time - last_time);
         fcnt = 0;
         last_time = cur_time;
     }
-    
-    // update jitter info
-    double cur_period = (qwTime.QuadPart - qwLastTime.QuadPart) / (double) qwTicksPerSec.QuadPart;
-    int i;
-    for (i = 0; i < MAX_JITTER_QUEUE; i++) {
-        if ((qwTime.QuadPart - jitter_info[i].dwTimeStamp.QuadPart) / (double) qwTicksPerSec.QuadPart > MAX_JITTER_SHOWTIME) {
-            jitter_info[i].dwTimeStamp.QuadPart = 0;
-        }
-    }
-    if (fabs(cur_period * fps - 1.0) >= JITTER_LIMIT) {
-        memmove(&jitter_info[0], &jitter_info[1], sizeof(struct jitter_info_t) * (MAX_JITTER_QUEUE - 1));
-        jitter_info[MAX_JITTER_QUEUE - 1] = (struct jitter_info_t) {
-            .dwTimeStamp = qwTime,
-            .period = cur_period,
-            .fps = fps,
-        };
-    }
+        
     qwLastTime = qwTime;
 }
 
@@ -63,22 +73,35 @@ static void showfps_onendscene()
 {
     if (!pFPSFont) return;
 
-    char str[MAXLINE];
-    char *ptr = str;
+    char jstr[MAXLINE];
+    char *ptr = jstr;
     *ptr = '\0';
     
     // generate jitter info
-    int i;
-    for (i = 0; i < MAX_JITTER_QUEUE; i++) {
-        struct jitter_info_t *ji = &jitter_info[i];
-        if (ji->dwTimeStamp.QuadPart > 0) {
-            snprintf(ptr, str + sizeof(str) - ptr, " %+.3fms (%+.2f%%)\n", (ji->period - 1.0 / ji->fps) * 1000.0, (ji->period * ji->fps - 1.0) * 100.0);
-            ptr += strlen(ptr);
+    if (jitter_limit >= 0) {
+        int i;
+        for (i = 0; i < MAX_JITTER_QUEUE; i++) {
+            struct jitter_info_t *ji = &jitter_info[i];
+            if (ji->dwTimeStamp.QuadPart > 0) {
+                snprintf(ptr, jstr + sizeof(jstr) - ptr, 
+                    " %+.3fms (%+.2f%%, @%.1f)\n",
+                    (ji->period - 1.0 / ji->standard_fps) * 1000.0,
+                    (ji->period * ji->standard_fps - 1.0) * 100.0,
+                    ji->standard_fps
+                );
+                ptr += strlen(ptr);
+            }
         }
     }
     
+    char vstr[MAXLINE];
+    vstr[0] = '\0';
+    if (showver_flag) {
+        snprintf(vstr, sizeof(vstr), "PAL3patch %s\n%s\n", patch_version, build_info);
+    }
+    
     wchar_t buf[MAXLINE];
-    snwprintf(buf, sizeof(buf) / sizeof(wchar_t), L"PAL3patch %hs\n%hs\nFPS = %.3f\n\n%hs", patch_version, build_info, fps, str);
+    snwprintf(buf, sizeof(buf) / sizeof(wchar_t), L"%hs" "FPS = %.3f\n\n" "%hs", vstr, fps, jstr);
 
     
     IDirect3DStateBlock9_Capture(pFPSStateBlock);
@@ -135,6 +158,14 @@ static void showfps_initfont()
 }
 MAKE_PATCHSET(showfps)
 {
+    showver_flag = get_int_from_configfile("showfps_showversion");
+
+    const char *jitter_cfgstr = get_string_from_configfile("showfps_showjitter");
+    if (sscanf(jitter_cfgstr, "%lf,%lf,%lf", &jitter_limit, &standard_fps1, &standard_fps2) != 3) {
+        fail("invalid showfps showjitter config string '%s'.", jitter_cfgstr);
+    }
+    
+    
     if (!QueryPerformanceFrequency(&qwTicksPerSec)) {
         // we can't use QueryPerformanceCounter
         warning("can't show fps.");

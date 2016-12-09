@@ -58,7 +58,7 @@ static void init_stage2()
             // these are subpatchs of graphics patch
             INIT_PATCHSET(fixfov);
             INIT_PATCHSET(nolockablebackbuffer);
-            INIT_PATCHSET(reduceinputlatency);
+            INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
             INIT_PATCHSET(fixreset);
             if (INIT_PATCHSET(fixui)) { 
                 // must called after INIT_PATCHSET(graphicspatch)

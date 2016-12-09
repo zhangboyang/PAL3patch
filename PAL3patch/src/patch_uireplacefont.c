@@ -307,7 +307,9 @@ static void UIDrawTextEx_wrapper(const char *str, RECT *rect, struct gbPrintFont
     struct gbPrintFont *new_font = get_gbprintfont(new_fontsize);
     if (!new_font) new_font = font;
     new_font->curColor = font->curColor; // copy color
+    fixui_pushidentity();
     UIDrawTextEx(str, &new_rect, new_font, new_fontsize, middleflag);
+    fixui_popstate();
 }
 static void hook_UIDrawTextEx()
 {
@@ -327,7 +329,9 @@ static void UIPrint_wrapper(int x, int y, char *str, struct gbColorQuad *color, 
     fixui_adjust_RECT(&tmp_rect, &tmp_rect);
     fontsize = map_bitmapfontsize(fontsize);
     // UIPrint() will automaticly select gbPrintFont by fontsize
+    fixui_pushidentity();
     UIPrint(tmp_rect.left, tmp_rect.top, str, color, fontsize);
+    fixui_popstate();
 }
 static void hook_UIPrint()
 {

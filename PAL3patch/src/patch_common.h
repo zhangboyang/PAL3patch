@@ -2,14 +2,21 @@
 #define PAL3PATCH_PATCH_COMMON_H
 
 #define MAKE_PATCHSET_NAME(name) CONCAT(patchset_, name)
-#define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
 #define GET_PATCHSET_FLAG(name) (get_int_from_configfile(TOSTR(name)))
+#define GET_PATCHSET_CONFIG_STR(name) (get_string_from_configfile(TOSTR(name)))
+
+// patchset based on integer config
+#define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
 #define INIT_PATCHSET(name) \
     ({ \
         int __flag = GET_PATCHSET_FLAG(name); \
         if (__flag) MAKE_PATCHSET_NAME(name)(__flag); \
         __flag; \
     })
+
+// patchset based on string config
+#define MAKE_PATCHSET_STRCFG(name) void MAKE_PATCHSET_NAME(name)(const char *cfgstr)
+#define INIT_PATCHSET_STRCFG(name) MAKE_PATCHSET_NAME(name)(GET_PATCHSET_CONFIG_STR(name))
 
 
 #define GAME_WIDTH_ORG 800
@@ -27,7 +34,7 @@ MAKE_PATCHSET(timerresolution);
 MAKE_PATCHSET(fixmemfree);
 MAKE_PATCHSET(nocpk);
 MAKE_PATCHSET(showfps);
-MAKE_PATCHSET(console); 
+MAKE_PATCHSET(console);
 MAKE_PATCHSET(relativetimer);
 
 MAKE_PATCHSET(graphicspatch);
@@ -84,6 +91,7 @@ MAKE_PATCHSET(graphicspatch);
         #define fixui_pushstate(src_frect, dst_frect, lr_method, tb_method, len_factor) \
             fixui_pushstate_node(fixui_newstate(src_frect, dst_frect, lr_method, tb_method, len_factor))
         extern void fixui_popstate();
+        #define fixui_pushidentity() fixui_pushstate(&game_frect, &game_frect, TR_LOW, TR_LOW, 1.0)
         
         struct uiwnd_ptag {
             unsigned short scalefactor_index : 3;
