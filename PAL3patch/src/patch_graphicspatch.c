@@ -273,8 +273,22 @@ static void init_scalefactor_table()
 #define WINDOW_NORMAL 1
 #define WINDOW_NOBORDER 2
 static char winname[0x80];
-static HWND gamehwnd;
-static int window_patch_cfg;
+
+static HWND gamehwnd = NULL;
+static int window_patch_cfg = -1;
+void try_goto_desktop()
+{
+    // this function is called by fail(), warning()
+    // should switch to desktop if necessary
+    // note: the graphics patch might not initialized when this function is called
+    //       must use static initialize method
+    
+    if (gamehwnd) {
+        if (window_patch_cfg == WINDOW_FULLSCREEN) {
+            ShowWindow(gamehwnd, SW_MINIMIZE);
+        }
+    }
+}
 
 static ATOM WINAPI RegisterClass_wrapper(WNDCLASS *lpWndClass)
 {
@@ -337,13 +351,13 @@ static void clipcursor_hook()
 }
 static int confirm_quit()
 {
+    try_goto_desktop();
     ClipCursor(NULL);
     return MessageBoxW(gamehwnd, wstr_confirmquit_text, wstr_confirmquit_title, MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES;
 }
 static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     if (Msg == WM_CLOSE) {
-        if (window_patch_cfg == WINDOW_FULLSCREEN) ShowWindow(gamehwnd, SW_MINIMIZE);
         if (!confirm_quit()) return 0;
     }
     if (Msg == WM_KEYUP && wParam == VK_F12) { clipcursor_enabled ^= 1; return 0; }
@@ -457,6 +471,32 @@ double str2scalefactor(const char *str)
 
 
 
+static void loading_splash()
+{
+    IDirect3DDevice9_Clear(g_GfxMgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);
+    IDirect3DDevice9_BeginScene(g_GfxMgr->m_pd3dDevice);
+    
+    int fontsize = 16 * game_scalefactor;
+    ID3DXFont *pFont;
+    if (FAILED(D3DXCreateFontW(g_GfxMgr->m_pd3dDevice, fontsize, 0, FW_BOLD, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, wstr_defaultfont, &pFont))) {
+        pFont = NULL;
+    }
+    if (pFont) {
+        RECT rc;
+        int padding = 20 * game_scalefactor;
+        set_rect(&rc, 0, gfxdrvinfo.height - padding - fontsize, gfxdrvinfo.width - padding, 0);
+        ID3DXFont_DrawTextW(pFont, NULL, wstr_gameloading, -1, &rc, DT_NOCLIP | DT_RIGHT, 0xFFFFFFFF);
+        ID3DXFont_Release(pFont);
+        pFont = NULL;
+    }
+    
+    IDirect3DDevice9_EndScene(g_GfxMgr->m_pd3dDevice);
+    IDirect3DDevice9_Present(g_GfxMgr->m_pd3dDevice, NULL, NULL, NULL, NULL);
+}
+static void add_loading_splash()
+{
+    add_postd3dcreate_hook(loading_splash);
+}
 
 MAKE_PATCHSET(graphicspatch)
 {
@@ -466,4 +506,5 @@ MAKE_PATCHSET(graphicspatch)
     init_scalefactor_table();
     init_window_patch(get_int_from_configfile("game_windowed"));
     fpslimit_init();
+    add_loading_splash();
 }

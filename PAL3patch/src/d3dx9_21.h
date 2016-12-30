@@ -253,6 +253,8 @@ DECLARE_INTERFACE_(ID3DXFont, IUnknown)
 #define ID3DXFont_Release(p) (p)->lpVtbl->Release(p)
 #define ID3DXFont_DrawTextA(p,a,b,c,d,e,f) (p)->lpVtbl->DrawTextA(p,a,b,c,d,e,f)
 #define ID3DXFont_DrawTextW(p,a,b,c,d,e,f) (p)->lpVtbl->DrawTextW(p,a,b,c,d,e,f)
+#define ID3DXFont_PreloadCharacters(p,a,b) (p)->lpVtbl->PreloadCharacters(p,a,b)
+#define ID3DXFont_PreloadTextW(p,a,b) (p)->lpVtbl->PreloadTextW(p,a,b)
 #define ID3DXFont_OnLostDevice(p) (p)->lpVtbl->OnLostDevice(p)
 #define ID3DXFont_OnResetDevice(p) (p)->lpVtbl->OnResetDevice(p)
 

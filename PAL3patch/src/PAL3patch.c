@@ -11,6 +11,8 @@ static void self_check()
     assert(sizeof(struct CCBUI) == 0xA48);
     assert(sizeof(struct UIStatic) == 0x98);
     assert(sizeof(struct CCBLineupWindow) == 0x7C);
+    assert(sizeof(struct UI3DCtrl) == 0x134);
+    assert(sizeof(struct gbCamera) == 0x178);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -57,6 +59,7 @@ static void init_stage2()
         if (INIT_PATCHSET(graphicspatch)) {
             // these are subpatchs of graphics patch
             INIT_PATCHSET(fixfov);
+            INIT_PATCHSET(fixortho);
             INIT_PATCHSET(nolockablebackbuffer);
             INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
             INIT_PATCHSET(fixreset);
@@ -69,6 +72,7 @@ static void init_stage2()
                 INIT_PATCHSET(fixcombatui);
                 //INIT_PATCHSET(fixroledialog);
                 //INIT_PATCHSET(fixgameover);
+                INIT_PATCHSET(fix3dctrl);
             }
             INIT_PATCHSET(replacetexture);
         }

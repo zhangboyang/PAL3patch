@@ -60,7 +60,11 @@ MAKE_PATCHSET(graphicspatch);
     extern double scalefactor_table[SCALEFACTOR_COUNT];
     extern double str2scalefactor(const char *str);
     
+    extern void try_goto_desktop();
+    
     MAKE_PATCHSET(fixfov);
+    MAKE_PATCHSET(fixortho);
+        extern float orthofactor;
     MAKE_PATCHSET(nolockablebackbuffer);
     MAKE_PATCHSET(reduceinputlatency);
     MAKE_PATCHSET(fixreset);
@@ -133,6 +137,8 @@ MAKE_PATCHSET(graphicspatch);
             #define cb_scalefactor (scalefactor_table[SF_COMBAT])
         MAKE_PATCHSET(fixroledialog);
         MAKE_PATCHSET(fixgameover);
+        MAKE_PATCHSET(fix3dctrl);
+
     MAKE_PATCHSET(replacetexture);
 
 #endif

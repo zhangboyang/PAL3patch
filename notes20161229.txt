@@ -1,0 +1,44 @@
+【uireplacefont_preload: 预加载字体】
+现在可以预加载字体了，目前有几种加载方式选项：
+uireplacefont_preloadfontset: 字体集等级，越高加载的字体大小就越多 (包含关系)
+    0: 不加载
+    1: 加载剧情对话框对应字体
+    2: 加载UI常用字体
+    3: 加载UI不常用字体
+    4: 几乎所有用到的字体（消耗大量内存！）
+uireplacefont_preloadcharset:
+    0 FONTPRELOAD_NONE: 不加载
+    1 FONTPRELOAD_ASCIIPRINTABLE: 所有ASCII可显示字符
+    2 FONTPRELOAD_FREQUENTLYUSED: 所有GB2312和BIG5中的常用字部分（cjktable）
+    3 FONTPRELOAD_FULLCJK: UCS-2中所有中文字符进行预加载（消耗大量内存！）
+一般两个参数设为2即可，经测量，在游戏启动时大约需要8秒钟，占用约200MB内存。
+
+【字体大小判断精度问题】
+在uireplacefont中，字体大小是直接由double强制类型转换成int的，此后该int参与了比较。
+但是由于精度问题，有时强制类型转换会将x.999999转换成x而不是x+1，导致比较出现问题而找不到相应字体
+所以需要加上个eps再向下取整，即floor(somedouble+eps)，这样就不会有问题了
+
+【fix3dctrl：修正3D平行投影控件】
+修改Update函数：修正鼠标行为（如鉴定小游戏）
+修改Render函数：修正显示位置（调用了SetAsCurrent因此有副作用）
+主要修改UI3DCtrl_SetOriginPt这个函数（两个重载）
+如果用GetCursorPos直接用鼠标坐标作为原点位置，移动鼠标可以观察到Y的比例好像不对，可能设计就是这样
+from_y的作用：绝对数值，与x和y取值无关
+
+【fixortho】
+类似fixfov，但是修正平行投影的比例
+目前想到的两种办法：
+(1)使用wrapper在调用前修改this->OrthoSize，调用后恢复
+(2)使用asmpatch把所有this->OtrhoSize引用全部改掉
+感觉前者较好，采用前者的方案。
+需要wrapper的函数可以参考fixfov的修改的地方（其实好多地方根据xref根本不会被调用）
+但是gbCamera::GetRayToScreen()是个例外，它ortho是自己处理，但是fov是交给别的函数处理
+  
+在wrapper是要注意重复包装的问题（不过此情况应该不会发生）
+fixfov其实也可以采用wrapper的方式，但是有一些地方需要注意：
+(1)修改/恢复什么，如果是修改this->fov势必要使用atan()函数，可能会引入较大浮点误差
+   如果修改this->ViewPort或是this->zNear，在SetAsCurrent函数中别处还用到了这两个参数，需要手动处理
+(2)GetRayToScreen()中调用GetViewSizeOnNearPlane()会造成重复包装问题
+(3)与fixortho使用同一wrapper的冲突问题
+既然fixfov已经写好，改进fixfov的工作还是等到以后重构的时候再说吧
+

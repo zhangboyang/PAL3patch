@@ -23,6 +23,43 @@ enum VertexProcessingType {
     PURE_HARDWARE_VP
 };
 
+struct gbVec3D {
+    float x;
+    float y;
+    float z;
+};
+struct gbQuaternion {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+struct gbMatrix4 {
+    union {
+        struct {
+            float xx;
+            float xy;
+            float xz;
+            float xw;
+            float yx;
+            float yy;
+            float yz;
+            float yw;
+            float zx;
+            float zy;
+            float zz;
+            float zw;
+            float tx;
+            float ty;
+            float tz;
+            float tw;
+        };
+        float m[4][4];
+    };
+};
+
+
 struct gbGfxDriverInfo {
     int type;
     int subtype;
@@ -569,10 +606,74 @@ struct CCBLineupWindow {
 
 struct UICursor;
 
+struct UI3DObj {
+    char m_mouseoff;
+    int m_enable;
+    int m_needdel;
+    int m_type;
+    union {
+        struct gbGeomNode *m_pol;
+        struct Actor *m_actor;
+    };
+    struct gbVec3D m_pos;
+};
+struct UI3DCtrl {
+    struct UIWnd baseclass;
+    int m_numobj;
+    struct UI3DObj m_obj[5];
+    float m_orthosize;
+    int m_rotatemode;
+    char m_isrotateto;
+    int m_speed;
+    float m_rotate;
+    float m_rotatetarget;
+    float m_rotx;
+    float m_rotz;
+    float m_dropx;
+    float m_dropy;
+    float m_dropz;
+    float m_scalex;
+    float m_scaley;
+    float m_scalez;
+    struct gbLightObj *m_lightobj;
+    struct gbCamera *m_camera;
+    struct gbVec3D m_raydir;
+};
+
+struct gbViewPort {
+    int x;
+    int y;
+    int width;
+    int height;
+    float minz;
+    float maxz;
+};
+
+struct gbCamera {
+    float fov;
+    float OrthoSize;
+    float Wscreen;
+    float Hscreen;
+    float zNear;
+    float zFar;
+    struct gbViewPort Viewport;
+    float Plane[6][4];
+    int numPlane;
+    struct gbMatrix4 ViewMatrix;
+    struct gbMatrix4 InvVMatrix;
+    struct gbCamControler *pControl[16];
+    int CurCtrl;
+    struct gbGfxManager *pGfxMgr;
+    struct gbVec3D eyeLoc;
+    struct gbQuaternion eyeDir;
+};
+
+struct gbRay;
 
 // functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
 #define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A190, void, struct gbGfxManager_D3D *), this)
+#define gbGfxManager_D3D_EndScene(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10018F00, void, struct gbGfxManager_D3D *), this)
 extern enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D *this);
 extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
 #define UIWnd_SetRect(this, rect) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445FA0, void, struct UIWnd *, RECT *), this, rect)
@@ -586,6 +687,9 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gby2y(gby) ((1.0 - (gby)) * gfxdrvinfo.height / 2.0)
 #define x2gbx(x) ((x) * 2.0 / gfxdrvinfo.width - 1.0)
 #define y2gby(y) (1.0 - (y) * 2.0 / gfxdrvinfo.height)
+#define gbCamera_SetAsCurrent(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021A80, void, struct gbCamera *, int), this, a2)
+#define gbCamera_PointEyeToScr_100220B0(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100220B0, void, struct gbCamera *, struct gbVec3D *, float *, float *), this, a2, a3, a4)
+#define gbCamera_GetRayToScreen(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100222C0, void, struct gbCamera *, float, float, struct gbRay *), this, a2, a3, a4);
 
 // PAL3 functions
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
@@ -593,7 +697,6 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gbBinkVideo_Height(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C720, int, struct gbBinkVideo *), this)
 #define gbBinkVideo_DrawFrameEx(this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C530, int, struct gbBinkVideo *, void *, int, int, int, int, int), this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType)
 #define PAL3_InitGFX ((void (*)(void)) TOPTR(0x00404FF0))
-#define gbGfxManager_D3D_EndScene(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10018F00, void, struct gbGfxManager_D3D *), this)
 #define UIDrawTextEx ((void (*)(const char *, RECT *, struct gbPrintFont *, int, int)) TOPTR(0x00541210))
 #define UIPrint ((void (*)(int, int, char *, struct gbColorQuad *, int)) TOPTR(0x00540FD0))
 #define C2DSpark_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004D61C0, void, struct C2DSpark *), this)
@@ -603,6 +706,11 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define UIFrameWnd_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0043DDF0, void, struct UIFrameWnd *), this)
 #define UIWnd_MoveWindow(this, x, y) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445D20, void, struct UIWnd *, int, int), this, x, y)
 #define UICursor_IRender(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00541640, void, struct UICursor *), this)
+#define UI3DCtrl_SetOriginPt_XY(this, x, y) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00439850, void, struct UI3DCtrl *, int, int), this, x, y)
+#define UI3DCtrl_SetOriginPt_XYFromY(this, x, y, from_y) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00439930, void, struct UI3DCtrl *, int, int, int), this, x, y, from_y)
+#define UI3DCtrl_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00439410, void, struct UI3DCtrl *), this)
+#define UI3DCtrl_Update(this, deltatime, haveinput) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00439A20, int, struct UI3DCtrl *, float, int), this, deltatime, haveinput)
+#define UI3DCtrl_GetMouseRay(this, mray, cursorpt) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00439FE0, struct gbRay *, struct UI3DCtrl *, struct gbRay *, POINT *), this, mray, cursorpt)
 
 // global variables
 #define gfxdrvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))

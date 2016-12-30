@@ -63,7 +63,7 @@ INIT_PATCH(prefix, addr, size, oldcode) => INIT_ASMPATCH(name, addr, size, oldco
 修正方法是：
     对gbCamera类里面所有函数中类似这样的等式
         宽度 = (double)this->Viewport.height * 近剪裁面 / (double)this->Viewport.width;
-    乘上一个系数 foxmul=width*0.75f/height，这样就把以4:3比例计算的宽度转换为实际比例的宽度了
+    乘上一个系数 fixmul=width*0.75f/height，这样就把以4:3比例计算的宽度转换为实际比例的宽度了
     一共有6处需要打补丁，这6处的位置可以通过对常数0.0087266462所在处flt_100F5810交叉引用得到。
     由于gbengine中透视矩阵的计算也是通过此等式进行一系列计算所得，所以我们只需要改这样的等式即可
 

@@ -22,14 +22,20 @@ static const wchar_t wstr_about_text_CHS[] =
     L"  https://github.com/zhangboyang/PAL3patch\n"
     L"编译信息:\n%hs"
 ;
+
 static const wchar_t wstr_confirmquit_text_CHS[] = L"您确定要退出游戏吗？\n未保存的游戏进度将会丢失。";
 static const wchar_t wstr_confirmquit_title_CHS[] = L"退出";
 
+static const wchar_t wstr_defaultfont_CHS[] = L"宋体";
+static const wchar_t wstr_gameloading_CHS[] = L"游戏加载中，请稍候……";
 
 const wchar_t *wstr_about_title;
 const wchar_t *wstr_about_text;
 const wchar_t *wstr_confirmquit_text;
 const wchar_t *wstr_confirmquit_title;
+const wchar_t *wstr_defaultfont;
+const wchar_t *wstr_gameloading;
+
 
 
 void init_locale()
@@ -39,4 +45,6 @@ void init_locale()
     wstr_about_text = wstr_about_text_CHS;
     wstr_confirmquit_text = wstr_confirmquit_text_CHS;
     wstr_confirmquit_title = wstr_confirmquit_title_CHS;
+    wstr_defaultfont = wstr_defaultfont_CHS;
+    wstr_gameloading = wstr_gameloading_CHS;
 }

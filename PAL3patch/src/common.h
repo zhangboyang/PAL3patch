@@ -26,6 +26,8 @@
 #define MAXLINE 4096
 #define MAXLINEFMT "%" TOSTR(MAXLINE) "s"
 
+#define eps (1e-5)
+
 
 // bool
 typedef unsigned char bool;
@@ -72,6 +74,7 @@ typedef unsigned char bool;
 #include "patch_common.h"
 #include "PAL3patch.h"
 #include "d3dx9_21.h"
+#include "cjktable.h"
 
 // common typedefs
 typedef void *(*malloc_funcptr_t)(size_t);

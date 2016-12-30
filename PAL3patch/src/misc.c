@@ -106,6 +106,7 @@ void __attribute__((noreturn)) __fail(const char *file, int line, const char *fu
         fputc('\n', fp);
         fclose(fp);
     }
+    try_goto_desktop();
     MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
     TerminateProcess(GetCurrentProcess(), 1);
     while (1);
@@ -160,6 +161,7 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
                     strncat(msgbuf, "\n\nmax messagebox limit reached.", sizeof(msgbuf));
                     msgbuf[sizeof(msgbuf) - 1] = '\0';
                 }
+                try_goto_desktop();
                 MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
             }
         }
