@@ -670,6 +670,34 @@ struct gbCamera {
 
 struct gbRay;
 
+struct ObjectCamera {
+    struct gbCamera *m_pCamera;
+    struct gbVec3D m_camFrom;
+    struct gbVec3D m_camTo;
+    struct gbVec3D m_camUp;
+    struct gbVec3D m_camDirect;
+    float m_yaw;
+    float m_pitch;
+    float m_roll;
+    float m_dist;
+    float m_nyaw;
+    float m_npitch;
+    float m_nroll;
+    struct gbVec3D m_forward;
+    struct gbVec3D m_side;
+    float m_stepRotSpeed;
+    float m_stepRot;
+    int m_stepRotMode;
+    int m_stepRotAxis;
+    char m_bStepRot;
+};
+struct LineupUI {
+    struct UIFrameWnd baseclass;
+    DWORD gapX[0x9BC2];
+    struct ObjectCamera *m_pCamera;
+    DWORD gapY[0xB66];
+};
+
 // functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
 #define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A190, void, struct gbGfxManager_D3D *), this)
@@ -711,6 +739,7 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define UI3DCtrl_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00439410, void, struct UI3DCtrl *), this)
 #define UI3DCtrl_Update(this, deltatime, haveinput) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00439A20, int, struct UI3DCtrl *, float, int), this, deltatime, haveinput)
 #define UI3DCtrl_GetMouseRay(this, mray, cursorpt) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00439FE0, struct gbRay *, struct UI3DCtrl *, struct gbRay *, POINT *), this, mray, cursorpt)
+#define LineupUI_Create(this, pWnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00483650, void, struct LineupUI *, struct UIWnd *), this, pWnd)
 
 // global variables
 #define gfxdrvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))

@@ -92,9 +92,7 @@ static void method2_preendscene_hook()
         warning("can't lock rect.");
         goto done;
     }
-    // touch the memory
-    volatile char x;
-    x = *(char *)lrect.pBits;
+    // FIXME: should we touch the memory at lrect.pBits
     // unlock the render target
     IDirect3DSurface9_UnlockRect(method2_pRenderTarget);
     

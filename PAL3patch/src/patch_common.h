@@ -74,6 +74,7 @@ MAKE_PATCHSET(graphicspatch);
             int lr_method, tb_method;
             double len_factor;
             struct fixui_state *prev;
+            int no_cursor_virt;
         };
         extern struct fixui_state *fs;
 
@@ -85,6 +86,7 @@ MAKE_PATCHSET(graphicspatch);
             PTR_GAMERECT,          // game_frect
             PTR_GAMERECT_43,       // game_frect_43
             PTR_GAMERECT_ORIGINAL, // game_frect_original
+            PTR_GAMERECT_UIAUTO,   // game_frect_ui_auto
             // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
         };
         int parse_uiwnd_rect_type(const char *str);
@@ -97,13 +99,18 @@ MAKE_PATCHSET(graphicspatch);
         extern void fixui_popstate();
         #define fixui_pushidentity() fixui_pushstate(&game_frect, &game_frect, TR_LOW, TR_LOW, 1.0)
         
+        #define UIWND_PTAG_MAGIC 162u
         struct uiwnd_ptag {
-            unsigned short scalefactor_index : 3;
-            unsigned short self_srcrect_type : 3;
-            unsigned short self_dstrect_type : 3;
-            unsigned short self_lr_method : 3;
-            unsigned short self_tb_method : 3;
-            unsigned short enabled : 1;
+            unsigned scalefactor_index : 3;
+            unsigned self_srcrect_type : 3;
+            unsigned self_dstrect_type : 3;
+            unsigned self_lr_method : 3;
+            unsigned self_tb_method : 3;
+            unsigned no_cursor_virt : 1; // if set to 1, will disable cursor transform for this UIWnd
+            unsigned self_only_ptag : 1; // if set to 1, this ptag apply to this UIWnd only, will not affect it's childrens
+            unsigned in_use : 1;
+            unsigned enabled : 1;
+            unsigned magic : 13;
         };
         #define M_PWND(addr) TOPTR(M_DWORD(addr))
         #define PWND TOPTR
@@ -114,7 +121,11 @@ MAKE_PATCHSET(graphicspatch);
                 .self_dstrect_type = (dst_type), \
                 .self_lr_method = (lr), \
                 .self_tb_method = (tb), \
+                .no_cursor_virt = 0, \
+                .self_only_ptag = 0, \
+                .in_use = 0, \
                 .enabled = 1, \
+                .magic = UIWND_PTAG_MAGIC, \
             })
         extern void set_uiwnd_ptag(struct UIWnd *this, struct uiwnd_ptag ptag);
         extern fRECT *get_ptag_frect(int rect_type);
@@ -130,6 +141,21 @@ MAKE_PATCHSET(graphicspatch);
         
         extern void push_ptag_state(struct UIWnd *pwnd);
         extern void pop_ptag_state(struct UIWnd *pwnd);
+        #define MAKE_UIWND_RENDER_WRAPPER(render_wrapper_name, original_render_address) \
+            void __fastcall render_wrapper_name(struct UIWnd *this, int dummy) \
+            { \
+                push_ptag_state(this); \
+                THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(original_render_address, void, struct UIWnd *), this); \
+                pop_ptag_state(this); \
+            }
+        #define MAKE_UIWND_UPDATE_WRAPPER(update_wrapper_name, original_wrapper_address) \
+            int __fastcall update_wrapper_name(struct UIWnd *this, int dummy, float deltatime, int haveinput) \
+            { \
+                push_ptag_state(this); \
+                int ret = THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(original_wrapper_address, int, struct UIWnd *, float, int), this, deltatime, haveinput); \
+                pop_ptag_state(this); \
+                return ret; \
+            }
 
         MAKE_PATCHSET(uireplacefont);
         MAKE_PATCHSET(fixloadingfrm);
@@ -138,6 +164,7 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fixroledialog);
         MAKE_PATCHSET(fixgameover);
         MAKE_PATCHSET(fix3dctrl);
+        MAKE_PATCHSET(fixlineupui);
 
     MAKE_PATCHSET(replacetexture);
 

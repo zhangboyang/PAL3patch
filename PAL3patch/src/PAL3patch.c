@@ -7,12 +7,14 @@ static void self_check()
 {
     // asserts
     assert(D3D_SDK_VERSION == 31);
-    assert(sizeof(struct uiwnd_ptag) == 2);
+    assert(sizeof(struct uiwnd_ptag) == 4);
     assert(sizeof(struct CCBUI) == 0xA48);
     assert(sizeof(struct UIStatic) == 0x98);
     assert(sizeof(struct CCBLineupWindow) == 0x7C);
     assert(sizeof(struct UI3DCtrl) == 0x134);
     assert(sizeof(struct gbCamera) == 0x178);
+    assert(sizeof(struct LineupUI) == 0x29CEC);
+    assert(sizeof(struct ObjectCamera) == 0x7C);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -73,6 +75,7 @@ static void init_stage2()
                 //INIT_PATCHSET(fixroledialog);
                 //INIT_PATCHSET(fixgameover);
                 INIT_PATCHSET(fix3dctrl);
+                INIT_PATCHSET(fixlineupui);
             }
             INIT_PATCHSET(replacetexture);
         }

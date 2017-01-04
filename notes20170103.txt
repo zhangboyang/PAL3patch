@@ -1,0 +1,13 @@
+【UI总体结构】
+从LineupUI::Ctor的xref graph to可以看到调用过程大致是这样
+UIGameFrm->StateUI->LineupUI
+前几层的调用几乎都是经过特殊判断的，所以依赖于UIWnd::Render()/UIWnd::Update()基类函数的PTAG无法起作用，需要手动处理（做wrapper）
+
+【确认类结构】
+可以确认Object3D和ObjectCamera没有变动
+
+【fixlineupui：解决系统阵型界面中3D大小问题和鼠标冲突问题】
+鼠标互相冲突通过对LineupUI打上加强后的PTAG可以解决
+加强的PTAG的两项功能是：no_cursor_virt禁止鼠标虚拟化；self_only_ptag标记只影响自身不影响子窗口
+阵型大小问题通过修改其camera的fov解决，使用了atan函数（据测试表明误差可以接受）
+

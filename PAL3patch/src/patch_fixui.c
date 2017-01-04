@@ -15,6 +15,7 @@ static void fixui_setdefaultstate(fRECT *src_frect, fRECT *dst_frect, int lr_met
     def_fs.lr_method = lr_method;
     def_fs.tb_method = tb_method;
     def_fs.len_factor = len_factor;
+    def_fs.no_cursor_virt = 0;
     def_fs.prev = NULL;
 }
 // allocate and construct a new state struct
@@ -26,6 +27,7 @@ struct fixui_state *fixui_newstate(fRECT *src_frect, fRECT *dst_frect, int lr_me
     cur->lr_method = lr_method;
     cur->tb_method = tb_method;
     cur->len_factor = len_factor;
+    cur->no_cursor_virt = 0;
     cur->prev = NULL;
     return cur;
 }
@@ -215,39 +217,20 @@ static void hook_gbPrintFont_PrintString()
 
 
 
-
-
-
 // hook GetCursorPos for cursor virtualization
-// src_frect should be original rect in game
-// dst_frect should be rect on screen
-static fRECT src_cursor_frect, dst_cursor_frect;
-static int cursor_virt_flag = 0;
-
-static void set_cursor_virtualization(fRECT *src_frect, fRECT *dst_frect)
+static void set_cursor_virt(int enabled)
 {
-    if (src_frect && dst_frect) {
-        cursor_virt_flag = 1;
-        src_cursor_frect = *src_frect;
-        dst_cursor_frect = *dst_frect;
-    } else {
-        cursor_virt_flag = 0;
-    }
+    fs->no_cursor_virt = !enabled;
 }
-
 static void getcursorpos_virtualization_hookfunc()
 {
     if (!getcursorpos_hook_ret) return;
     fixui_update_gamestate();
-    fRECT *src_frect, *dst_frect;
-    if (cursor_virt_flag) {
-        src_frect = &src_cursor_frect;
-        dst_frect = &dst_cursor_frect;
-    } else { // use rect in def_fs for default
-        src_frect = &fs->src_frect;
-        dst_frect = &fs->dst_frect;
+    if (!fs->no_cursor_virt) {
+        // src_frect should be original rect in game
+        // dst_frect should be rect on screen
+        fixui_scale_POINT_round(getcursorpos_hook_lppoint, getcursorpos_hook_lppoint, &fs->src_frect, &fs->dst_frect);
     }
-    fixui_scale_POINT_round(getcursorpos_hook_lppoint, getcursorpos_hook_lppoint, src_frect, dst_frect);
 }
 
 
@@ -273,10 +256,8 @@ static void init_softcursor_sizepatch()
 
 
 // UIWnd position-tag patch,  ptag = position tag
-#define UIWND_PTAG_MAGIC "PT"
-#define UIWND_PTAG_MAGIC_LEN 2
-#define get_ptag_with_magic(this) ((unsigned)((this)->m_bcreateok))
-#define get_ptag(this) (*(struct uiwnd_ptag *)(((char *) &(this)->m_bcreateok) + UIWND_PTAG_MAGIC_LEN))
+#define get_ptag_raw(this) ((unsigned)((this)->m_bcreateok))
+#define get_ptag(this) (*(struct uiwnd_ptag *)(&(this)->m_bcreateok))
 
 fRECT *get_ptag_frect(int rect_type)
 {
@@ -284,23 +265,30 @@ fRECT *get_ptag_frect(int rect_type)
         case PTR_GAMERECT:           return &game_frect;
         case PTR_GAMERECT_43:        return &game_frect_43;
         case PTR_GAMERECT_ORIGINAL:  return &game_frect_original;
+        case PTR_GAMERECT_UIAUTO:    return &game_frect_ui_auto;
         default:                     return NULL;
     }
 }
 static int verify_ptag_magic(struct UIWnd *this)
 {
-    if (memcmp(&(this)->m_bcreateok, UIWND_PTAG_MAGIC, UIWND_PTAG_MAGIC_LEN) == 0) {
+    if (get_ptag(this).magic == UIWND_PTAG_MAGIC) {
         return 1;
     } else {
-        plog("position tag %08X for UIWnd %p is broken.", get_ptag_with_magic(this), this);
+        warning("position tag %08X for UIWnd %p is broken.", get_ptag_raw(this), this);
         return 0;
     }
 }
 
 void push_ptag_state(struct UIWnd *pwnd)
 {
+    if (!verify_ptag_magic(pwnd)) return;
     struct uiwnd_ptag ptag = get_ptag(pwnd);
     if (!ptag.enabled) return;
+    
+    // check in-use flag
+    if (ptag.in_use) {
+        warning("duplicate ptag in stack.");
+    }
     
     // read rect information from ptag
     fRECT *trans_src_frect, *trans_dst_frect;
@@ -319,10 +307,24 @@ void push_ptag_state(struct UIWnd *pwnd)
     
     // scale window contents
     fixui_pushstate(&src_frect, &dst_frect, TR_SCALE_LOW, TR_SCALE_LOW, len_factor);
+    if (ptag.no_cursor_virt) set_cursor_virt(0); // update cursor virt status
+    
+    // update in-use flag
+    get_ptag(pwnd).in_use = 1;
 }
 void pop_ptag_state(struct UIWnd *pwnd)
 {
-    if (!get_ptag(pwnd).enabled) return;
+    if (!verify_ptag_magic(pwnd)) return;
+    struct uiwnd_ptag ptag = get_ptag(pwnd);
+    if (!ptag.enabled) return;
+    
+    // restore in-use flag
+    if (!ptag.in_use) {
+        warning("unmatched ptag pop operation.");
+    }
+    get_ptag(pwnd).in_use = 0;
+    
+    // pop state
     fixui_popstate();
 }
 
@@ -339,15 +341,17 @@ static void __fastcall UIWnd_Render(struct UIWnd *this, int dummy)
     for (i = 0; i < this->m_childs.m_nSize; i++) {
         struct UIWnd *pwnd = this->m_childs.m_pData[i];
         if (!pwnd->m_bvisible) continue;
-        if (!verify_ptag_magic(pwnd)) {
+        if (!verify_ptag_magic(pwnd) || !verify_ptag_magic(this)) {
             // the magic is broken due to unknown reasons
             // for safety, render only
             UIWnd_vfptr_Render(pwnd);
         } else {
             // push state, render, pop state
+            if (get_ptag(this).self_only_ptag) pop_ptag_state(this);
             push_ptag_state(pwnd);
             UIWnd_vfptr_Render(pwnd);
             pop_ptag_state(pwnd);
+            if (get_ptag(this).self_only_ptag) push_ptag_state(this);
         }
     }
 }
@@ -358,14 +362,16 @@ static int __fastcall UIWnd_Update(struct UIWnd *this, int dummy, float deltatim
     for (i = this->m_childs.m_nSize - 1; i >= 0; i--) {
         struct UIWnd *pwnd = this->m_childs.m_pData[i];
         int ret;
-        if (!verify_ptag_magic(pwnd)) {
+        if (!verify_ptag_magic(pwnd) || !verify_ptag_magic(this)) {
             // fallback    
             ret = UIWnd_vfptr_Update(pwnd, deltatime, haveinput);
         } else {
             // push state, update, pop state
+            if (get_ptag(this).self_only_ptag) pop_ptag_state(this);
             push_ptag_state(pwnd);
             ret = UIWnd_vfptr_Update(pwnd, deltatime, haveinput);
             pop_ptag_state(pwnd);
+            if (get_ptag(this).self_only_ptag) push_ptag_state(this);
         }
         if (ret) haveinput = 0;
     }
@@ -376,7 +382,13 @@ static void init_uiwnd_positiontag_patch()
 {
     // modify UIWnd::Create
     SIMPLE_PATCH(0x00445BDA, "\x89\x46\x34", "\xEB\x0B\x90", 3);
-    SIMPLE_PATCH(0x00445BE7, "\x90\x90\x90\x90\x90\x90\x90\x90\x90", "\xC7\x46\x34" UIWND_PTAG_MAGIC "\x00\x00\xEB\xED", 9);
+    
+    char code_with_magic[] = "\xC7\x46\x34\x00\x00\x00\x00\xEB\xED";
+    struct uiwnd_ptag initial_ptag;
+    memset(&initial_ptag, 0, sizeof(struct uiwnd_ptag));
+    initial_ptag.magic = UIWND_PTAG_MAGIC;
+    memcpy(code_with_magic + 3, &initial_ptag, sizeof(struct uiwnd_ptag));
+    SIMPLE_PATCH(0x00445BE7, "\x90\x90\x90\x90\x90\x90\x90\x90\x90", code_with_magic, 9);
 
     // replace UIWnd::Update and UIWnd::Render
     make_jmp(0x00445C60, UIWnd_Update);
@@ -415,7 +427,6 @@ MAKE_PATCHSET(fixui)
     hook_gbPrintFont_PrintString(); 
     
     // init cursor virtualization
-    set_cursor_virtualization(NULL, NULL);
     add_getcursorpos_hook(getcursorpos_virtualization_hookfunc);
     
     // init uiwnd position tag patch
