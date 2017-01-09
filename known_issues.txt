@@ -25,7 +25,7 @@ FIXED: 更换字体后，战斗对话渐变效果错误，可能与颜色的Alph
 战斗界面天空盒子贴图有时也会变成纯色，例如璧山第一个酒坛妖怪
 WONTFIX: 在新安当丁时彦处投资当铺，弹出窗口中标题处“当铺等级”的值显示有微小错位
 “动态模糊”相关功能
-进入系统界面，背景拉伸问题
+进入系统界面（如买卖等），背景拉伸（压缩）问题
 FIXED: launcher无法在某些系统中使用，因为API的地址发生了变化，需要动态获取
 很有可能出现用到GBENGINE.DLL中的地址却忘记加gboffset的情况。可以通过将gbengine重定位(rebase)到0x40000000然后在memcpy_to_process系列函数中判断来测试，需要枚举选项。（也许有更好方法）
 FIXED: 战斗界面gbPrintFont_NUM类显示的文字位置仍然错误，需要对CCBDisplayChain类、CCBSystem类（次要）进行逆向
@@ -46,9 +46,11 @@ FIXED: 当使用原游戏字体字体替换时，文字会错位
 帧率问题（详见note20161209.txt）：当帧率不为60时会有一系列问题
 FIXED: 减少输入延迟时，用StretchRect和LockRect的方法在touch memory被编译器优化掉了（或许可以仿照alloca写汇编，或者根本不需要touch memory）（暂时删去touch memory操作）
 小游戏UI修正（包括那些只能通过剧情触发而不能通过游戏主菜单进入的）
-屏幕比例不是4:3时，司南转动时会变形
+FIXED: 屏幕比例不是4:3时，司南转动时会变形
 UI贴图很多情况下位置不准，会造成UI贴图看起来发虚
 UI很多都是D3DTEXF_POINT，放大质量不佳
+游戏场景中人物表情图标（例如红心、心碎、汗等）位置和大小不正常（UIEmote）
+FIXED: 游戏欢迎界面太极打开效果错位
 
 
 ===== TODO =====
@@ -62,6 +64,7 @@ DONE: 能让用户选择特定游戏状态是否对4:3比例留白，而不是�
 DONE: 静态链接D3DX9_21
 DONE: 统计FPS抖动
 DONE: 允许配置抖动显示阈值
+DONE: 允许自定义窗口比例（提供除4:3留白和全屏不留白之外的自定义选项），新增customrectN
 繁体默认字体
 繁体翻译
 默认/初次设置向导（专家系统）
@@ -79,7 +82,6 @@ ABANDONED: 允许使用MSVC编译
 更换截屏方式（不要用GetFrontBufferData，用StretchRect到RenderTarget上）
 添加配音接口
 使用Direct3D9Ex接口（没有D3DPOOL_MANAGED了）
-允许自定义窗口比例（提供除4:3留白和全屏不留白之外的自定义选项），新增game_customrect
 添加多屏幕支持（例如三屏幕，在不同屏幕之间使用不同的透视投影矩阵）
 ABANDONED: 添加VR支持
 

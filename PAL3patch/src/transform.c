@@ -50,6 +50,10 @@ double get_frect_height(const fRECT *frect)
 {
     return frect->bottom - frect->top;
 }
+double get_frect_aspect_ratio(const fRECT *frect)
+{
+    return get_frect_width(frect) / get_frect_height(frect);
+}
 
 // set rect by Left, Top, Right, Bottom
 void set_frect_ltrb(fRECT *frect, double left, double top, double right, double bottom)
@@ -78,24 +82,24 @@ void scale_frect_fixlt(fRECT *out_frect, fRECT *frect, double wf, double hf)
     set_frect_ltwh(out_frect, frect->left, frect->top, get_frect_width(frect) * wf, get_frect_height(frect) * hf);
 }
 
-// get maximum rect at a ratio of rwidth:rheight inside an existing rect
+// get maximum rect with ratio (width / height) inside an existing rect
 // the out_frect in centered in frect
 // out_frect == frect is allowed
-void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double rwidth, double rheight)
+void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double ratio)
 {
     double width = get_frect_width(frect);
     double height = get_frect_height(frect);
     double new_width, new_height;
     double new_width_shift, new_height_shift;
     
-    if (width * rheight >= height * rwidth) {
-        new_width = height * (rwidth / rheight);
+    if (width >= height * ratio) {
+        new_width = height * ratio;
         new_height = height;
         new_width_shift = (width - new_width) / 2;
         new_height_shift = 0;
     } else {
         new_width = width;
-        new_height = width * (rheight / rwidth);
+        new_height = width / ratio;
         new_width_shift = 0;
         new_height_shift = (height - new_height) / 2;
     }

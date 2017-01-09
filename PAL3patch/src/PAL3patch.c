@@ -15,6 +15,7 @@ static void self_check()
     assert(sizeof(struct gbCamera) == 0x178);
     assert(sizeof(struct LineupUI) == 0x29CEC);
     assert(sizeof(struct ObjectCamera) == 0x7C);
+    assert(sizeof(struct UIStaticEXA) == 0xC0);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -76,6 +77,7 @@ static void init_stage2()
                 //INIT_PATCHSET(fixgameover);
                 INIT_PATCHSET(fix3dctrl);
                 INIT_PATCHSET(fixlineupui);
+                INIT_PATCHSET(fixuistaticex);
             }
             INIT_PATCHSET(replacetexture);
         }

@@ -40,6 +40,8 @@ MAKE_PATCHSET(relativetimer);
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
     extern fRECT game_frect, game_frect_43, game_frect_original;
+    #define MAX_CUSTOM_GAME_FRECT 4 // NOTE: pay attention to enum uiwnd_rect_type
+    extern fRECT game_frect_custom[MAX_CUSTOM_GAME_FRECT];
     extern double game_scalefactor;
     enum scalefactor_index_name {
         // all scalefactor should be set when stage2 is complete
@@ -87,6 +89,11 @@ MAKE_PATCHSET(graphicspatch);
             PTR_GAMERECT_43,       // game_frect_43
             PTR_GAMERECT_ORIGINAL, // game_frect_original
             PTR_GAMERECT_UIAUTO,   // game_frect_ui_auto
+            PTR_GAMERECT_CUSTOM0,  // game_frect_custom[0]
+            //PTR_GAMERECT_CUSTOM0+1,  // game_frect_custom[1]
+            //PTR_GAMERECT_CUSTOM0+2,  // game_frect_custom[2]
+            //PTR_GAMERECT_CUSTOM0+3,  // game_frect_custom[3]
+            // NOTE: PTR_GAMERECT_CUSTOM0 must be last one, since it occupy MAX_CUSTOM_GAME_FRECT values
             // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
         };
         int parse_uiwnd_rect_type(const char *str);
@@ -165,6 +172,7 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fixgameover);
         MAKE_PATCHSET(fix3dctrl);
         MAKE_PATCHSET(fixlineupui);
+        MAKE_PATCHSET(fixuistaticex);
 
     MAKE_PATCHSET(replacetexture);
 

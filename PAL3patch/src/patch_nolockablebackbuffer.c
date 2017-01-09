@@ -131,7 +131,7 @@ static void init_movieframe_texture(const char *filename, int movie_width, int m
     get_movie_uv(filename);
     mf_tex_width = movie_width;
     mf_tex_height = movie_height;
-    get_ratio_frect(&mf_frect, &game_frect, mf_tex_width * (mf_tex_u2 - mf_tex_u1), mf_tex_height * (mf_tex_v2 - mf_tex_v1));
+    get_ratio_frect(&mf_frect, &game_frect, (mf_tex_width * (mf_tex_u2 - mf_tex_u1)) / (mf_tex_height * (mf_tex_v2 - mf_tex_v1)));
     
     // prepare target surface type for BinkVideo
     switch (g_GfxMgr->m_d3dsdBackBuffer.Format) {
@@ -323,7 +323,7 @@ static void before_screenshot(struct gbSurfaceDesc *surface)
 
     fRECT frect;
     set_frect_rect(&frect, &GameRect);
-    get_ratio_frect(&frect, &frect, 4.0, 3.0);
+    get_ratio_frect(&frect, &frect, 4.0 / 3.0);
     set_rect_frect(&GameRect, &frect);
         
     if (GameRect.left < 0) GameRect.left = 0;

@@ -1,0 +1,68 @@
+【某些静态实例的类可能没有构造函数的实例】
+例如UIGameFrm，它的构造函数并没有出现，但是它是通过某个函数（我管它叫StaticCtor）
+直接用静态地址初始化了各个成员
+
+【eh vector constructor iterator和eh vector destructor iterator】
+eh vector constructor iterator是用来初始化类实例数组的函数
+原型： void __stdcall `eh vector constructor iterator' (
+    void *vector_pointer, 数组首地址
+    unsigned int object_size, 对象大小
+    int count, 对象个数
+    int object_ctor, 构造函数
+    void (__thiscall *object_dtor)(void *) 析构函数
+)
+eh vector destructor iterator类似。
+这两个函数可以用来判断类大小、数组大小、构造函数、析构函数，很有用！
+
+
+【UIHeadDialog：可能已废弃】
+从UIGameFrm::Create()看，它引用了图片ui\dlg\headbk.tga，是一个对话气泡样子的图片
+但是在游戏中根本见不到，同一文件夹中其他图片也没见到
+脚本里有DlgHead函数，接收一个整数和字符串，整数对应角色编号。
+可以通过修改汇编代码强行让Dlg函数跳转到DlgHead函数，在修改整数参数对应的汇编后可以看到对话框的样子。
+但是对话框虽然可以显示，但是内容错位，而且一旦显示脚本就卡住了（Update中没处理输入，一直处于等待状态）
+因此推断这种对话方式已经废弃（好像王世颖在某篇文章里提到了这点）。
+
+【很多UIWnd有重载的Create()虚函数】
+估计是由于滥用virtual xxx Create(yyy...)导致很多UIWnd派生类有另外的重载了不同参数的Create虚函数。
+这些函数指针一般位于虚函数表末尾，本应是Create的地方填的却是基类Create的函数指针，实际上根本没有必要“虚”。
+
+【PAL3中::Create()没有bCallFrameRate】
+这个参数可能是PAL3A中才有的
+
+【Create()中opt参数的含义】
+猜测是为了指定贴图是存在文件中的还是TLI/UILIB中的
+
+【游戏场景相关的UIWnd: UISceneFrm UISceneMap UISceneFace】
+UISceneFrm是UI Scene Frame的意思
+结构
+UIGameFrm
++UISceneFrm
+ +UISceneMap
+ +UISceneFace
+
+【UINote：游戏场景中显示顶端文字信息（例如地点）的框】
+
+【ChooseCompose】
+选择让哪个角色学习合成术的对话框
+这个对话框在PAL3A中消失了
+
+【Ollydbg中保存一段内存的方法】
+首先选中要保存的范围，然后右键选Open in a serarate dump window
+然后在新弹出的窗口上右键选Backup->Save data to file即可保存选中范围的内容到文件中
+
+【游戏脚本指令表可以通过DecoderHelp.h推测出】
+打开任意场景cpk，例如scene\m08，可以看到有DecoderHelp.h，里面是一个自动生成的C语言头文件
+内含游戏脚本的指令表（PDB送人、指令表送人、粒子编辑器送人、战斗编辑器送人哈哈哈哈哈哈哈哈）
+但是每个场景的DecoderHelp.h有些差别，需要仔细查看（或者说把所有DecoderHelp.h中信息合并起来看）
+参考资料http://bbs.pediy.com/showthread.php?t=157228
+http://bbs.gameres.com/forum.php?mod=viewthread&tid=2511
+
+【fixuistaticex: 修正UIStaticEX的显示比例问题和UIStaticEXA的显示问题】
+在UIStaticEX::Render函数中，写死了比例为8:6，因此导致司南在非4:3屏幕上显示异常。
+在UIStaticEXA::Render函数中也有类似情况，除此之外m_rect和(centerx,center_y)需要提前变换。
+
+【customrect功能】
+现在可以在补丁配置文件里指定自定义矩形了，可以自定义大小比例和宽高比例，最多支持4个自定义矩形
+例如customrect0=1.00,16:9
+

@@ -1,18 +1,3 @@
-【逆向CCBSystem相关的类】
-确认大小已对应上的类(含调整后)：
-CCBSystem
-CUtil //这个类是空的，大概没用
-CCBUI
-CCBStage
-CCBControl
-CCBAI
-C2DSpark
-C3DSpark
-CCBRoleState/tagRoleState
-tagCmdData
-tagParam (guess)
-
-
 【fixui state新函数】
 fixui_newstate: 分配内存，根据参数构造新struct fixui_state
 fixui_dupstate: 分配内存，复制栈顶状态

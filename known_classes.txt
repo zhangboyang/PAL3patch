@@ -1,0 +1,45 @@
+【逆向CCBSystem相关的类】
+确认大小已对应上的类(含调整后)：
+CCBSystem
+CUtil //这个类是空的，大概没用
+CCBUI
+CCBStage
+CCBControl
+CCBAI
+C2DSpark
+C3DSpark
+CCBRoleState/tagRoleState
+tagCmdData
+tagParam (guess)
+
+【确认类结构】
+Object3D
+ObjectCamera
+UIDialog
+PalScriptWaitObj
+UIHeadDialog
+UIAnimateCtrl
+UIEmote（已修正）
+UINote
+UIStaticFlex
+UILBColumn（已修正）
+UIFlexBar
+UIScrollBar（已修正）
+UIListBox（已修正）
+UIRoleSelect（已修正）
+MUIDialog（已修正）
+ScriptData
+TxtFile
+RestScript
+UICharRest（已修正）
+ChooseCompose
+UIGameFrm（部分修正，开头192字节未知，结尾位置未知）
+UIStaticEX // 可旋转的UIStatic，用于司南图标
+UIStaticEXA // 带有旋转中心的UIStatic，用于游戏欢迎界面的太极图
+UIStaticFlip
+UIMap // 猜测是大地图
+UITextureArray
+UISceneMap（已修正）
+SceneMapPlayer
+UISceneFrm（已修正）
+

@@ -3,6 +3,7 @@
 // game resolution
 int game_width, game_height;
 fRECT game_frect, game_frect_43, game_frect_original;
+fRECT game_frect_custom[MAX_CUSTOM_GAME_FRECT];
 double game_scalefactor;
 
 
@@ -232,12 +233,30 @@ static void patch_resolution_config(const char *cfgstr)
         game_height = GAME_HEIGHT_ORG;
     }
     
+    /* calc basic game rect */
     set_frect_ltwh(&game_frect_original, 0, 0, GAME_WIDTH_ORG, GAME_HEIGHT_ORG);
     set_frect_ltwh(&game_frect, 0, 0, game_width, game_height);
-    get_ratio_frect(&game_frect_43, &game_frect, 4.0, 3.0);
+    get_ratio_frect(&game_frect_43, &game_frect, 4.0 / 3.0);
     game_scalefactor = get_frect_min_scalefactor(&game_frect_43, &game_frect_original);
-    make_call(0x00406436, Readn);
-    make_call(0x00406453, Readn);
+    
+    /* calc custom game rect */
+    int i;
+    for (i = 0; i < MAX_CUSTOM_GAME_FRECT; i++) {
+        char cfgname[MAXLINE];
+        snprintf(cfgname, sizeof(cfgname), "customrect%d", i);
+        const char *cfgline = get_string_from_configfile(cfgname);
+        double sizefactor, rwidth, rheight;
+        if (sscanf(cfgline, "%lf,%lf:%lf", &sizefactor, &rwidth, &rheight) != 3) {
+            fail("invalid config line '%s' for custom rect %d.", cfgline, i);
+        }
+        transform_frect(&game_frect_custom[i], &game_frect, &game_frect, &game_frect, TR_SCALE_CENTER, TR_SCALE_CENTER, sizefactor);
+        get_ratio_frect(&game_frect_custom[i], &game_frect_custom[i], rwidth / rheight);
+    }
+
+    INIT_WRAPPER_CALL(Readn, {
+        0x00406436,
+        0x00406453,
+    });
 }
 
 

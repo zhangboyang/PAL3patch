@@ -259,16 +259,6 @@ static void init_softcursor_sizepatch()
 #define get_ptag_raw(this) ((unsigned)((this)->m_bcreateok))
 #define get_ptag(this) (*(struct uiwnd_ptag *)(&(this)->m_bcreateok))
 
-fRECT *get_ptag_frect(int rect_type)
-{
-    switch (rect_type) {
-        case PTR_GAMERECT:           return &game_frect;
-        case PTR_GAMERECT_43:        return &game_frect_43;
-        case PTR_GAMERECT_ORIGINAL:  return &game_frect_original;
-        case PTR_GAMERECT_UIAUTO:    return &game_frect_ui_auto;
-        default:                     return NULL;
-    }
-}
 static int verify_ptag_magic(struct UIWnd *this)
 {
     if (get_ptag(this).magic == UIWND_PTAG_MAGIC) {
@@ -402,14 +392,32 @@ static void init_uiwnd_positiontag_patch()
 
 
 
-
+fRECT *get_ptag_frect(int rect_type)
+{
+    switch (rect_type) {
+        case PTR_GAMERECT:           return &game_frect;
+        case PTR_GAMERECT_43:        return &game_frect_43;
+        case PTR_GAMERECT_ORIGINAL:  return &game_frect_original;
+        case PTR_GAMERECT_UIAUTO:    return &game_frect_ui_auto;
+        default:
+            if (PTR_GAMERECT_CUSTOM0 <= rect_type && rect_type < PTR_GAMERECT_CUSTOM0 + MAX_CUSTOM_GAME_FRECT) {
+                return &game_frect_custom[rect_type - PTR_GAMERECT_CUSTOM0];
+            }
+            return NULL;
+    }
+}
 int parse_uiwnd_rect_type(const char *str)
 {
-    int val = str2int(str);
-    if (val != PTR_GAMERECT && val != PTR_GAMERECT_43) {
-        fail("unknown rect type %d.", val);
+    int customrect;
+    if (stricmp(str, "full") == 0) {
+        return PTR_GAMERECT;
+    } else if (stricmp(str, "full43") == 0) {
+        return PTR_GAMERECT_43;
+    } else if (strnicmp(str, "custom", 6) == 0 && sscanf(str + 6, "%d", &customrect) == 1 && 0 <= customrect && customrect < MAX_CUSTOM_GAME_FRECT) {
+        return PTR_GAMERECT_CUSTOM0 + customrect;
+    } else {
+        fail("unknown rect type %s.", str);
     }
-    return val;
 }
 
 
