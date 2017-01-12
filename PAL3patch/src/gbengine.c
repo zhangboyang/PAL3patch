@@ -23,7 +23,7 @@ enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D
 // this is my own method! not exists in original GBENGINE
 void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus)
 {
-    if (requirefocus && !is_window_active) {
+    if (requirefocus && !PAL3_s_bActive) {
         while (1) {
             MSG msg;
             // we must process message queue here
@@ -35,7 +35,7 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
                 PostQuitMessage(msg.wParam);
                 return;
             }
-            if (is_window_active) {
+            if (PAL3_s_bActive) {
                 break;
             }
             Sleep(100);

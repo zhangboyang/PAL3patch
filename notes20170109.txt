@@ -61,6 +61,10 @@ http://bbs.gameres.com/forum.php?mod=viewthread&tid=2511
 【fixuistaticex: 修正UIStaticEX的显示比例问题和UIStaticEXA的显示问题】
 在UIStaticEX::Render函数中，写死了比例为8:6，因此导致司南在非4:3屏幕上显示异常。
 在UIStaticEXA::Render函数中也有类似情况，除此之外m_rect和(centerx,center_y)需要提前变换。
+UIStaticEX::Render()需要复杂的准备工作（计算变换后矩形、在变换后矩形中居中变换前矩形，修改m_rect大小不变位置改变）
+因为司南的图片不在UILib中，因此游戏程序会根据this->m_rect确定贴图的大小，调整m_rect会造成问题
+而UIStaticEXA::Render()则不需要UIStaticEX的哪些矩形变换（但是需要变换中点位置）
+这是因为太极的图片在UILib中，因此游戏程序根据UILib的信息（而不是m_rect）得到贴图的大小，所以调整m_rect不会有问题
 
 【customrect功能】
 现在可以在补丁配置文件里指定自定义矩形了，可以自定义大小比例和宽高比例，最多支持4个自定义矩形

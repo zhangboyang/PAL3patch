@@ -3,6 +3,20 @@
 
 // types
 
+struct std_basic_string { // std::basic_string<char,std::char_traits<char>,std::allocator<char> >
+    char allocator;
+    char *_Ptr;
+    unsigned int _Len;
+    unsigned int _Res;
+};
+
+struct std_vector_int {
+    char allocator;
+    int *_First;
+    int *_Last;
+    int *_End;
+};
+
 enum GAME_STATE {
     GAME_NONE,
     GAME_UI,
@@ -481,7 +495,7 @@ struct UIStatic {
     int m_textx;
     int m_texty;
     enum gbFontType m_fonttype;
-    DWORD m_text[4]; // should be std::basic_string<char,std::char_traits<char>,std::allocator<char> >
+    struct std_basic_string m_text;
     struct gbTexture *m_pbk;
     struct _Texture_Info *m_pbkInfo;
     struct gbTexture *m_ppic;
@@ -715,6 +729,443 @@ struct UIStaticEXA {
     int center_y;
 };
 
+struct PalScriptWaitObjVtbl;
+struct PalScriptWaitObj {
+    struct PalScriptWaitObjVtbl *vfptr;
+    int m_needscriptdel;
+};
+
+struct UICaption {
+    struct UIWnd baseclass;
+    struct PalScriptWaitObj baseclass2;
+    struct gbTexture *m_tex;
+    int m_numline;
+    int m_lineheight;
+    int m_curline;
+    float m_linetime;
+};
+
+enum UIButton_UIBUTTON_STATE {
+    NORMAL = 0x0,
+    MOUSEON = 0x1,
+    MOUSEDOWN = 0x2,
+    NUMSTATE = 0x3,
+};
+struct UITextureArray {
+    struct gbTexture *m_ptex[16];
+    int m_num;
+};
+struct UIButton {
+    struct UIWnd baseclass;
+    char m_hasDBclk;
+    float m_ratiow;
+    float m_ratioh;
+    RECT m_drawrc;
+    enum UIButton_UIBUTTON_STATE m_state;
+    char m_canctrl;
+    char m_bLockUpdate;
+    int m_offsetx;
+    int m_offsety;
+    char m_bBigFont;
+    struct UITextureArray m_texarray;
+    struct _Texture_Info *m_texarrayInfo[3];
+    struct gbTexture *m_disablepic;
+    struct _Texture_Info *m_disablepicInfo;
+    char m_mouseoff;
+    char m_mouseon;
+    int m_alignmode;
+    char m_caption[128];
+    char m_benable_snd;
+};
+struct UIDialog {
+    struct UIWnd baseclass;
+    int m_bmodal;
+};
+#define UIStaticFlex_State UIButton_UIBUTTON_STATE
+struct UIStaticFlex {
+    struct UIWnd baseclass;
+    float DURATION;
+    struct std_basic_string m_text;
+    RECT m_currect;
+    struct UITextureArray m_texs;
+    enum UIStaticFlex_State m_state;
+    float m_statetime;
+    enum gbFontType m_fonttype;
+    int m_tilesize;
+    int m_openstyle;
+};
+struct UINote {
+    struct UIDialog baseclass;
+    struct UIStaticFlex m_static;
+    float time;
+};
+enum UIFlexBar_STYLE {
+    HORIZONTAL = 0x0,
+    VERTICAL = 0x1,
+};
+struct UIFlexBar {
+    struct UIWnd baseclass;
+    int m_tilewidth;
+    int m_tileheight;
+    struct gbTexture *m_tex;
+    enum UIFlexBar_STYLE m_style;
+};
+enum UIScrollBar_SB_AREA {
+    UPBTN = 0x0,
+    DOWNBTN = 0x1,
+    SLIDER = 0x2,
+    PAGEUP = 0x3,
+    PAGEDOWN = 0x4,
+    NONE = 0x5,
+};
+struct UIScrollBar {
+    struct UIWnd baseclass;
+    char m_bPress;
+    char m_bPressed;
+    struct UIFlexBar m_bk;
+    int m_btnH;
+    enum UIScrollBar_SB_AREA m_mouseat;
+    int m_min;
+    int m_max;
+    int m_pos;
+    int m_lastpos;
+    int m_drawpos;
+    int m_step;
+    int m_pagesize;
+    struct UITextureArray m_texarray;
+    struct _Texture_Info *m_texarrayInfo[10];
+    float m_keytime;
+    RECT m_btnrect[2];
+    int m_slideroffset;
+    int m_slidertboffset;
+    int m_sliderw;
+    int m_sliderh;
+};
+struct UILBColumn {
+    char head[64];
+    struct PtrArray items;
+    int width;
+};
+struct UIListBox {
+    struct UIWnd baseclass;
+    struct gbColorQuad m_selcolor;
+    int m_showGrayBk;
+    char m_hasKeyCtrl;
+    struct UIScrollBar m_scrollbar;
+    int m_numcol;
+    struct UILBColumn m_column[8];
+    int m_itemheight;
+    int m_fontsize;
+    int m_firstshow;
+    int m_onsel;
+    int m_locksel;
+    RECT m_scrollRc;
+    struct gbTexture *m_pbkpic;
+    struct _Texture_Info *m_pbkpicInfo;
+    struct gbTexture *m_selpic;
+    struct _Texture_Info *m_selpicInfo;
+    int m_seloffset;
+    int m_seloffsetL;
+    int m_seloffsetR;
+    int m_scrollW;
+    struct gbColorQuad m_seltexcolor;
+    POINT m_itemoffset;
+    int m_movesel;
+    struct std_vector_int m_rowenable;
+};
+struct UIRoleSelect {
+    struct UIDialog baseclass;
+    struct PalScriptWaitObj baseclass2;
+    int m_sel;
+    int m_maxlen;
+    struct UIListBox m_list;
+    struct UIStaticFlex m_bk;
+};
+struct UIHeadDialog {
+    struct UIDialog baseclass;
+    struct PalScriptWaitObj baseclass2;
+    struct Role *m_role;
+    int m_width;
+    int m_height;
+    struct gbTexture *m_bktex;
+    char m_text[256];
+};
+struct UIAnimateCtrl {
+    struct UIWnd baseclass;
+    float m_FPS;
+    float m_passtime;
+    struct UITextureArray m_texarray;
+    int m_curframe;
+    int m_numframe;
+    int m_looppassed;
+    int m_nLoop;
+    int m_mode;
+};
+struct UITextArea {
+    struct UIWnd baseclass;
+    struct std_basic_string m_buf;
+    struct std_basic_string m_page;
+    char m_bInvalidate;
+};
+enum PGR_MODE {
+    NORMAL_PGR = 0x0,
+    ALPHA_PGR = 0x1,
+};
+struct UIProgressBar {
+    struct UIWnd baseclass;
+    int m_mode;
+    int m_dir;
+    RECT m_ProgressRc;
+    RECT m_decorateRc;
+    float m_progress;
+    float m_speed;
+    float m_SetProgress;
+    float m_Lenth;
+    float m_MaxVal;
+    float m_stepval;
+    float m_radius;
+    float m_lradius;
+    float m_rradius;
+    float m_tradius;
+    float m_bradius;
+    float m_step;
+    float m_Val;
+    char m_IsGetit;
+    struct gbColorQuad m_bkColor;
+    struct gbColorQuad m_foColor;
+    struct gbTexture *m_pbk;
+    struct _Texture_Info *m_pbkInfo;
+    struct gbTexture *m_ppic;
+    struct _Texture_Info *m_ppicInfo;
+    struct gbTexture *m_pdecorate;
+    struct _Texture_Info *m_pdecorateInfo;
+    int m_decorateW;
+    int m_decorateH;
+    int m_decorateOffsetX;
+    int m_decorateOffsetY;
+    enum PGR_MODE m_pgrmode;
+    struct gbColorQuad m_color;
+    int m_dstAlpha;
+    int m_alpha;
+    int m_minAlpha;
+    float m_fadespeed;
+    char m_isAdd;
+    char m_isFlash;
+    char m_stop;
+    int m_warningval;
+};
+struct UIRoleDialog {
+    struct UIDialog baseclass;
+    struct PalScriptWaitObj baseclass2;
+    struct UIStaticFlex m_bk;
+    struct UIAnimateCtrl arrow;
+    struct UIWnd faceimage;
+    DWORD gapX[22];
+    struct UITextArea textfield;
+    struct UIWnd timeclose_off2b8;
+    DWORD gapY[21];
+    struct UIProgressBar timeprogress_off350;
+    int temp;
+    int m_mode;
+    int m_leftright;
+    int m_sel;
+};
+struct ScreenEffect {
+    struct PalScriptWaitObj baseclass;
+    int m_blive;
+    float m_life;
+    float m_age;
+    char m_hold;
+};
+enum DLG_TYPE {
+    DLG_YES = 0x0,
+    DLG_NO = 0x1,
+    DLG_YESNO = 0x2,
+    DLG_MSGBOX = 0x3,
+    DLG_TYPENUM = 0x4,
+};
+enum DLG_MSG {
+    DLG_MSG_NONE = 0xFFFFFFFF,
+    DLG_BT_YES = 0x0,
+    DLG_BT_NO = 0x1,
+    DLG_MSG_END = 0x2,
+    DLG_MSG_NUM = 0x3,
+};
+struct _TimeMgr {
+    unsigned int newtick;
+    unsigned int oldtick;
+    char bNote;
+};
+struct MUIDialog {
+    struct UIDialog baseclass_0;
+    struct UIWnd *ptr_Dlg;
+    unsigned int m_DlgId;
+    RECT m_rect;
+    RECT m_textRc;
+    struct UIStaticFlex m_bk;
+    struct UIStatic m_static;
+    struct UIStatic m_text;
+    int m_btnW;
+    int m_btnH;
+    RECT m_btRc;
+    struct UIButton mb_Yes;
+    struct UIButton mb_No;
+    int Lacune;
+    enum DLG_TYPE m_type;
+    enum DLG_MSG m_getMsg;
+    int dft_W;
+    int dft_H;
+    char m_IsModel;
+    char m_isDoModel;
+    int m_xOffset;
+    int m_yOffset;
+    struct _TimeMgr _m_timeMgr;
+    char _m_canEndDlg;
+    char _haveSound;
+};
+struct TimeCtl {
+    unsigned int newtick;
+    unsigned int oldtick;
+    char bNote;
+};
+struct TxtFile {
+    char m_token[512];
+    char *m_buf;
+    char *m_sectionstart;
+    char *m_curpos;
+};
+struct ScriptData {
+    unsigned __int16 m_ID;
+    char m_Name[256];
+    int m_RestPrice;
+    char m_Rest[256];
+    char m_Enough[256];
+    char m_NoEnough[256];
+    char m_RestEnd[256];
+};
+struct RestScript {
+    struct TxtFile m_LoadRest;
+    char m_lastFile[256];
+    struct ScriptData m_Data;
+};
+struct UIChatRest {
+    struct UIWnd baseclass;
+    POINT m_pt;
+    RECT rc;
+    RECT bkrc;
+    int m_startX;
+    int m_startY;
+    int mbWidth;
+    int mbHeight;
+    struct UIStatic m_FlagT;
+    struct UIStatic m_FlagB;
+    struct UIStatic m_FlagM[3];
+    struct UIButton m_Chat;
+    struct UIButton m_Rest;
+    struct UIButton m_Exit;
+    struct MUIDialog m_answerDlg;
+    char m_bAnswer;
+    struct ScreenEffect *eft;
+    struct TimeCtl m_timewait;
+    char m_isFadeOut;
+    char m_isFadeIn;
+    struct MUIDialog m_noenoughmsg;
+    struct MUIDialog m_enough;
+    struct MUIDialog m_restover;
+    unsigned int m_status;
+    char m_isExit;
+    struct RestScript m_RestScript;
+    int m_CANREST_ID;
+    int m_CANNOTREST_ID;
+    int m_RESTOVER_ID;
+    struct PalScript *pRest;
+    struct PalScript *pCantRest;
+    struct PalScript *pRestOver;
+    char m_bActive;
+};
+enum PAL3_FRAME {
+    FRM_SCENE = 0x0,
+    // many values unknown
+};
+enum UIEMOTE {
+    EM_NONE = 0x0,
+    EM_SHUI = 0x1,
+    EM_JING = 0x2,
+    EM_YI = 0x3,
+    EM_NU = 0x4,
+    EM_XI = 0x5,
+    EM_XIN = 0x6,
+    EM_HAN = 0x7,
+    EM_LUAN = 0x8,
+    EM_JI = 0x9,
+    EM_QI = 0xA,
+    EM_YUN = 0xB,
+    EM_SHENG = 0xC,
+    EM_BEI = 0xD,
+    EM_NUM = 0xE,
+};
+struct UIEmote {
+    struct UIWnd baseclass;
+    struct PalScriptWaitObj baseclass2;
+    enum UIEMOTE m_cur;
+    struct UIAnimateCtrl m_ani[13];
+    struct Role *m_role;
+    int m_loopcount;
+    int m_nLoop[13];
+};
+struct UIGameFrm {
+    struct UIWnd baseclass_0;
+    BYTE gap0[192];
+    struct UICaption m_cap;
+    struct UINote m_note;
+    unsigned int m_SmeltChatScript;
+    unsigned int m_HockShopScript;
+    unsigned int m_EncampFlag;
+    unsigned int m_ExitRow;
+    char m_SDTY;
+    char m_APPR;
+    char m_SKEE;
+    unsigned int m_ExitSkee;
+    struct ScreenEffect *eft;
+    char m_isFadeOut;
+    char m_overFade;
+    struct UIRoleSelect m_seldlg;
+    struct UIHeadDialog m_headdlg[5];
+    struct UIRoleDialog m_roledlg;
+    struct UIChatRest m_ChatRest;
+    unsigned int m_ChatRestStatus;
+    struct UIFrameWnd *m_curfrm;
+    enum PAL3_FRAME m_curfrmid;
+    enum PAL3_FRAME m_lastfrmid;
+    struct UIEmote m_emote[6];
+    struct UISceneFrm *m_scenefrm;
+    struct StateUI *m_sysfrm;
+    struct ChoseCompose *m_chosecompose;
+};
+struct UISceneMap {
+    struct UIWnd baseclass;
+    struct UIButton m_probe;
+    struct UIStatic m_base;
+    struct UIStaticEX m_compass;
+    struct UIStaticFlex m_mapbk;
+    struct UITextureArray m_icons;
+    int m_state;
+};
+struct UISceneFace {
+    struct UIWnd baseclass;
+    struct UIProgressBar m_hp;
+    struct UIProgressBar m_mp;
+    struct UIStatic m_face[3];
+    struct UIStatic m_bk;
+    float m_clicktime;
+    int m_onclick;
+    struct UIStatic m_state[4];
+};
+struct UISceneFrm {
+    struct UIFrameWnd baseclass;
+    struct UISceneMap m_map;
+    struct UISceneFace m_face;
+};
 
 // functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
@@ -729,13 +1180,14 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gbPrintFont_PrintString(this, str, x, y, endx, endy) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10022BF0, void, struct gbPrintFont *, const char *, float, float, float, float), this, str, x, y, endx, endy)
 #define gbmalloc ((malloc_funcptr_t) (gboffset + 0x100E4B0D))
 #define gbfree ((free_funcptr_t) (gboffset + 0x100E4B99))
-#define gbx2x(gbx) (((gbx) + 1.0) * gfxdrvinfo.width / 2.0)
-#define gby2y(gby) ((1.0 - (gby)) * gfxdrvinfo.height / 2.0)
-#define x2gbx(x) ((x) * 2.0 / gfxdrvinfo.width - 1.0)
-#define y2gby(y) (1.0 - (y) * 2.0 / gfxdrvinfo.height)
+#define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
+#define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
+#define x2gbx(x) ((x) * 2.0 / PAL3_s_drvinfo.width - 1.0)
+#define y2gby(y) (1.0 - (y) * 2.0 / PAL3_s_drvinfo.height)
 #define gbCamera_SetAsCurrent(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021A80, void, struct gbCamera *, int), this, a2)
 #define gbCamera_PointEyeToScr_100220B0(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100220B0, void, struct gbCamera *, struct gbVec3D *, float *, float *), this, a2, a3, a4)
 #define gbCamera_GetRayToScreen(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100222C0, void, struct gbCamera *, float, float, struct gbRay *), this, a2, a3, a4);
+#define gbMatrixStack_Scale(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10027520, void, struct gbMatrixStack *, float, float, float), this, a2, a3, a4);
 
 // PAL3 functions
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
@@ -759,15 +1211,22 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define UI3DCtrl_Update(this, deltatime, haveinput) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00439A20, int, struct UI3DCtrl *, float, int), this, deltatime, haveinput)
 #define UI3DCtrl_GetMouseRay(this, mray, cursorpt) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00439FE0, struct gbRay *, struct UI3DCtrl *, struct gbRay *, POINT *), this, mray, cursorpt)
 #define LineupUI_Create(this, pWnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00483650, void, struct LineupUI *, struct UIWnd *), this, pWnd)
+#define UIStaticEX_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00442E90, void, struct UIStaticEX *), this)
 #define UIStaticEXA_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00443200, void, struct UIStaticEXA *), this)
+#define UIGameFrm_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044F130, void, struct UIGameFrm *), this)
+#define PlayerMgr_Create ((void (*)(void)) TOPTR(0x00408BE0))
+#define PlayerMgr_DrawMsg ((void (*)(void)) TOPTR(0x0040C7D0))
+#define UIAnimateCtrl_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0043A270, void, struct UIAnimateCtrl *), this)
+#define UIWnd_Render_rewrited(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445CD0, void, struct UIWnd *), this)
+
 
 // global variables
-#define gfxdrvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))
-#define game_state (*(int *) TOPTR(0x00BFDA6C))
-#define is_window_active (*(int *) TOPTR(0x005833B8))
-#define config_flags (*(int *) TOPTR(0x005833BC))
-#define g_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)
+#define GB_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)
+#define g_msgbk (*(struct UIStaticFlex *) TOPTR(0x00BFDAB0))
+#define PAL3_s_gamestate (*(int *) TOPTR(0x00BFDA6C))
+#define PAL3_s_drvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))
+#define PAL3_s_bActive (*(int *) TOPTR(0x005833B8))
+#define PAL3_s_flag (*(int *) TOPTR(0x005833BC))
 #define g_pVFileSys (*(struct gbVFileSystem **) (gboffset + 0x1015D3A8))
-
 
 #endif

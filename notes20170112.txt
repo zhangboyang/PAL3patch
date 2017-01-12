@@ -1,0 +1,27 @@
+【DebugInfosViewer：可以导出成HTML，处理后可以用各种工具进行查找】
+处理后只有函数原型，方便查找函数，处理命令：
+grep 'Section Index' functions.html  | grep -v '^.*TABLE BORDER.*TABLE BORDER.*$' | sed -r -e 's/<\/{0,1}(TD|TR|TABLE)>//g' -e 's/<TABLE BORDER="1">.*$//g'
+
+【另一个可以查看PDB的工具：DBH】
+DBH是对dbghelp.dll的一个包装，功能更加底层
+DBH的源码似乎还作为Windows SDK的某个示例代码提供了
+命令说明：https://msdn.microsoft.com/en-us/library/windows/hardware/ff540441%28v=vs.85%29.aspx
+DBH可以看到代码文件的路径和行号（可以利用这个做一个行数统计哈哈）
+DBH可以看到全局变量的名字和占用大小（但是好像看不到类型）：dbh -v PAL3A.pdb enum > enum.txt （然后再排个序更好看）
+方法：用enum看感兴趣的符号名字，type SYMBOL看符号大小，type TYPENAME看某类型大小，如果对上则说明该符号SYNBOL很有可能是TYPENAME这个类型
+用此工具可以找到全局变量的原始名字、推测类型，不用胡乱起名了。
+对于静态分配的类，可以看到各个成员的相对位置，有用！
+
+【有时IDA Pro的栈指针自动分析会有问题】
+此时需要手动调整栈指针增量
+参考IDA Pro权威指南p92 7.3.4节
+
+【fixsceneui：修正游戏场景的UI】
+修正的内容包括：司南和小地图、右上角头像、头顶表情符号、选择合成让谁学习的对话框、客栈对话框、场景提示文字（无渐变和带渐变）、跳跃指示符、神眼怪物数量
+其中带渐变的场景提示文字（例如获得物品、宾化投钱小游戏提示文字）、跳跃指示符、神眼怪物数量是由PlayerMgr::DrawMsg()绘制的
+PlayerMgr::DrawMsg()完全脱离了原有的UIWnd体系，所以需要手工处理。
+司南主要靠UIStaticEX修正，小地图也需要手工编写代码修正。
+其余的东西都较常规
+客栈对话框似乎原本就有些错位（可能是开发者无意造成的，游戏说明书上的对话框都有所错位，可能这是漏网之鱼），现已居中
+尚未修复的部分：各种小游戏UI、剧情对话框
+

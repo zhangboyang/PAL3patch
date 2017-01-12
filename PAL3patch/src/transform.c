@@ -13,13 +13,13 @@ void set_fpoint(fPOINT *fpoint, double x, double y)
 }
 void set_point_fpoint(POINT *point, const fPOINT *fpoint)
 {
-    point->x = fpoint->x;
-    point->y = fpoint->y;
+    point->x = floor(fpoint->x + eps);
+    point->y = floor(fpoint->y + eps);
 }
 void set_point_fpoint_round(POINT *point, const fPOINT *fpoint)
 {
-    point->x = round(fpoint->x);
-    point->y = round(fpoint->y);
+    point->x = round(fpoint->x + eps);
+    point->y = round(fpoint->y + eps);
 }
 void set_fpoint_point(fPOINT *fpoint, const POINT *point)
 {
@@ -30,12 +30,12 @@ void set_fpoint_point(fPOINT *fpoint, const POINT *point)
 // convert between fRECT and RECT
 void set_rect_frect(RECT *rect, const fRECT *frect)
 {
-    rect->left = frect->left;
-    rect->top = frect->top;
+    rect->left = floor(frect->left + eps);
+    rect->top = floor(frect->top + eps);
     
     // use ceiling
-    rect->right = rect->left + ceil(get_frect_width(frect));
-    rect->bottom = rect->top + ceil(get_frect_height(frect));
+    rect->right = rect->left + ceil(get_frect_width(frect) - eps);
+    rect->bottom = rect->top + ceil(get_frect_height(frect) - eps);
 }
 void set_frect_rect(fRECT *frect, const RECT *rect)
 {
@@ -138,7 +138,7 @@ void set_fseg(fSEG *fseg, double start, double length)
         TR_SCALE: length is scaled by len_factor (keep middle point), offset is scaled by (dst_total / src_total)
         TR_SCALE_LOW: length is scaled by len_factor (keep lower point), offset is scaled by (dst_total / src_total)
         TR_SCALE_HIGH: length is scaled by len_factor (keep higher point), offset is scaled by (dst_total / src_total)
-        TR_SCALE_CENTER: length is scaled by len_factor (keep middle point), offset is scaled by (dst_total / src_total)
+        TR_SCALE_MID: length is scaled by len_factor (keep middle point), offset is scaled by (dst_total / src_total)
     
     out_seg == seg is allowed
 */
@@ -166,7 +166,7 @@ void transform_fseg(fSEG *out_fseg, const fSEG *fseg, double src_total, double d
             start = (start + length) * (dst_total / src_total) - length * len_factor;
             length *= len_factor;
             break;
-        case TR_SCALE_CENTER:
+        case TR_SCALE_MID:
             start = (start + length / 2.0) * (dst_total / src_total) - length * len_factor / 2.0;
             length *= len_factor;
             break;

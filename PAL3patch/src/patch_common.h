@@ -55,6 +55,7 @@ MAKE_PATCHSET(graphicspatch);
         SF_UI,
         SF_SOFTCURSOR,
         SF_COMBAT,
+        SF_SCENEUI,
         
         // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
         SCALEFACTOR_COUNT // EOF
@@ -106,7 +107,7 @@ MAKE_PATCHSET(graphicspatch);
         extern void fixui_popstate();
         #define fixui_pushidentity() fixui_pushstate(&game_frect, &game_frect, TR_LOW, TR_LOW, 1.0)
         
-        #define UIWND_PTAG_MAGIC 162u
+        #define UIWND_PTAG_MAGIC 162u // must be non-zero
         struct uiwnd_ptag {
             unsigned scalefactor_index : 3;
             unsigned self_srcrect_type : 3;
@@ -134,6 +135,9 @@ MAKE_PATCHSET(graphicspatch);
                 .enabled = 1, \
                 .magic = UIWND_PTAG_MAGIC, \
             })
+        
+        #define FIXUI_AUTO_TRANSFORM_PTAG MAKE_PTAG(SF_UI, PTR_GAMERECT_ORIGINAL, PTR_GAMERECT_UIAUTO, TR_SCALE_LOW, TR_SCALE_LOW)
+        
         extern void set_uiwnd_ptag(struct UIWnd *this, struct uiwnd_ptag ptag);
         extern fRECT *get_ptag_frect(int rect_type);
         
@@ -173,6 +177,8 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fix3dctrl);
         MAKE_PATCHSET(fixlineupui);
         MAKE_PATCHSET(fixuistaticex);
+        MAKE_PATCHSET(fixsceneui);
+            #define sceneui_scalefactor (scalefactor_table[SF_SCENEUI])
 
     MAKE_PATCHSET(replacetexture);
 

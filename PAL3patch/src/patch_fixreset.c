@@ -94,8 +94,8 @@ static void CTrail_OnDeviceLost(struct CTrail *this)
 static void CTrail_OnResetDevice(struct CTrail *this)
 {
     if (this->m_bSupport) {
-        IDirect3DDevice9_GetRenderTarget(g_GfxMgr->m_pd3dDevice, 0, &this->m_OriginSurface);
-        enum gbPixelFmtType format = gbGfxManager_D3D_GetBackBufferFormat(g_GfxMgr);
+        IDirect3DDevice9_GetRenderTarget(GB_GfxMgr->m_pd3dDevice, 0, &this->m_OriginSurface);
+        enum gbPixelFmtType format = gbGfxManager_D3D_GetBackBufferFormat(GB_GfxMgr);
         int i;
         for (i = 0; i < 8; i++) {
             gbTexture_D3D_CreateForRenderTarget(&this->m_texRT[i], 256, 256, format);

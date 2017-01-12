@@ -65,7 +65,7 @@ static void init_movieframe_vertbuf()
 {
     // we need init vertbuf only once
     if (!mf_vbuf) {
-        if (FAILED(IDirect3DDevice9_CreateVertexBuffer(g_GfxMgr->m_pd3dDevice, MF_VBUF_SIZE_BYTES, 0, MF_VERTEX_FVF, D3DPOOL_MANAGED, &mf_vbuf, NULL))) {
+        if (FAILED(IDirect3DDevice9_CreateVertexBuffer(GB_GfxMgr->m_pd3dDevice, MF_VBUF_SIZE_BYTES, 0, MF_VERTEX_FVF, D3DPOOL_MANAGED, &mf_vbuf, NULL))) {
             fail("can't create vertex buffer for movie frame.");
         }
     }
@@ -134,7 +134,7 @@ static void init_movieframe_texture(const char *filename, int movie_width, int m
     get_ratio_frect(&mf_frect, &game_frect, (mf_tex_width * (mf_tex_u2 - mf_tex_u1)) / (mf_tex_height * (mf_tex_v2 - mf_tex_v1)));
     
     // prepare target surface type for BinkVideo
-    switch (g_GfxMgr->m_d3dsdBackBuffer.Format) {
+    switch (GB_GfxMgr->m_d3dsdBackBuffer.Format) {
         case D3DFMT_R5G6B5:   mf_bink_dstsurfacetype = 10; break;
         case D3DFMT_X8R8G8B8: mf_bink_dstsurfacetype = 3; break;
         case D3DFMT_X1R5G5B5: mf_bink_dstsurfacetype = 9; break;
@@ -142,7 +142,7 @@ static void init_movieframe_texture(const char *filename, int movie_width, int m
     }
     
     // create texture
-    if (FAILED(IDirect3DDevice9_CreateTexture(g_GfxMgr->m_pd3dDevice, movie_width, movie_height, 1, 0, g_GfxMgr->m_d3dsdBackBuffer.Format, D3DPOOL_MANAGED, &mf_tex, NULL))) {
+    if (FAILED(IDirect3DDevice9_CreateTexture(GB_GfxMgr->m_pd3dDevice, movie_width, movie_height, 1, 0, GB_GfxMgr->m_d3dsdBackBuffer.Format, D3DPOOL_MANAGED, &mf_tex, NULL))) {
         fail("can't create texture for movie frame.");
     }
 }
@@ -175,10 +175,10 @@ static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
     }
     
     // check cooperative level
-    gbGfxManager_D3D_EnsureCooperativeLevel(g_GfxMgr, 1);
+    gbGfxManager_D3D_EnsureCooperativeLevel(GB_GfxMgr, 1);
 
     // clear surface
-    IDirect3DDevice9_Clear(g_GfxMgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0);
+    IDirect3DDevice9_Clear(GB_GfxMgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0);
     
     // upload movie frame to texture
     D3DLOCKED_RECT lrc;
@@ -193,32 +193,32 @@ static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
     IDirect3DVertexBuffer9_Unlock(mf_vbuf);
     
     // prepare d3d state
-    IDirect3DDevice9_SetRenderState(g_GfxMgr->m_pd3dDevice, D3DRS_CULLMODE, D3DCULL_NONE);
-    IDirect3DDevice9_SetRenderState(g_GfxMgr->m_pd3dDevice, D3DRS_ZENABLE, TRUE);
-    IDirect3DDevice9_SetTextureStageState(g_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-    IDirect3DDevice9_SetTextureStageState(g_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    IDirect3DDevice9_SetTextureStageState(g_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-    IDirect3DDevice9_SetTextureStageState(g_GfxMgr->m_pd3dDevice, 0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-    IDirect3DDevice9_SetRenderState(g_GfxMgr->m_pd3dDevice, D3DRS_LIGHTING, FALSE);
-    IDirect3DDevice9_SetSamplerState(g_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-    IDirect3DDevice9_SetSamplerState(g_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-    IDirect3DDevice9_SetSamplerState(g_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSU, D3DTADDRESS_BORDER);
-    IDirect3DDevice9_SetSamplerState(g_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSV, D3DTADDRESS_BORDER);
-    IDirect3DDevice9_SetSamplerState(g_GfxMgr->m_pd3dDevice, 0, D3DSAMP_BORDERCOLOR, 0x00000000);
-    IDirect3DDevice9_SetTexture(g_GfxMgr->m_pd3dDevice, 0, (void *) mf_tex);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_CULLMODE, D3DCULL_NONE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZENABLE, TRUE);
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_LIGHTING, FALSE);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSU, D3DTADDRESS_BORDER);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSV, D3DTADDRESS_BORDER);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_BORDERCOLOR, 0x00000000);
+    IDirect3DDevice9_SetTexture(GB_GfxMgr->m_pd3dDevice, 0, (void *) mf_tex);
     
     // draw
-    IDirect3DDevice9_BeginScene(g_GfxMgr->m_pd3dDevice);
-    IDirect3DDevice9_SetFVF(g_GfxMgr->m_pd3dDevice, MF_VERTEX_FVF);
-    IDirect3DDevice9_SetStreamSource(g_GfxMgr->m_pd3dDevice, 0, mf_vbuf, 0, MF_VERTEX_SIZE);
-    IDirect3DDevice9_DrawPrimitive(g_GfxMgr->m_pd3dDevice, D3DPT_TRIANGLELIST, 0, MF_VBUF_TRANGLE_COUNT);
+    IDirect3DDevice9_BeginScene(GB_GfxMgr->m_pd3dDevice);
+    IDirect3DDevice9_SetFVF(GB_GfxMgr->m_pd3dDevice, MF_VERTEX_FVF);
+    IDirect3DDevice9_SetStreamSource(GB_GfxMgr->m_pd3dDevice, 0, mf_vbuf, 0, MF_VERTEX_SIZE);
+    IDirect3DDevice9_DrawPrimitive(GB_GfxMgr->m_pd3dDevice, D3DPT_TRIANGLELIST, 0, MF_VBUF_TRANGLE_COUNT);
     
     // end scene
     call_preendscene_hooks();
-    IDirect3DDevice9_EndScene(g_GfxMgr->m_pd3dDevice);
+    IDirect3DDevice9_EndScene(GB_GfxMgr->m_pd3dDevice);
     
     // present
-    IDirect3DDevice9_Present(g_GfxMgr->m_pd3dDevice, NULL, NULL, NULL, NULL);
+    IDirect3DDevice9_Present(GB_GfxMgr->m_pd3dDevice, NULL, NULL, NULL, NULL);
     call_postpresent_hooks();
     
     return ret;

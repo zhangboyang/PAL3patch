@@ -148,7 +148,7 @@ static int fixui_map_gamestate(int pal3_gamestate)
 // check and update game state
 void fixui_update_gamestate()
 {
-    fixui_setdefaultransform(fixui_map_gamestate(game_state));
+    fixui_setdefaultransform(fixui_map_gamestate(PAL3_s_gamestate));
 }
 
 

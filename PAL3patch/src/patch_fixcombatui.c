@@ -11,7 +11,7 @@ static int ccbui_dstrect_type;
 // FIXME: there may be better ways to do the same job using transform framework
 static void __fastcall C2DSpark_Render_wrapper(struct C2DSpark *this, int dummy)
 {
-    fixui_pushstate(&game_frect, &game_frect, TR_SCALE_CENTER, TR_SCALE_CENTER, cb_scalefactor);
+    fixui_pushstate(&game_frect, &game_frect, TR_SCALE_MID, TR_SCALE_MID, cb_scalefactor);
     C2DSpark_Render(this);
     fixui_popstate();
 }
@@ -191,7 +191,7 @@ static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
     CB_POPSTATE();
     
     // fix combat dialog
-    ptag = MAKE_PTAG(SF_COMBAT, PTR_GAMERECT, PTR_GAMERECT, TR_SCALE_CENTER, TR_SCALE_HIGH);
+    ptag = MAKE_PTAG(SF_COMBAT, PTR_GAMERECT, PTR_GAMERECT, TR_SCALE_MID, TR_SCALE_HIGH);
     set_uiwnd_ptag((struct UIWnd *) this->m_pDialogBack, ptag);
     
     return true;

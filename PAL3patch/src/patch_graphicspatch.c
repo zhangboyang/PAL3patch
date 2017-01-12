@@ -249,7 +249,7 @@ static void patch_resolution_config(const char *cfgstr)
         if (sscanf(cfgline, "%lf,%lf:%lf", &sizefactor, &rwidth, &rheight) != 3) {
             fail("invalid config line '%s' for custom rect %d.", cfgline, i);
         }
-        transform_frect(&game_frect_custom[i], &game_frect, &game_frect, &game_frect, TR_SCALE_CENTER, TR_SCALE_CENTER, sizefactor);
+        transform_frect(&game_frect_custom[i], &game_frect, &game_frect, &game_frect, TR_SCALE_MID, TR_SCALE_MID, sizefactor);
         get_ratio_frect(&game_frect_custom[i], &game_frect_custom[i], rwidth / rheight);
     }
 
@@ -362,7 +362,7 @@ static void clipcursor_atexit()
 }
 static void clipcursor_hook()
 {
-    if (is_window_active) {
+    if (PAL3_s_bActive) {
         clipcursor(1);
     } else {
         clipcursor(0);
@@ -403,7 +403,7 @@ static void init_window_patch(int flag)
         fail("unknown window patch configuration.");
     }
 
-    // patch gfxdrvinfo
+    // patch PAL3_s_drvinfo
     if (window_patch_cfg != WINDOW_FULLSCREEN) {
         SIMPLE_PATCH(0x004064DA, "\xC7\x05\xE8\xD6\xBF\x00\x01\x00\x00\x00", "\xC7\x05\xE8\xD6\xBF\x00\x00\x00\x00\x00", 10);
     }
@@ -492,25 +492,25 @@ double str2scalefactor(const char *str)
 
 static void loading_splash()
 {
-    IDirect3DDevice9_Clear(g_GfxMgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);
-    IDirect3DDevice9_BeginScene(g_GfxMgr->m_pd3dDevice);
+    IDirect3DDevice9_Clear(GB_GfxMgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);
+    IDirect3DDevice9_BeginScene(GB_GfxMgr->m_pd3dDevice);
     
     int fontsize = 16 * game_scalefactor;
     ID3DXFont *pFont;
-    if (FAILED(D3DXCreateFontW(g_GfxMgr->m_pd3dDevice, fontsize, 0, FW_BOLD, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, wstr_defaultfont, &pFont))) {
+    if (FAILED(D3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, fontsize, 0, FW_BOLD, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, wstr_defaultfont, &pFont))) {
         pFont = NULL;
     }
     if (pFont) {
         RECT rc;
         int padding = 20 * game_scalefactor;
-        set_rect(&rc, 0, gfxdrvinfo.height - padding - fontsize, gfxdrvinfo.width - padding, 0);
+        set_rect(&rc, 0, PAL3_s_drvinfo.height - padding - fontsize, PAL3_s_drvinfo.width - padding, 0);
         ID3DXFont_DrawTextW(pFont, NULL, wstr_gameloading, -1, &rc, DT_NOCLIP | DT_RIGHT, 0xFFFFFFFF);
         ID3DXFont_Release(pFont);
         pFont = NULL;
     }
     
-    IDirect3DDevice9_EndScene(g_GfxMgr->m_pd3dDevice);
-    IDirect3DDevice9_Present(g_GfxMgr->m_pd3dDevice, NULL, NULL, NULL, NULL);
+    IDirect3DDevice9_EndScene(GB_GfxMgr->m_pd3dDevice);
+    IDirect3DDevice9_Present(GB_GfxMgr->m_pd3dDevice, NULL, NULL, NULL, NULL);
 }
 static void add_loading_splash()
 {

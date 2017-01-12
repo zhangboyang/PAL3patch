@@ -107,14 +107,14 @@ static void showfps_onendscene()
     IDirect3DStateBlock9_Capture(pFPSStateBlock);
     
     // make text in front of other pixels
-    IDirect3DDevice9_SetRenderState(g_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
     
     // manually turn on alphablend, for drawing charactor backgrounds
-    IDirect3DDevice9_SetRenderState(g_GfxMgr->m_pd3dDevice, D3DRS_ALPHABLENDENABLE, TRUE);
-    IDirect3DDevice9_SetRenderState(g_GfxMgr->m_pd3dDevice, D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-    IDirect3DDevice9_SetRenderState(g_GfxMgr->m_pd3dDevice, D3DRS_DESTBLEND, D3DBLEND_ZERO);
-    IDirect3DDevice9_SetTextureStageState(g_GfxMgr->m_pd3dDevice, 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-    IDirect3DDevice9_SetTextureStageState(g_GfxMgr->m_pd3dDevice, 0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ALPHABLENDENABLE, TRUE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_DESTBLEND, D3DBLEND_ZERO);
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
     
     ID3DXSprite_Begin(pFPSSprite, 0);
     RECT rc;
@@ -137,22 +137,22 @@ static void showfps_onresetdevice()
     ID3DXFont_OnResetDevice(pFPSFont);
     ID3DXSprite_OnResetDevice(pFPSSprite);
     
-    if (FAILED(IDirect3DDevice9_CreateStateBlock(g_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &pFPSStateBlock))) {
+    if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &pFPSStateBlock))) {
         fail("can't create state block for showing FPS.");
     }
 }
 static void showfps_initfont()
 {
-    if (FAILED(D3DXCreateFontW(g_GfxMgr->m_pd3dDevice, 12, 0, 0, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, PROOF_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Fixedsys", &pFPSFont))) {
+    if (FAILED(D3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, 12, 0, 0, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, PROOF_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Fixedsys", &pFPSFont))) {
         warning("can't create font for showing FPS.");
         pFPSFont = NULL;
     }
     
-    if (FAILED(D3DXCreateSprite(g_GfxMgr->m_pd3dDevice, &pFPSSprite))) {
+    if (FAILED(D3DXCreateSprite(GB_GfxMgr->m_pd3dDevice, &pFPSSprite))) {
         fail("can't create sprite for showing FPS.");
     }
     
-    if (FAILED(IDirect3DDevice9_CreateStateBlock(g_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &pFPSStateBlock))) {
+    if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &pFPSStateBlock))) {
         fail("can't create state block for showing FPS.");
     }
 }

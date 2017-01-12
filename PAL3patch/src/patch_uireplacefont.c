@@ -103,7 +103,7 @@ static void d3dxfont_insertfont(int fontsize, int boldflag, int preload)
     }
     
     // create the font
-    if (FAILED(D3DXCreateFontW(g_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, d3dxfont_quality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
+    if (FAILED(D3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, d3dxfont_quality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
         fail("can't create ID3DXFont for size '%d'.", fontsize);
     }
     
@@ -239,11 +239,11 @@ static void d3dxfont_init()
     // do preload
     d3dxfont_preload(get_int_from_configfile("uireplacefont_preloadcharset"));
     
-    if (FAILED(D3DXCreateSprite(g_GfxMgr->m_pd3dDevice, &d3dxfont_sprite))) {
+    if (FAILED(D3DXCreateSprite(GB_GfxMgr->m_pd3dDevice, &d3dxfont_sprite))) {
         fail("can't create sprite for font replacing.");
     }
     
-    if (FAILED(IDirect3DDevice9_CreateStateBlock(g_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &d3dxfont_stateblock))) {
+    if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &d3dxfont_stateblock))) {
         fail("can't create state block for font replacing.");
     }
 }
@@ -270,7 +270,7 @@ static void d3dxfont_onresetdevice()
         ID3DXFont_OnResetDevice(d3dxfont_fontlist[i].pfont);
     }
     ID3DXSprite_OnResetDevice(d3dxfont_sprite);
-    if (FAILED(IDirect3DDevice9_CreateStateBlock(g_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &d3dxfont_stateblock))) {
+    if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &d3dxfont_stateblock))) {
         fail("can't create state block for font replacing.");
     }
 }
@@ -323,7 +323,7 @@ static void __fastcall gbPrintFont_UNICODE_Flush(struct gbPrintFont_UNICODE *thi
     IDirect3DStateBlock9_Capture(d3dxfont_stateblock);
     
     // make text in front of other pixels
-    IDirect3DDevice9_SetRenderState(g_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
     
     // draw strings in linked-list
     ID3DXSprite_Begin(d3dxfont_sprite, D3DXSPRITE_ALPHABLEND);
@@ -383,10 +383,10 @@ static void ui_replacefont_d3dxfont_init()
 static struct gbPrintFont *get_gbprintfont(int fontsize)
 {
     switch (fontsize) { // according to UIDrawText() in PAL3
-        case 12: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_UNICODE12);
-        case 16: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_UNICODE16);
-        case 20: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_UNICODE20);
-        case 24: return gbPrintFontMgr_GetFont(g_GfxMgr->pFontMgr, GB_FONT_NUMBER);
+        case 12: return gbPrintFontMgr_GetFont(GB_GfxMgr->pFontMgr, GB_FONT_UNICODE12);
+        case 16: return gbPrintFontMgr_GetFont(GB_GfxMgr->pFontMgr, GB_FONT_UNICODE16);
+        case 20: return gbPrintFontMgr_GetFont(GB_GfxMgr->pFontMgr, GB_FONT_UNICODE20);
+        case 24: return gbPrintFontMgr_GetFont(GB_GfxMgr->pFontMgr, GB_FONT_NUMBER);
         // FIXME: where is GB_FONT_ASC
         default: return NULL;
     }

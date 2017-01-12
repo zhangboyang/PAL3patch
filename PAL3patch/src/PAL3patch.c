@@ -16,6 +16,18 @@ static void self_check()
     assert(sizeof(struct LineupUI) == 0x29CEC);
     assert(sizeof(struct ObjectCamera) == 0x7C);
     assert(sizeof(struct UIStaticEXA) == 0xC0);
+    assert(sizeof(struct UICaption) == 0x60);
+    assert(sizeof(struct UINote) == 0x10C);
+    assert(sizeof(struct ScreenEffect) == 0x18);
+    assert(sizeof(struct UIRoleSelect) == 0x5D0);
+    assert(sizeof(struct UIHeadDialog) == 0x160);
+    assert(sizeof(struct UIRoleDialog) == 0x454);
+    assert(sizeof(struct UIChatRest) == 0x252C);
+    assert(sizeof(struct UIEmote) == 0x8E0);
+    assert(sizeof(struct UIGameFrm) == 0x6E1C);
+    assert(sizeof(struct UISceneMap) == 0x3F4);
+    assert(sizeof(struct UISceneFace) == 0x6F4);
+    assert(sizeof(struct UISceneFrm) == 0xB30);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -78,6 +90,7 @@ static void init_stage2()
                 INIT_PATCHSET(fix3dctrl);
                 INIT_PATCHSET(fixlineupui);
                 INIT_PATCHSET(fixuistaticex);
+                INIT_PATCHSET(fixsceneui);
             }
             INIT_PATCHSET(replacetexture);
         }

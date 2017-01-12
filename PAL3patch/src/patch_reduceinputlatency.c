@@ -6,7 +6,7 @@
 static void method1_hook()
 {
     IDirect3DQuery9 *pQuery;
-    if (IDirect3DDevice9_CreateQuery(g_GfxMgr->m_pd3dDevice, D3DQUERYTYPE_EVENT, &pQuery) == D3D_OK) {
+    if (IDirect3DDevice9_CreateQuery(GB_GfxMgr->m_pd3dDevice, D3DQUERYTYPE_EVENT, &pQuery) == D3D_OK) {
         if (pQuery) {
             IDirect3DQuery9_Issue(pQuery, D3DISSUE_END);
             while (IDirect3DQuery9_GetData(pQuery, NULL, 0, D3DGETDATA_FLUSH) == S_FALSE); // busy wait
@@ -42,7 +42,7 @@ static void method2_create_rendertarget()
     // get backbuffer format
     D3DSURFACE_DESC desc;
     IDirect3DSurface9 *pBackBuffer = NULL;
-    if (FAILED(IDirect3DDevice9_GetBackBuffer(g_GfxMgr->m_pd3dDevice, 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer))) {
+    if (FAILED(IDirect3DDevice9_GetBackBuffer(GB_GfxMgr->m_pd3dDevice, 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer))) {
         pBackBuffer = NULL;
         goto done;
     }
@@ -50,7 +50,7 @@ static void method2_create_rendertarget()
         goto done;
     }
     
-    if (FAILED(IDirect3DDevice9_CreateRenderTarget(g_GfxMgr->m_pd3dDevice, desc.Width, desc.Height, desc.Format, D3DMULTISAMPLE_NONE, 0, TRUE, &method2_pRenderTarget, NULL))) {
+    if (FAILED(IDirect3DDevice9_CreateRenderTarget(GB_GfxMgr->m_pd3dDevice, desc.Width, desc.Height, desc.Format, D3DMULTISAMPLE_NONE, 0, TRUE, &method2_pRenderTarget, NULL))) {
         method2_pRenderTarget = NULL;
         goto done;
     }
@@ -76,13 +76,13 @@ static void method2_preendscene_hook()
     
     IDirect3DSurface9 *pBackBuffer = NULL;
     // get back buffer
-    if (FAILED(IDirect3DDevice9_GetBackBuffer(g_GfxMgr->m_pd3dDevice, 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer))) {
+    if (FAILED(IDirect3DDevice9_GetBackBuffer(GB_GfxMgr->m_pd3dDevice, 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer))) {
         warning("can't get back buffer.");
         pBackBuffer = NULL;
         goto done;
     }
     // copy backbuffer to render target
-    if (FAILED(IDirect3DDevice9_StretchRect(g_GfxMgr->m_pd3dDevice, pBackBuffer, NULL, method2_pRenderTarget, NULL, D3DTEXF_POINT))) {
+    if (FAILED(IDirect3DDevice9_StretchRect(GB_GfxMgr->m_pd3dDevice, pBackBuffer, NULL, method2_pRenderTarget, NULL, D3DTEXF_POINT))) {
         warning("can't stretch rect.");
         goto done;
     }

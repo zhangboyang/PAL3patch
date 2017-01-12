@@ -8,7 +8,7 @@ static void __fastcall LineupUI_Create_wrapper(struct LineupUI *this, int dummy,
     LineupUI_Create(this, pWnd);
     
     // set ptag
-    struct uiwnd_ptag ptag = MAKE_PTAG(SF_UI, PTR_GAMERECT_ORIGINAL, PTR_GAMERECT_UIAUTO, TR_SCALE_LOW, TR_SCALE_LOW); // same as FIXUI_AUTO_TRANSFORM
+    struct uiwnd_ptag ptag = FIXUI_AUTO_TRANSFORM_PTAG;
     ptag.no_cursor_virt = 1;
     ptag.self_only_ptag = 1;
     set_uiwnd_ptag((struct UIWnd *) this, ptag);

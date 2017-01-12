@@ -19,7 +19,6 @@ static void ui3dctrl_updatecamera(struct UI3DCtrl *this, struct ui3dctrl_orthoin
     POINT pt = { oinfo(this).x, oinfo(this).y };
     fixui_adjust_POINT(&pt, &pt);
     pt.y = gby2y(y2gby(pt.y) * (game_height * 4.0 / (game_width * 3.0)));
-    //GetCursorPos(&pt); ScreenToClient(gfxdrvinfo.hgfxwnd, &pt);
     sv->m_orthosize_sv = this->m_orthosize;
     this->m_camera->OrthoSize = this->m_orthosize * ui_orthofactor;
     this->m_orthosize *= orthofactor * ui_orthofactor;
