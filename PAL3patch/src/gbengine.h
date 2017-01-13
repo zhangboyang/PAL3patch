@@ -954,20 +954,26 @@ struct UIProgressBar {
     char m_stop;
     int m_warningval;
 };
+enum _FLIP {
+    STATIC_LEFT_FLIP = 0x0,
+    STATIC_RIGHT_FLIP = 0x1,
+};
+struct UIStaticFlip {
+    struct UIStatic baseclass;
+    enum _FLIP flipMode;
+};
 struct UIRoleDialog {
     struct UIDialog baseclass;
     struct PalScriptWaitObj baseclass2;
     struct UIStaticFlex m_bk;
-    struct UIAnimateCtrl arrow;
-    struct UIWnd faceimage;
-    DWORD gapX[22];
-    struct UITextArea textfield;
-    struct UIWnd timeclose_off2b8;
-    DWORD gapY[21];
-    struct UIProgressBar timeprogress_off350;
-    int temp;
+    struct UIAnimateCtrl m_ani;
+    struct UIStaticFlip m_face;
+    struct UITextArea m_static;
+    struct UIStatic timeclose;
+    struct UIProgressBar timeprogress;
+    DWORD gapX[1];
     int m_mode;
-    int m_leftright;
+    float m_time;
     int m_sel;
 };
 struct ScreenEffect {
@@ -1218,7 +1224,8 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define PlayerMgr_DrawMsg ((void (*)(void)) TOPTR(0x0040C7D0))
 #define UIAnimateCtrl_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0043A270, void, struct UIAnimateCtrl *), this)
 #define UIWnd_Render_rewrited(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445CD0, void, struct UIWnd *), this)
-
+#define UIRoleDialog_Create(this, id, rect, pfather, bkfile) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00450F90, void, struct UIRoleDialog *, int, RECT *, struct UIWnd *, const char *), this, id, rect, pfather, bkfile)
+#define UIRoleDialog_SetFace(this, path, leftright) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00451360, void, struct UIRoleDialog *, const char *, int), this, path, leftright)
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)

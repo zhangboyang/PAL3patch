@@ -56,6 +56,8 @@ MAKE_PATCHSET(graphicspatch);
         SF_SOFTCURSOR,
         SF_COMBAT,
         SF_SCENEUI,
+        SF_SCENETEXT,
+        SF_SCENEICON,
         
         // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
         SCALEFACTOR_COUNT // EOF
@@ -107,9 +109,8 @@ MAKE_PATCHSET(graphicspatch);
         extern void fixui_popstate();
         #define fixui_pushidentity() fixui_pushstate(&game_frect, &game_frect, TR_LOW, TR_LOW, 1.0)
         
-        #define UIWND_PTAG_MAGIC 162u // must be non-zero
         struct uiwnd_ptag {
-            unsigned scalefactor_index : 3;
+            unsigned scalefactor_index : 4;
             unsigned self_srcrect_type : 3;
             unsigned self_dstrect_type : 3;
             unsigned self_lr_method : 3;
@@ -118,7 +119,9 @@ MAKE_PATCHSET(graphicspatch);
             unsigned self_only_ptag : 1; // if set to 1, this ptag apply to this UIWnd only, will not affect it's childrens
             unsigned in_use : 1;
             unsigned enabled : 1;
-            unsigned magic : 13;
+            
+            #define UIWND_PTAG_MAGIC 1223u // TangXueJian's birthday, hahahaha
+            unsigned magic : 12; // must be non-zero
         };
         #define M_PWND(addr) TOPTR(M_DWORD(addr))
         #define PWND TOPTR
@@ -179,6 +182,9 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fixuistaticex);
         MAKE_PATCHSET(fixsceneui);
             #define sceneui_scalefactor (scalefactor_table[SF_SCENEUI])
+            #define scenetext_scalefactor (scalefactor_table[SF_SCENETEXT])
+            #define sceneicon_scalefactor (scalefactor_table[SF_SCENEICON])
+            
 
     MAKE_PATCHSET(replacetexture);
 

@@ -116,6 +116,8 @@ static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
         set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateGP[i], ptag);
         set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateMP[i], ptag);
         set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStatePanel[i], ptag);
+    }
+    for (i = 0; i < 5; i++) {
         set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateFace[i], ptag);
         set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateFaceName[i], ptag);
     }

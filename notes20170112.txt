@@ -17,7 +17,16 @@ DBH可以看到全局变量的名字和占用大小（但是好像看不到类�
 参考IDA Pro权威指南p92 7.3.4节
 
 【fixsceneui：修正游戏场景的UI】
-修正的内容包括：司南和小地图、右上角头像、头顶表情符号、选择合成让谁学习的对话框、客栈对话框、场景提示文字（无渐变和带渐变）、跳跃指示符、神眼怪物数量
+UIGameFrm成员功能：
+  UIChatRest m_ChatRest 客栈对话框
+  ChoseCompose m_chosecompose 选择合成让谁学习的对话框
+  UINote m_note 场景提示文字（无渐变）
+  UIRoleSelect m_seldlg 场景选择框
+  UICaption m_cap 诗词
+  UISceneMap m_scenefrm->m_map 司南和小地图
+  UISceneFace m_scenefrm->m_face 右上角头像
+  UIRoleDialog m_roledlg 剧情对话框
+修正的内容包括：司南和小地图、右上角头像、头顶表情符号、选择合成让谁学习的对话框、客栈对话框、场景选择框、场景提示文字（无渐变和带渐变）、跳跃指示符、神眼怪物数量
 其中带渐变的场景提示文字（例如获得物品、宾化投钱小游戏提示文字）、跳跃指示符、神眼怪物数量是由PlayerMgr::DrawMsg()绘制的
 PlayerMgr::DrawMsg()完全脱离了原有的UIWnd体系，所以需要手工处理。
 司南主要靠UIStaticEX修正，小地图也需要手工编写代码修正。
