@@ -45,10 +45,10 @@ extern double get_frect_height(const fRECT *frect);
 extern double get_frect_aspect_ratio(const fRECT *frect);
 extern void set_frect_ltrb(fRECT *frect, double left, double top, double right, double bottom);
 extern void set_frect_ltwh(fRECT *frect, double left, double top, double width, double height);
-extern void translate_frect_rel(fRECT *out_frect, fRECT *frect, double lr, double tb);
-extern void scale_frect_fixlt(fRECT *out_frect, fRECT *frect, double wf, double hf);
+extern void translate_frect_rel(fRECT *out_frect, const fRECT *frect, double lr, double tb);
+extern void scale_frect_fixlt(fRECT *out_frect, const fRECT *frect, double wf, double hf);
 extern void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double ratio);
-extern double get_frect_min_scalefactor(fRECT *dst_frect, fRECT *src_frect);
+extern double get_frect_min_scalefactor(const fRECT *dst_frect, const fRECT *src_frect);
 
 // segment functions
 extern void set_fseg(fSEG *fseg, double start, double length);

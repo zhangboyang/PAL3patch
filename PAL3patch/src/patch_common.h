@@ -56,8 +56,9 @@ MAKE_PATCHSET(graphicspatch);
         SF_SOFTCURSOR,
         SF_COMBAT,
         SF_SCENEUI,
-        SF_SCENETEXT,
         SF_SCENEICON,
+        SF_SCENETEXT,
+        SF_SCENEDLGFACE,
         
         // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
         SCALEFACTOR_COUNT // EOF
@@ -182,9 +183,9 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fixuistaticex);
         MAKE_PATCHSET(fixsceneui);
             #define sceneui_scalefactor (scalefactor_table[SF_SCENEUI])
-            #define scenetext_scalefactor (scalefactor_table[SF_SCENETEXT])
             #define sceneicon_scalefactor (scalefactor_table[SF_SCENEICON])
-            
+            #define scenetext_scalefactor (scalefactor_table[SF_SCENETEXT])
+            #define scenedlgface_scalefactor (scalefactor_table[SF_SCENEDLGFACE])
 
     MAKE_PATCHSET(replacetexture);
 

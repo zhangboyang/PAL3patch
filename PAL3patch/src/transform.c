@@ -71,13 +71,13 @@ void set_frect_ltwh(fRECT *frect, double left, double top, double width, double 
 }
 
 // translate (move) a rect relatively
-void translate_frect_rel(fRECT *out_frect, fRECT *frect, double lr, double tb)
+void translate_frect_rel(fRECT *out_frect, const fRECT *frect, double lr, double tb)
 {
     set_frect_ltrb(out_frect, frect->left + lr, frect->top + tb, frect->right + lr, frect->bottom + tb);
 }
 
 // scale a rect, Left and Top is fixed
-void scale_frect_fixlt(fRECT *out_frect, fRECT *frect, double wf, double hf)
+void scale_frect_fixlt(fRECT *out_frect, const fRECT *frect, double wf, double hf)
 {
     set_frect_ltwh(out_frect, frect->left, frect->top, get_frect_width(frect) * wf, get_frect_height(frect) * hf);
 }
@@ -108,7 +108,7 @@ void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double ratio)
 }
 
 
-double get_frect_min_scalefactor(fRECT *dst_frect, fRECT *src_frect)
+double get_frect_min_scalefactor(const fRECT *dst_frect, const fRECT *src_frect)
 {
     return fmin(get_frect_width(dst_frect) / get_frect_width(src_frect),
                 get_frect_height(dst_frect) / get_frect_height(src_frect));

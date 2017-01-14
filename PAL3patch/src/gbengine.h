@@ -746,10 +746,10 @@ struct UICaption {
 };
 
 enum UIButton_UIBUTTON_STATE {
-    NORMAL = 0x0,
-    MOUSEON = 0x1,
-    MOUSEDOWN = 0x2,
-    NUMSTATE = 0x3,
+    UIBUTTON_NORMAL = 0x0,
+    UIBUTTON_MOUSEON = 0x1,
+    UIBUTTON_MOUSEDOWN = 0x2,
+    UIBUTTON_NUMSTATE = 0x3,
 };
 struct UITextureArray {
     struct gbTexture *m_ptex[16];
@@ -781,7 +781,11 @@ struct UIDialog {
     struct UIWnd baseclass;
     int m_bmodal;
 };
-#define UIStaticFlex_State UIButton_UIBUTTON_STATE
+enum UIStaticFlex_State {
+    UISTATICFLEX_OPENING,
+    UISTATICFLEX_CLOSING,
+    UISTATICFLEX_NORMAL,
+};
 struct UIStaticFlex {
     struct UIWnd baseclass;
     float DURATION;
@@ -1194,6 +1198,7 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gbCamera_PointEyeToScr_100220B0(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100220B0, void, struct gbCamera *, struct gbVec3D *, float *, float *), this, a2, a3, a4)
 #define gbCamera_GetRayToScreen(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100222C0, void, struct gbCamera *, float, float, struct gbRay *), this, a2, a3, a4);
 #define gbMatrixStack_Scale(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10027520, void, struct gbMatrixStack *, float, float, float), this, a2, a3, a4);
+#define pUIWND(x) ((struct UIWnd *)(x))
 
 // PAL3 functions
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
