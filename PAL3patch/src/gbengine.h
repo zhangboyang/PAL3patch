@@ -392,7 +392,6 @@ enum gbFontType {
     GB_FONT_NUMBER,
     GB_FONT_ASC,
 };
-
 struct gbPrintFont {
     struct gbPrintFontVtbl *vfptr;
     struct FontPrintInfo *ptInfo;
@@ -413,6 +412,15 @@ struct gbPrintFont {
     float ZValue;
     struct gbRenderEffect *pEffect[2];
 };
+struct gbPrintFontVtbl {
+    int (__fastcall *Init)(struct gbPrintFont *this, int dummy);
+    void (__fastcall *Release)(struct gbPrintFont *this, int dummy);
+    void (__fastcall *Flush)(struct gbPrintFont *this, int dummy);
+    void (__fastcall *Flush3D)(struct gbPrintFont *this, int dummy);
+    void (__fastcall *PrintString)(struct gbPrintFont *this, int dummy, char *, float, float, float, float);
+    void (__fastcall *Print3DString)(struct gbPrintFont *this, int dummy, char *, float, float, float);
+};
+#define gbPrintFont_vfptr_Flush(this) THISCALL_WRAPPER((this)->vfptr->Flush, this)
 
 struct gbPrintFont_UNICODE {
     struct gbPrintFont;
@@ -1177,6 +1185,64 @@ struct UISceneFrm {
     struct UISceneFace m_face;
 };
 
+
+struct UIEncampment;
+
+struct UISkee {
+    struct UIFrameWnd uiframewnd0;
+    RECT frame_rect;
+    BYTE gap58[8];
+    char buf[256];
+    DWORD unknown_cur_tick;
+    DWORD unknown_last_tick;
+    BYTE byte168;
+    BYTE gap169[3];
+    struct UIStatic uistatic16C;
+    BYTE gap204[4];
+    struct gbColorQuad colorquad208;
+    char buf2[3][256];
+    DWORD dword50C[3];
+    int int518;
+    DWORD dword51C;
+    DWORD dword520;
+    struct UIStatic skeetimebk;
+    struct UIStatic numberA[10];
+    struct UIStatic numberB[10];
+    BYTE gapX[4];
+    DWORD current_timer;
+    int digit_high;
+    int digit_low;
+    BYTE byte11AC;
+    DWORD dword11B0;
+    DWORD dword11B4;
+    BYTE byte11B8;
+    BYTE gap11B9[3];
+    struct MUIDialog result_dlg;
+    struct MUIDialog help_dlg;
+    BYTE byte1C6C;
+    BYTE showing_mouseicon;
+    struct UIStatic sb0;
+    struct UIStatic sb1;
+    DWORD dword1DA0;
+    DWORD dword1DA4;
+    BYTE byte1DA8;
+    BYTE byte1DA9;
+    BYTE byte1DAA;
+    BYTE byte1DAB;
+    BYTE mouseicon_state;
+    BYTE byte1DAD;
+    BYTE opt;
+};
+
+struct UIGameOver {
+    struct UIFrameWnd baseclass;
+    struct gbTexture *m_pbktex;
+    struct UIStatic m_Blood;
+    float m_fTime;
+};
+
+
+
 // functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
 #define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A190, void, struct gbGfxManager_D3D *), this)
@@ -1231,6 +1297,11 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define UIWnd_Render_rewrited(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445CD0, void, struct UIWnd *), this)
 #define UIRoleDialog_Create(this, id, rect, pfather, bkfile) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00450F90, void, struct UIRoleDialog *, int, RECT *, struct UIWnd *, const char *), this, id, rect, pfather, bkfile)
 #define UIRoleDialog_SetFace(this, path, leftright) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00451360, void, struct UIRoleDialog *, const char *, int), this, path, leftright)
+#define UIEncampment_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0052BEB0, void, struct UIEncampment *), this)
+#define UISkee_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00531F50, void, struct UISkee *), this)
+#define UIGameOver_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004500F0, void, struct UIGameOver *), this)
+#define BinkDoFrame (*(int (__stdcall **)(DWORD)) 0x0056A1E0)
+#define BinkCopyToBuffer (*(int (__stdcall **)(DWORD, DWORD, DWORD, DWORD, DWORD, DWORD, DWORD)) 0x0056A1DC)
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)

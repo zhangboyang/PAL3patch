@@ -2,7 +2,7 @@
 
 static void __fastcall UIStaticEX_Render_wrapper(struct UIStaticEX *this, int dummy)
 {
-    RECT *wndrect = &((struct UIWnd *) this)->m_rect;
+    RECT *wndrect = &pUIWND(this)->m_rect;
     RECT old_rect = *wndrect;
     fRECT new_frect, old_frect, tmp_frect;
     double len_factor = fs->len_factor;
@@ -25,7 +25,7 @@ static void __fastcall UIStaticEXA_Render_wrapper(struct UIStaticEXA *this, int 
     // TaiJi pictures are in UILib
     // there is no need to adjust m_rect and fixui state very complex like UIStaticEX
     
-    RECT *wndrect = &((struct UIWnd *) this)->m_rect;
+    RECT *wndrect = &pUIWND(this)->m_rect;
     RECT old_rect = *wndrect;
     POINT old_pt = { this->center_x, this->center_y };
     

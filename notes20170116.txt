@@ -1,0 +1,17 @@
+【修正小游戏UI】
+需要修正UI的小游戏有两个，一个是露营（Encampment/四方四象枢），另一个是滑雪（Skee）
+难点主要在于PAL3A代码中把属于仙三的小游戏的代码删去了，因此PDB中没有这两个游戏所涉及到的类，需要自己逆向。
+由于PDB中没有相关的信息，我只好自己命名这两个UIFrameWnd的子类：UIEncampment和UISkee
+两个小游戏的各自的UIFrameWnd都是另一个与各自游戏对应的类的一个成员，类结构大致如下
+class SkeeGame {
+    /// .... some other unknown members
+    UISkee *framewnd;
+};
+由于之前已经标定好了很多UI相关的类的构造函数，因此只有根据小游戏UIFrameWnd调用了哪些构造函数，即可知道成员的类型和位置
+修正露营小游戏时，将UI故意向左挪了一些，这样可以露出背景中主角们围在篝火边的样子
+
+【当限制游戏帧率小于30时动画播放时画面可能卡住的原因】
+这是因为PAL3原有的动画播放代码没有处理跳帧的情况
+根据BinkSDK的文档描述，当跳帧时BinkDoFrame()和BinkCopyToBuffer()会返回1，否则返回0
+新的播放代码在检测到跳帧后会跳过当前帧的输出（不调用Clear(),BeginScene(),EndScene(),Present()等函数）
+这样在帧率较低的时候播放仍然正常（虽然丢帧）

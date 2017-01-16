@@ -12,6 +12,8 @@ PDB中有很多函数，在PAL3中没有出现，应该是这些函数被实现�
 
 【gbPrintFont_NUM修正】
 通过包装PrintString()函数，在内部进行位置、大小、比例变换完成
+::Flush()中调用gbDynVertBuf::RenderUIQuad直接使用的是gamebox的坐标
+因此在对RenderUIQuad进行hook时需避免此处位置！（或者在调用Flush时保证fixui状态为identity也可）
 
 【str2scalefactor】
 这个函数提供scalefactor的解析功能

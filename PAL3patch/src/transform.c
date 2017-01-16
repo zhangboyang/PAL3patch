@@ -82,6 +82,16 @@ void scale_frect_fixlt(fRECT *out_frect, const fRECT *frect, double wf, double h
     set_frect_ltwh(out_frect, frect->left, frect->top, get_frect_width(frect) * wf, get_frect_height(frect) * hf);
 }
 
+// convert between GameBox coord and screen coord
+void gbfrect2frect(fRECT *out_frect, const fRECT *frect)
+{
+    set_frect_ltrb(out_frect, gbx2x(frect->left), gby2y(frect->top), gbx2x(frect->right), gby2y(frect->bottom));
+}
+void frect2gbfrect(fRECT *out_frect, const fRECT *frect)
+{
+    set_frect_ltrb(out_frect, x2gbx(frect->left), y2gby(frect->top), x2gbx(frect->right), y2gby(frect->bottom));
+}
+
 // get maximum rect with ratio (width / height) inside an existing rect
 // the out_frect in centered in frect
 // out_frect == frect is allowed

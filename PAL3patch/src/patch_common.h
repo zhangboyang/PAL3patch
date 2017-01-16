@@ -56,6 +56,7 @@ MAKE_PATCHSET(graphicspatch);
         SF_SOFTCURSOR,
         SF_COMBAT,
         SF_SCENEUI,
+        SF_SCENEUIRECT,
         SF_SCENEICON,
         SF_SCENETEXT,
         SF_SCENEDLGFACE,
@@ -80,7 +81,7 @@ MAKE_PATCHSET(graphicspatch);
             int lr_method, tb_method;
             double len_factor;
             struct fixui_state *prev;
-            int no_cursor_virt;
+            int no_cursor_virt; // if set to non-zero, there is no cursor virtualizion
         };
         extern struct fixui_state *fs;
 
@@ -145,7 +146,7 @@ MAKE_PATCHSET(graphicspatch);
         extern void set_uiwnd_ptag(struct UIWnd *this, struct uiwnd_ptag ptag);
         extern fRECT *get_ptag_frect(int rect_type);
         
-        extern void fixui_adjust_fRECT(fRECT *out_frect, fRECT *frect);
+        extern void fixui_adjust_fRECT(fRECT *out_frect, const fRECT *frect);
         extern void fixui_adjust_gbUIQuad(struct gbUIQuad *out_uiquad, const struct gbUIQuad *uiquad);
         extern void fixui_adjust_RECT(RECT *out_rect, const RECT *rect);
         extern void fixui_adjust_fPOINT(fPOINT *out_fpoint, const fPOINT *fpoint);
@@ -183,6 +184,7 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fixuistaticex);
         MAKE_PATCHSET(fixsceneui);
             #define sceneui_scalefactor (scalefactor_table[SF_SCENEUI])
+            #define sceneuirect_scalefactor (scalefactor_table[SF_SCENEUIRECT])
             #define sceneicon_scalefactor (scalefactor_table[SF_SCENEICON])
             #define scenetext_scalefactor (scalefactor_table[SF_SCENETEXT])
             #define scenedlgface_scalefactor (scalefactor_table[SF_SCENEDLGFACE])

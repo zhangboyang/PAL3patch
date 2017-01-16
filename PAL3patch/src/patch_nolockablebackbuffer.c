@@ -147,6 +147,17 @@ static void init_movieframe_texture(const char *filename, int movie_width, int m
     }
 }
 
+
+static int last_BinkDoFrame_retval;
+static int last_BinkCopyToBuffer_retval;
+static int __stdcall BinkDoFrame_wrapper(DWORD a1)
+{
+    return last_BinkDoFrame_retval = BinkDoFrame(a1);
+}
+static int __stdcall BinkCopyToBuffer_wrapper(DWORD a1, DWORD a2, DWORD a3, DWORD a4, DWORD a5, DWORD a6, DWORD a7)
+{
+    return last_BinkCopyToBuffer_retval = BinkCopyToBuffer(a1, a2, a3, a4, a5, a6, a7);
+}
 static int __fastcall gbBinkVideo_OpenFile(struct gbBinkVideo *this, int dummy, const char *szFileName, HWND hWnd, int bChangeScreenMode, int nOpenFlag)
 {
     int ret = gbBinkVideo_SFLB_OpenFile(this, szFileName, hWnd, bChangeScreenMode, nOpenFlag);
@@ -177,15 +188,17 @@ static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
     // check cooperative level
     gbGfxManager_D3D_EnsureCooperativeLevel(GB_GfxMgr, 1);
 
-    // clear surface
-    IDirect3DDevice9_Clear(GB_GfxMgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0);
-    
     // upload movie frame to texture
     D3DLOCKED_RECT lrc;
     IDirect3DTexture9_LockRect(mf_tex, 0, &lrc, NULL, 0);
     ret = gbBinkVideo_DrawFrameEx(this, lrc.pBits, lrc.Pitch, mf_tex_height, 0, 0, mf_bink_dstsurfacetype);
     IDirect3DTexture9_UnlockRect(mf_tex, 0);
 
+    if (last_BinkDoFrame_retval || last_BinkCopyToBuffer_retval) {
+        // the binkvideo tells us frame is skipped
+        return ret;
+    }
+    
     // upload vertex
     struct mf_vertex_t *vbuf;
     IDirect3DVertexBuffer9_Lock(mf_vbuf, 0, 0, (void *) &vbuf, 0);
@@ -206,6 +219,9 @@ static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSV, D3DTADDRESS_BORDER);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_BORDERCOLOR, 0x00000000);
     IDirect3DDevice9_SetTexture(GB_GfxMgr->m_pd3dDevice, 0, (void *) mf_tex);
+    
+    // clear surface
+    IDirect3DDevice9_Clear(GB_GfxMgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x00000000, 1.0f, 0);
     
     // draw
     IDirect3DDevice9_BeginScene(GB_GfxMgr->m_pd3dDevice);
@@ -261,6 +277,10 @@ static void hook_gbBinkVideo()
     // hook WM_SETCURSOR
     make_call(0x00404DFF, wm_setcursor_hook);
     SIMPLE_PATCH(0x00404E04, "\x00\x09", "\x85\xC0", 2);
+    
+    // hook BinkDoFrame() and BinkCopyToBuffer()
+    make_branch(0x0053C544, 0xE8, BinkDoFrame_wrapper, 6);
+    make_branch(0x0053C571, 0xE8, BinkCopyToBuffer_wrapper, 6);
 }
 
 

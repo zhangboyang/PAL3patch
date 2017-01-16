@@ -56,7 +56,7 @@ void fixui_popstate()
     free(cur);
 }
 // adjust structures
-void fixui_adjust_fRECT(fRECT *out_frect, fRECT *frect)
+void fixui_adjust_fRECT(fRECT *out_frect, const fRECT *frect)
 {
     transform_frect(out_frect, frect, &fs->src_frect, &fs->dst_frect, fs->lr_method, fs->tb_method, fs->len_factor);
 }
@@ -181,7 +181,7 @@ static void hook_gbDynVertBuf_RenderUIQuad()
     INIT_WRAPPER_CALL(gbDynVertBuf_RenderUIQuad_wrapper, {
         gboffset + 0x10015476,
         gboffset + 0x100229A7,
-        gboffset + 0x10023462,
+        // gboffset + 0x10023462, // NOTE: should NOT hook this function in gbPrintFont_NUM::Flush(), see notes20161115.txt for details
         gboffset + 0x10023A87,
     });
 }

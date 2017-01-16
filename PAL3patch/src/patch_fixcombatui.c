@@ -110,16 +110,16 @@ static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
     
     // fix rolestate panel
     ptag = CB_PTAG(TR_LOW, TR_HIGH);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateSword, ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pRoleStateSword), ptag);
     for (i = 0; i < 4; i++) {
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateHP[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateGP[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateMP[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStatePanel[i], ptag);
+        set_uiwnd_ptag(pUIWND(this->m_pRoleStateHP[i]), ptag);
+        set_uiwnd_ptag(pUIWND(this->m_pRoleStateGP[i]), ptag);
+        set_uiwnd_ptag(pUIWND(this->m_pRoleStateMP[i]), ptag);
+        set_uiwnd_ptag(pUIWND(this->m_pRoleStatePanel[i]), ptag);
     }
     for (i = 0; i < 5; i++) {
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateFace[i], ptag);
-        set_uiwnd_ptag((struct UIWnd *) this->m_pRoleStateFaceName[i], ptag);
+        set_uiwnd_ptag(pUIWND(this->m_pRoleStateFace[i]), ptag);
+        set_uiwnd_ptag(pUIWND(this->m_pRoleStateFaceName[i]), ptag);
     }
     
     // fix rolestate icons
@@ -130,55 +130,55 @@ static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
             ptag = MAKE_PTAG(SF_COMBAT, PTR_GAMERECT, PTR_GAMERECT, TR_SCALE_LOW, TR_SCALE_LOW);
         }
         for (j = 0; j < 19; j++) {
-            set_uiwnd_ptag((struct UIWnd *) this->m_pRoleSpecState[j][i], ptag);
+            set_uiwnd_ptag(pUIWND(this->m_pRoleSpecState[j][i]), ptag);
         }
     }
     
     // fix trickname
     ptag = CB_PTAG(TR_CENTER, TR_LOW);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pTrickName, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pTrickName2, ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pTrickName), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pTrickName2), ptag);
     
     // fix attacksequen
     ptag = CB_PTAG(TR_HIGH, TR_LOW);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pAttackSequenBack, ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pAttackSequenBack), ptag);
     for (i = 0; i < 11; i++) {
-        set_uiwnd_ptag((struct UIWnd *) this->m_pAttackSequenFace[i], ptag);
+        set_uiwnd_ptag(pUIWND(this->m_pAttackSequenFace[i]), ptag);
     }
     
     // fix result popup box
     ptag = CB_PTAG(TR_CENTER, TR_CENTER);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pResultLevelup, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pResultWindLvup, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pResultThunderLvup, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pResultWaterLvup, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pResultFireLvup, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pResultEarthLvup, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pResultDoubleLvup, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pResultGetItem, ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pResultLevelup), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pResultWindLvup), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pResultThunderLvup), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pResultWaterLvup), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pResultFireLvup), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pResultEarthLvup), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pResultDoubleLvup), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pResultGetItem), ptag);
     
     // fix result window
     ptag = CB_PTAG(TR_LOW, TR_LOW);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pWinPanel, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pLosePanel, ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pWinPanel), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pLosePanel), ptag);
     for (i = 0; i < 4; i++) {
-        set_uiwnd_ptag((struct UIWnd *) this->m_pResultWindow[i], ptag);
+        set_uiwnd_ptag(pUIWND(this->m_pResultWindow[i]), ptag);
     }
     
     // fix other windows
     ptag = CB_PTAG(TR_LOW, TR_HIGH);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pMain, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pItemWindow, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pMagicWindow, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pSkillWindow, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pAIWindow, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pLineupWindow, ptag);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pProtectWindow, ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pMain), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pItemWindow), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pMagicWindow), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pSkillWindow), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pAIWindow), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pLineupWindow), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pProtectWindow), ptag);
     
     // fix lineup faces positions
     ptag = MAKE_PTAG(SF_COMBAT, PTR_GAMERECT, PTR_GAMERECT, TR_SCALE_LOW, TR_SCALE_LOW);
     for (i = 0; i < 5; i++) {
-        set_uiwnd_ptag((struct UIWnd *) this->m_pLineupWindow->m_pFace[i], ptag);
+        set_uiwnd_ptag(pUIWND(this->m_pLineupWindow->m_pFace[i]), ptag);
     }
     int *lineup_head_left = TOPTR(0x0057024C);
     int *lineup_head_top = TOPTR(0x00570268);
@@ -194,7 +194,7 @@ static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
     
     // fix combat dialog
     ptag = MAKE_PTAG(SF_COMBAT, PTR_GAMERECT, PTR_GAMERECT, TR_SCALE_MID, TR_SCALE_HIGH);
-    set_uiwnd_ptag((struct UIWnd *) this->m_pDialogBack, ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pDialogBack), ptag);
     
     return true;
 }
@@ -234,7 +234,7 @@ static void __fastcall CCBUI_Render(struct CCBUI *this, int dummy)
 static void __fastcall CCBLineupWindow_Render(struct CCBLineupWindow *this, int dummy)
 {
     UIFrameWnd_Render((struct UIFrameWnd *) this);
-    struct UIWnd *pSelectedFace = (struct UIWnd *) this->m_pFace[this->m_nSelected];
+    struct UIWnd *pSelectedFace = pUIWND(this->m_pFace[this->m_nSelected]);
     push_ptag_state(pSelectedFace);
     UIWnd_vfptr_Render(pSelectedFace);
     pop_ptag_state(pSelectedFace);
@@ -242,7 +242,7 @@ static void __fastcall CCBLineupWindow_Render(struct CCBLineupWindow *this, int 
 // rewrite CCBLineupWindow::IsPtOnFace
 static bool __fastcall CCBLineupWindow_IsPtOnFace(struct CCBLineupWindow *this, int dummy, int nFaceIndex, POINT pt)
 {
-    struct UIWnd *pFace = (struct UIWnd *) this->m_pFace[nFaceIndex];
+    struct UIWnd *pFace = pUIWND(this->m_pFace[nFaceIndex]);
     RECT rc = pFace->m_rect;
     push_ptag_state(pFace);
     fixui_adjust_RECT(&rc, &rc);

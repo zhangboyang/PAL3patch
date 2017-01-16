@@ -11,7 +11,7 @@ static void __fastcall LineupUI_Create_wrapper(struct LineupUI *this, int dummy,
     struct uiwnd_ptag ptag = FIXUI_AUTO_TRANSFORM_PTAG;
     ptag.no_cursor_virt = 1;
     ptag.self_only_ptag = 1;
-    set_uiwnd_ptag((struct UIWnd *) this, ptag);
+    set_uiwnd_ptag(pUIWND(this), ptag);
     
     // set fov
     float *fov = &this->m_pCamera->m_pCamera->fov;

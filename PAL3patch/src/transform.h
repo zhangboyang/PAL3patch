@@ -47,6 +47,8 @@ extern void set_frect_ltrb(fRECT *frect, double left, double top, double right, 
 extern void set_frect_ltwh(fRECT *frect, double left, double top, double width, double height);
 extern void translate_frect_rel(fRECT *out_frect, const fRECT *frect, double lr, double tb);
 extern void scale_frect_fixlt(fRECT *out_frect, const fRECT *frect, double wf, double hf);
+extern void gbfrect2frect(fRECT *out_frect, const fRECT *frect);
+extern void frect2gbfrect(fRECT *out_frect, const fRECT *frect);
 extern void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double ratio);
 extern double get_frect_min_scalefactor(const fRECT *dst_frect, const fRECT *src_frect);
 

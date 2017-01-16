@@ -1,0 +1,29 @@
+【导致FVF问题的原因】
+将D3D调为Debug模式后，在游戏战斗界面选择敌方怪物时，会发生FVF与VB不匹配的错误，如下：
+Direct3D9: (ERROR) :Current vertex shader declaration doesn't match VB's FVF
+这是因为basedata.cpk/gfxscript/geom_diffuse_t.gbf文件中technique t0 pass p0 的FVF写错了造成的
+应该为XYZ|NORMAL|TEX1，错误地写成了XYZ|DIFFUSE|TEX1（推测是笔误）
+此外在夜探游戏中，用到的ui_notex.gbf中FVF也有问题（用于地面三角形的绘制，因为添加ZFUNC=NEVER;可导致三角形消失）
+应该为XYZ|DIFFUSE，但是错误地写成了XYZ|DIFFUSE|TEX1
+找到此问题的方法：
+ 找到调用D3DXCreateEffect的函数 => gbEffectMgr::NewRenderEffect
+ 利用ollydbg的断点功能记录日志：效果的文件名和效果对象的指针
+ 在D3D控制面板上设置“错误时断下来”，在错误时，在GBENGINE.DLL上.text节下断点（这样就会在调用返回到GBENGINE.DLL时断下来）
+ 查看函数，找到应用效果的位置，利用ollydbg把效果对象指针记录下来
+ 分析日志，最后一个效果对象指针很可能就是导致问题的那个，因此查找创建时日志信息，找到对应文件 => geom_diffuse_t.gbf
+遗留问题：
+ geom_diffuse_t.gbf和geom_diffuse.gbf的区别？
+   有一个BYTE控制着使用哪个效果文件，意义未知
+ 有时选择敌方怪物时，敌方怪物显示不出来，与此问题的联系？
+   如强行采用geom_diffuse.gbf，则有可能显示不出来；修正geom_diffuse_t.gbf后问题似乎消失
+
+【需要创建修改effect的框架】
+修正上面的FVF问题、修改UI元素纹理过滤器都需要对效果文件进行修改
+因此需要考虑创建这样的框架
+
+【修正夜探小游戏的计时器】
+两个夜探小游戏（包括当铺、刺史府）和山洞的初体验都是使用同一个计时器显示代码（位于PAL3::Render中）
+夜探小游戏的计时器是通过gbPrintFont_NUM显示，由于之前已经针对此类型字体其做了修正（notes20161115.txt）
+因此需要在PrintString()前后设置好fixui的状态
+最终采用ASMPATCH方案
+
