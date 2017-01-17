@@ -75,6 +75,7 @@ typedef unsigned char bool;
 #include "PAL3patch.h"
 #include "d3dx9_21.h"
 #include "cjktable.h"
+#include "effecthook.h"
 
 // common typedefs
 typedef void *(*malloc_funcptr_t)(size_t);

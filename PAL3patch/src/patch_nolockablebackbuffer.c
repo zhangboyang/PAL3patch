@@ -34,10 +34,10 @@ static void mf_fillvbuf_rect(struct mf_vertex_t *vbuf, const fRECT *frect, float
     float top = frect->top;
     float right = frect->right;
     float bottom = frect->bottom;
-    left = floor(left) - 0.5f;
-    right = floor(right) - 0.5f;
-    top = floor(top) - 0.5f;
-    bottom = floor(bottom) - 0.5f;
+    left = floor(left + eps) - 0.5f;
+    right = ceil(right - eps) - 0.5f;
+    top = floor(top + eps) - 0.5f;
+    bottom = ceil(bottom - eps) - 0.5f;
     vbuf[0].x = vbuf[5].x = left;
     vbuf[0].y = vbuf[5].y = top;
     vbuf[0].u = vbuf[5].u = u1;
@@ -208,6 +208,7 @@ static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
     // prepare d3d state
     IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_CULLMODE, D3DCULL_NONE);
     IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZENABLE, TRUE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_SHADEMODE, D3DSHADE_FLAT);
     IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLOROP, D3DTOP_MODULATE);
     IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
     IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
@@ -218,6 +219,7 @@ static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSU, D3DTADDRESS_BORDER);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSV, D3DTADDRESS_BORDER);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_BORDERCOLOR, 0x00000000);
+    
     IDirect3DDevice9_SetTexture(GB_GfxMgr->m_pd3dDevice, 0, (void *) mf_tex);
     
     // clear surface

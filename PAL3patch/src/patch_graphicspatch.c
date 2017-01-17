@@ -483,7 +483,7 @@ double str2scalefactor(const char *str)
     } else {
         fail("unknown scalefactor string %s.", str);
     }
-return ret;
+//return ret;
     return fbound(ret, 1.0, game_scalefactor);
 }
 

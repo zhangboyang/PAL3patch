@@ -1,0 +1,18 @@
+【用来挂钩d3d效果(effect)的框架: effecthook.c】
+支持对指定文件进行字符串替换
+add_effect_hook(效果文件名（不含路径）, 被替换字符串, 新字符串)
+
+【用来修正UI纹理过滤器为D3DTEXF_LINEAR的补丁: uireplacetexf】
+现在可以通过这个补丁把UI相关的效果文件中纹理过滤器的设定由POINT改为LINEAR
+当图像有放大或缩小时，显示效果更好
+
+【用黑色覆盖系统UI界面的边缘：uifillborder】
+由于和fixui关系紧密，代码写在了fixui内部
+需要注意到覆盖系统UI界面需要在绘制鼠标指针之前完成
+
+【修正FVF问题：fixvsfvf】
+原理详见notes20170115.txt
+修正了夜探小游戏、战斗界面选择敌人时会出现的FVF问题
+
+【已可以发布beta版本了】
+至此所有重大问题已经全部解决，制作好补丁配置工具后就可以发布beta版本了。

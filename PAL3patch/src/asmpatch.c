@@ -26,6 +26,7 @@ static unsigned dyncode_ptr;
 
 static unsigned char *alloc_dyncode_buffer(unsigned size)
 {
+    if (!size || size > PAGE_SIZE) fail("invalid size %08X.", size);
     if (!dyncode_page || dyncode_ptr + size > PAGE_SIZE) {
         dyncode_page = VirtualAlloc(NULL, PAGE_SIZE, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
         if (!dyncode_page) fail("can't alloc memory for dynamic code.");

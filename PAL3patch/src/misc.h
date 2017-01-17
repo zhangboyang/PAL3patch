@@ -17,6 +17,7 @@ extern int str2int(const char *valstr);
 extern double str2double(const char *valstr);
 extern int str_iendwith(const char *a, const char *b);
 extern double fbound(double x, double low, double high);
+extern int fcmp(double a, double b);
 extern HMODULE LoadLibrary_safe(LPCTSTR lpFileName);
 extern FARPROC GetProcAddress_safe(HMODULE hModule, LPCSTR lpProcName);
 extern wchar_t *cs2wcs(const char *cstr, UINT src_cp);

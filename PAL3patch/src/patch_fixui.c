@@ -1,7 +1,7 @@
 #include "common.h"
 
 // ui configuration (automatic transform)
-static fRECT game_frect_ui_auto;
+fRECT game_frect_ui_auto;
 
 // fixui state
 static struct fixui_state def_fs; // default fixui state, at stack bottom, also for default cursor rect
@@ -235,9 +235,131 @@ static void getcursorpos_virtualization_hookfunc()
 
 
 
+// fill auto transform ui border
+static int fillborder_enabled;
+static IDirect3DStateBlock9 *uifb_stateblock;
+static IDirect3DVertexBuffer9 *uifb_vbuf = NULL;
+struct uifb_vertex_t {
+    float x, y, z, rhw;
+    DWORD color;
+};
+#define UIFB_VERTEX_FVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
+#define UIFB_VERTEX_SIZE (sizeof(struct uifb_vertex_t))
+#define UIFB_VBUF_TRANGLE_PER_RECT 2
+#define UIFB_VBUF_RECT_CNT 4
+#define UIFB_VBUF_SIZE (UIFB_VBUF_TRANGLE_PER_RECT * UIFB_VBUF_RECT_CNT * 3)
+#define UIFB_VBUF_SIZE_BYTES (UIFB_VERTEX_SIZE * UIFB_VBUF_SIZE)
+static void vbuf_put_frect(struct uifb_vertex_t *vbuf, const fRECT *frect)
+{
+    float left = frect->left;
+    float top = frect->top;
+    float right = frect->right;
+    float bottom = frect->bottom;
+    left = floor(left + eps) - 0.5f;
+    right = ceil(right - eps) - 0.5f;
+    top = floor(top + eps) - 0.5f;
+    bottom = ceil(bottom - eps) - 0.5f;
+    vbuf[0].x = vbuf[5].x = left;
+    vbuf[0].y = vbuf[5].y = top;
+    vbuf[1].x = left;
+    vbuf[1].y = bottom;
+    vbuf[2].x = vbuf[3].x = right;
+    vbuf[2].y = vbuf[3].y = bottom;
+    vbuf[4].x = right;
+    vbuf[4].y = top;
+    vbuf[0].color = vbuf[1].color = vbuf[2].color = vbuf[3].color = vbuf[4].color = vbuf[5].color = 0;
+    vbuf[0].rhw = vbuf[1].rhw = vbuf[2].rhw = vbuf[3].rhw = vbuf[4].rhw = vbuf[5].rhw = 1.0f;
+    vbuf[0].z = vbuf[1].z = vbuf[2].z = vbuf[3].z = vbuf[4].z = vbuf[5].z = 0.0f;
+}
+static void vbuf_draw(const fRECT *frect_list, int frect_cnt)
+{
+    IDirect3DStateBlock9_Capture(uifb_stateblock);
+    
+    // upload vertex
+    int i;
+    struct uifb_vertex_t *vbuf;
+    IDirect3DVertexBuffer9_Lock(uifb_vbuf, 0, 0, (void *) &vbuf, 0);
+    int draw_cnt = 0;
+    for (i = 0; i < frect_cnt; i++) {
+        if (fcmp(frect_list[i].left, frect_list[i].right) != 0 && fcmp(frect_list[i].top, frect_list[i].bottom) != 0) {
+            vbuf_put_frect(vbuf + UIFB_VBUF_TRANGLE_PER_RECT * 3 * draw_cnt, &frect_list[i]);
+            draw_cnt++;
+        }
+    }
+    IDirect3DVertexBuffer9_Unlock(uifb_vbuf);
+    
+    // prepare d3d state
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ALPHABLENDENABLE, FALSE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_CULLMODE, D3DCULL_NONE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZENABLE, TRUE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_LIGHTING, FALSE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_SHADEMODE, D3DSHADE_FLAT);
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLOROP, D3DTOP_DISABLE);
+    
+    // draw
+    IDirect3DDevice9_SetFVF(GB_GfxMgr->m_pd3dDevice, UIFB_VERTEX_FVF);
+    IDirect3DDevice9_SetStreamSource(GB_GfxMgr->m_pd3dDevice, 0, uifb_vbuf, 0, UIFB_VERTEX_SIZE);
+    IDirect3DDevice9_DrawPrimitive(GB_GfxMgr->m_pd3dDevice, D3DPT_TRIANGLELIST, 0, UIFB_VBUF_TRANGLE_PER_RECT * draw_cnt);
+
+    IDirect3DStateBlock9_Apply(uifb_stateblock);
+}
+static void uifb_draw()
+{
+    double lr[] = { game_frect.left, game_frect_ui_auto.left, game_frect_ui_auto.right, game_frect.right };
+    double tb[] = { game_frect.top, game_frect_ui_auto.top, game_frect_ui_auto.bottom, game_frect.bottom };
+    fRECT frect[4];
+    set_frect_ltrb(&frect[0], lr[0], tb[0], lr[1], tb[3]);
+    set_frect_ltrb(&frect[1], lr[2], tb[0], lr[3], tb[3]);
+    set_frect_ltrb(&frect[2], lr[0], tb[0], lr[3], tb[1]);
+    set_frect_ltrb(&frect[3], lr[0], tb[2], lr[3], tb[3]);
+    vbuf_draw(frect, 4);
+}
+static void uifb_create()
+{
+    if (FAILED(IDirect3DDevice9_CreateVertexBuffer(GB_GfxMgr->m_pd3dDevice, UIFB_VBUF_SIZE_BYTES, 0, UIFB_VERTEX_FVF, D3DPOOL_MANAGED, &uifb_vbuf, NULL))) {
+        fail("can't create vertex buffer for filling ui border.");
+    }
+    if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &uifb_stateblock))) {
+        fail("can't create state block for filling ui border.");
+    }
+}
+static void uifb_onresetdevice()
+{
+    if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &uifb_stateblock))) {
+        fail("can't create state block for filling ui border.");
+    }
+}
+static void uifb_onlostdevice()
+{
+    IDirect3DStateBlock9_Release(uifb_stateblock);
+}
+static void uifb_precursordraw()
+{
+    // this function may be called when fillborder is disabled
+    if (fillborder_enabled && cur_def == FIXUI_AUTO_TRANSFORM) {
+        uifb_draw();
+    }
+}
+static void init_fillborder()
+{
+    fillborder_enabled = get_int_from_configfile("uifillborder");
+    if (!fillborder_enabled) return;
+    add_postd3dcreate_hook(uifb_create);
+    add_onlostdevice_hook(uifb_onlostdevice);
+    add_onresetdevice_hook(uifb_onresetdevice);
+}
+
+
+
+
+
+
+
 // hook UICursor_IRender to change cursor size (only in soft-cursor mode)
 static void __fastcall UICursor_IRender_wrapper(struct UICursor *this, int dummy)
 {
+    uifb_precursordraw();
     fixui_pushstate(&game_frect, &game_frect, TR_SCALE_LOW, TR_SCALE_LOW, softcursor_scalefactor);
     UICursor_IRender(this);
     fixui_popstate();
@@ -433,6 +555,7 @@ MAKE_PATCHSET(fixui)
     fixui_setdefaultransform(FIXUI_MANUAL_TRANSFORM);
     hook_gbDynVertBuf_RenderUIQuad();
     hook_gbPrintFont_PrintString(); 
+    add_postpresent_hook(fixui_update_gamestate);
     
     // init cursor virtualization
     add_getcursorpos_hook(getcursorpos_virtualization_hookfunc);
@@ -442,4 +565,7 @@ MAKE_PATCHSET(fixui)
     
     // init soft-cursor size patch
     init_softcursor_sizepatch();
+    
+    // init fill border
+    init_fillborder();
 }

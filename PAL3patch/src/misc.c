@@ -39,6 +39,13 @@ double fbound(double x, double low, double high)
     return fmin(fmax(x, low), high);
 }
 
+int fcmp(double a, double b)
+{
+    double d = a - b;
+    if (fabs(d) <= eps) return 0;
+    return d > 0 ? 1 : -1;
+}
+
 HMODULE LoadLibrary_safe(LPCTSTR lpFileName)
 {
     HMODULE ret = LoadLibrary(lpFileName);

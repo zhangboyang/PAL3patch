@@ -36,6 +36,7 @@ MAKE_PATCHSET(nocpk);
 MAKE_PATCHSET(showfps);
 MAKE_PATCHSET(console);
 MAKE_PATCHSET(relativetimer);
+MAKE_PATCHSET(fixvsfvf);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
@@ -188,6 +189,7 @@ MAKE_PATCHSET(graphicspatch);
             #define sceneicon_scalefactor (scalefactor_table[SF_SCENEICON])
             #define scenetext_scalefactor (scalefactor_table[SF_SCENETEXT])
             #define scenedlgface_scalefactor (scalefactor_table[SF_SCENEDLGFACE])
+        MAKE_PATCHSET(uireplacetexf);
 
     MAKE_PATCHSET(replacetexture);
 

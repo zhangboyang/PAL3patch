@@ -133,9 +133,9 @@ void *load_png(void *fdata, unsigned flen, int *width, int *height, int *bitcoun
     unsigned pbits_size;
     void *pbits = NULL;
     struct D3DXTex_CImage img;
-    D3DXTex_CImage_ctor(&img);
+    gbD3DXTex_CImage_ctor(&img);
     
-    if (D3DXTex_CImage_Load(&img, fdata, flen, NULL, 1) < 0) {
+    if (gbD3DXTex_CImage_Load(&img, fdata, flen, NULL, 1) < 0) {
         goto done;
     }
     
@@ -222,7 +222,7 @@ void *load_png(void *fdata, unsigned flen, int *width, int *height, int *bitcoun
 done:
     
     if (!ret) gbfree(pbits); // free(NULL) is allowed
-    D3DXTex_CImage_dtor(&img);
+    gbD3DXTex_CImage_dtor(&img);
     return ret;
 }
 

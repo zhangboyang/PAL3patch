@@ -58,6 +58,7 @@ static void init_stage2()
     target_codepage = system_codepage = GetACP();
     
     init_hooks();
+    init_effect_hooks();
     
     INIT_PATCHSET(cdpatch);
     INIT_PATCHSET(regredirect);
@@ -66,9 +67,11 @@ static void init_stage2()
     INIT_PATCHSET(timerresolution);
     INIT_PATCHSET(fixmemfree);
     INIT_PATCHSET(nocpk);
-    INIT_PATCHSET(showfps);
     INIT_PATCHSET(console);
     INIT_PATCHSET(relativetimer);
+    INIT_PATCHSET(fixvsfvf);
+    INIT_PATCHSET(showfps);
+    INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
     
     if (!INIT_PATCHSET(testcombat)) {
         // here are some patches not compatiable with 'testcombat'
@@ -78,27 +81,23 @@ static void init_stage2()
             INIT_PATCHSET(fixfov);
             INIT_PATCHSET(fixortho);
             INIT_PATCHSET(nolockablebackbuffer);
-            INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
             INIT_PATCHSET(fixreset);
             if (INIT_PATCHSET(fixui)) { 
                 // must called after INIT_PATCHSET(graphicspatch)
                 // must called after INIT_PATCHSET(setlocale) because of D3DXCreateFont need charset information
                 // ui fixes
                 INIT_PATCHSET(uireplacefont);
-                //INIT_PATCHSET(fixloadingfrm);
                 INIT_PATCHSET(fixcombatui);
-                //INIT_PATCHSET(fixroledialog);
-                //INIT_PATCHSET(fixgameover);
                 INIT_PATCHSET(fix3dctrl);
                 INIT_PATCHSET(fixlineupui);
                 INIT_PATCHSET(fixuistaticex);
                 INIT_PATCHSET(fixsceneui);
+                INIT_PATCHSET(uireplacetexf);
             }
             INIT_PATCHSET(replacetexture);
         }
     }
-
-
+    
     // init_locale() must called after INIT_PATCHSET(setlocale)
     init_locale();
     

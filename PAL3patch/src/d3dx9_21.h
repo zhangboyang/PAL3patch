@@ -16,6 +16,8 @@
 
 
 // D3DX9 types and functions
+// this is copied from Microsoft D3DX headers
+
 typedef enum _D3DXIMAGE_FILEFORMAT {
     D3DXIFF_BMP = 0,
     D3DXIFF_JPG = 1,
@@ -284,9 +286,6 @@ struct D3DXTex_CImage {
     struct D3DXTex_CImage *pNext1;
     struct D3DXTex_CImage *pNext2;
 };
-#define D3DXTex_CImage_ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346CA, void, struct D3DXTex_CImage *), this)
-#define D3DXTex_CImage_dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346E3, void, struct D3DXTex_CImage *), this)
-#define D3DXTex_CImage_Load(this, data, len, pinfo, flag) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10037159, int, struct D3DXTex_CImage *, const void *, unsigned, D3DXIMAGE_INFO *, int), this, data, len, pinfo, flag)
 
 
 #ifndef USE_MSVC_LINKER

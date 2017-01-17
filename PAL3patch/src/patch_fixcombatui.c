@@ -220,7 +220,7 @@ static void __fastcall CCBUI_Render(struct CCBUI *this, int dummy)
                     firstflag = 0;
                 }
                 UIWnd_MoveWindow(&pWnd->baseclass, left, top);
-                left += ceil(icon_width[j] * cb_scalefactor);
+                left += ceil(icon_width[j] * cb_scalefactor - eps);
             }
         }
     }

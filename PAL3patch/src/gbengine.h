@@ -1243,6 +1243,11 @@ struct UIGameOver {
 
 
 
+// D3DX functions
+#define gbD3DXTex_CImage_ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346CA, void, struct D3DXTex_CImage *), this)
+#define gbD3DXTex_CImage_dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346E3, void, struct D3DXTex_CImage *), this)
+#define gbD3DXTex_CImage_Load(this, data, len, pinfo, flag) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10037159, int, struct D3DXTex_CImage *, const void *, unsigned, D3DXIMAGE_INFO *, int), this, data, len, pinfo, flag)
+
 // functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
 #define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A190, void, struct gbGfxManager_D3D *), this)
@@ -1265,6 +1270,7 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gbCamera_GetRayToScreen(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100222C0, void, struct gbCamera *, float, float, struct gbRay *), this, a2, a3, a4);
 #define gbMatrixStack_Scale(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10027520, void, struct gbMatrixStack *, float, float, float), this, a2, a3, a4);
 #define pUIWND(x) ((struct UIWnd *)(x))
+
 
 // PAL3 functions
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
