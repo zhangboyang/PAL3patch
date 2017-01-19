@@ -29,6 +29,10 @@
 #define IDS_ZBUF_D3DFMT_D32             25
 #define IDS_MSAA_NONE                   26
 #define IDS_MSAA_FORMAT                 27
+#define IDS_AUTORESOLUTION_DESC         28
+#define IDS_AUTOMAXIMUM_DESC            29
+#define IDS_MSAA_NONE_DESC              30
+#define IDS_APPTITLE                    31
 #define IDD_PATCHCONFIG_DIALOG          102
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129
@@ -45,6 +49,7 @@
 #define IDC_CHOOSEFROMLIST              1013
 #define IDC_TOGGLEADVOPTS               1014
 #define IDC_ENUMLIST                    1015
+#define IDC_RADIO4                      1015
 #define IDC_WAITMESSAGE                 1016
 
 // Next default values for new objects

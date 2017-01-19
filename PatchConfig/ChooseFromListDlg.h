@@ -16,7 +16,7 @@ class CChooseFromListDlg : public CDialog
 public:
 	CChooseFromListDlg(CWnd* pParent = NULL);   // standard constructor
 
-	std::vector<std::pair<CString, CString> > *m_pEnumData;
+	std::vector<std::pair<CString, std::pair<CString, CString> > > *m_pEnumData;
 	int m_Choosen;
 
 // Dialog Data

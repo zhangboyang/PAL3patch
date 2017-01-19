@@ -23,7 +23,7 @@ struct ConfigDescItem {
 	// otherwise, item type is "text", optlist must be { { NULL } }
 	ConfigDescOptionItem optlist[MAX_CONFIGDESC_OPTIONS];
 
-	void (*enumfunc)(std::vector<std::pair<CString, CString> > &result);
+	void (*enumfunc)(std::vector<std::pair<CString, std::pair<CString, CString> > > &result);
 
 
 	// run-time data

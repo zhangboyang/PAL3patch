@@ -1,6 +1,6 @@
 #include "common.h"
 
-const char patch_version[] = "v1.0 alpha";
+const char patch_version[] = "v1.0 beta";
 const char build_date[] = __DATE__ ", " __TIME__;
 const char build_compiler[] =
 #if defined(__GNUC__) && defined(__VERSION__)

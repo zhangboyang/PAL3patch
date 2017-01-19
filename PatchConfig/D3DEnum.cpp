@@ -3,11 +3,6 @@
 #include "dxstdafx.h"
 #include "Resource.h"
 
-#include <set>
-#include <functional>
-#include <algorithm>
-
-
 static IDirect3D9 *pD3D = NULL;
 static CD3DEnumeration *pD3DEnum = NULL;
 
@@ -35,7 +30,7 @@ void CleanupD3DEnumeration()
 
 
 
-void EnumDisplayMode(std::vector<std::pair<CString, CString> > &result)
+void EnumDisplayMode(std::vector<std::pair<CString, std::pair<CString, CString> > > &result)
 {
 	int i;
 	std::vector<std::pair<int, int> > dlist;
@@ -49,17 +44,17 @@ void EnumDisplayMode(std::vector<std::pair<CString, CString> > &result)
 	dlist.resize(std::unique(dlist.begin(), dlist.end()) - dlist.begin());
 
 	result.clear();
-	result.push_back(std::make_pair(STRTABLE(IDS_AUTORESOLUTION), CString(_T("current"))));
+	result.push_back(std::make_pair(CString(_T("current")), std::make_pair(STRTABLE(IDS_AUTORESOLUTION), STRTABLE(IDS_AUTORESOLUTION_DESC))));
 	for (it = dlist.begin(); it != dlist.end(); it++) {
 		if (it->first >= 800 && it->second >= 600) {
 			CString str;
 			str.Format(_T("%dx%d"), it->first, it->second);
-			result.push_back(std::make_pair(str, str));
+			result.push_back(std::make_pair(str, std::make_pair(str, EMPTYSTR)));
 		}
 	}
 }
 
-void EnumDepthBuffer(std::vector<std::pair<CString, CString> > &result)
+void EnumDepthBuffer(std::vector<std::pair<CString, std::pair<CString, CString> > > &result)
 {
 	int i, j;
 	D3DFORMAT fmt;
@@ -68,9 +63,9 @@ void EnumDepthBuffer(std::vector<std::pair<CString, CString> > &result)
 	D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
 	D3DDeviceCombo *pDeviceComboList;
 	result.clear();
-	result.push_back(std::make_pair(STRTABLE(IDS_AUTOMAXIMUM), CString(_T("max"))));
-	result.push_back(std::make_pair(STRTABLE(IDS_AUTOZBUF16), CString(_T("16"))));
-	result.push_back(std::make_pair(STRTABLE(IDS_AUTOZBUF24), CString(_T("24"))));
+	result.push_back(std::make_pair(CString(_T("max")), std::make_pair(STRTABLE(IDS_AUTOMAXIMUM), STRTABLE(IDS_AUTOMAXIMUM_DESC))));
+	result.push_back(std::make_pair(CString(_T("16")), std::make_pair(STRTABLE(IDS_AUTOZBUF16), EMPTYSTR)));
+	result.push_back(std::make_pair(CString(_T("24")), std::make_pair(STRTABLE(IDS_AUTOZBUF24), EMPTYSTR)));
 	for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
 		pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
 		for (i = 0; i < pDeviceComboList->pDepthStencilFormatList->Count(); i++) {
@@ -80,22 +75,22 @@ void EnumDepthBuffer(std::vector<std::pair<CString, CString> > &result)
 				str.Format(_T("%d"), -fmt);
 				switch (fmt) {
 					case D3DFMT_D16:
-						result.push_back(std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D16), str));
+						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D16), EMPTYSTR)));
 						break;
 					case D3DFMT_D15S1:
-						result.push_back(std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D15S1), str));
+						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D15S1), EMPTYSTR)));
 						break;
 					case D3DFMT_D24X8:
-						result.push_back(std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D24X8), str));
+						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D24X8), EMPTYSTR)));
 						break;
 					case D3DFMT_D24S8:
-						result.push_back(std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D24S8), str));
+						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D24S8), EMPTYSTR)));
 						break;
 					case D3DFMT_D24X4S4:
-						result.push_back(std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D24X4S4), str));
+						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D24X4S4), EMPTYSTR)));
 						break;
 					case D3DFMT_D32:
-						result.push_back(std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D32), str));
+						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D32), EMPTYSTR)));
 						break;
 					default:
 						break;
@@ -105,7 +100,7 @@ void EnumDepthBuffer(std::vector<std::pair<CString, CString> > &result)
 	}
 }
 
-void EnumMultisample(std::vector<std::pair<CString, CString> > &result)
+void EnumMultisample(std::vector<std::pair<CString, std::pair<CString, CString> > > &result)
 {
 	int i, j;
 	int q, maxq;
@@ -115,7 +110,7 @@ void EnumMultisample(std::vector<std::pair<CString, CString> > &result)
 	D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
 	D3DDeviceCombo *pDeviceComboList;
 	result.clear();
-	result.push_back(std::make_pair(STRTABLE(IDS_AUTOMAXIMUM), CString(_T("max,max"))));
+	result.push_back(std::make_pair(CString(_T("max,max")), std::make_pair(STRTABLE(IDS_AUTOMAXIMUM), STRTABLE(IDS_AUTOMAXIMUM_DESC))));
 	for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
 		pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
 		for (i = 0; i < pDeviceComboList->pMultiSampleTypeList->Count(); i++) {
@@ -123,13 +118,13 @@ void EnumMultisample(std::vector<std::pair<CString, CString> > &result)
 			maxq = *(DWORD *) pDeviceComboList->pMultiSampleQualityList->GetPtr(i);
 			if (mtype != D3DMULTISAMPLE_NONMASKABLE && mtypeset.insert(mtype).second) {
 				if (mtype == D3DMULTISAMPLE_NONE) {
-					result.push_back(std::make_pair(STRTABLE(IDS_MSAA_NONE), CString(_T("0,0"))));
+					result.push_back(std::make_pair(CString(_T("0,0")), std::make_pair(STRTABLE(IDS_MSAA_NONE), STRTABLE(IDS_MSAA_NONE_DESC))));
 				} else {
 					for (q = 0; q < maxq; q++) {
 						CString key, val;
 						key.Format(STRTABLE(IDS_MSAA_FORMAT), mtype, q);
 						val.Format(_T("%d,%d"), mtype, q);
-						result.push_back(std::make_pair(key, val));
+						result.push_back(std::make_pair(val, std::make_pair(key, EMPTYSTR)));
 					}
 				}
 			}

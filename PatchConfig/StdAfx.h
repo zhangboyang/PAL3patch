@@ -27,12 +27,18 @@
 
 
 #include <vector>
+#include <map>
+#include <set>
+#include <functional>
+#include <algorithm>
+
 #include "D3DEnum.h"
 #include "ConfigDescData.h"
 
 
 // load CString from StringTable
 #define STRTABLE(x) (CString(MAKEINTRESOURCE((x))))
+#define EMPTYSTR (CString(_T("")))
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

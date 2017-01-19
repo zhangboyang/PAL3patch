@@ -46,7 +46,7 @@ static void init_stage1()
     sha1_init();
     add_atexit_hook(sha1_cleanup);
 
-    MessageBox(NULL, "stage1", "stage1", 0);
+    //MessageBox(NULL, "stage1", "stage1", 0);
     INIT_PATCHSET(depcompatible);
 }
 

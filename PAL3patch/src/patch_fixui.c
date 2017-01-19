@@ -1,7 +1,7 @@
 #include "common.h"
 
 // ui configuration (automatic transform)
-fRECT game_frect_ui_auto;
+static fRECT game_frect_ui_auto;
 
 // fixui state
 static struct fixui_state def_fs; // default fixui state, at stack bottom, also for default cursor rect

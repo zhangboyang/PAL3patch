@@ -139,7 +139,9 @@ void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 			m_CfgTitle = CString(pItem->title);
 		}
 	}
-	if (reload) m_CfgDesc = CString(pItem->description);
+	if (reload) {
+		m_CfgDesc = CString(pItem->description);
+	}
 
 	m_RadioVal = -1;
 	int invflag = -1; // first invalid option's id
@@ -177,10 +179,14 @@ void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 
 	if (pItem->enumfunc) {
 		if (reload) pItem->enumfunc(m_EnumList);
-		std::vector<std::pair<CString, CString> >::iterator it;
+		std::vector<std::pair<CString, std::pair<CString, CString> > >::iterator it;
 		for (it = m_EnumList.begin(); it != m_EnumList.end(); it++) {
-			if (it->second == *pItem->pvalue) {
-				m_OptDesc = it->first;
+			if (it->first == *pItem->pvalue) {
+				if (it->second.second != EMPTYSTR) {
+					m_OptDesc = it->second.second;
+				} else {
+					m_OptDesc = it->second.first;
+				}
 				descflag = 1;
 				break;
 			}
@@ -199,6 +205,10 @@ void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 	}
 
 	if (reload) m_OptDescShowing = -1;
+
+	GetDlgItem(IDC_CFGDESC)->ShowWindow(m_CfgDesc != EMPTYSTR);
+	GetDlgItem(IDC_OPTDESC)->ShowWindow(m_OptDesc != EMPTYSTR);
+
 	UpdateData(FALSE);
 }
 
@@ -344,16 +354,16 @@ void CPatchConfigDlg::OnChoosefromlist()
 	enumdlg.m_pEnumData = &m_EnumList;
 
 	enumdlg.m_Choosen = -1;
-	std::vector<std::pair<CString, CString> >::iterator it;
+	std::vector<std::pair<CString, std::pair<CString, CString> > >::iterator it;
 	for (it = m_EnumList.begin(); it != m_EnumList.end(); it++) {
-		if (it->second == m_CfgVal) {
+		if (it->first == m_CfgVal) {
 			enumdlg.m_Choosen = it - m_EnumList.begin();
 			break;
 		}
 	}
 	int nResponse = enumdlg.DoModal();
 	if (nResponse == IDOK) {
-		*m_ItemSelected->pvalue = m_EnumList[enumdlg.m_Choosen].second;
+		*m_ItemSelected->pvalue = m_EnumList[enumdlg.m_Choosen].first;
 		UpdateConfigItem();
 	}
 }

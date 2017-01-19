@@ -214,7 +214,7 @@ static void d3dxfont_init()
         int preload;
     } *preloadtblptr, preloadtbl[] = {
         // role dialog
-        { 1, 1.0, D3DXFONT_U20, FONTPRELOAD_FULLCJK }, // FIXME: adjust size for roledialog
+        { 1, scenetext_scalefactor, D3DXFONT_U20, FONTPRELOAD_FULLCJK },
         
         // ui
         { 2, ui_scalefactor, D3DXFONT_U16, FONTPRELOAD_FULLCJK },

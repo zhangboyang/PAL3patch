@@ -77,7 +77,7 @@ IDD_PATCHCONFIG_DIALOG DIALOGEX 0, 0, 365, 221
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "补丁配置工具"
-FONT 9, "宋体"
+FONT 9, "宋体", 0, 0, 0x1
 BEGIN
     CONTROL         "Tree1",IDC_CFGTREE,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
@@ -134,9 +134,9 @@ BEGIN
     IDD_PATCHCONFIG_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 358
+        VERTGUIDE, 123
+        VERTGUIDE, 132
         TOPMARGIN, 7
-        BOTTOMMARGIN, 214
     END
 
     IDD_CHOOSEFROMLIST, DIALOG
@@ -160,7 +160,7 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// RCDATA
+// Data
 //
 
 IDR_DEFCONFIG           RCDATA  DISCARDABLE     "default.conf"
@@ -208,8 +208,12 @@ BEGIN
     IDS_ZBUF_D3DFMT_D24S8   "24 位深度缓存，8 位模板缓存"
     IDS_ZBUF_D3DFMT_D24X4S4 "24 位深度缓存，4 位模板缓存"
     IDS_ZBUF_D3DFMT_D32     "仅 32 位深度缓存"
-    IDS_MSAA_NONE           "关闭多重采样"
+    IDS_MSAA_NONE           "关闭抗锯齿"
     IDS_MSAA_FORMAT         "%d 级多重采样，质量水平 %d"
+    IDS_AUTORESOLUTION_DESC "补丁会在运行时自动检测屏幕分辨率。"
+    IDS_AUTOMAXIMUM_DESC    "补丁会在运行时自动选择最高配置。"
+    IDS_MSAA_NONE_DESC      "关闭抗锯齿功能。"
+    IDS_APPTITLE            "补丁配置工具"
 END
 
 #endif    // Chinese (P.R.C.) resources

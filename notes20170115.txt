@@ -15,7 +15,8 @@ Direct3D9: (ERROR) :Current vertex shader declaration doesn't match VB's FVF
  geom_diffuse_t.gbf和geom_diffuse.gbf的区别？
    有一个BYTE控制着使用哪个效果文件，意义未知
  有时选择敌方怪物时，敌方怪物显示不出来，与此问题的联系？
-   如强行采用geom_diffuse.gbf，则有可能显示不出来；修正geom_diffuse_t.gbf后问题似乎消失
+   如强行采用geom_diffuse.gbf，则有可能显示不出来；修正geom_diffuse_t.gbf后问题仍然存在
+   所以应该没有太大联系
 
 【需要创建修改effect的框架】
 修正上面的FVF问题、修改UI元素纹理过滤器都需要对效果文件进行修改

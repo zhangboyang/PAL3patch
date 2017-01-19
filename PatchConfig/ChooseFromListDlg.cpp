@@ -48,9 +48,9 @@ BOOL CChooseFromListDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	// TODO: Add extra initialization here
-	std::vector<std::pair<CString, CString> >::iterator it;
+	std::vector<std::pair<CString, std::pair<CString, CString> > >::iterator it;
 	for (it = m_pEnumData->begin(); it != m_pEnumData->end(); it++) {
-		m_EnumList.AddString(it->first);
+		m_EnumList.AddString(it->second.first);
 	}
 	m_EnumList.SetCurSel(m_Choosen);
 	
@@ -65,7 +65,7 @@ void CChooseFromListDlg::OnOK()
 	if (m_Choosen >= 0) {
 		CDialog::OnOK();
 	} else {
-		MessageBox(STRTABLE(IDS_NOCHOOSEN), NULL, MB_ICONWARNING);
+		MessageBox(STRTABLE(IDS_NOCHOOSEN), STRTABLE(IDS_APPTITLE), MB_ICONWARNING);
 	}
 }
 

@@ -517,13 +517,21 @@ static void add_loading_splash()
     add_postd3dcreate_hook(loading_splash);
 }
 
+static void init_resolution_and_window_patch()
+{
+    int window_cfg = get_int_from_configfile("game_windowed");
+    init_window_patch(window_cfg);
+    const char *resolution_cfg = get_string_from_configfile("game_resolution");
+    if (window_cfg == WINDOW_NOBORDER) resolution_cfg = "current";
+    patch_resolution_config(resolution_cfg);
+}
+
 MAKE_PATCHSET(graphicspatch)
 {
     patch_depth_buffer_config(get_string_from_configfile("game_zbufferbits"));
     patch_multisample_config(get_string_from_configfile("game_multisample"));
-    patch_resolution_config(get_string_from_configfile("game_resolution"));
+    init_resolution_and_window_patch();
     init_scalefactor_table();
-    init_window_patch(get_int_from_configfile("game_windowed"));
     fpslimit_init();
     add_loading_splash();
 }

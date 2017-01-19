@@ -7,9 +7,10 @@ UINT target_codepage;
 
 static const wchar_t wstr_about_title_CHS[] = L"关于";
 static const wchar_t wstr_about_text_CHS[] = 
-    L"欢迎使用《仙剑奇侠传三》增强补丁 %hs\n" 
+    L"欢迎使用《仙剑奇侠传三》分辨率补丁 %hs\n" 
     L"\n"
-    L"本补丁可以修复一些游戏程序的小问题\n"
+    L"本补丁可以扩大游戏的分辨率\n"
+    L"同时修复一些游戏程序的小问题\n"
     L"并且添加了一些实用的小功能\n" 
     L"详细信息和使用方法请参见补丁说明文件\n"
     L"\n"
@@ -18,8 +19,9 @@ static const wchar_t wstr_about_text_CHS[] =
     L"请使用补丁配置工具，将“显示关于”设为“禁用”\n" 
     L"\n"
     L"\n"
-    L"源代码:\n"
-    L"  https://github.com/zhangboyang/PAL3patch\n"
+    L"补丁网站:\n"
+    L"  https://pal3.zbyzbyzby.com\n"
+    L"\n"
     L"编译信息:\n%hs"
 ;
 

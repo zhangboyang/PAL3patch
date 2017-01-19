@@ -26,6 +26,7 @@ public:
 	CMouseMsgButton	m_RadioBtn1;
 	CMouseMsgButton	m_RadioBtn2;
 	CMouseMsgButton	m_RadioBtn3;
+	CMouseMsgButton	m_RadioBtn4;
 	CButton	m_ToggleAdvBtn;
 	CButton	m_ChooseBtn;
 	CTreeCtrl	m_CfgTree;
@@ -50,7 +51,7 @@ protected:
 	ConfigDescItem *m_ItemSelected;
 	int m_IsAdvMode;
 	int m_OptDescShowing;
-	std::vector<std::pair<CString, CString> > m_EnumList;
+	std::vector<std::pair<CString, std::pair<CString, CString> > > m_EnumList;
 
 	static void OnMouseMoveCallbackWarpper(void *ptr, int btnid);
 	void SetRadioBtnStyle(int btnid, int bold, int underline);
