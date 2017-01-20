@@ -7,7 +7,7 @@ CC := gcc
 CCLD := gcc
 STRIP := strip
 
-CFLAGS := -Wall -Werror -O0 -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions
+CFLAGS := -Wall -Werror -O0 -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing
 SFLAGS := -Wall -Werror
 CCLDFLAGS := -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lgdi32 -lcomctl32 -lwinmm
 

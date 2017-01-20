@@ -520,9 +520,10 @@ static void add_loading_splash()
 static void init_resolution_and_window_patch()
 {
     int window_cfg = get_int_from_configfile("game_windowed");
-    init_window_patch(window_cfg);
     const char *resolution_cfg = get_string_from_configfile("game_resolution");
     if (window_cfg == WINDOW_NOBORDER) resolution_cfg = "current";
+    if (strcmp(resolution_cfg, "current") == 0 && window_cfg == WINDOW_NORMAL) window_cfg = WINDOW_NOBORDER;
+    init_window_patch(window_cfg);
     patch_resolution_config(resolution_cfg);
 }
 

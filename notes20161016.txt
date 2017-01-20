@@ -10,7 +10,7 @@
             scene\*.cpk => .\*\
         movie
             movie => ..\
-            movie => ..\
+            movie_end => ..\
         music
             music => ..\
 

@@ -69,7 +69,6 @@ static void init_stage2()
     INIT_PATCHSET(nocpk);
     INIT_PATCHSET(console);
     INIT_PATCHSET(relativetimer);
-    INIT_PATCHSET(fixvsfvf);
     INIT_PATCHSET(showfps);
     INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
     
@@ -95,6 +94,8 @@ static void init_stage2()
                 INIT_PATCHSET(uireplacetexf);
             }
             INIT_PATCHSET(replacetexture);
+            INIT_PATCHSET(fixeffect);
+            INIT_PATCHSET(forcesettexture);
         }
     }
     

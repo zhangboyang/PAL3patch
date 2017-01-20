@@ -10,6 +10,7 @@ static struct effecthook_t effhooks[MAX_EFFECTHOOKS];
 static int nr_effhooks = 0;
 
 // alloc memory and copy hook description to effhooks[]
+// eff_file = "*" means hook apply to any effect
 void add_effect_hook(const char *eff_file, const char *old_str, const char *new_str)
 {
     if (nr_effhooks >= MAX_EFFECTHOOKS) fail("too many effect hooks.");
@@ -58,7 +59,7 @@ static char *do_effhook_replace(struct effecthook_t *p, const char *eff)
     }
     *new_eff = '\0';
     
-    if (!flag) {
+    if (!flag && strcmp(p->eff_file, "*") != 0) {
         warning("no replace occured. (effhook: file='%s' old='%s' new='%s')", p->eff_file, p->old_str, p->new_str);
     }
     
@@ -73,7 +74,7 @@ static char *run_all_effect_hooks(const char *fn, const char *eff)
     char *str = strdup(eff);
     int i;
     for (i = 0; i < nr_effhooks; i++) {
-        if (stricmp(effhooks[i].eff_file, fn) == 0) {
+        if (strcmp(effhooks[i].eff_file, "*") == 0 || stricmp(effhooks[i].eff_file, fn) == 0) {
             char *new_str = do_effhook_replace(&effhooks[i], str);
             free(str);
             str = new_str;

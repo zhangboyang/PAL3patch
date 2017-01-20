@@ -36,7 +36,6 @@ MAKE_PATCHSET(nocpk);
 MAKE_PATCHSET(showfps);
 MAKE_PATCHSET(console);
 MAKE_PATCHSET(relativetimer);
-MAKE_PATCHSET(fixvsfvf);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
@@ -178,8 +177,6 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fixloadingfrm);
         MAKE_PATCHSET(fixcombatui);
             #define cb_scalefactor (scalefactor_table[SF_COMBAT])
-        MAKE_PATCHSET(fixroledialog);
-        MAKE_PATCHSET(fixgameover);
         MAKE_PATCHSET(fix3dctrl);
         MAKE_PATCHSET(fixlineupui);
         MAKE_PATCHSET(fixuistaticex);
@@ -192,5 +189,7 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(uireplacetexf);
 
     MAKE_PATCHSET(replacetexture);
+    MAKE_PATCHSET(fixeffect);
+    MAKE_PATCHSET(forcesettexture);
 
 #endif
