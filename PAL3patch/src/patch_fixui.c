@@ -28,6 +28,7 @@ struct fixui_state *fixui_newstate(fRECT *src_frect, fRECT *dst_frect, int lr_me
     cur->tb_method = tb_method;
     cur->len_factor = len_factor;
     cur->no_cursor_virt = 0;
+    cur->no_align = 0;
     cur->prev = NULL;
     return cur;
 }
@@ -65,11 +66,25 @@ void fixui_adjust_gbUIQuad(struct gbUIQuad *out_uiquad, const struct gbUIQuad *u
     fRECT frect;
     set_frect_ltrb(&frect, uiquad->sx, uiquad->ey, uiquad->ex, uiquad->sy);
     fixui_adjust_fRECT(&frect, &frect);
+    
+    double left = frect.left;
+    double top = frect.top;
+    if (!fs->no_align) {
+        if (fcmp(fs->len_factor, 1.0) == 0) {
+            left = floor(left + eps);
+            top = floor(top + eps);
+        }
+        left -= 0.5;
+        top -= 0.5;
+    }
+    double width = frect.right - frect.left;
+    double height = frect.bottom - frect.top;
+
     memcpy(out_uiquad, uiquad, sizeof(struct gbUIQuad));
-    out_uiquad->sx = frect.left;
-    out_uiquad->sy = frect.bottom;
-    out_uiquad->ex = frect.right;
-    out_uiquad->ey = frect.top;
+    out_uiquad->sx = left;
+    out_uiquad->sy = top + height;
+    out_uiquad->ex = left + width;
+    out_uiquad->ey = top;
 }
 void fixui_adjust_RECT(RECT *out_rect, const RECT *rect)
 {
@@ -544,6 +559,43 @@ int parse_uiwnd_rect_type(const char *str)
 
 
 
+static void init_align_uirect()
+{
+    // fix 0.5 and -0.5 to 0
+
+    static float fzero = 0.0f;
+    float *fzero_addr = &fzero;
+    unsigned immaddr[] = {
+        // UIRenderQuad_2Rect_byFVF
+        0x005402CD,
+        0x00540303,
+        0x00540315,
+        0x0054038E,
+        0x005403C7,
+        
+        // _Texture_Info::_CalculateUV()
+        0x0053F329,
+        0x0053F349,
+        0x0053F303,
+        0x0053F36D,
+        
+        // UIStaticFlex::DrawRect()
+        0x004457AC,
+        0x004457D9,
+        
+        // UIFlexBar::DrawRect()
+        0x0043DBCE,
+        0x0043DB52,
+        
+        0 // EOF
+    };
+    unsigned *p;
+    for (p = immaddr; *p; p++) memcpy_to_process(*p + 2, &fzero_addr, 4);
+    // other UIRenderQuad functions
+    SIMPLE_PATCH(0x00570A6C, "\x00\x00\x00\xBF", "\x00\x00\x00\x00", 4);
+}
+
+
 MAKE_PATCHSET(fixui)
 {
     // calc game_frect_ui_auto
@@ -568,4 +620,7 @@ MAKE_PATCHSET(fixui)
     
     // init fill border
     init_fillborder();
+    
+    // init align uirect
+    init_align_uirect();
 }

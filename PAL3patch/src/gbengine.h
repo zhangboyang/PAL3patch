@@ -1241,6 +1241,9 @@ struct UIGameOver {
     float m_fTime;
 };
 
+struct UIRenderObj {
+    char gap0[1];
+};
 
 
 // D3DX functions
@@ -1308,6 +1311,8 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define UIGameOver_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004500F0, void, struct UIGameOver *), this)
 #define BinkDoFrame (*(int (__stdcall **)(DWORD)) 0x0056A1E0)
 #define BinkCopyToBuffer (*(int (__stdcall **)(DWORD, DWORD, DWORD, DWORD, DWORD, DWORD, DWORD)) 0x0056A1DC)
+#define UIRenderObj_Ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00540F60, void, struct UIRenderObj *), this)
+#define UIRenderObj_Dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00540FA0, void, struct UIRenderObj *), this)
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)

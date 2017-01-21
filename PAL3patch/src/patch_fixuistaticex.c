@@ -13,6 +13,7 @@ static void __fastcall UIStaticEX_Render_wrapper(struct UIStaticEX *this, int du
     set_rect_frect(wndrect, &tmp_frect);
 
     fixui_pushstate(&tmp_frect, &tmp_frect, TR_SCALE_MID, TR_SCALE_MID, len_factor);
+    fs->no_align = 1;
     UIStaticEX_Render(this);
     fixui_popstate();
 
@@ -36,6 +37,7 @@ static void __fastcall UIStaticEXA_Render_wrapper(struct UIStaticEXA *this, int 
     this->center_y = pt.y;
 
     fixui_pushidentity();
+    fs->no_align = 1;
     UIStaticEXA_Render(this);
     fixui_popstate();
     

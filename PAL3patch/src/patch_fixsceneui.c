@@ -53,6 +53,7 @@ static MAKE_ASMPATCH(UISceneMap_Render_hookpart1)
     // step1: transform rect and push identity
     fixui_adjust_RECT(rc, rc);
     fixui_pushidentity();
+    fs->no_align = 1;
 }
 static void __fastcall UISceneMap_Render_hookpart2(struct UIWnd *this, int dummy)
 {

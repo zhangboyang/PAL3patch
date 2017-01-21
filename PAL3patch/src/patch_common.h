@@ -82,6 +82,7 @@ MAKE_PATCHSET(graphicspatch);
             double len_factor;
             struct fixui_state *prev;
             int no_cursor_virt; // if set to non-zero, there is no cursor virtualizion
+            int no_align; // if set to non-zero, disable uirect alignment
         };
         extern struct fixui_state *fs;
 
@@ -174,7 +175,6 @@ MAKE_PATCHSET(graphicspatch);
             }
 
         MAKE_PATCHSET(uireplacefont);
-        MAKE_PATCHSET(fixloadingfrm);
         MAKE_PATCHSET(fixcombatui);
             #define cb_scalefactor (scalefactor_table[SF_COMBAT])
         MAKE_PATCHSET(fix3dctrl);
