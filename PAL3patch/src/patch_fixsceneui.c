@@ -4,8 +4,17 @@
 
 static int sceneui_dstrect_type;
 #define sceneui_dstrect (*get_ptag_frect(sceneui_dstrect_type))
+#define sceneui_dstrect_scalefactor get_frect_min_scalefactor(&sceneui_dstrect, &game_frect_original)
 
 // fix PlayerMgr: pushable notification, ShenYan numbers
+static void __fastcall HeadMsg_Render_wrapper(struct HeadMsg *this, int dummy)
+{
+    // step2: fix lost blood message in scene
+    int flag = this->m_bEnable && !this->m_nType;
+    if (flag) fixui_pushstate(&game_frect, &game_frect, TR_SCALE_LOW, TR_SCALE_LOW, sceneicon_scalefactor);
+    HeadMsg_Render(this);
+    if (flag) fixui_popstate();
+}
 static void __cdecl PlayerMgr_DrawMsg_hookpart1()
 {
     set_uiwnd_ptag(pUIWND(&g_msgbk), SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT, TR_CENTER, TR_LOW));
@@ -15,19 +24,34 @@ static void __cdecl PlayerMgr_DrawMsg_hookpart1()
     
     PlayerMgr_DrawMsg(); // oldcode, it will call part2
     
-    // step3: restore fixui state stack
+    // step4: restore fixui state stack
     fixui_popstate();
 }
 static void __fastcall PlayerMgr_DrawMsg_hookpart2(struct UIAnimateCtrl *this, int dummy)
 {
-    // step2: change fixui state, for g_jumpflag and ShenYan
+    // step3: change fixui state, for g_jumpflag and ShenYan
     pop_ptag_state(pUIWND(&g_msgbk));
     fixui_pushstate(&game_frect, &game_frect, TR_SCALE_LOW, TR_SCALE_LOW, sceneicon_scalefactor);
     
     UIAnimateCtrl_Render(this); // oldcode
 }
+static void fix_headmsg_offset()
+{
+    PATCH_FLOAT_MEMREF_EXPR(scale_gbxdiff(0.1f, sceneicon_scalefactor), { 0x00402F76 });
+}
+static void fix_scene_lostblood()
+{
+    // init wrapper to HeadMsg::Render()
+    INIT_WRAPPER_CALL(HeadMsg_Render_wrapper, { 0x0040C7F4 });
+    
+    // scale diff constant for showing lost blood
+    add_postd3dcreate_hook(fix_headmsg_offset);
+}
 static void install_PlayerMgr_DrawMsg_hook()
 {
+    // fix scene lost blood information
+    fix_scene_lostblood();
+    
     // hookpart1 is a wrapper to PlayerMgr::DrawMsg()
     INIT_WRAPPER_CALL(PlayerMgr_DrawMsg_hookpart1, { 0x00405FE0 });
     
@@ -192,7 +216,7 @@ static void __fastcall UIRoleDialog_SetFace_wrapper(struct UIRoleDialog *this, i
         fRECT face_frect, face_old_frect;
         set_frect_rect(&face_old_frect, &pUIWND(&this->m_face)->m_rect);
         transform_frect(&face_frect, &face_old_frect, &game_frect, &dlg_facearea_frect, (leftright ? TR_HIGH : TR_LOW), TR_HIGH, 1.0);
-        scenedlgface_scalefactor = fmin(ROLEDLG_FACESIZE * get_frect_height(&dlg_frect) / (get_frect_height(&face_frect) * ROLEDLG_FACEHEIGHTFACTOR), sceneuirect_scalefactor);
+        scenedlgface_scalefactor = fmin(ROLEDLG_FACESIZE * get_frect_height(&dlg_frect) / (get_frect_height(&face_frect) * ROLEDLG_FACEHEIGHTFACTOR), sceneui_dstrect_scalefactor);
         set_uiwnd_ptag(pUIWND(&this->m_face), MAKE_PTAG(SF_SCENEDLGFACE, PTR_GAMERECT, PTR_GAMERECT, (leftright ? TR_SCALE_HIGH : TR_SCALE_LOW), TR_SCALE_HIGH));
         set_rect_frect(&pUIWND(&this->m_face)->m_rect, &face_frect);
         
@@ -230,7 +254,7 @@ static void __fastcall UIRoleDialog_Create_wrapper(struct UIRoleDialog *this, in
     
     // calc role dialog rect
     set_frect_rect(&dlg_old_frect, &pUIWND(this)->m_rect);
-    transform_frect(&dlg_frect, &dlg_old_frect, &game_frect_original, &sceneui_dstrect, TR_CENTER, TR_HIGH, sceneuirect_scalefactor);
+    transform_frect(&dlg_frect, &dlg_old_frect, &game_frect_original, &sceneui_dstrect, TR_CENTER, TR_HIGH, sceneui_dstrect_scalefactor);
     dlg_frect.top = fmin(dlg_frect.bottom - get_frect_height(&dlg_old_frect) * scenetext_scalefactor, sceneui_dstrect.top + get_frect_height(&sceneui_dstrect) * ROLEDLG_MINSIZE);
     
     transform_frect(&dlg_real_frect, &dlg_frect, &dlg_frect, &dlg_frect, TR_LOW, TR_LOW, 1.0 / scenetext_scalefactor);
@@ -320,19 +344,22 @@ static void fix_YeTan_timer()
 
 
 // fix encampment mini-game
-static void __fastcall UIEncampment_Create_wrapper(struct UIEncampment *this, int dummy)
+static void pre_UIEncampment(struct UIWnd *this)
 {
-    UIEncampment_Create(this);
-    struct uiwnd_ptag ptag = MAKE_PTAG(SF_SCENEUIRECT, PTR_GAMERECT_ORIGINAL, sceneui_dstrect_type, TR_LOW, TR_LOW);
-    set_uiwnd_ptag(pUIWND(this), ptag);
+    fRECT dst_frect_area, dst_frect;
+    get_ratio_frect(&dst_frect_area, &sceneui_dstrect, 4.0 / 3.0);
+    transform_frect(&dst_frect_area, &dst_frect_area, &dst_frect_area, &sceneui_dstrect, TR_LOW, TR_LOW, 1.0);
+    transform_frect(&dst_frect, &game_frect_original, &dst_frect_area, &dst_frect_area, TR_CENTER, TR_CENTER, ui_scalefactor);
+    fixui_pushstate(&game_frect_original, &dst_frect, TR_SCALE_LOW, TR_SCALE_LOW, ui_scalefactor);
 }
-static MAKE_UIWND_RENDER_WRAPPER(UIEncampment_Render_wrapper, 0x0052C450)
-static MAKE_UIWND_UPDATE_WRAPPER(UIEncampment_Update_wrapper, 0x0052C480)
+static void post_UIEncampment(struct UIWnd *this)
+{
+    fixui_popstate();
+}
+static MAKE_UIWND_RENDER_WRAPPER_CUSTOM(UIEncampment_Render_wrapper, 0x0052C450, pre_UIEncampment, post_UIEncampment)
+static MAKE_UIWND_UPDATE_WRAPPER_CUSTOM(UIEncampment_Update_wrapper, 0x0052C480, pre_UIEncampment, post_UIEncampment)
 static void fix_UIEncampment()
 {
-    // hook UIEncampment::Create()
-    INIT_WRAPPER_CALL(UIEncampment_Create_wrapper, { 0x0052B812 });
-    
     // manually add wrapper to UIEncampment::Render/Update()
     INIT_WRAPPER_VFPTR(UIEncampment_Render_wrapper, 0x00570834);
     INIT_WRAPPER_VFPTR(UIEncampment_Update_wrapper, 0x00570838);
@@ -346,10 +373,11 @@ static void __fastcall UISkee_Create_wrapper(struct UISkee *this, int dummy)
     int i;
     struct uiwnd_ptag ptag;
     
-    // fix self
-    ptag = MAKE_PTAG(SF_SCENEUIRECT, PTR_GAMERECT_ORIGINAL, sceneui_dstrect_type, TR_CENTER, TR_CENTER);
-    set_uiwnd_ptag(pUIWND(this), ptag);
-
+    // fix dialog
+    ptag = FIXUI_AUTO_TRANSFORM_PTAG;
+    set_uiwnd_ptag(pUIWND(&this->result_dlg), ptag);
+    set_uiwnd_ptag(pUIWND(&this->help_dlg), ptag);
+    
     // fix timer
     ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT_ORIGINAL, TR_HIGH, TR_LOW);
     set_uiwnd_ptag(pUIWND(&this->skeetimebk), ptag);
@@ -358,8 +386,18 @@ static void __fastcall UISkee_Create_wrapper(struct UISkee *this, int dummy)
         set_uiwnd_ptag(pUIWND(&this->numberB[i]), ptag);
     }
 }
-static MAKE_UIWND_RENDER_WRAPPER(UISkee_Render_wrapper, 0x0043DDF0)
-static MAKE_UIWND_UPDATE_WRAPPER(UISkee_Update_wrapper, 0x00532710)
+static void pre_UISkee(struct UIWnd *this)
+{
+    fRECT dst_frect;
+    get_ratio_frect(&dst_frect, &game_frect, 4.0 / 3.0);
+    fixui_pushstate(&game_frect_original, &dst_frect, TR_SCALE_MID, TR_SCALE_MID, sceneicon_scalefactor);
+}
+static void post_UISkee(struct UIWnd *this)
+{
+    fixui_popstate();
+}
+static MAKE_UIWND_RENDER_WRAPPER_CUSTOM(UISkee_Render_wrapper, 0x0043DDF0, pre_UISkee, post_UISkee)
+static MAKE_UIWND_UPDATE_WRAPPER_CUSTOM(UISkee_Update_wrapper, 0x00532710, pre_UISkee, post_UISkee)
 static void fix_UISkee()
 {
     INIT_WRAPPER_CALL(UISkee_Create_wrapper, { 0x0052EE78 });
@@ -402,7 +440,6 @@ MAKE_PATCHSET(fixsceneui)
 {
     sceneui_dstrect_type = parse_uiwnd_rect_type(get_string_from_configfile("fixsceneui_scaletype"));
     sceneui_scalefactor = str2scalefactor(get_string_from_configfile("fixsceneui_uiscalefactor"));
-    sceneuirect_scalefactor = get_frect_min_scalefactor(&sceneui_dstrect, &game_frect_original);
     sceneicon_scalefactor = str2scalefactor(get_string_from_configfile("fixsceneui_iconscalefactor"));
     scenetext_scalefactor = str2scalefactor(get_string_from_configfile("fixsceneui_textscalefactor"));
 

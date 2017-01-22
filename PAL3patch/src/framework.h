@@ -34,5 +34,22 @@ extern void *hook_import_table(void *image_base, const char *dllname, const char
         void *__func_ptr = (wrapper_func); \
         memcpy_to_process((vfptr_addr), &__func_ptr, sizeof(__func_ptr)); \
     } while (0)
+#define PATCH_FLOAT_MEMREF_PTR(float_addr, instr_list...) \
+    do { \
+        float *__new_value_addr = (float_addr); \
+        unsigned __instr_addr[] = instr_list; \
+        int __instr_addr_cnt = sizeof(__instr_addr) / sizeof(__instr_addr[0]); \
+        unsigned *__instr_addr_ptr; \
+        for (__instr_addr_ptr = __instr_addr; __instr_addr_ptr < __instr_addr + __instr_addr_cnt; __instr_addr_ptr++) { \
+            memcpy_to_process(*__instr_addr_ptr + 2, &__new_value_addr, sizeof(__new_value_addr)); \
+        } \
+    } while (0)
+#define PATCH_FLOAT_MEMREF_EXPR(expr, instr_list...) \
+    do { \
+        static float __expr_value; \
+        __expr_value = (expr); \
+        PATCH_FLOAT_MEMREF_PTR(&__expr_value, instr_list); \
+    } while (0)
+
 
 #endif

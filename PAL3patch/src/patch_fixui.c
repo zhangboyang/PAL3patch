@@ -562,10 +562,7 @@ int parse_uiwnd_rect_type(const char *str)
 static void init_align_uirect()
 {
     // fix 0.5 and -0.5 to 0
-
-    static float fzero = 0.0f;
-    float *fzero_addr = &fzero;
-    unsigned immaddr[] = {
+    PATCH_FLOAT_MEMREF_EXPR(0.0f, {
         // UIRenderQuad_2Rect_byFVF
         0x005402CD,
         0x00540303,
@@ -586,13 +583,8 @@ static void init_align_uirect()
         // UIFlexBar::DrawRect()
         0x0043DBCE,
         0x0043DB52,
-        
-        0 // EOF
-    };
-    unsigned *p;
-    for (p = immaddr; *p; p++) memcpy_to_process(*p + 2, &fzero_addr, 4);
-    // other UIRenderQuad functions
-    SIMPLE_PATCH(0x00570A6C, "\x00\x00\x00\xBF", "\x00\x00\x00\x00", 4);
+    });
+    SIMPLE_PATCH(0x00570A6C, "\x00\x00\x00\xBF", "\x00\x00\x00\x00", 4); // patch UIRenderQuad functions
 }
 
 

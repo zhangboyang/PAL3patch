@@ -56,7 +56,6 @@ MAKE_PATCHSET(graphicspatch);
         SF_SOFTCURSOR,
         SF_COMBAT,
         SF_SCENEUI,
-        SF_SCENEUIRECT,
         SF_SCENEICON,
         SF_SCENETEXT,
         SF_SCENEDLGFACE,
@@ -158,21 +157,25 @@ MAKE_PATCHSET(graphicspatch);
         
         extern void push_ptag_state(struct UIWnd *pwnd);
         extern void pop_ptag_state(struct UIWnd *pwnd);
-        #define MAKE_UIWND_RENDER_WRAPPER(render_wrapper_name, original_render_address) \
+        #define MAKE_UIWND_RENDER_WRAPPER_CUSTOM(render_wrapper_name, original_render_address, pre_action, post_action) \
             void __fastcall render_wrapper_name(struct UIWnd *this, int dummy) \
             { \
-                push_ptag_state(this); \
+                pre_action(this); \
                 THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(original_render_address, void, struct UIWnd *), this); \
-                pop_ptag_state(this); \
+                post_action(this); \
             }
-        #define MAKE_UIWND_UPDATE_WRAPPER(update_wrapper_name, original_wrapper_address) \
+        #define MAKE_UIWND_UPDATE_WRAPPER_CUSTOM(update_wrapper_name, original_wrapper_address, pre_action, post_action) \
             int __fastcall update_wrapper_name(struct UIWnd *this, int dummy, float deltatime, int haveinput) \
             { \
-                push_ptag_state(this); \
+                pre_action(this); \
                 int ret = THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(original_wrapper_address, int, struct UIWnd *, float, int), this, deltatime, haveinput); \
-                pop_ptag_state(this); \
+                post_action(this); \
                 return ret; \
             }
+        #define MAKE_UIWND_RENDER_WRAPPER(render_wrapper_name, original_render_address) \
+            MAKE_UIWND_RENDER_WRAPPER_CUSTOM(render_wrapper_name, original_render_address, push_ptag_state, pop_ptag_state)
+        #define MAKE_UIWND_UPDATE_WRAPPER(update_wrapper_name, original_wrapper_address) \
+            MAKE_UIWND_UPDATE_WRAPPER_CUSTOM(update_wrapper_name, original_wrapper_address, push_ptag_state, pop_ptag_state)
 
         MAKE_PATCHSET(uireplacefont);
         MAKE_PATCHSET(fixcombatui);
@@ -182,7 +185,6 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fixuistaticex);
         MAKE_PATCHSET(fixsceneui);
             #define sceneui_scalefactor (scalefactor_table[SF_SCENEUI])
-            #define sceneuirect_scalefactor (scalefactor_table[SF_SCENEUIRECT])
             #define sceneicon_scalefactor (scalefactor_table[SF_SCENEICON])
             #define scenetext_scalefactor (scalefactor_table[SF_SCENETEXT])
             #define scenedlgface_scalefactor (scalefactor_table[SF_SCENEDLGFACE])

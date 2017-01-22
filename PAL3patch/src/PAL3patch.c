@@ -30,6 +30,7 @@ static void self_check()
     assert(sizeof(struct UISceneFrm) == 0xB30);
     assert(sizeof(struct UISkee) == 0x1DB0);
     assert(sizeof(struct UIGameOver) == 0xE8);
+    assert(sizeof(struct HeadMsg) == 0x24);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)

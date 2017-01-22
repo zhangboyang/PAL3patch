@@ -1245,6 +1245,14 @@ struct UIRenderObj {
     char gap0[1];
 };
 
+struct HeadMsg {
+    struct HeadMsgVtbl *vfptr;
+    char m_bEnable;
+    struct std_basic_string m_szMsg;
+    float m_fTime;
+    int m_nType;
+    int m_nY;
+};
 
 // D3DX functions
 #define gbD3DXTex_CImage_ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346CA, void, struct D3DXTex_CImage *), this)
@@ -1268,6 +1276,8 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
 #define x2gbx(x) ((x) * 2.0 / PAL3_s_drvinfo.width - 1.0)
 #define y2gby(y) (1.0 - (y) * 2.0 / PAL3_s_drvinfo.height)
+#define scale_gbxdiff(xdiff, scalefactor) ((double)(xdiff) * (scalefactor) * GAME_WIDTH_ORG / PAL3_s_drvinfo.width)
+#define scale_gbydiff(ydiff, scalefactor) ((double)(ydiff) * (scalefactor) * GAME_HEIGHT_ORG / PAL3_s_drvinfo.height)
 #define gbCamera_SetAsCurrent(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021A80, void, struct gbCamera *, int), this, a2)
 #define gbCamera_PointEyeToScr_100220B0(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100220B0, void, struct gbCamera *, struct gbVec3D *, float *, float *), this, a2, a3, a4)
 #define gbCamera_GetRayToScreen(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100222C0, void, struct gbCamera *, float, float, struct gbRay *), this, a2, a3, a4);
@@ -1280,6 +1290,7 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gbBinkVideo_Width(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C710, int, struct gbBinkVideo *), this)
 #define gbBinkVideo_Height(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C720, int, struct gbBinkVideo *), this)
 #define gbBinkVideo_DrawFrameEx(this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C530, int, struct gbBinkVideo *, void *, int, int, int, int, int), this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType)
+#define gbBinkVideo_BinkWait(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C460, int, struct gbBinkVideo *), this)
 #define PAL3_InitGFX ((void (*)(void)) TOPTR(0x00404FF0))
 #define UIDrawTextEx ((void (*)(const char *, RECT *, struct gbPrintFont *, int, int)) TOPTR(0x00541210))
 #define UIPrint ((void (*)(int, int, char *, struct gbColorQuad *, int)) TOPTR(0x00540FD0))
@@ -1313,6 +1324,7 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define BinkCopyToBuffer (*(int (__stdcall **)(DWORD, DWORD, DWORD, DWORD, DWORD, DWORD, DWORD)) 0x0056A1DC)
 #define UIRenderObj_Ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00540F60, void, struct UIRenderObj *), this)
 #define UIRenderObj_Dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00540FA0, void, struct UIRenderObj *), this)
+#define HeadMsg_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402D20, void, struct HeadMsg *), this)
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)

@@ -8,9 +8,10 @@
 static int (*gbBinkVideo_SFLB_OpenFile)(struct gbBinkVideo *, const char *, HWND, int, int) = NULL;
 
 // texture
+#define MF_TEX_WIDTH 1024
+#define MF_TEX_HEIGHT 1024
 static IDirect3DTexture9 *mf_tex = NULL;
-static int mf_tex_width, mf_tex_height;
-static float mf_tex_u1, mf_tex_v1, mf_tex_u2, mf_tex_v2;
+static double mf_tex_u1, mf_tex_v1, mf_tex_u2, mf_tex_v2;
 static int mf_bink_dstsurfacetype;
 static int mf_movie_playing = 0;
 static fRECT mf_frect;
@@ -72,15 +73,16 @@ static void init_movieframe_vertbuf()
 }
 
 
-static void get_movie_uv(const char *filename)
+static void get_movie_uv(const char *filename, int movie_width, int movie_height)
 {
+    // calc u, v as if texture size equals to movie size
     struct {
         const char *filename;
-        float u1, v1, u2, v2;
+        double u1, v1, u2, v2;
     } *p, uvdata[] = { // input custom U and V value here
         
         // opening
-        { "Movie\\Pal3op.bik", 0.0f, (60.0 / 480.0), 1.0f, (420.0 / 480.0) },
+        { "Movie\\Pal3op.bik", 0.0, (60.0 / 480.0), 1.0, (420.0 / 480.0) },
         
         /* ending
                     id     name      top   bottom
@@ -91,11 +93,11 @@ static void get_movie_uv(const char *filename)
                     4     HuaYing     *      Sub
                     5     Perfact     *      Sub
         */
-        { "Movie\\END1.bik",   0.0f, (75.0 / 600.0), 1.0f, (525.0 / 600.0) },
-        { "Movie\\END2.bik",   0.0f, (75.0 / 600.0), 1.0f, (575.0 / 600.0) },
-        { "Movie\\END3.bik",   0.0f, (75.0 / 600.0), 1.0f, (575.0 / 600.0) },
-        { "Movie\\END4.bik",   0.0f, (75.0 / 600.0), 1.0f, (575.0 / 600.0) },
-        { "Movie\\END5.bik",   0.0f, (75.0 / 600.0), 1.0f, (585.0 / 600.0) },
+        { "Movie\\END1.bik",   0.0, (75.0 / 600.0), 1.0, (525.0 / 600.0) },
+        { "Movie\\END2.bik",   0.0, (75.0 / 600.0), 1.0, (575.0 / 600.0) },
+        { "Movie\\END3.bik",   0.0, (75.0 / 600.0), 1.0, (575.0 / 600.0) },
+        { "Movie\\END4.bik",   0.0, (75.0 / 600.0), 1.0, (575.0 / 600.0) },
+        { "Movie\\END5.bik",   0.0, (75.0 / 600.0), 1.0, (585.0 / 600.0) },
         
         { NULL } // EOF
     };
@@ -110,28 +112,36 @@ static void get_movie_uv(const char *filename)
             mf_tex_v1 = p->v1;
             mf_tex_u2 = p->u2;
             mf_tex_v2 = p->v2;
-            return;
+            break;
         }
     }
     if (!p->filename) {
         mf_tex_u1 = mf_tex_v1 = 0.0f;
         mf_tex_u2 = mf_tex_v2 = 1.0f;
     }
+
+    // adjust to real texture coord
+    if (movie_width > MF_TEX_WIDTH || movie_height > MF_TEX_HEIGHT) {
+        fail("movie size is larger than texture size.");
+    }
+    mf_tex_u1 *= (double) movie_width / MF_TEX_WIDTH;
+    mf_tex_u2 *= (double) movie_width / MF_TEX_WIDTH;
+    mf_tex_v1 *= (double) movie_height / MF_TEX_HEIGHT;
+    mf_tex_v2 *= (double) movie_height / MF_TEX_HEIGHT;
 }
 
 static void init_movieframe_texture(const char *filename, int movie_width, int movie_height)
 {
-    // if texture exists, free it
-    if (mf_tex) {
-        IDirect3DTexture9_Release(mf_tex);
-        mf_tex = NULL;
+    // create texture
+    if (!mf_tex) {
+        if (FAILED(IDirect3DDevice9_CreateTexture(GB_GfxMgr->m_pd3dDevice, MF_TEX_WIDTH, MF_TEX_HEIGHT, 1, 0, GB_GfxMgr->m_d3dsdBackBuffer.Format, D3DPOOL_MANAGED, &mf_tex, NULL))) {
+            fail("can't create texture for movie frame.");
+        }
     }
     
     // set texture information
-    get_movie_uv(filename);
-    mf_tex_width = movie_width;
-    mf_tex_height = movie_height;
-    get_ratio_frect(&mf_frect, &game_frect, (mf_tex_width * (mf_tex_u2 - mf_tex_u1)) / (mf_tex_height * (mf_tex_v2 - mf_tex_v1)));
+    get_movie_uv(filename, movie_width, movie_height);
+    get_ratio_frect(&mf_frect, &game_frect, (MF_TEX_WIDTH * (mf_tex_u2 - mf_tex_u1)) / (MF_TEX_HEIGHT * (mf_tex_v2 - mf_tex_v1)));
     
     // prepare target surface type for BinkVideo
     switch (GB_GfxMgr->m_d3dsdBackBuffer.Format) {
@@ -139,11 +149,6 @@ static void init_movieframe_texture(const char *filename, int movie_width, int m
         case D3DFMT_X8R8G8B8: mf_bink_dstsurfacetype = 3; break;
         case D3DFMT_X1R5G5B5: mf_bink_dstsurfacetype = 9; break;
         default:              mf_bink_dstsurfacetype = 0; break;
-    }
-    
-    // create texture
-    if (FAILED(IDirect3DDevice9_CreateTexture(GB_GfxMgr->m_pd3dDevice, movie_width, movie_height, 1, 0, GB_GfxMgr->m_d3dsdBackBuffer.Format, D3DPOOL_MANAGED, &mf_tex, NULL))) {
-        fail("can't create texture for movie frame.");
     }
 }
 
@@ -168,7 +173,7 @@ static int __fastcall gbBinkVideo_OpenFile(struct gbBinkVideo *this, int dummy, 
     // fill the texture with zeros
     D3DLOCKED_RECT lrc;
     IDirect3DTexture9_LockRect(mf_tex, 0, &lrc, NULL, 0);
-    memset(lrc.pBits, 0, lrc.Pitch * mf_tex_height);
+    memset(lrc.pBits, 0, lrc.Pitch * MF_TEX_HEIGHT);
     IDirect3DTexture9_UnlockRect(mf_tex, 0);
     
     // set playing flag for cursor
@@ -181,7 +186,7 @@ static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
 {
     int ret;
     // check if we have inited
-    if (!mf_tex_width || !mf_tex_height || !mf_bink_dstsurfacetype) {
+    if (!mf_tex || !mf_bink_dstsurfacetype) {
         return 0;
     }
     
@@ -191,7 +196,7 @@ static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
     // upload movie frame to texture
     D3DLOCKED_RECT lrc;
     IDirect3DTexture9_LockRect(mf_tex, 0, &lrc, NULL, 0);
-    ret = gbBinkVideo_DrawFrameEx(this, lrc.pBits, lrc.Pitch, mf_tex_height, 0, 0, mf_bink_dstsurfacetype);
+    ret = gbBinkVideo_DrawFrameEx(this, lrc.pBits, lrc.Pitch, gbBinkVideo_Height(this), 0, 0, mf_bink_dstsurfacetype);
     IDirect3DTexture9_UnlockRect(mf_tex, 0);
 
     if (last_BinkDoFrame_retval || last_BinkCopyToBuffer_retval) {
@@ -266,6 +271,13 @@ static int wm_setcursor_hook()
     return m_curfrmid != 9 && !mf_movie_playing;
 }
 
+static int __fastcall gbBinkVideo_BinkWait_wrapper(struct gbBinkVideo *this, int dummy)
+{
+    int ret = gbBinkVideo_BinkWait(this);
+    if (ret) Sleep(1);
+    return ret;
+}
+
 static void hook_gbBinkVideo()
 {
     // hook member funtions
@@ -283,6 +295,9 @@ static void hook_gbBinkVideo()
     // hook BinkDoFrame() and BinkCopyToBuffer()
     make_branch(0x0053C544, 0xE8, BinkDoFrame_wrapper, 6);
     make_branch(0x0053C571, 0xE8, BinkCopyToBuffer_wrapper, 6);
+    
+    // hook gbBinkVideo::BinkWait() to release CPU while playing movie
+    INIT_WRAPPER_CALL(gbBinkVideo_BinkWait_wrapper, { 0x0053C672 });
 }
 
 
