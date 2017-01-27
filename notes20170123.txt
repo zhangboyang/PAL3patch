@@ -1,0 +1,10 @@
+【纹理创建过程】
+跟纹理创建相关的函数有：
+gbGfxManager_D3D::NewTexture() 创建gbTexture实例，将纹理文件名赋给新建的实例，但不进行实际加载
+gbTexture::LoadTexture 从已存储的文件名实际地加载纹理
+  会先尝试.dds，如果文件存在则调用gbTexture_D3D::CreateFromFileMemory加载纹理
+  其次使用gbImage2D辅助加载纹理：先gbImage2D::LoadImageFile()然后gbTexture::LoadFromImage2D
+gbTexture_D3D::LoadFromImage2D 从gbImage2D加载纹理
+gbTexture_D3D::CreateFromFileMemory 从内存中文件创建纹理 => 仅用来处理DDS文件
+gbTexture_D3D::CreateFromMemory 从内存数据创建纹理 => 被LoadFromImage2D调用，也被其他函数调用（例如创建字体）
+

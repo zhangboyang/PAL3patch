@@ -21,7 +21,6 @@ static void fpslimit_hook()
             double diff = (qwTime.QuadPart - fpslimit_qwLast.QuadPart) / (double) fpslimit_qwTicksPerSec.QuadPart;
             if (diff >= fpslimit_target_period) break;
             int sleepms = floor((fpslimit_target_period - diff) * 1000.0);
-            plog("sleepms=%d\n", sleepms);
             if (sleepms > 2) Sleep(sleepms - 2);
         }
         fpslimit_qwLast.QuadPart = qwTime.QuadPart;

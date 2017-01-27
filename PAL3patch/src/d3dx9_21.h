@@ -43,8 +43,13 @@ typedef struct _D3DXIMAGE_INFO {
 #define D3DX_DEFAULT ((UINT) -1)
 
 typedef struct _D3DMATRIX D3DXMATRIX, *LPD3DXMATRIX;
+typedef struct D3DXVECTOR2 {
+    FLOAT x, y;
+} D3DXVECTOR2, *LPD3DXVECTOR2;
 typedef struct _D3DVECTOR D3DXVECTOR3, *LPD3DXVECTOR3;
-
+typedef struct D3DXVECTOR4 {
+    FLOAT x, y, z, w;
+} D3DXVECTOR4, *LPD3DXVECTOR4;
 
 //////////////////////////////////////////////////////////////////////////////
 // D3DXSPRITE flags:
@@ -265,6 +270,9 @@ DECLARE_INTERFACE_(ID3DXFont, IUnknown)
 
 
 
+typedef VOID (WINAPI *LPD3DXFILL2D)(D3DXVECTOR4 *pOut, 
+    CONST D3DXVECTOR2 *pTexCoord, CONST D3DXVECTOR2 *pTexelSize, LPVOID pData);
+
 
 
 // D3DX CImage internels (summer 2003 SDK)
@@ -313,6 +321,28 @@ extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXCreateSprite)(
     LPDIRECT3DDEVICE9   pDevice, 
     LPD3DXSPRITE*       ppSprite);
 
+
+extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXGetImageInfoFromFileInMemory)(
+    LPCVOID pSrcData,
+    UINT SrcDataSize,
+    D3DXIMAGE_INFO *pSrcInfo
+);
+extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXLoadSurfaceFromFileInMemory)(
+    LPDIRECT3DSURFACE9 pDestSurface,
+    CONST PALETTEENTRY *pDestPalette,
+    CONST RECT *pDestRect,
+    LPCVOID pSrcData,
+    UINT SrcData,
+    CONST RECT *pSrcRect,
+    DWORD Filter,
+    D3DCOLOR ColorKey,
+    D3DXIMAGE_INFO *pSrcInfo
+);
+extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXFillTexture)(
+    LPDIRECT3DTEXTURE9 pTexture,
+    LPD3DXFILL2D pFunction,
+    LPVOID pData
+);
 extern void d3dx9_dynlink();
 
 #endif

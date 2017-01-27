@@ -1,0 +1,20 @@
+【texturehook：纹理替换框架】
+这是一个较为通用的纹理替换框架，能够在纹理加载前、加载后对纹理进行处理
+详细使用说明见texturehook.h，使用样例见patch_clampuilib.c
+
+【clampuilib：解决UI界面中接缝问题】
+UILib中，使用线性纹理过滤器会导致拼接两纹理时出现缝隙，因为采样到纹理区域外部的像素
+这个补丁通过将指定的几个UILib中的纹理拆出来，自己进行clamp操作
+这样即使采样到纹理区域外，采样到的像素也是clamp过的像素，接缝就会消失
+
+【UILibTools：UILib查询工具】
+编译好后与UILib.tli放在一起
+运行后，可以生成BMP格式的纹理占用图（黑色为已占用区域，白色为未使用区域）
+还可以查询某坐标对应的纹理信息（纹理名、大小等；用画图打开占用图，鼠标移上去能看到坐标）
+
+【解决系统界面背景贴图的问题】
+之前场景中，系统界面的背景贴图会被挤压变形，现在通过hook函数UIRenderQuad_color可以让其不变形
+此外，原来如果开启抗锯齿，在设置渲染目标(SetRenderTarget)时没有设置相应的深度模板缓存平面(Depth Stencil Surface)，导致渲染到纹理(Render To Texture)会失败
+通过修改gbGfxManager_D3D::SetRenderTarget解决了此问题（设置适当的深度模板缓存平面）
+另外在创建RenderTarget纹理时，会调用D3DXFillTexture对其进行清空，这样在系统界面切出再切回后，背景不会花掉（但是现在会变成纯黑）
+

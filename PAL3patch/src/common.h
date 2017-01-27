@@ -60,8 +60,8 @@ typedef unsigned char bool;
 
 
 // PAL3patch headers
+#include "memallocator.h"
 #include "gbengine.h"
-#include "zpk.h"
 #include "sha1.h"
 #include "hook.h"
 #include "asmpatch.h"
@@ -76,10 +76,8 @@ typedef unsigned char bool;
 #include "d3dx9_21.h"
 #include "cjktable.h"
 #include "effecthook.h"
+#include "texturehook.h"
 
-// common typedefs
-typedef void *(*malloc_funcptr_t)(size_t);
-typedef void (*free_funcptr_t)(void *);
 
 // patch oldnames
 #define stricmp _stricmp

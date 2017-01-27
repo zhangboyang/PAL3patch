@@ -588,6 +588,30 @@ static void init_align_uirect()
 }
 
 
+
+static void __cdecl UIRenderQuad_color_wrapper(int left, int top, int right, int bottom, float sv, float ev, struct gbColorQuad *color, struct gbTextureArray *atex)
+{
+    fixui_pushidentity();
+    left = floor(game_frect.left + eps);
+    top = floor(game_frect.top + eps);
+    right = floor(game_frect.right + eps);
+    bottom = floor(game_frect.bottom + eps);
+    UIRenderQuad_color(left, top, right, bottom, sv, ev, color, atex);
+    fixui_popstate();
+}
+static void hook_UIRenderQuad_color()
+{
+    INIT_WRAPPER_CALL(UIRenderQuad_color_wrapper, {
+        0x0045995D,
+        0x0047C2BD,
+        0x004A487D,
+        0x0052365D,
+        0x00527D2D,
+        0x00529CDB,
+    });
+}
+
+
 MAKE_PATCHSET(fixui)
 {
     // calc game_frect_ui_auto
@@ -615,4 +639,7 @@ MAKE_PATCHSET(fixui)
     
     // init align uirect
     init_align_uirect();
+    
+    // hook UIRenderQuad_color for drawing system ui background
+    hook_UIRenderQuad_color();
 }

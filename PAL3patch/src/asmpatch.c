@@ -1,24 +1,13 @@
 #include "common.h"
 
-static int push_dword_count;
-
-void __push_dword(struct trapframe *tf, unsigned data)
-{
-    if (push_dword_count >= MAX_PUSH_DWORDS) fail("too many stack PUSHes.");
-    *--tf->p_esp = data;
-    push_dword_count++;
-}
-
-unsigned __pop_dword(struct trapframe *tf)
-{
-    push_dword_count--;
-    return *tf->p_esp++;
-}
-
 void patchentry(struct trapframe *tf)
 {
-    push_dword_count = 0;
+    unsigned old_esp = tf->esp;
     tf->patch_proc(tf);
+    unsigned new_esp = tf->esp;
+    if (new_esp < old_esp && old_esp - new_esp > MAX_PUSH_DWORDS * 4) {
+        fail("too many stack memory allocated.");
+    }
 }
 
 static unsigned char *dyncode_page = NULL;

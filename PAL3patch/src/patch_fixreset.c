@@ -1,7 +1,37 @@
 #include "common.h"
 
+// hook gbTexture_D3D::CreateForRenderTarget, clear texture after creation
+static VOID WINAPI fill_black(D3DXVECTOR4 *pOut, const D3DXVECTOR2 *pTexCoord, const D3DXVECTOR2 *pTexelSize, LPVOID pData)
+{
+   *pOut = (D3DXVECTOR4) { 0.0f, 0.0f, 0.0f, 1.0f };
+}
+static int __fastcall gbTexture_D3D_CreateForRenderTarget_wrapper(struct gbTexture_D3D *this, int dummy, int width, int height, enum gbPixelFmtType format)
+{
+    int ret = gbTexture_D3D_CreateForRenderTarget(this, width, height, format);
+    if (ret) {
+        D3DXFillTexture((IDirect3DTexture9 *) this->pTex, fill_black, NULL);
+    }
+    return ret;
+}
 
 // rewrite gbGfxManager_D3D::SetRenderTarget()
+static IDirect3DSurface9 *g_pRenderTargetDepthStencilSurface = NULL;
+static void create_RenderTargetDepthStencilSurface()
+{
+    IDirect3DDevice9_CreateDepthStencilSurface(GB_GfxMgr->m_pd3dDevice, GB_GfxMgr->m_d3dpp.BackBufferWidth, GB_GfxMgr->m_d3dpp.BackBufferHeight, GB_GfxMgr->m_d3dpp.AutoDepthStencilFormat, 0, 0, FALSE, &g_pRenderTargetDepthStencilSurface, NULL);
+}
+static void release_RenderTargetDepthStencilSurface()
+{
+    IDirect3DSurface9_Release(g_pRenderTargetDepthStencilSurface);
+    g_pRenderTargetDepthStencilSurface = NULL;
+}
+static void init_RenderTargetDepthStencilSurface()
+{
+    add_postd3dcreate_hook(create_RenderTargetDepthStencilSurface);
+    add_onlostdevice_hook(release_RenderTargetDepthStencilSurface);
+    add_onresetdevice_hook(create_RenderTargetDepthStencilSurface);
+}
+static IDirect3DSurface9 *g_pDefaultDepthStencilSurface = NULL;
 #define g_pDefaultRenderTarget (*(IDirect3DSurface9 **) (gboffset + 0x1013BDF4))
 static int __fastcall gbGfxManager_D3D_SetRenderTarget(struct gbGfxManager_D3D *this, int dummy, struct gbTexture_D3D *pNewTex)
 {
@@ -29,6 +59,12 @@ static int __fastcall gbGfxManager_D3D_SetRenderTarget(struct gbGfxManager_D3D *
         // release the surface
         IDirect3DSurface9_Release(pNewSurface);
         
+        // backup default depth stencil surface
+        IDirect3DDevice9_GetDepthStencilSurface(this->m_pd3dDevice, &g_pDefaultDepthStencilSurface);
+        
+        // set new depth stencil surface
+        IDirect3DDevice9_SetDepthStencilSurface(this->m_pd3dDevice, g_pRenderTargetDepthStencilSurface);
+        
         return ret;
     } else {
         // try restore default surface
@@ -38,6 +74,12 @@ static int __fastcall gbGfxManager_D3D_SetRenderTarget(struct gbGfxManager_D3D *
         IDirect3DDevice9_SetRenderTarget(this->m_pd3dDevice, 0, g_pDefaultRenderTarget);
         IDirect3DSurface9_Release(g_pDefaultRenderTarget);
         g_pDefaultRenderTarget = NULL;
+        
+        // restore default depth stencil surface
+        IDirect3DDevice9_SetDepthStencilSurface(this->m_pd3dDevice, g_pDefaultDepthStencilSurface);
+        IDirect3DSurface9_Release(g_pDefaultDepthStencilSurface);
+        g_pDefaultDepthStencilSurface = NULL;
+        
         return 1;
     }
 }
@@ -98,7 +140,7 @@ static void CTrail_OnResetDevice(struct CTrail *this)
         enum gbPixelFmtType format = gbGfxManager_D3D_GetBackBufferFormat(GB_GfxMgr);
         int i;
         for (i = 0; i < 8; i++) {
-            gbTexture_D3D_CreateForRenderTarget(&this->m_texRT[i], 256, 256, format);
+            THISCALL_WRAPPER(gbTexture_D3D_CreateForRenderTarget_wrapper, &this->m_texRT[i], 256, 256, format);
         }
     }
 }
@@ -175,6 +217,9 @@ static MAKE_ASMPATCH(retryreset)
 
 MAKE_PATCHSET(fixreset)
 {
+    // hook gbTexture_D3D::CreateForRenderTarget
+    INIT_WRAPPER_VFPTR(gbTexture_D3D_CreateForRenderTarget_wrapper, gboffset + 0x100F5744);
+    
     // fix gbGfxManager_D3D::SetRenderTarget
     make_jmp(gboffset + 0x1001B360, gbGfxManager_D3D_SetRenderTarget);
     
@@ -197,6 +242,6 @@ MAKE_PATCHSET(fixreset)
     // patch Reset3DEnvironment
     INIT_ASMPATCH(retryreset, gboffset + 0x1001AC8D, 6, "\x0F\x8C\xE3\x00\x00\x00");
     
-    
-    // FIXME: may be more patch needed!
+    // patch render target depth stencil format
+    init_RenderTargetDepthStencilSurface();
 }

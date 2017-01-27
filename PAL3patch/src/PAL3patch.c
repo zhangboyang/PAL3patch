@@ -31,6 +31,7 @@ static void self_check()
     assert(sizeof(struct UISkee) == 0x1DB0);
     assert(sizeof(struct UIGameOver) == 0xE8);
     assert(sizeof(struct HeadMsg) == 0x24);
+    assert(sizeof(struct gbTexture_D3D) == 0x60);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -58,9 +59,15 @@ static void init_stage2()
     // PATCHSET 'setlocale' may overwrite target_codepage
     target_codepage = system_codepage = GetACP();
     
+    // init memory allocators
+    init_memory_allocators();
+    
+    // init hook framework
     init_hooks();
     init_effect_hooks();
+    init_texture_hooks();
     
+    // init patchsets
     INIT_PATCHSET(cdpatch);
     INIT_PATCHSET(regredirect);
     INIT_PATCHSET(disablekbdhook);
@@ -72,7 +79,6 @@ static void init_stage2()
     INIT_PATCHSET(relativetimer);
     INIT_PATCHSET(showfps);
     INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
-    
     if (!INIT_PATCHSET(testcombat)) {
         // here are some patches not compatiable with 'testcombat'
         INIT_PATCHSET(dpiawareness);
@@ -93,8 +99,8 @@ static void init_stage2()
                 INIT_PATCHSET(fixuistaticex);
                 INIT_PATCHSET(fixsceneui);
                 INIT_PATCHSET(uireplacetexf);
+                INIT_PATCHSET(clampuilib);
             }
-            INIT_PATCHSET(replacetexture);
             INIT_PATCHSET(fixeffect);
             INIT_PATCHSET(forcesettexture);
         }

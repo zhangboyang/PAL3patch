@@ -189,8 +189,8 @@ MAKE_PATCHSET(graphicspatch);
             #define scenetext_scalefactor (scalefactor_table[SF_SCENETEXT])
             #define scenedlgface_scalefactor (scalefactor_table[SF_SCENEDLGFACE])
         MAKE_PATCHSET(uireplacetexf);
+        MAKE_PATCHSET(clampuilib);
 
-    MAKE_PATCHSET(replacetexture);
     MAKE_PATCHSET(fixeffect);
     MAKE_PATCHSET(forcesettexture);
 

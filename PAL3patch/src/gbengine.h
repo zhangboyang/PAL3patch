@@ -181,8 +181,44 @@ struct gbSurfaceDesc {
     void *pbits;
 };
 
+struct gbRefObject {
+    struct gbRefObjectVtbl *vfptr;
+    int RefCount;
+};
+
+struct gbPixelFormat {
+    enum gbPixelFmtType Type;
+    int Bpp;
+    struct gbColorQuad *Pal;
+    unsigned int r_mask;
+    unsigned int g_mask;
+    unsigned int b_mask;
+    unsigned int a_mask;
+    unsigned int r_shift;
+    unsigned int g_shift;
+    unsigned int b_shift;
+    unsigned int a_shift;
+};
+
+struct gbResource {
+    struct gbRefObject baseclass;
+    char *pName;
+    unsigned int NameCrc32;
+    int IsLoaded;
+    struct gbResManager *pMgr;
+};
+
+struct gbTexture {
+    struct gbResource baseclass;
+    int Width;
+    int Height;
+    struct gbImage2D *pTexImage;
+    struct gbPixelFormat InFmt;
+    int nLevels;
+};
+
 struct gbTexture_D3D {
-    char padding[0x54];
+    struct gbTexture baseclass;
     struct IDirect3DBaseTexture9 *pTex;
     struct IDirect3DSurface9 *pDS;
     ULONG m_ImgFormat;
@@ -266,19 +302,6 @@ struct CTrail {
 };
 
 
-struct gbPixelFormat {
-    enum gbPixelFmtType Type;
-    int Bpp;
-    struct gbColorQuad *Pal;
-    unsigned int r_mask;
-    unsigned int g_mask;
-    unsigned int b_mask;
-    unsigned int a_mask;
-    unsigned int r_shift;
-    unsigned int g_shift;
-    unsigned int b_shift;
-    unsigned int a_shift;
-};
 struct gbImage2DInfo {
     int isdiskinfo;
     int goal;
@@ -1254,24 +1277,57 @@ struct HeadMsg {
     int m_nY;
 };
 
+struct Parent_Data {
+    struct Parent_DataVtbl *vfptr;
+};
+
+struct _TextureLib_Data {
+    struct Parent_Data baseclass;
+    char *Seps;
+    char *tok;
+    char _libfolder[512];
+    int _realNum;
+    struct _Texture_Info *m_pData;
+    char _isLoadTLI;
+};
+
+struct _Tex_uv {
+    float u;
+    float v;
+};
+struct _Texture_Info {
+    char _tex_name[512];
+    char _tex_lib[512];
+    unsigned int _tex_libw;
+    unsigned int _tex_libh;
+    unsigned int _tex_origin_x;
+    unsigned int _tex_origin_y;
+    unsigned int _tex_width;
+    unsigned int _tex_height;
+    struct _Tex_uv _tex_uvLT;
+    struct _Tex_uv _tex_uvLB;
+    struct _Tex_uv _tex_uvRB;
+    struct _Tex_uv _tex_uvRT;
+    unsigned int _tex_mode;
+    char _tex_valid;
+};
+
 // D3DX functions
 #define gbD3DXTex_CImage_ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346CA, void, struct D3DXTex_CImage *), this)
 #define gbD3DXTex_CImage_dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346E3, void, struct D3DXTex_CImage *), this)
 #define gbD3DXTex_CImage_Load(this, data, len, pinfo, flag) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10037159, int, struct D3DXTex_CImage *, const void *, unsigned, D3DXIMAGE_INFO *, int), this, data, len, pinfo, flag)
 
-// functions
+// GBENGINE functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
 #define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A190, void, struct gbGfxManager_D3D *), this)
 #define gbGfxManager_D3D_EndScene(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10018F00, void, struct gbGfxManager_D3D *), this)
-extern enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D *this);
-extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
 #define UIWnd_SetRect(this, rect) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445FA0, void, struct UIWnd *, RECT *), this, rect)
 #define gbTexture_D3D_CreateForRenderTarget(this, width, height, format) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001BF80, int, struct gbTexture_D3D *, int, int, enum gbPixelFmtType), this, width, height, format)
 #define gbTexture_D3D_CreateFromFileMemory(this, data, len) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001C010, void, struct gbTexture_D3D *, void *, int), this, data, len)
 #define gbPrintFontMgr_GetFont(this, fonttype) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10004450, struct gbPrintFont *, struct gbPrintFontMgr *, enum gbFontType), this, fonttype)
 #define gbPrintFont_PrintString(this, str, x, y, endx, endy) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10022BF0, void, struct gbPrintFont *, const char *, float, float, float, float), this, str, x, y, endx, endy)
-#define gbmalloc ((malloc_funcptr_t) (gboffset + 0x100E4B0D))
-#define gbfree ((free_funcptr_t) (gboffset + 0x100E4B99))
+#define _gbmalloc ((malloc_funcptr_t) (gboffset + 0x100E4B0D))
+#define _gbfree ((free_funcptr_t) (gboffset + 0x100E4B99))
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
 #define x2gbx(x) ((x) * 2.0 / PAL3_s_drvinfo.width - 1.0)
@@ -1283,6 +1339,10 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define gbCamera_GetRayToScreen(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100222C0, void, struct gbCamera *, float, float, struct gbRay *), this, a2, a3, a4);
 #define gbMatrixStack_Scale(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10027520, void, struct gbMatrixStack *, float, float, float), this, a2, a3, a4);
 #define pUIWND(x) ((struct UIWnd *)(x))
+#define gbVFileSystem_OpenFile(this, filename, mode) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10030540, struct gbVFile *, struct gbVFileSystem *, const char *, unsigned int), this, filename, mode)
+#define gbVFileSystem_GetFileSize(this, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10030BE0, long, struct gbVFileSystem *, struct gbVFile *), this, fp)
+#define gbVFileSystem_Read(this, buf, size, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10030810, void, struct gbVFileSystem *, void *, unsigned int, struct gbVFile *), this, buf, size, fp)
+#define gbVFileSystem_CloseFile(this, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100307A0, void, struct gbVFileSystem *, struct gbVFile *), this, fp)
 
 
 // PAL3 functions
@@ -1325,6 +1385,8 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define UIRenderObj_Ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00540F60, void, struct UIRenderObj *), this)
 #define UIRenderObj_Dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00540FA0, void, struct UIRenderObj *), this)
 #define HeadMsg_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402D20, void, struct HeadMsg *), this)
+#define _TextureLib_Data_GetLibInfo(this, filename) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053F960, bool, struct _TextureLib_Data *, const char *), this, filename)
+#define UIRenderQuad_color ((void (*)(int, int, int, int, float, float, struct gbColorQuad *, struct gbTextureArray *)) TOPTR(0x00540D20))
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)
@@ -1334,5 +1396,12 @@ extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *thi
 #define PAL3_s_bActive (*(int *) TOPTR(0x005833B8))
 #define PAL3_s_flag (*(int *) TOPTR(0x005833BC))
 #define g_pVFileSys (*(struct gbVFileSystem **) (gboffset + 0x1015D3A8))
+
+// self-written functions
+extern enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D *this);
+extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
+extern void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height, int *bitcount, struct memory_allocator *mem_allocator);
+extern void *vfs_readfile(const char *filepath, unsigned *length, struct memory_allocator *mem_allocator);
+extern const char *vfs_cpkname();
 
 #endif
