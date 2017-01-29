@@ -184,9 +184,9 @@ static void fix_gamescene()
 
 
 // fix RoleDialog
-#define ROLEDLG_MINSIZE 0.80 // ratio of whole screen
 #define ROLEDLG_FACESIZE 2.0 // ratio of text frame
 #define ROLEDLG_FACEHEIGHTFACTOR (256.0 / 512.0) // real face height : face texture height
+static double dlg_minsize; // ratio of whole screen
 static fRECT dlg_frect; // screen rect of role dialog
 static fRECT dlg_real_frect; // real role dialog rect before scale
 static fRECT dlg_old_frect; // original role dialog rect
@@ -255,7 +255,7 @@ static void __fastcall UIRoleDialog_Create_wrapper(struct UIRoleDialog *this, in
     // calc role dialog rect
     set_frect_rect(&dlg_old_frect, &pUIWND(this)->m_rect);
     transform_frect(&dlg_frect, &dlg_old_frect, &game_frect_original, &sceneui_dstrect, TR_CENTER, TR_HIGH, sceneui_dstrect_scalefactor);
-    dlg_frect.top = fmin(dlg_frect.bottom - get_frect_height(&dlg_old_frect) * scenetext_scalefactor, sceneui_dstrect.top + get_frect_height(&sceneui_dstrect) * ROLEDLG_MINSIZE);
+    dlg_frect.top = fmin(dlg_frect.bottom - get_frect_height(&dlg_old_frect) * scenetext_scalefactor, sceneui_dstrect.top + get_frect_height(&sceneui_dstrect) * (1.0 - dlg_minsize));
     
     transform_frect(&dlg_real_frect, &dlg_frect, &dlg_frect, &dlg_frect, TR_LOW, TR_LOW, 1.0 / scenetext_scalefactor);
     set_rect_frect(&pUIWND(&this->m_bk)->m_rect, &dlg_real_frect);
@@ -442,6 +442,8 @@ MAKE_PATCHSET(fixsceneui)
     sceneui_scalefactor = str2scalefactor(get_string_from_configfile("fixsceneui_uiscalefactor"));
     sceneicon_scalefactor = str2scalefactor(get_string_from_configfile("fixsceneui_iconscalefactor"));
     scenetext_scalefactor = str2scalefactor(get_string_from_configfile("fixsceneui_textscalefactor"));
+    
+    dlg_minsize = str2double(get_string_from_configfile("fixsceneui_dlgminsize"));
 
     // general fixes
     fix_gamescene();

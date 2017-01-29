@@ -11,12 +11,12 @@ enum texture_hook_type {
 struct texture_hook_info {
     // read only information
     char cpkname[MAXLINE]; // current CPK name, may be empty string if not using CPK
-    char texpath[MAXLINE]; // original texture path, if texpath starts with ":some_special_magic:balabala", other hooks should ignore it
+    char texpath[MAXLINE]; // original texture path, if texpath starts with ":some_special_magic:some_extra_info", other hooks should ignore it
     struct memory_allocator *mem_allocator; // any memory allocation associated with this thinfo should use this allocator
     enum texture_hook_type type; // current callback type
 
     // pre-imageload hook only
-    char loadpath[MAXLINE]; // loadpath might be empty string, indicating no image should be automaticly loaded
+    char loadpath[MAXLINE]; // loadpath might be ".", indicating no image should be automaticly loaded
     int interested; // MUST be set to non-zero in TH_PRE_IMAGELOAD stage if interested
     
     // image data

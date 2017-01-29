@@ -467,6 +467,8 @@ static void init_window_patch(int flag)
 
 double str2scalefactor(const char *str)
 {
+    int bound_flag = 1;
+    if (*str == '!') { str++; bound_flag = 0; }
     double ret;
     if (stricmp(str, "large") == 0) {
         ret = game_scalefactor;
@@ -483,8 +485,7 @@ double str2scalefactor(const char *str)
     } else {
         fail("unknown scalefactor string %s.", str);
     }
-//return ret;
-    return fbound(ret, 1.0, game_scalefactor);
+    return bound_flag ? fbound(ret, 1.0, game_scalefactor) : ret;
 }
 
 
