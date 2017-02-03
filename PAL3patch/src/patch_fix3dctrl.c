@@ -18,7 +18,7 @@ static void ui3dctrl_updatecamera(struct UI3DCtrl *this, struct ui3dctrl_orthoin
     
     POINT pt = { oinfo(this).x, oinfo(this).y };
     fixui_adjust_POINT(&pt, &pt);
-    pt.y = gby2y(y2gby(pt.y) * (game_height * 4.0 / (game_width * 3.0)));
+    pt.y = floor(gby2y(y2gby(pt.y) * (game_height * 4.0 / (game_width * 3.0))) + eps);
     sv->m_orthosize_sv = this->m_orthosize;
     this->m_camera->OrthoSize = this->m_orthosize * ui_orthofactor;
     this->m_orthosize *= orthofactor * ui_orthofactor;
@@ -36,7 +36,7 @@ static void ui3dctrl_restoreortho(struct UI3DCtrl *this, struct ui3dctrl_orthoin
 
 
 
-static int __fastcall UI3DCtrl_Update_wrapper(struct UI3DCtrl *this, int dummy, float deltatime, int haveinput)
+static MAKE_THISCALL(int, UI3DCtrl_Update_wrapper, struct UI3DCtrl *this, float deltatime, int haveinput)
 {
     //struct ui3dctrl_orthoinfo sv;
     //ui3dctrl_updatecamera(this, &sv);
@@ -47,7 +47,7 @@ static int __fastcall UI3DCtrl_Update_wrapper(struct UI3DCtrl *this, int dummy, 
     return ret;
 }
 
-static void __fastcall UI3DCtrl_Render_wrapper(struct UI3DCtrl *this, int dummy)
+static MAKE_THISCALL(void, UI3DCtrl_Render_wrapper, struct UI3DCtrl *this)
 {
     struct ui3dctrl_orthoinfo sv;
     ui3dctrl_updatecamera(this, &sv);
@@ -55,7 +55,7 @@ static void __fastcall UI3DCtrl_Render_wrapper(struct UI3DCtrl *this, int dummy)
     ui3dctrl_restoreortho(this, &sv);
 }
 
-static void __fastcall UI3DCtrl_SetOriginPt_XY_wrapper(struct UI3DCtrl *this, int dummy, int x, int y)
+static MAKE_THISCALL(void, UI3DCtrl_SetOriginPt_XY_wrapper, struct UI3DCtrl *this, int x, int y)
 {
     oinfo(this) = (struct ui3dctrl_origininfo) {
         .x = x,
@@ -66,7 +66,7 @@ static void __fastcall UI3DCtrl_SetOriginPt_XY_wrapper(struct UI3DCtrl *this, in
     //plog("SAVE: %p %d %d %.10f", this, x, y, this->m_orthosize);
     UI3DCtrl_SetOriginPt_XY(this, x, y);
 }
-static void __fastcall UI3DCtrl_SetOriginPt_XYFromY_wrapper(struct UI3DCtrl *this, int dummy, int x, int y, int from_y)
+static MAKE_THISCALL(void, UI3DCtrl_SetOriginPt_XYFromY_wrapper, struct UI3DCtrl *this, int x, int y, int from_y)
 {
     oinfo(this) = (struct ui3dctrl_origininfo) {
         .x = x,

@@ -96,7 +96,7 @@ void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height,
     bits = mem_allocator->malloc(img_info.Width * img_info.Height * (*bitcount / 8));
     int i;
     for (i = 0; i < img_info.Height; i++) {
-        memcpy(bits + i * img_info.Width * (*bitcount / 8), lrc.pBits + i * lrc.Pitch, img_info.Width * (*bitcount / 8));
+        memcpy(PTRADD(bits, i * img_info.Width * (*bitcount / 8)), PTRADD(lrc.pBits, i * lrc.Pitch), img_info.Width * (*bitcount / 8));
     }
     /* // fill random color, for debug purpose
     for (i = 0; i < (*height) * (*width); i++) {

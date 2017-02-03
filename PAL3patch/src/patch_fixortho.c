@@ -33,19 +33,19 @@ static void wrapper_post_hook(struct gbCamera *this)
 
 
 
-static void __fastcall gbCamera_SetAsCurrent_wrapper(struct gbCamera *this, int dummy, int a2)
+static MAKE_THISCALL(void, gbCamera_SetAsCurrent_wrapper, struct gbCamera *this, int a2)
 {
     wrapper_pre_hook(this);
     gbCamera_SetAsCurrent(this, a2);
     wrapper_post_hook(this);
 }
-static void __fastcall gbCamera_PointEyeToScr_100220B0_wrapper(struct gbCamera *this, int dummy, struct gbVec3D *a2, float *a3, float *a4)
+static MAKE_THISCALL(void, gbCamera_PointEyeToScr_100220B0_wrapper, struct gbCamera *this, struct gbVec3D *a2, float *a3, float *a4)
 {
     wrapper_pre_hook(this);
     gbCamera_PointEyeToScr_100220B0(this, a2, a3, a4);
     wrapper_post_hook(this);
 }
-static void __fastcall gbCamera_GetRayToScreen_wrapper(struct gbCamera *this, int dummy, float a2, float a3, struct gbRay *a4)
+static MAKE_THISCALL(void, gbCamera_GetRayToScreen_wrapper, struct gbCamera *this, float a2, float a3, struct gbRay *a4)
 {
     wrapper_pre_hook(this);
     gbCamera_GetRayToScreen(this, a2, a3, a4);

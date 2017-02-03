@@ -286,7 +286,7 @@ struct d3dxfont_strnode {
 
 struct d3dxfont_strnode *d3dxfont_strlist_head = NULL, *d3dxfont_strlist_tail = NULL;
 
-static void __fastcall gbPrintFont_UNICODE_PrintString(struct gbPrintFont_UNICODE *this, int dummy, const char *str, float x, float y, float endx, float endy)
+static MAKE_THISCALL(void, gbPrintFont_UNICODE_PrintString, struct gbPrintFont_UNICODE *this, const char *str, float x, float y, float endx, float endy)
 {
     fixui_update_gamestate();
     
@@ -315,7 +315,7 @@ static void __fastcall gbPrintFont_UNICODE_PrintString(struct gbPrintFont_UNICOD
     }
 }
 
-static void __fastcall gbPrintFont_UNICODE_Flush(struct gbPrintFont_UNICODE *this, int dummy)
+static MAKE_THISCALL(void, gbPrintFont_UNICODE_Flush, struct gbPrintFont_UNICODE *this)
 {
     struct d3dxfont_strnode *node, *nextnode;
     

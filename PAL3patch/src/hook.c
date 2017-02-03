@@ -2,9 +2,9 @@
 
 // the hook framework
 static int nr_hooks[MAX_HOOK_TYPES] = {};
-static void (*hookfunc[MAX_HOOK_TYPES][MAX_HOOKS])(void);
+static void (*hookfunc[MAX_HOOK_TYPES][MAX_HOOKS])();
 
-static void add_hook(int hookid, void (*funcptr)(void))
+static void add_hook(int hookid, void (*funcptr)())
 {
     if (hookid >= MAX_HOOK_TYPES) fail("invalid hook type %d.", hookid);
     if (nr_hooks[hookid] >= MAX_HOOKS) fail("too many hooks for type %d.", hookid);
@@ -29,11 +29,11 @@ static void run_hooks_reverse(int hookid)
 
 
 // pre-EndScene and post-Present hooks
-void add_preendscene_hook(void (*funcptr)(void))
+void add_preendscene_hook(void (*funcptr)())
 {
     add_hook(HOOKID_PREENDSCENE, funcptr);
 }
-void add_postpresent_hook(void (*funcptr)(void))
+void add_postpresent_hook(void (*funcptr)())
 {
     add_hook(HOOKID_POSTPRESENT, funcptr);
 }
@@ -45,7 +45,7 @@ void call_postpresent_hooks()
 {
     run_hooks(HOOKID_POSTPRESENT);
 }
-static void __fastcall gbGfxManager_D3D_EndScene_wrapper(struct gbGfxManager_D3D *this, int dummy)
+static MAKE_THISCALL(void, gbGfxManager_D3D_EndScene_wrapper, struct gbGfxManager_D3D *this)
 {
     call_preendscene_hooks();
     gbGfxManager_D3D_EndScene(this);
@@ -59,7 +59,7 @@ static void init_preendscene_postpresent_hook()
 
 
 // OnLostDevice and OnResetDevice hooks
-void add_onlostdevice_hook(void (*funcptr)(void))
+void add_onlostdevice_hook(void (*funcptr)())
 {
     add_hook(HOOKID_ONLOSTDEVICE, funcptr);
 }
@@ -67,7 +67,7 @@ void call_onlostdevice_hooks()
 {
     run_hooks(HOOKID_ONLOSTDEVICE);
 }
-void add_onresetdevice_hook(void (*funcptr)(void))
+void add_onresetdevice_hook(void (*funcptr)())
 {
     add_hook(HOOKID_ONRESETDEVICE, funcptr);
 }
@@ -78,7 +78,7 @@ void call_onresetdevice_hooks()
 
 
 // post d3d create hooks
-void add_postd3dcreate_hook(void (*funcptr)(void))
+void add_postd3dcreate_hook(void (*funcptr)())
 {
     add_hook(HOOKID_POSTD3DCREATE, funcptr);
 }
@@ -102,7 +102,7 @@ static MAKE_ASMPATCH(atexit)
     
     LINK_RETN(0x10);
 }
-void add_atexit_hook(void (*funcptr)(void))
+void add_atexit_hook(void (*funcptr)())
 {
     add_hook(HOOKID_ATEXIT, funcptr);
 }
@@ -114,7 +114,7 @@ static void init_atexit_hook()
 
 // gameloop hook
 int gameloop_hookflag;
-void add_gameloop_hook(void (*funcptr)(void))
+void add_gameloop_hook(void (*funcptr)())
 {
     // you need to check gameloop_hookflag in your hook function
     add_hook(HOOKID_GAMELOOP, funcptr);
@@ -173,7 +173,7 @@ static BOOL WINAPI GetCursorPos_wrapper(LPPOINT lpPoint)
     run_hooks(HOOKID_GETCURSORPOS);
     return getcursorpos_hook_ret;
 }
-void add_getcursorpos_hook(void (*funcptr)(void))
+void add_getcursorpos_hook(void (*funcptr)())
 {
     add_hook(HOOKID_GETCURSORPOS, funcptr);
 }
@@ -195,7 +195,7 @@ static BOOL WINAPI SetCursorPos_wrapper(int X, int Y)
     run_hooks_reverse(HOOKID_SETCURSORPOS);
     return SetCursorPos(setcursorpos_hook_point.x, setcursorpos_hook_point.y);
 }
-void add_setcursorpos_hook(void (*funcptr)(void))
+void add_setcursorpos_hook(void (*funcptr)())
 {
     add_hook(HOOKID_SETCURSORPOS, funcptr);
 }

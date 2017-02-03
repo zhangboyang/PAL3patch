@@ -3,7 +3,7 @@
 static MAKE_UIWND_RENDER_WRAPPER(LineupUI_Render_wrapper, 0x004850E0)
 static MAKE_UIWND_UPDATE_WRAPPER(LineupUI_Update_wrapper, 0x00485230)
 
-static void __fastcall LineupUI_Create_wrapper(struct LineupUI *this, int dummy, struct UIWnd *pWnd)
+static MAKE_THISCALL(void, LineupUI_Create_wrapper, struct LineupUI *this, struct UIWnd *pWnd)
 {
     LineupUI_Create(this, pWnd);
     

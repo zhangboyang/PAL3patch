@@ -171,7 +171,7 @@ void fixui_update_gamestate()
 // hook gbDynVertBuf::RenderUIQuad()
 static void *gbDynVertBuf_RenderUIQuad_original;
 #define gbDynVertBuf_RenderUIQuad(this, uiquad, count, render_effect, tex_array) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gbDynVertBuf_RenderUIQuad_original, void, struct gbDynVertBuf *, struct gbUIQuad *, int, struct gbRenderEffect *, struct gbTextureArray *), this, uiquad, count, render_effect, tex_array)
-static void __fastcall gbDynVertBuf_RenderUIQuad_wrapper(struct gbDynVertBuf *this, int dummy, struct gbUIQuad *uiquad, int count, struct gbRenderEffect *render_effect, struct gbTextureArray *tex_array)
+static MAKE_THISCALL(void, gbDynVertBuf_RenderUIQuad_wrapper, struct gbDynVertBuf *this, struct gbUIQuad *uiquad, int count, struct gbRenderEffect *render_effect, struct gbTextureArray *tex_array)
 {
     fixui_update_gamestate();
     struct gbUIQuad *tmp_uiquad = malloc(sizeof(struct gbUIQuad) * count);
@@ -207,7 +207,7 @@ static void hook_gbDynVertBuf_RenderUIQuad()
 
 
 // gbPrintFont::PrintString wrapper for derived classes (not for gbPrintFont_UNICODE)
-static void __fastcall gbPrintFont_PrintString_wrapper(struct gbPrintFont *this, int dummy, const char *str, float x, float y, float endx, float endy)
+static MAKE_THISCALL(void, gbPrintFont_PrintString_wrapper, struct gbPrintFont *this, const char *str, float x, float y, float endx, float endy)
 {
     fPOINT a = {gbx2x(x), gby2y(y)}, b = {gbx2x(endx), gby2y(endy)};
     fixui_adjust_fPOINT(&a, &a);
@@ -372,7 +372,7 @@ static void init_fillborder()
 
 
 // hook UICursor_IRender to change cursor size (only in soft-cursor mode)
-static void __fastcall UICursor_IRender_wrapper(struct UICursor *this, int dummy)
+static MAKE_THISCALL(void, UICursor_IRender_wrapper, struct UICursor *this)
 {
     uifb_precursordraw();
     fixui_pushstate(&game_frect, &game_frect, TR_SCALE_LOW, TR_SCALE_LOW, softcursor_scalefactor);
@@ -461,7 +461,7 @@ void set_uiwnd_ptag(struct UIWnd *this, struct uiwnd_ptag ptag)
         get_ptag(this) = ptag;
     }
 }
-static void __fastcall UIWnd_Render(struct UIWnd *this, int dummy)
+static MAKE_THISCALL(void, UIWnd_Render, struct UIWnd *this)
 {
     if (!this->m_bvisible) return;
     int i;
@@ -482,7 +482,7 @@ static void __fastcall UIWnd_Render(struct UIWnd *this, int dummy)
         }
     }
 }
-static int __fastcall UIWnd_Update(struct UIWnd *this, int dummy, float deltatime, int haveinput)
+static MAKE_THISCALL(int, UIWnd_Update, struct UIWnd *this, float deltatime, int haveinput)
 {
     if (!this->m_bvisible || !this->m_benable) return 0;
     int i;

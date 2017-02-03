@@ -1,6 +1,6 @@
 #include "common.h"
 
-static void __fastcall UIStaticEX_Render_wrapper(struct UIStaticEX *this, int dummy)
+static MAKE_THISCALL(void, UIStaticEX_Render_wrapper, struct UIStaticEX *this)
 {
     RECT *wndrect = &pUIWND(this)->m_rect;
     RECT old_rect = *wndrect;
@@ -20,7 +20,7 @@ static void __fastcall UIStaticEX_Render_wrapper(struct UIStaticEX *this, int du
     *wndrect = old_rect;
 }
 
-static void __fastcall UIStaticEXA_Render_wrapper(struct UIStaticEXA *this, int dummy)
+static MAKE_THISCALL(void, UIStaticEXA_Render_wrapper, struct UIStaticEXA *this)
 {
     // UIStaticEXA is for display TaiJi pictures only
     // TaiJi pictures are in UILib

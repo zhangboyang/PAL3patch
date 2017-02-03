@@ -22,7 +22,7 @@ void sha1_hash_buffer(const void *databuf, int datalen, unsigned char *hashbuf)
 {
 	int ret = 0;
 	DWORD hashlen = SHA1_BYTE;
-	HCRYPTHASH hHash;
+	HCRYPTHASH hHash = 0;
 
     if (!hProv) goto done;
     

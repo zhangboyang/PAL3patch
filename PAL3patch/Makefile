@@ -1,22 +1,22 @@
 # use msvc linker to link d3dx9.lib
-# must run 'make clean' after modifying this option
-USE_MSVC_LINKER := 1
+# MUST run 'make clean' after modifying this option
+LINK_D3DX9 := 1
 
 
 CC := gcc
 CCLD := gcc
 STRIP := strip
 
-CFLAGS := -Wall -Werror -O0 -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing
-SFLAGS := -Wall -Werror
+CFLAGS := -Wall -Wpointer-arith -O0 -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing
+SFLAGS :=
 CCLDFLAGS := -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lgdi32 -lcomctl32 -lwinmm
 
 MSDEV := msdev
 MSDEVFLAGS := -make -rebuild
 CCLDFLAGS_MSVC :=
 
-ifeq ($(USE_MSVC_LINKER), 1)
-	CFLAGS += -DUSE_MSVC_LINKER
+ifeq ($(LINK_D3DX9), 0)
+	CFLAGS += -DDYNLINK_D3DX9_AT_RUNTIME
 endif
 
 TARGET_DLL := PAL3patch.dll
@@ -60,10 +60,10 @@ $(TARGET_DLL_SRCPATH)/%.o: $(TARGET_DLL_SRCPATH)/%.S
 	$(CC) $(SFLAGS) -c -o $@ $<
 
 $(TARGET_DLL): $(TARGET_DLL_OBJS)
-ifeq ($(USE_MSVC_LINKER), 1)
-	$(CCLD) $(CCLDFLAGS_MSVC) -o $(TARGET_DLL_MSVC_OBJ) -r -Wl,--retain-symbols-file $(TARGET_DLL_MSVC_SYMBOLS) -nostdlib $(TARGET_DLL_OBJS) -lmingwex -lgcc
-	$(MSDEV) $(TARGET_DLL_MSVC_DSP) $(MSDEVFLAGS)
-else
+ifeq ($(LINK_D3DX9), 0)
 	$(CCLD) -shared -o $@ $(TARGET_DLL_OBJS) $(TARGET_DLL_SRCPATH)/$(@:.dll=.def) $(CCLDFLAGS)
 	$(STRIP) $@
+else
+	$(CCLD) $(CCLDFLAGS_MSVC) -o $(TARGET_DLL_MSVC_OBJ) -r -Wl,--retain-symbols-file $(TARGET_DLL_MSVC_SYMBOLS) -nostdlib $(TARGET_DLL_OBJS) -lmingwex -lgcc
+	$(MSDEV) $(TARGET_DLL_MSVC_DSP) $(MSDEVFLAGS)
 endif

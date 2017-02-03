@@ -9,20 +9,20 @@ static int ccbui_dstrect_type;
 
 // patch C2DSpark, only size is changed, position is not changed
 // FIXME: there may be better ways to do the same job using transform framework
-static void __fastcall C2DSpark_Render_wrapper(struct C2DSpark *this, int dummy)
+static MAKE_THISCALL(void, C2DSpark_Render_wrapper, struct C2DSpark *this)
 {
     fixui_pushstate(&game_frect, &game_frect, TR_SCALE_MID, TR_SCALE_MID, cb_scalefactor);
     C2DSpark_Render(this);
     fixui_popstate();
 }
-static bool __fastcall C2DSpark_CreateSingle_wrapper(struct C2DSpark *this, int dummy, struct C2DSpark_tagSpark *pSpark)
+static MAKE_THISCALL(bool, C2DSpark_CreateSingle_wrapper, struct C2DSpark *this, struct C2DSpark_tagSpark *pSpark)
 {
     struct C2DSpark_tagSpark tmp = *pSpark;
     tmp.fVx *= cb_scalefactor; tmp.fAx *= cb_scalefactor;
     tmp.fVy *= cb_scalefactor; tmp.fAy *= cb_scalefactor;
     return C2DSpark_CreateSingle(this, &tmp);
 }
-static void __fastcall C2DSpark_CreateStars_wrapper(struct C2DSpark *this, int dummy, int x, int y, int nWidth, float fStarSize)
+static MAKE_THISCALL(void, C2DSpark_CreateStars_wrapper, struct C2DSpark *this, int x, int y, int nWidth, float fStarSize)
 {
     C2DSpark_CreateStars(this, x, y, nWidth * cb_scalefactor, fStarSize);
 }
@@ -101,7 +101,7 @@ static MAKE_ASMPATCH(CCBDisplayChain_Render_PostEachItem)
 
 
 // fix others
-static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
+static MAKE_THISCALL(bool, CCBUI_Create_wrapper, struct CCBUI *this)
 {
     if (!CCBUI_Create(this)) return false;
     
@@ -200,7 +200,7 @@ static bool __fastcall CCBUI_Create_wrapper(struct CCBUI *this, int dummy)
 }
 
 // CCBUI use baseclass's Render(), we write a vitual function for it as a wrapper
-static void __fastcall CCBUI_Render(struct CCBUI *this, int dummy)
+static MAKE_THISCALL(void, CCBUI_Render, struct CCBUI *this)
 {
     int i, j, k;
     
@@ -231,7 +231,7 @@ static void __fastcall CCBUI_Render(struct CCBUI *this, int dummy)
 
 
 // rewrite CCBLineupWindow::Render
-static void __fastcall CCBLineupWindow_Render(struct CCBLineupWindow *this, int dummy)
+static MAKE_THISCALL(void, CCBLineupWindow_Render, struct CCBLineupWindow *this)
 {
     UIFrameWnd_Render((struct UIFrameWnd *) this);
     struct UIWnd *pSelectedFace = pUIWND(this->m_pFace[this->m_nSelected]);
@@ -240,7 +240,7 @@ static void __fastcall CCBLineupWindow_Render(struct CCBLineupWindow *this, int 
     pop_ptag_state(pSelectedFace);
 }
 // rewrite CCBLineupWindow::IsPtOnFace
-static bool __fastcall CCBLineupWindow_IsPtOnFace(struct CCBLineupWindow *this, int dummy, int nFaceIndex, POINT pt)
+static MAKE_THISCALL(bool, CCBLineupWindow_IsPtOnFace, struct CCBLineupWindow *this, int nFaceIndex, POINT pt)
 {
     struct UIWnd *pFace = pUIWND(this->m_pFace[nFaceIndex]);
     RECT rc = pFace->m_rect;

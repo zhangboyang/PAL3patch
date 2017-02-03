@@ -7,12 +7,8 @@
 
 // patchset based on integer config
 #define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
-#define INIT_PATCHSET(name) \
-    ({ \
-        int __flag = GET_PATCHSET_FLAG(name); \
-        if (__flag) MAKE_PATCHSET_NAME(name)(__flag); \
-        __flag; \
-    })
+#define INIT_PATCHSET(name) (GET_PATCHSET_FLAG(name) ? (MAKE_PATCHSET_NAME(name)(GET_PATCHSET_FLAG(name)), GET_PATCHSET_FLAG(name)) : 0)
+
 
 // patchset based on string config
 #define MAKE_PATCHSET_STRCFG(name) void MAKE_PATCHSET_NAME(name)(const char *cfgstr)
@@ -158,14 +154,14 @@ MAKE_PATCHSET(graphicspatch);
         extern void push_ptag_state(struct UIWnd *pwnd);
         extern void pop_ptag_state(struct UIWnd *pwnd);
         #define MAKE_UIWND_RENDER_WRAPPER_CUSTOM(render_wrapper_name, original_render_address, pre_action, post_action) \
-            void __fastcall render_wrapper_name(struct UIWnd *this, int dummy) \
+            MAKE_THISCALL(void, render_wrapper_name, struct UIWnd *this) \
             { \
                 pre_action(this); \
                 THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(original_render_address, void, struct UIWnd *), this); \
                 post_action(this); \
             }
         #define MAKE_UIWND_UPDATE_WRAPPER_CUSTOM(update_wrapper_name, original_wrapper_address, pre_action, post_action) \
-            int __fastcall update_wrapper_name(struct UIWnd *this, int dummy, float deltatime, int haveinput) \
+            MAKE_THISCALL(int, update_wrapper_name, struct UIWnd *this, float deltatime, int haveinput) \
             { \
                 pre_action(this); \
                 int ret = THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(original_wrapper_address, int, struct UIWnd *, float, int), this, deltatime, haveinput); \

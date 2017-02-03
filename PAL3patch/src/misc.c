@@ -82,7 +82,7 @@ fail:
     return wcsdup(L"cs2wcs failed.");
 }
 
-void __attribute__((noreturn)) __fail(const char *file, int line, const char *func, const char *fmt, ...)
+void NORETURN __fail(const char *file, int line, const char *func, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -104,7 +104,7 @@ void __attribute__((noreturn)) __fail(const char *file, int line, const char *fu
         
         SYSTEMTIME SystemTime;
         GetLocalTime(&SystemTime);
-        snprintf(buf, sizeof(buf), "  %04hd-%02hd-%02hd %02hd:%02hd:%02hd.%03hd\n", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
+        snprintf(buf, sizeof(buf), "  %04hu-%02hu-%02hu %02hu:%02hu:%02hu.%03hu\n", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
         fputs("timestamp:\n", fp);
         fputs(buf, fp);
         
@@ -149,7 +149,7 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
             
             SYSTEMTIME SystemTime;
             GetLocalTime(&SystemTime);
-            snprintf(buf, sizeof(buf), "  %04hd-%02hd-%02hd %02hd:%02hd:%02hd.%03hd\n", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
+            snprintf(buf, sizeof(buf), "  %04hu-%02hu-%02hu %02hu:%02hu:%02hu.%03hu\n", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
             fputs("timestamp:\n", fp);
             fputs(buf, fp);
             
@@ -165,7 +165,7 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
             plog_msgboxes++;
             if (plog_msgboxes <= MAXWARNMSGBOXES) {
                 if (plog_msgboxes >= MAXWARNMSGBOXES) {
-                    strncat(msgbuf, "\n\nmax messagebox limit reached.", sizeof(msgbuf));
+                    strncat(msgbuf, "\n\nmax messagebox limit reached.", sizeof(msgbuf) - strlen(msgbuf));
                     msgbuf[sizeof(msgbuf) - 1] = '\0';
                 }
                 try_goto_desktop();

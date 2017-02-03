@@ -1,14 +1,14 @@
 #include "common.h"
 
 static DWORD timeOffset;
-static DWORD WINAPI (*Real_timeGetTime)(VOID);
+static DWORD (WINAPI *Real_timeGetTime)(VOID);
 static DWORD WINAPI My_timeGetTime(VOID)
 {
     return Real_timeGetTime() - timeOffset;
 }
 
 static LARGE_INTEGER countOffset;
-static BOOL WINAPI (*Real_QueryPerformanceCounter)(LARGE_INTEGER *lpPerformanceCount);
+static BOOL (WINAPI *Real_QueryPerformanceCounter)(LARGE_INTEGER *lpPerformanceCount);
 static BOOL WINAPI My_QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 {
     BOOL ret = Real_QueryPerformanceCounter(lpPerformanceCount);

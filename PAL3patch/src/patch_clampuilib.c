@@ -81,7 +81,7 @@ static void clamp_rect(void *bits, int width, int height, int bitcount, int pitc
     int i, j;
     int bytecount = bitcount / 8;
     for (i = 0; i < height; i++) {
-        void *line = bits + i * pitch;
+        char *line = PTRADD(bits, i * pitch);
         for (j = 0; j < left; j++) {
             memcpy(line + j * bytecount, line + left * bytecount, bytecount);
         }
@@ -90,22 +90,22 @@ static void clamp_rect(void *bits, int width, int height, int bitcount, int pitc
         }
     }
     for (i = 0; i < top; i++) {
-        memcpy(bits + i * pitch, bits + top * pitch, width * bytecount);
+        memcpy(PTRADD(bits, i * pitch), PTRADD(bits, top * pitch), width * bytecount);
     }
     for (i = bottom; i < height; i++) {
-        memcpy(bits + i * pitch, bits + (bottom - 1) * pitch, width * bytecount);
+        memcpy(PTRADD(bits, i * pitch), PTRADD(bits, (bottom - 1) * pitch), width * bytecount);
     }
 }
 static void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, void *src, int src_pitch, int src_x, int src_y, int width, int height, int bitcount)
 {
-    dst += dst_pitch * dst_y + dst_x * (bitcount / 8);
-    src += src_pitch * src_y + src_x * (bitcount / 8);
+    dst = PTRADD(dst, dst_pitch * dst_y + dst_x * (bitcount / 8));
+    src = PTRADD(src, src_pitch * src_y + src_x * (bitcount / 8));
     int copypitch = width * (bitcount / 8);
     int i;
     for (i = 0; i < height; i++) {
         memcpy(dst, src, copypitch);
-        dst += dst_pitch;
-        src += src_pitch;
+        dst = PTRADD(dst, dst_pitch);
+        src = PTRADD(src, src_pitch);
     }
 }
 
@@ -173,7 +173,7 @@ static void texlib_loader(struct texture_hook_info *thinfo)
     }
 }
 
-static bool __fastcall _TextureLib_Data_GetLibInfo_wrapper(struct _TextureLib_Data *this, int dummy, const char *filename)
+static MAKE_THISCALL(bool, _TextureLib_Data_GetLibInfo_wrapper, struct _TextureLib_Data *this, const char *filename)
 {
     bool ret = _TextureLib_Data_GetLibInfo(this, filename);
     if (ret) {

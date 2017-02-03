@@ -163,7 +163,7 @@ static int __stdcall BinkCopyToBuffer_wrapper(DWORD a1, DWORD a2, DWORD a3, DWOR
 {
     return last_BinkCopyToBuffer_retval = BinkCopyToBuffer(a1, a2, a3, a4, a5, a6, a7);
 }
-static int __fastcall gbBinkVideo_OpenFile(struct gbBinkVideo *this, int dummy, const char *szFileName, HWND hWnd, int bChangeScreenMode, int nOpenFlag)
+static MAKE_THISCALL(int, gbBinkVideo_OpenFile, struct gbBinkVideo *this, const char *szFileName, HWND hWnd, int bChangeScreenMode, int nOpenFlag)
 {
     int ret = gbBinkVideo_SFLB_OpenFile(this, szFileName, hWnd, bChangeScreenMode, nOpenFlag);
 
@@ -182,7 +182,7 @@ static int __fastcall gbBinkVideo_OpenFile(struct gbBinkVideo *this, int dummy, 
     return ret;
 }
 
-static int __fastcall gbBinkVideo_DrawFrame(struct gbBinkVideo *this, int dummy)
+static MAKE_THISCALL(int, gbBinkVideo_DrawFrame, struct gbBinkVideo *this)
 {
     int ret;
     // check if we have inited
@@ -271,7 +271,7 @@ static int wm_setcursor_hook()
     return m_curfrmid != 9 && !mf_movie_playing;
 }
 
-static int __fastcall gbBinkVideo_BinkWait_wrapper(struct gbBinkVideo *this, int dummy)
+static MAKE_THISCALL(int, gbBinkVideo_BinkWait_wrapper, struct gbBinkVideo *this)
 {
     int ret = gbBinkVideo_BinkWait(this);
     if (ret) Sleep(1);
@@ -391,7 +391,7 @@ static void after_screenshot()
 }
 
 // rewriteen class member functions
-static __fastcall int LockBackBuffer(struct gbGfxManager_D3D *this, int dummy, struct gbSurfaceDesc *surface, int flags)
+static MAKE_THISCALL(int, LockBackBuffer, struct gbGfxManager_D3D *this, struct gbSurfaceDesc *surface, int flags)
 {
     // fill the surface structure
     // note: surface->pitch and surface->pbits will be filled later
@@ -420,7 +420,7 @@ static __fastcall int LockBackBuffer(struct gbGfxManager_D3D *this, int dummy, s
     return 1;
 }
 
-static __fastcall void UnlockBackBuffer(struct gbGfxManager_D3D *this, int dummy)
+static MAKE_THISCALL(void, UnlockBackBuffer, struct gbGfxManager_D3D *this)
 {
     switch (locktype) {
         case LT_RENDERTARGET: break; // do nothing

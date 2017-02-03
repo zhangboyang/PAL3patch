@@ -12,8 +12,8 @@ int GetFileSHA1(const char *fn, char *buf)
 	unsigned char hashbuf[SHA1_BYTE];
 	DWORD hashlen = sizeof(hashbuf);
 	FILE *fp = fopen(fn, "rb");
-	HCRYPTPROV hProv;
-	HCRYPTHASH hHash;
+	HCRYPTPROV hProv = 0;
+	HCRYPTHASH hHash = 0;
 
 	if (!fp) goto done;
 	// use CryptAcquireContextA to make this program KernelEx (for Win9X) compatible

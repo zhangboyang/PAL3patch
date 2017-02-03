@@ -1,8 +1,11 @@
 #ifndef PAL3PATCH_D3DX9_H
 #define PAL3PATCH_D3DX9_H
 
+#ifdef HAVE_D3DX9
+#include <d3dx9.h>
+#else
 // make gcc happy, not generate error for typedef redefinition
-#if __GNUC__ >=3
+#if __GNUC__ >= 3
 #pragma GCC system_header
 #endif
 
@@ -11,6 +14,7 @@
     the D3DX_SDK_VERSION is 21 in this SDK, so the DLL name is d3dx9_21.dll
     in fact, Microsoft has never release such DLL, this DLL is compiled by myself
 */
+#define D3DX_SDK_VERSION 21
 #define D3DX9_DLL "d3dx9_21.dll"
 
 
@@ -296,8 +300,17 @@ struct D3DXTex_CImage {
 };
 
 
-#ifndef USE_MSVC_LINKER
+#endif
+
+
+
+
+
+#if defined(DYNLINK_D3DX9_AT_RUNTIME) || !defined(HAVE_D3DX9)
+
+#ifdef DYNLINK_D3DX9_AT_RUNTIME
 #define PAL3PATCH_D3DX9FUNC(func) (WINAPI *func)
+extern void d3dx9_dynlink();
 #else
 #define PAL3PATCH_D3DX9FUNC(func) (WINAPI func)
 #endif
@@ -343,6 +356,12 @@ extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXFillTexture)(
     LPD3DXFILL2D pFunction,
     LPVOID pData
 );
-extern void d3dx9_dynlink();
+
+#undef PAL3PATCH_D3DX9FUNC
+
+#endif
+
+
+
 
 #endif

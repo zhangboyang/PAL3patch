@@ -62,7 +62,7 @@ static void *CArrayList_GetPtr(struct CArrayList *this, UINT Entry)
 static int *CArrayList_FindInt(struct CArrayList *this, int target, int *subscript)
 {
     int i;
-    for (i = 0; i < this->m_NumEntries; i++) {
+    for (i = 0; i < (int) this->m_NumEntries; i++) {
         int *cur = CArrayList_GetPtr(this, i);
         if (*cur == target) {
             if (subscript) *subscript = i;
@@ -162,7 +162,7 @@ static void set_multisample_config(struct CArrayList *tl, struct CArrayList *ql,
     if (ms_tflag == INT_MAX) {
         id = tl->m_NumEntries - 1;
         *tret = *(int *) CArrayList_GetPtr(tl, id);
-    } else if (ms_tflag >= msTypeArrayCount) {
+    } else if (ms_tflag >= (int) msTypeArrayCount) {
         fail("invalid multisample type configuration.");
     } else {
         int tprefer = msTypeArray[ms_tflag];
@@ -216,10 +216,10 @@ static void patch_multisample_config(const char *cfgstr)
 
 
 // resolution patch
-static char __fastcall Readn(void *this, int dummy, char *appname, char *keyname, int *ret, int defvalue)
+static MAKE_THISCALL(BOOL, Readn, void *this, char *appname, char *keyname, int *ret, int defvalue)
 {
-    if (strcmp(keyname, "width") == 0) { *ret = game_width; return 1; }
-    if (strcmp(keyname, "height") == 0) { *ret = game_height; return 1; }
+    if (strcmp(keyname, "width") == 0) { *ret = game_width; return TRUE; }
+    if (strcmp(keyname, "height") == 0) { *ret = game_height; return TRUE; }
     fail("invalid call to ConfigFile::Readn");
 }
 static void patch_resolution_config(const char *cfgstr)
@@ -382,7 +382,7 @@ static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam,
     if (Msg == WM_KEYUP && wParam == VK_F12) { clipcursor_enabled ^= 1; return 0; }
     return DefWindowProcA(hWnd, Msg, wParam, lParam);
 }
-static void __fastcall gbGfxManager_D3D_BuildPresentParamsFromSettings_wrapper(struct gbGfxManager_D3D *this, int dummy)
+static MAKE_THISCALL(void, gbGfxManager_D3D_BuildPresentParamsFromSettings_wrapper, struct gbGfxManager_D3D *this)
 {
     // by default, windowed mode ignore vsync settings
     // this wrapper add vsync feature to windowed mode
@@ -496,14 +496,14 @@ static void loading_splash()
     IDirect3DDevice9_Clear(GB_GfxMgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);
     IDirect3DDevice9_BeginScene(GB_GfxMgr->m_pd3dDevice);
     
-    int fontsize = 16 * game_scalefactor;
+    int fontsize = floor(16 * game_scalefactor + eps);
     ID3DXFont *pFont;
     if (FAILED(D3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, fontsize, 0, FW_BOLD, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, wstr_defaultfont, &pFont))) {
         pFont = NULL;
     }
     if (pFont) {
         RECT rc;
-        int padding = 20 * game_scalefactor;
+        int padding = floor(20 * game_scalefactor + eps);
         set_rect(&rc, 0, PAL3_s_drvinfo.height - padding - fontsize, PAL3_s_drvinfo.width - padding, 0);
         ID3DXFont_DrawTextW(pFont, NULL, wstr_gameloading, -1, &rc, DT_NOCLIP | DT_RIGHT, 0xFFFFFFFF);
         ID3DXFont_Release(pFont);

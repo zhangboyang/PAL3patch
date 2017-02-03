@@ -1,5 +1,5 @@
-#ifndef PAL3PATCH_GBENGINE_H
-#define PAL3PATCH_GBENGINE_H
+#ifndef PAL3PATCH_PAL3_H
+#define PAL3PATCH_PAL3_H
 
 // types
 
@@ -264,13 +264,13 @@ struct UIWnd {
     int m_bfocus;
 };
 struct UIWndVtbl {
-    void (__fastcall *ShowWindow)(struct UIWnd *this, int dummy, int);
-    void (__fastcall *Render)(struct UIWnd *this, int dummy);
-    int (__fastcall *Update)(struct UIWnd *this, int dummy, float, int);
-    void (__fastcall *Destroy)(struct UIWnd *this, int dummy);
-    void (__fastcall *Create)(struct UIWnd *this, int dummy, unsigned int, RECT *, struct UIWnd *, char);
+    MAKE_THISCALL(void, *ShowWindow, struct UIWnd *this, int);
+    MAKE_THISCALL(void, *Render, struct UIWnd *this);
+    MAKE_THISCALL(int, *Update, struct UIWnd *this, float, int);
+    MAKE_THISCALL(void, *Destroy, struct UIWnd *this);
+    MAKE_THISCALL(void, *Create, struct UIWnd *this, unsigned int, RECT *, struct UIWnd *, char);
     void *scalar_deleting_destructor;
-    int (__fastcall *OnMessage)(struct UIWnd *this, int dummy, unsigned int, unsigned int, unsigned int);
+    MAKE_THISCALL(int, *OnMessage, struct UIWnd *this, unsigned int, unsigned int, unsigned int);
 };
 #define UIWnd_vfptr_Render(this) THISCALL_WRAPPER((this)->vfptr->Render, this)
 #define UIWnd_vfptr_Update(this, deltatime, haveinput) THISCALL_WRAPPER((this)->vfptr->Update, this, deltatime, haveinput)

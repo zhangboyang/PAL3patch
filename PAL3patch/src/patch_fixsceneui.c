@@ -7,7 +7,7 @@ static int sceneui_dstrect_type;
 #define sceneui_dstrect_scalefactor get_frect_min_scalefactor(&sceneui_dstrect, &game_frect_original)
 
 // fix PlayerMgr: pushable notification, ShenYan numbers
-static void __fastcall HeadMsg_Render_wrapper(struct HeadMsg *this, int dummy)
+static MAKE_THISCALL(void, HeadMsg_Render_wrapper, struct HeadMsg *this)
 {
     // step2: fix lost blood message in scene
     int flag = this->m_bEnable && !this->m_nType;
@@ -27,7 +27,7 @@ static void __cdecl PlayerMgr_DrawMsg_hookpart1()
     // step4: restore fixui state stack
     fixui_popstate();
 }
-static void __fastcall PlayerMgr_DrawMsg_hookpart2(struct UIAnimateCtrl *this, int dummy)
+static MAKE_THISCALL(void, PlayerMgr_DrawMsg_hookpart2, struct UIAnimateCtrl *this)
 {
     // step3: change fixui state, for g_jumpflag and ShenYan
     pop_ptag_state(pUIWND(&g_msgbk));
@@ -79,7 +79,7 @@ static MAKE_ASMPATCH(UISceneMap_Render_hookpart1)
     fixui_pushidentity();
     fs->no_align = 1;
 }
-static void __fastcall UISceneMap_Render_hookpart2(struct UIWnd *this, int dummy)
+static MAKE_THISCALL(void, UISceneMap_Render_hookpart2, struct UIWnd *this)
 {
     // step2: restore fixui state
     fixui_popstate();
@@ -119,7 +119,7 @@ static void install_UISceneMap_Render_hook()
 
 
 // fix UIEmote::Render() to fix emote
-static void __fastcall UIEmote_Render(struct UIEmote *this, int dummy)
+static MAKE_THISCALL(void, UIEmote_Render, struct UIEmote *this)
 {
     fixui_pushstate(&game_frect, &game_frect, TR_SCALE_MID, TR_SCALE_HIGH, sceneicon_scalefactor);
     UIWnd_Render_rewrited(pUIWND(this)); // should call rewrited version
@@ -128,7 +128,7 @@ static void __fastcall UIEmote_Render(struct UIEmote *this, int dummy)
 
 
 // general sceneui fixes
-static void __fastcall UIGameFrm_Create_wrapper(struct UIGameFrm *this, int dummy)
+static MAKE_THISCALL(void, UIGameFrm_Create_wrapper, struct UIGameFrm *this)
 {
     UIGameFrm_Create(this);
     struct uiwnd_ptag ptag;
@@ -192,7 +192,7 @@ static fRECT dlg_real_frect; // real role dialog rect before scale
 static fRECT dlg_old_frect; // original role dialog rect
 static fRECT dlg_facearea_frect; // face area
 
-static void __fastcall UIRoleDialog_SetFace_wrapper(struct UIRoleDialog *this, int dummy, const char *path, int leftright)
+static MAKE_THISCALL(void, UIRoleDialog_SetFace_wrapper, struct UIRoleDialog *this, const char *path, int leftright)
 {
     // call SetFace() with original rect
     set_rect_frect(&pUIWND(this)->m_rect, &dlg_old_frect);
@@ -248,7 +248,7 @@ static void __fastcall UIRoleDialog_SetFace_wrapper(struct UIRoleDialog *this, i
     set_rect_frect(&pUIWND(&this->m_static)->m_rect, &new_text_frect);
     set_rect_frect(&pUIWND(&this->m_ani)->m_rect, &ani_frect);
 }
-static void __fastcall UIRoleDialog_Create_wrapper(struct UIRoleDialog *this, int dummy, int id, RECT *rect, struct UIWnd *pfather, const char *bkfile)
+static MAKE_THISCALL(void, UIRoleDialog_Create_wrapper, struct UIRoleDialog *this, int id, RECT *rect, struct UIWnd *pfather, const char *bkfile)
 {
     UIRoleDialog_Create(this, id, rect, pfather, bkfile);
     
@@ -367,7 +367,7 @@ static void fix_UIEncampment()
 
 
 // fix skee mini-game
-static void __fastcall UISkee_Create_wrapper(struct UISkee *this, int dummy)
+static MAKE_THISCALL(void, UISkee_Create_wrapper, struct UISkee *this)
 {
     UISkee_Create(this);
     int i;
@@ -411,7 +411,7 @@ static void fix_UISkee()
 
 
 // fix UIGameOver
-static void __fastcall UIGameOver_Create_wrapper(struct UIGameOver *this, int dummy)
+static MAKE_THISCALL(void, UIGameOver_Create_wrapper, struct UIGameOver *this)
 {
     UIGameOver_Create(this);
     

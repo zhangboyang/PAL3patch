@@ -9,7 +9,7 @@
 
 extern int is_win9x();
 #define fail(fmt, ...) __fail(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
-extern void __attribute__((noreturn)) __fail(const char *file, int line, const char *func, const char *fmt, ...);
+extern void NORETURN __fail(const char *file, int line, const char *func, const char *fmt, ...);
 #define warning(fmt, ...) __plog(1, __FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
 #define plog(fmt, ...) __plog(0, __FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
 extern void __plog(int is_warning, const char *file, int line, const char *func, const char *fmt, ...);

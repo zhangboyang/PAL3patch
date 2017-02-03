@@ -1,6 +1,6 @@
 #include "common.h"
 
-#ifndef USE_MSVC_LINKER
+#ifdef DYNLINK_D3DX9_AT_RUNTIME
 
 #define DECLARE_D3DX9_FUNCPTR(funcptr) typeof(funcptr) funcptr
 #define IMPORT_D3DX9_FUNCPTR(funcptr) ((funcptr) = (void *) GetProcAddress_safe(hD3DX9, TOSTR(funcptr)))

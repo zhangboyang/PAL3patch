@@ -42,8 +42,6 @@ extern void patchentry(struct trapframe *tf);
 extern void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigned size);
 #define PUSH_DWORD(data) (*--(tf)->p_esp = (data))
 #define POP_DWORD() (*(tf)->p_esp++)
-#define TOPTR(addr) ((void *)(addr))
-#define TOUINT(addr) ((unsigned)(addr))
 #define M_DWORD(addr) (*(unsigned *)(addr))
 #define M_WORD(addr) (*(unsigned short *)(addr))
 #define M_BYTE(addr) (*(unsigned char *)(addr))

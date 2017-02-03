@@ -28,7 +28,7 @@ void *get_branch_jtarget(unsigned addr, unsigned char opcode)
     if (buf[0] != opcode) fail("jtarget opcode mismatch");
     void *off;
     memcpy(&off, &buf[1], 4);
-    return off + addr + 5;
+    return PTRADD(off, addr + 5);
 }
 
 void make_branch(unsigned addr, unsigned char opcode, const void *jtarget, unsigned size)
@@ -107,17 +107,17 @@ void *hook_import_table(void *image_base, const char *dllname, const char *funcn
         fail("can't find address of %s in dll %s.", funcname, dllname);
     }
     PIMAGE_DOS_HEADER pdoshdr = image_base;
-    PIMAGE_NT_HEADERS pnthdr = image_base + pdoshdr->e_lfanew;
+    PIMAGE_NT_HEADERS pnthdr = PTRADD(image_base, pdoshdr->e_lfanew);
     PIMAGE_IMPORT_DESCRIPTOR pimpdesc;
     IMAGE_IMPORT_DESCRIPTOR zeroimpdesc;
     memset(&zeroimpdesc, 0, sizeof(IMAGE_IMPORT_DESCRIPTOR));
-    for (pimpdesc = image_base + pnthdr->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
-        memcmp(pimpdesc, &zeroimpdesc, sizeof(IMAGE_IMPORT_DESCRIPTOR)) && stricmp(image_base + pimpdesc->Name, dllname);
+    for (pimpdesc = PTRADD(image_base, pnthdr->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
+        memcmp(pimpdesc, &zeroimpdesc, sizeof(IMAGE_IMPORT_DESCRIPTOR)) && stricmp(PTRADD(image_base, pimpdesc->Name), dllname);
         pimpdesc++);
     if (!pimpdesc->Name) {
         warning("can't find import descriptor for dll '%s' in module %p, iat hook failed.", dllname, image_base);
     } else {
-        hook_iat(image_base + pimpdesc->FirstThunk, oldptr, newptr);
+        hook_iat(PTRADD(image_base, pimpdesc->FirstThunk), oldptr, newptr);
     }
     return oldptr;
 }

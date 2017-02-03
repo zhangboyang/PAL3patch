@@ -7,6 +7,7 @@ static void self_check()
 {
     // asserts
     assert(D3D_SDK_VERSION == 31);
+    assert(D3DX_SDK_VERSION == 21);
     assert(sizeof(struct uiwnd_ptag) == 4);
     assert(sizeof(struct CCBUI) == 0xA48);
     assert(sizeof(struct UIStatic) == 0x98);
@@ -40,7 +41,7 @@ static void init_stage1()
     self_check();
     gboffset = get_module_base("GBENGINE.DLL") - 0x10000000;
     
-#ifndef USE_MSVC_LINKER
+#ifdef DYNLINK_D3DX9_AT_RUNTIME
     d3dx9_dynlink();
 #endif
 

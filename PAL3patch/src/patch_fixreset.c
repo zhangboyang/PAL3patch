@@ -5,7 +5,7 @@ static VOID WINAPI fill_black(D3DXVECTOR4 *pOut, const D3DXVECTOR2 *pTexCoord, c
 {
    *pOut = (D3DXVECTOR4) { 0.0f, 0.0f, 0.0f, 1.0f };
 }
-static int __fastcall gbTexture_D3D_CreateForRenderTarget_wrapper(struct gbTexture_D3D *this, int dummy, int width, int height, enum gbPixelFmtType format)
+static MAKE_THISCALL(int, gbTexture_D3D_CreateForRenderTarget_wrapper, struct gbTexture_D3D *this, int width, int height, enum gbPixelFmtType format)
 {
     int ret = gbTexture_D3D_CreateForRenderTarget(this, width, height, format);
     if (ret) {
@@ -33,7 +33,7 @@ static void init_RenderTargetDepthStencilSurface()
 }
 static IDirect3DSurface9 *g_pDefaultDepthStencilSurface = NULL;
 #define g_pDefaultRenderTarget (*(IDirect3DSurface9 **) (gboffset + 0x1013BDF4))
-static int __fastcall gbGfxManager_D3D_SetRenderTarget(struct gbGfxManager_D3D *this, int dummy, struct gbTexture_D3D *pNewTex)
+static MAKE_THISCALL(int, gbGfxManager_D3D_SetRenderTarget, struct gbGfxManager_D3D *this, struct gbTexture_D3D *pNewTex)
 {
     if (pNewTex) {
         IDirect3DSurface9 *pNewSurface = NULL;
