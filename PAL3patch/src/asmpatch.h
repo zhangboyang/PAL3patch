@@ -1,15 +1,6 @@
 #ifndef PAL3PATCH_ASMPATCH_H
 #define PAL3PATCH_ASMPATCH_H
 
-// MAX_PUSH_DWORDS controls how many dwords 'asmentry' will reserve for possible stack pushes
-// this value can't be too large (no more than one page)
-// this value mustn't smaller than 3
-#define MAX_PUSH_DWORDS 16
-
-#ifndef __ASSEMBLER__
-
-
-
 #define MAKE_ASMPATCH_PROC(funcname) void funcname(struct trapframe *tf)
 #define MAKE_ASMPATCH_NAME(name) CONCAT(asmpatch_, name)
 #define MAKE_ASMPATCH(name) MAKE_ASMPATCH_PROC(MAKE_ASMPATCH_NAME(name))
@@ -61,9 +52,7 @@ extern void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigne
 #define LINK_RETN(arg_bytes) do { RETNADDR = POP_DWORD(); R_ESP += (arg_bytes); } while (0)
 
 // asmentry.S
+extern unsigned max_push_dwords;
 extern void __stdcall asmentry(unsigned patch_id);
 
-
-
-#endif
 #endif

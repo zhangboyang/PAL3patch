@@ -8,7 +8,7 @@
 #define TO_STR(x) __TO_STR(x)
 
 #define MAXLINE 4096
-#define MAXLINEFMT "%" TO_STR(MAXLINE) "s"
+#define MAXLINEFMT "%4095s"
 
 #define ROUND_UP_INC(value, graduate) ((value) - (value) % (graduate) + (graduate))
 #define ROUND_UP(value, graduate) ((value) % (graduate) == 0 ? (value) : ROUND_UP_INC(value, graduate))

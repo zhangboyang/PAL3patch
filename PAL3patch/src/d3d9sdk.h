@@ -1,23 +1,34 @@
-#ifndef PAL3PATCH_D3DX9_H
-#define PAL3PATCH_D3DX9_H
+#ifndef PAL3PATCH_D3D9SDK_H
+#define PAL3PATCH_D3D9SDK_H
+
+#if defined(_MSC_VER) && !defined(DYNLINK_D3DX9_AT_RUNTIME)
+#ifdef _DEBUG
+#pragma comment(lib, "d3dx9d.lib")
+#else
+#pragma comment(lib, "d3dx9.lib")
+#endif
+#if _MSC_VER >= 1900
+#pragma comment(lib, "legacy_stdio_definitions.lib")
+#endif
+#endif
+
 
 #ifdef HAVE_D3DX9
+// include d3dx9.h only, do not include d3d9.h here
+// d3dx9.h will include d3d9.h automaticly
+// this avoid confilits between DirectX SDK headers and DirectX headers in Windows 8 SDK
 #include <d3dx9.h>
-#else
+
+#else /* HAVE_D3DX9 */
+
+#include <d3d9.h>
+
 // make gcc happy, not generate error for typedef redefinition
-#if __GNUC__ >= 3
+#if defined(__GNUC__) && __GNUC__ >= 3
 #pragma GCC system_header
 #endif
 
-/*
-    PAL3's gbengine.dll uses D3DX9 from summer 2003 SDK
-    the D3DX_SDK_VERSION is 21 in this SDK, so the DLL name is d3dx9_21.dll
-    in fact, Microsoft has never release such DLL, this DLL is compiled by myself
-*/
 #define D3DX_SDK_VERSION 21
-#define D3DX9_DLL "d3dx9_21.dll"
-
-
 
 // D3DX9 types and functions
 // this is copied from Microsoft D3DX headers
@@ -158,14 +169,6 @@ DECLARE_INTERFACE_(ID3DXSprite, IUnknown)
     STDMETHOD(OnResetDevice)(THIS) PURE;
 };
 
-#define ID3DXSprite_Release(p) (p)->lpVtbl->Release(p)
-#define ID3DXSprite_SetTransform(p,a) (p)->lpVtbl->SetTransform(p,a)
-#define ID3DXSprite_SetWorldViewRH(p,a,b) (p)->lpVtbl->SetWorldViewRH(p,a,b)
-#define ID3DXSprite_SetWorldViewLH(p,a,b) (p)->lpVtbl->SetWorldViewLH(p,a,b)
-#define ID3DXSprite_Begin(p,a) (p)->lpVtbl->Begin(p,a)
-#define ID3DXSprite_End(p) (p)->lpVtbl->End(p)
-#define ID3DXSprite_OnLostDevice(p) (p)->lpVtbl->OnLostDevice(p)
-#define ID3DXSprite_OnResetDevice(p) (p)->lpVtbl->OnResetDevice(p)
 
 //////////////////////////////////////////////////////////////////////////////
 // ID3DXFont:
@@ -261,63 +264,32 @@ DECLARE_INTERFACE_(ID3DXFont, IUnknown)
 
 };
 
-#define ID3DXFont_Release(p) (p)->lpVtbl->Release(p)
-#define ID3DXFont_DrawTextA(p,a,b,c,d,e,f) (p)->lpVtbl->DrawTextA(p,a,b,c,d,e,f)
-#define ID3DXFont_DrawTextW(p,a,b,c,d,e,f) (p)->lpVtbl->DrawTextW(p,a,b,c,d,e,f)
-#define ID3DXFont_PreloadCharacters(p,a,b) (p)->lpVtbl->PreloadCharacters(p,a,b)
-#define ID3DXFont_PreloadTextW(p,a,b) (p)->lpVtbl->PreloadTextW(p,a,b)
-#define ID3DXFont_OnLostDevice(p) (p)->lpVtbl->OnLostDevice(p)
-#define ID3DXFont_OnResetDevice(p) (p)->lpVtbl->OnResetDevice(p)
-
-
-
-
 
 
 typedef VOID (WINAPI *LPD3DXFILL2D)(D3DXVECTOR4 *pOut, 
     CONST D3DXVECTOR2 *pTexCoord, CONST D3DXVECTOR2 *pTexelSize, LPVOID pData);
 
 
-
-// D3DX CImage internels (summer 2003 SDK)
-struct D3DXTex_CImage {
-    D3DFORMAT Format;
-    void *pBits;
-    DWORD *pPalette; // A8B8G8R8, byte0 = B, byte1 = G, byte2 = R, byte3 = A
-    UINT Width;
-    UINT Height;
-    UINT Depth;
-    DWORD gap18[6];
-    INT Pitch;
-    DWORD gap34[1];
-    INT pBits_Valid;
-    INT pPalette_Valid;
-    INT Valid;
-    D3DRESOURCETYPE ResourceType;
-    D3DXIMAGE_FILEFORMAT ImageFileFormat;
-    struct D3DXTex_CImage *pNext1;
-    struct D3DXTex_CImage *pNext2;
-};
+#endif /* HAVE_D3DX9 */
 
 
+
+#ifdef DYNLINK_D3DX9_AT_RUNTIME
+#define DECL_D3DX9FUNC(func) (WINAPI *CONCAT(p, func))
+#define D3DXFUNC(func) CONCAT(p, func)
+extern void d3dx9_dynlink();
+#else
+#define DECL_D3DX9FUNC(func) (WINAPI func)
+#define D3DXFUNC(func) func
 #endif
-
-
 
 
 
 #if defined(DYNLINK_D3DX9_AT_RUNTIME) || !defined(HAVE_D3DX9)
 
-#ifdef DYNLINK_D3DX9_AT_RUNTIME
-#define PAL3PATCH_D3DX9FUNC(func) (WINAPI *func)
-extern void d3dx9_dynlink();
-#else
-#define PAL3PATCH_D3DX9FUNC(func) (WINAPI func)
-#endif
-
-// function pointers for D3DX9
-extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXSaveTextureToFileA)(LPCTSTR pDestFile, D3DXIMAGE_FILEFORMAT DestFormat, LPDIRECT3DBASETEXTURE9 pSrcTexture, const PALETTEENTRY *pSrcPalette);
-extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXCreateFontW)(
+// functions for D3DX9
+HRESULT DECL_D3DX9FUNC(D3DXSaveTextureToFileA)(LPCTSTR pDestFile, D3DXIMAGE_FILEFORMAT DestFormat, LPDIRECT3DBASETEXTURE9 pSrcTexture, const PALETTEENTRY *pSrcPalette);
+HRESULT DECL_D3DX9FUNC(D3DXCreateFontW)(
     LPDIRECT3DDEVICE9       pDevice,  
     UINT                    Height,
     UINT                    Width,
@@ -330,17 +302,17 @@ extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXCreateFontW)(
     DWORD                   PitchAndFamily,
     LPCWSTR                 pFaceName,
     LPD3DXFONT*             ppFont);
-extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXCreateSprite)( 
+HRESULT DECL_D3DX9FUNC(D3DXCreateSprite)( 
     LPDIRECT3DDEVICE9   pDevice, 
     LPD3DXSPRITE*       ppSprite);
 
 
-extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXGetImageInfoFromFileInMemory)(
+HRESULT DECL_D3DX9FUNC(D3DXGetImageInfoFromFileInMemory)(
     LPCVOID pSrcData,
     UINT SrcDataSize,
     D3DXIMAGE_INFO *pSrcInfo
 );
-extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXLoadSurfaceFromFileInMemory)(
+HRESULT DECL_D3DX9FUNC(D3DXLoadSurfaceFromFileInMemory)(
     LPDIRECT3DSURFACE9 pDestSurface,
     CONST PALETTEENTRY *pDestPalette,
     CONST RECT *pDestRect,
@@ -351,17 +323,34 @@ extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXLoadSurfaceFromFileInMemory)(
     D3DCOLOR ColorKey,
     D3DXIMAGE_INFO *pSrcInfo
 );
-extern HRESULT PAL3PATCH_D3DX9FUNC(D3DXFillTexture)(
+HRESULT DECL_D3DX9FUNC(D3DXFillTexture)(
     LPDIRECT3DTEXTURE9 pTexture,
     LPD3DXFILL2D pFunction,
     LPVOID pData
 );
 
-#undef PAL3PATCH_D3DX9FUNC
-
 #endif
 
 
 
+
+// method macros
+
+#define ID3DXSprite_Release(p) (p)->lpVtbl->Release(p)
+#define ID3DXSprite_SetTransform(p,a) (p)->lpVtbl->SetTransform(p,a)
+#define ID3DXSprite_SetWorldViewRH(p,a,b) (p)->lpVtbl->SetWorldViewRH(p,a,b)
+#define ID3DXSprite_SetWorldViewLH(p,a,b) (p)->lpVtbl->SetWorldViewLH(p,a,b)
+#define ID3DXSprite_Begin(p,a) (p)->lpVtbl->Begin(p,a)
+#define ID3DXSprite_End(p) (p)->lpVtbl->End(p)
+#define ID3DXSprite_OnLostDevice(p) (p)->lpVtbl->OnLostDevice(p)
+#define ID3DXSprite_OnResetDevice(p) (p)->lpVtbl->OnResetDevice(p)
+
+#define ID3DXFont_Release(p) (p)->lpVtbl->Release(p)
+#define ID3DXFont_DrawTextA(p,a,b,c,d,e,f) (p)->lpVtbl->DrawTextA(p,a,b,c,d,e,f)
+#define ID3DXFont_DrawTextW(p,a,b,c,d,e,f) (p)->lpVtbl->DrawTextW(p,a,b,c,d,e,f)
+#define ID3DXFont_PreloadCharacters(p,a,b) (p)->lpVtbl->PreloadCharacters(p,a,b)
+#define ID3DXFont_PreloadTextW(p,a,b) (p)->lpVtbl->PreloadTextW(p,a,b)
+#define ID3DXFont_OnLostDevice(p) (p)->lpVtbl->OnLostDevice(p)
+#define ID3DXFont_OnResetDevice(p) (p)->lpVtbl->OnResetDevice(p)
 
 #endif

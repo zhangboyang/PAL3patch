@@ -436,12 +436,12 @@ struct gbPrintFont {
     struct gbRenderEffect *pEffect[2];
 };
 struct gbPrintFontVtbl {
-    int (__fastcall *Init)(struct gbPrintFont *this, int dummy);
-    void (__fastcall *Release)(struct gbPrintFont *this, int dummy);
-    void (__fastcall *Flush)(struct gbPrintFont *this, int dummy);
-    void (__fastcall *Flush3D)(struct gbPrintFont *this, int dummy);
-    void (__fastcall *PrintString)(struct gbPrintFont *this, int dummy, char *, float, float, float, float);
-    void (__fastcall *Print3DString)(struct gbPrintFont *this, int dummy, char *, float, float, float);
+    MAKE_THISCALL(int, *Init, struct gbPrintFont *this);
+    MAKE_THISCALL(void, *Release, struct gbPrintFont *this);
+    MAKE_THISCALL(void, *Flush, struct gbPrintFont *this);
+    MAKE_THISCALL(void, *Flush3D, struct gbPrintFont *this);
+    MAKE_THISCALL(void, *PrintString, struct gbPrintFont *this, char *, float, float, float, float);
+    MAKE_THISCALL(void, *Print3DString, struct gbPrintFont *this, char *, float, float, float);
 };
 #define gbPrintFont_vfptr_Flush(this) THISCALL_WRAPPER((this)->vfptr->Flush, this)
 
@@ -547,7 +547,7 @@ struct UIFrameWnd {
 struct CCBUI;
 
 struct CCBUI_funcptr_t {
-    unsigned long (__fastcall *fp)(struct CCBUI *this, int dummy, unsigned long);
+    void *fp;
     DWORD fp_data[3];
 };
 

@@ -405,7 +405,7 @@ static MAKE_THISCALL(int, LockBackBuffer, struct gbGfxManager_D3D *this, struct 
     
     // save parameters
     gfxmgr = this;
-    switch (TOUINT(__builtin_return_address(0))) {
+    switch (TOUINT(func_return_address())) {
         case 0x004BDB7B: locktype = LT_RENDERTARGET; break;
         case 0x00406DA2: locktype = LT_SCREENSHOT; break;
         default: locktype = LT_UNKNOWN; break;

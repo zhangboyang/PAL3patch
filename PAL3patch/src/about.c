@@ -30,8 +30,7 @@ void show_about()
     int flag = get_int_from_configfile("showabout");
     if (flag) {
         wchar_t buf[MAXLINE];
-        memset(buf, 0, sizeof(buf));
-        snwprintf(buf, sizeof(buf) / sizeof(wchar_t) - 1, wstr_about_text, patch_version, build_info);
+        snwprintf(buf, sizeof(buf) / sizeof(wchar_t), wstr_about_text, patch_version, build_info);
         MessageBoxW(NULL, buf, wstr_about_title, MB_ICONINFORMATION | MB_SETFOREGROUND); 
     }
 }

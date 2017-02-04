@@ -1,7 +1,7 @@
 #include "common.h"
 
 // the hook framework
-static int nr_hooks[MAX_HOOK_TYPES] = {};
+static int nr_hooks[MAX_HOOK_TYPES];
 static void (*hookfunc[MAX_HOOK_TYPES][MAX_HOOKS])();
 
 static void add_hook(int hookid, void (*funcptr)())
@@ -208,6 +208,7 @@ static void init_setcursorpos_hook()
 // init all hooks
 void init_hooks()
 {
+    memset(nr_hooks, 0, sizeof(nr_hooks));
     init_gameloop_hook();
     init_atexit_hook();
     init_getcursorpos_hook();

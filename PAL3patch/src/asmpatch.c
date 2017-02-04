@@ -5,7 +5,7 @@ void patchentry(struct trapframe *tf)
     unsigned old_esp = tf->esp;
     tf->patch_proc(tf);
     unsigned new_esp = tf->esp;
-    if (new_esp < old_esp && old_esp - new_esp > MAX_PUSH_DWORDS * 4) {
+    if (new_esp < old_esp && old_esp - new_esp > max_push_dwords * 4) {
         fail("too many stack memory allocated.");
     }
 }

@@ -2,15 +2,14 @@
 
 #ifdef DYNLINK_D3DX9_AT_RUNTIME
 
-#define DECLARE_D3DX9_FUNCPTR(funcptr) typeof(funcptr) funcptr
-#define IMPORT_D3DX9_FUNCPTR(funcptr) ((funcptr) = (void *) GetProcAddress_safe(hD3DX9, TOSTR(funcptr)))
+/*
+    PAL3's gbengine.dll uses D3DX9 from summer 2003 SDK
+    the D3DX_SDK_VERSION is 21 in this SDK, so the DLL name is d3dx9_21.dll
+    in fact, Microsoft has never release such DLL, this DLL is compiled by myself
+*/
+#define D3DX9_DLL "d3dx9_" TOSTR(D3DX_SDK_VERSION) ".dll"
 
-//DECLARE_D3DX9_FUNCPTR(D3DXSaveTextureToFileA);
-DECLARE_D3DX9_FUNCPTR(D3DXCreateFontW);
-DECLARE_D3DX9_FUNCPTR(D3DXCreateSprite);
-DECLARE_D3DX9_FUNCPTR(D3DXGetImageInfoFromFileInMemory);
-DECLARE_D3DX9_FUNCPTR(D3DXLoadSurfaceFromFileInMemory);
-DECLARE_D3DX9_FUNCPTR(D3DXFillTexture);
+#define IMPORT_D3DX9_FUNCPTR(func) (D3DXFUNC(func) = (void *) GetProcAddress_safe(hD3DX9, TOSTR(func)))
 
 static HMODULE hD3DX9;
 

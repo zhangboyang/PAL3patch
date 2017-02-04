@@ -77,7 +77,7 @@ void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height,
     IDirect3DSurface9 *suf = NULL;
     void *bits = NULL;
     
-    if (FAILED(D3DXGetImageInfoFromFileInMemory(filedata, filelen, &img_info))) goto fail;
+    if (FAILED(D3DXFUNC(D3DXGetImageInfoFromFileInMemory)(filedata, filelen, &img_info))) goto fail;
     *width = img_info.Width;
     *height = img_info.Height;
     *bitcount = 32; // FIXME: detect if alpha exists
@@ -91,11 +91,11 @@ void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height,
         suf = NULL;
         goto fail;
     }
-    if (FAILED(D3DXLoadSurfaceFromFileInMemory(suf, NULL, NULL, filedata, filelen, NULL, D3DX_DEFAULT, 0, NULL))) goto fail;
+    if (FAILED(D3DXFUNC(D3DXLoadSurfaceFromFileInMemory)(suf, NULL, NULL, filedata, filelen, NULL, D3DX_DEFAULT, 0, NULL))) goto fail;
     if (FAILED(IDirect3DSurface9_LockRect(suf, &lrc, NULL, 0))) goto fail;
     bits = mem_allocator->malloc(img_info.Width * img_info.Height * (*bitcount / 8));
     int i;
-    for (i = 0; i < img_info.Height; i++) {
+    for (i = 0; i < (int) img_info.Height; i++) {
         memcpy(PTRADD(bits, i * img_info.Width * (*bitcount / 8)), PTRADD(lrc.pBits, i * lrc.Pitch), img_info.Width * (*bitcount / 8));
     }
     /* // fill random color, for debug purpose

@@ -11,7 +11,7 @@
 #define TO_STR(x) __TO_STR(x)
 
 #define MAXLINE 4096
-#define MAXLINEFMT "%" TO_STR(MAXLINE) "s"
+#define MAXLINEFMT "%4095s"
 
 #define STR_STARTS_WITH(A, B) (strncmp((A), (B), strlen((B))) == 0)
 

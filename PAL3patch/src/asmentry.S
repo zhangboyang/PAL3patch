@@ -1,11 +1,19 @@
-#include "asmpatch.h"
+// MAX_PUSH_DWORDS controls how many dwords 'asmentry' will reserve for possible stack pushes
+// this value can't be too large (no more than one page)
+// this value mustn't smaller than 3
+#define MAX_PUSH_DWORDS 16
 
 #define X ((MAX_PUSH_DWORDS - 3) * 4)
 #define Y ((MAX_PUSH_DWORDS - 1) * 4)
 #define Z ((MAX_PUSH_DWORDS + 3) * 4)
 
+.data
+.p2align 2
+.globl _max_push_dwords
+_max_push_dwords:
+.long MAX_PUSH_DWORDS
+
 .text
-.align 0x10
 .globl _asmentry@4
 _asmentry@4:
 	pushf
@@ -33,9 +41,3 @@ _asmentry@4:
 	popl %esp
 	popf
 	ret
-
-/*
-how to use asm entry:
-	push FUNC_ID
-	call asmentry
-*/

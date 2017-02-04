@@ -101,7 +101,7 @@ static void showfps_onendscene()
     }
     
     wchar_t buf[MAXLINE];
-    snwprintf(buf, sizeof(buf) / sizeof(wchar_t), L"%hs" "FPS = %.3f\n\n" "%hs", vstr, fps, jstr);
+    snwprintf(buf, sizeof(buf) / sizeof(wchar_t), L"%hsFPS = %.3f\n\n%hs", vstr, fps, jstr);
 
     
     IDirect3DStateBlock9_Capture(pFPSStateBlock);
@@ -143,12 +143,12 @@ static void showfps_onresetdevice()
 }
 static void showfps_initfont()
 {
-    if (FAILED(D3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, 12, 0, 0, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, PROOF_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Fixedsys", &pFPSFont))) {
+    if (FAILED(D3DXFUNC(D3DXCreateFontW)(GB_GfxMgr->m_pd3dDevice, 12, 0, 0, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, PROOF_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Fixedsys", &pFPSFont))) {
         warning("can't create font for showing FPS.");
         pFPSFont = NULL;
     }
     
-    if (FAILED(D3DXCreateSprite(GB_GfxMgr->m_pd3dDevice, &pFPSSprite))) {
+    if (FAILED(D3DXFUNC(D3DXCreateSprite)(GB_GfxMgr->m_pd3dDevice, &pFPSSprite))) {
         fail("can't create sprite for showing FPS.");
     }
     

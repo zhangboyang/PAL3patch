@@ -9,7 +9,7 @@ static MAKE_THISCALL(int, gbTexture_D3D_CreateForRenderTarget_wrapper, struct gb
 {
     int ret = gbTexture_D3D_CreateForRenderTarget(this, width, height, format);
     if (ret) {
-        D3DXFillTexture((IDirect3DTexture9 *) this->pTex, fill_black, NULL);
+        D3DXFUNC(D3DXFillTexture)((IDirect3DTexture9 *) this->pTex, fill_black, NULL);
     }
     return ret;
 }

@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0C1CB014-1772-4E7F-8EBE-3421F21AC14C}</ProjectGuid>
+    <RootNamespace>PAL3patch</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PAL3patch.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PAL3patch.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(IncludePath);$(D3D9SDK_PATH)\Include</IncludePath>
+    <LibraryPath>$(LibraryPath);$(D3D9SDK_PATH)\Lib</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(IncludePath);$(D3D9SDK_PATH)\Include</IncludePath>
+    <LibraryPath>$(LibraryPath);$(D3D9SDK_PATH)\Lib</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>false</SDLCheck>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>src/PAL3patch.def</ModuleDefinitionFile>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>common.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>src/PAL3patch.def</ModuleDefinitionFile>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\about.c" />
+    <ClCompile Include="src\asmpatch.c" />
+    <ClCompile Include="src\cfgreader.c" />
+    <ClCompile Include="src\cjktable.c" />
+    <ClCompile Include="src\common.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\d3d9sdk.c" />
+    <ClCompile Include="src\effecthook.c" />
+    <ClCompile Include="src\framework.c" />
+    <ClCompile Include="src\hook.c" />
+    <ClCompile Include="src\locale.c" />
+    <ClCompile Include="src\memallocator.c" />
+    <ClCompile Include="src\misc.c" />
+    <ClCompile Include="src\pal3.c" />
+    <ClCompile Include="src\PAL3patch.c" />
+    <ClCompile Include="src\patch_cdpatch.c" />
+    <ClCompile Include="src\patch_clampuilib.c" />
+    <ClCompile Include="src\patch_console.c" />
+    <ClCompile Include="src\patch_depcompatible.c" />
+    <ClCompile Include="src\patch_disablekbdhook.c" />
+    <ClCompile Include="src\patch_dpiawareness.c" />
+    <ClCompile Include="src\patch_fix3dctrl.c" />
+    <ClCompile Include="src\patch_fixcombatui.c" />
+    <ClCompile Include="src\patch_fixeffect.c" />
+    <ClCompile Include="src\patch_fixfov.c" />
+    <ClCompile Include="src\patch_fixlineupui.c" />
+    <ClCompile Include="src\patch_fixmemfree.c" />
+    <ClCompile Include="src\patch_fixortho.c" />
+    <ClCompile Include="src\patch_fixreset.c" />
+    <ClCompile Include="src\patch_fixsceneui.c" />
+    <ClCompile Include="src\patch_fixui.c" />
+    <ClCompile Include="src\patch_fixuistaticex.c" />
+    <ClCompile Include="src\patch_forcesettexture.c" />
+    <ClCompile Include="src\patch_graphicspatch.c" />
+    <ClCompile Include="src\patch_nocpk.c" />
+    <ClCompile Include="src\patch_nolockablebackbuffer.c" />
+    <ClCompile Include="src\patch_reduceinputlatency.c" />
+    <ClCompile Include="src\patch_regredirect.c" />
+    <ClCompile Include="src\patch_relativetimer.c" />
+    <ClCompile Include="src\patch_setlocale.c" />
+    <ClCompile Include="src\patch_showfps.c" />
+    <ClCompile Include="src\patch_testcombat.c" />
+    <ClCompile Include="src\patch_timerresolution.c" />
+    <ClCompile Include="src\patch_uireplacefont.c" />
+    <ClCompile Include="src\patch_uireplacetexf.c" />
+    <ClCompile Include="src\sha1.c" />
+    <ClCompile Include="src\texturehook.c" />
+    <ClCompile Include="src\transform.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\about.h" />
+    <ClInclude Include="src\asmpatch.h" />
+    <ClInclude Include="src\cfgreader.h" />
+    <ClInclude Include="src\cjktable.h" />
+    <ClInclude Include="src\common.h" />
+    <ClInclude Include="src\d3d9sdk.h" />
+    <ClInclude Include="src\effecthook.h" />
+    <ClInclude Include="src\framework.h" />
+    <ClInclude Include="src\hook.h" />
+    <ClInclude Include="src\locale.h" />
+    <ClInclude Include="src\memallocator.h" />
+    <ClInclude Include="src\misc.h" />
+    <ClInclude Include="src\pal3.h" />
+    <ClInclude Include="src\PAL3patch.h" />
+    <ClInclude Include="src\patch_common.h" />
+    <ClInclude Include="src\sha1.h" />
+    <ClInclude Include="src\texturehook.h" />
+    <ClInclude Include="src\transform.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

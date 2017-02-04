@@ -1,0 +1,12 @@
+【使用MSVC编译】
+由于代码中使用了一些C99特性，所以需要使用MSVC 2013或以上版本，因此只能支持WinXP和更高平台，不支持Win2000和Win9x。
+此外，由于汇编文件（.S文件）语法在不同编译器下完全不同，因此需要先用GCC编译出目标文件，提供给MSVC使用。
+使用方法：
+（1）先在有gcc的环境中运行：make msvcasm；得到PAL3patch_asm.lib文件
+（2）将正确版本（summer2003）的DirectX SDK解压缩到C:\DX90SDK文件夹
+（3）然后在有MSVC 2013+的环境中打开PAL3patch.vcxproj；编译即可
+其他说明：
+（1）如果SDK目录不是C:\DX90SDK，可以在“属性管理器”中的“PAL3patch”属性表中“用户宏”处修改，也可直接修改PAL3patch.props文件。
+（2）可以用MSVC的代码分析工具，找到代码中潜在的错误。先在项目属性页中将“平台工具集”设为非WinXP的版本，然后“对解决方案运行代码分析”即可。（已用此功能找到不少BUG）
+（3）在Debug配置下，会链接D3DX9D.LIB，它会引用D3DX9D.DLL；而在Release配置下则会链接D3DX9.LIB（静态链接D3DX）
+

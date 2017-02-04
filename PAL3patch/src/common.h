@@ -1,10 +1,34 @@
 #ifndef PAL3PATCH_COMMON_H
 #define PAL3PATCH_COMMON_H
 
+// if you want to avoid linking to D3DX, uncomment this
+//#define DYNLINK_D3DX9_AT_RUNTIME
+
+
 // compiler capability
-#if (defined(_MSC_VER) && _MSC_VER >= 1400) || \
-    (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)))
+#if defined(_MSC_VER)
+#if _MSC_VER < 1800
+#error require MSVC++ 2013 or higher
+#endif
+#define _USE_MATH_DEFINES
+#define _CRT_SECURE_NO_WARNINGS
+#pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "comctl32.lib")
+#pragma comment(lib, "PAL3patch_asm.lib")
+#define __func__ __FUNCTION__
+#define HAVE_D3DX9
+#endif
+
+#if (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)))
 #define HAVE_THISCALL
+#endif
+
+#if defined(_MSC_VER)
+#define func_return_address() _ReturnAddress()
+#elif defined(__GNUC__)
+#define func_return_address() __builtin_return_address(0)
+#elif
+#error
 #endif
 
 #if defined(_MSC_VER)
@@ -16,7 +40,7 @@
 #endif
 
 #ifdef HAVE_THISCALL
-#define MAKE_THISCALL(ret_type, func_name, this_decl, ...) ret_type __thiscall func_name(this_decl, ##__VA_ARGS__)
+#define MAKE_THISCALL(ret_type, func_name, this_decl, ...) ret_type (__thiscall func_name)(this_decl, ##__VA_ARGS__)
 #define MAKE_THISCALL_FUNCPTR(addr, ret_type, this_type, ...) ((ret_type (__thiscall *)(this_type, ##__VA_ARGS__)) TOPTR(addr))
 #define THISCALL_WRAPPER(func, this, ...) func(this, ##__VA_ARGS__)
 #else
@@ -70,8 +94,10 @@ typedef unsigned char bool;
 #define true 1
 #define false 0
 
+#if defined(__GNUC__)
 // avoid libmoldname.a
 #define _NO_OLDNAMES
+#endif
 
 // for InitCommonControlsEx
 #define _WIN32_IE	0x0300
@@ -89,11 +115,13 @@ typedef unsigned char bool;
 #include <limits.h>
 #include <assert.h>
 
+// windows headers
 #include <windows.h>
 #include <wincrypt.h>
 #include <commctrl.h>
-#include <d3d9.h>
 
+// direct3d headers
+#include "d3d9sdk.h"
 
 // PAL3patch headers
 #include "memallocator.h"
@@ -109,7 +137,6 @@ typedef unsigned char bool;
 #include "transform.h"
 #include "patch_common.h"
 #include "PAL3patch.h"
-#include "d3dx9_21.h"
 #include "cjktable.h"
 #include "effecthook.h"
 #include "texturehook.h"
@@ -120,6 +147,10 @@ typedef unsigned char bool;
 #define strnicmp _strnicmp
 #define strdup _strdup
 #define wcsdup _wcsdup
-#define snwprintf _snwprintf
+
+// make sure '\0' is added when using snprintf family functions
+#define snprintf(s, n, format, ...) ((n) > 0 ? ((s)[(n) - 1] = 0, _snprintf((s), (n) - 1, format, ##__VA_ARGS__)) : -1)
+#define snwprintf(s, n, format, ...) ((n) > 0 ? ((s)[(n) - 1] = 0, _snwprintf((s), (n) - 1, format, ##__VA_ARGS__)) : -1)
+#define vsnprintf(s, n, format, ...) ((n) > 0 ? ((s)[(n) - 1] = 0, _vsnprintf((s), (n) - 1, format, ##__VA_ARGS__)) : -1)
 
 #endif

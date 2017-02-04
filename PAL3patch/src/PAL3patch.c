@@ -5,9 +5,15 @@ unsigned gboffset;
 
 static void self_check()
 {
-    // asserts
-    assert(D3D_SDK_VERSION == 31);
-    assert(D3DX_SDK_VERSION == 21);
+    // check SDK versions
+    if (D3D_SDK_VERSION != 31) {
+        fail("wrong D3D_SDK_VERSION.");
+    }
+    if (D3DX_SDK_VERSION != 21) {
+        fail("wrong D3DX_SDK_VERSION.");
+    }
+    
+    // check struct sizes
     assert(sizeof(struct uiwnd_ptag) == 4);
     assert(sizeof(struct CCBUI) == 0xA48);
     assert(sizeof(struct UIStatic) == 0x98);

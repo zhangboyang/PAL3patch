@@ -252,6 +252,8 @@ EXPORTS
 	D3DXSHPRTSimulation
 	D3DXSHPRTSimulationTex
 	D3DXSHProjectCubeMap
+	D3DXSHProjectParabolicMap
+	D3DXSHProjectSphereMap
 	D3DXSHRotate
 	D3DXSHRotateZ
 	D3DXSHScale

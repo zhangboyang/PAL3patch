@@ -103,7 +103,7 @@ static void d3dxfont_insertfont(int fontsize, int boldflag, int preload)
     }
     
     // create the font
-    if (FAILED(D3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, d3dxfont_quality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
+    if (FAILED(D3DXFUNC(D3DXCreateFontW)(GB_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, d3dxfont_quality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
         fail("can't create ID3DXFont for size '%d'.", fontsize);
     }
     
@@ -239,7 +239,7 @@ static void d3dxfont_init()
     // do preload
     d3dxfont_preload(get_int_from_configfile("uireplacefont_preloadcharset"));
     
-    if (FAILED(D3DXCreateSprite(GB_GfxMgr->m_pd3dDevice, &d3dxfont_sprite))) {
+    if (FAILED(D3DXFUNC(D3DXCreateSprite)(GB_GfxMgr->m_pd3dDevice, &d3dxfont_sprite))) {
         fail("can't create sprite for font replacing.");
     }
     
