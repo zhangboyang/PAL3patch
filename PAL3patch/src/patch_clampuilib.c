@@ -165,10 +165,13 @@ static void texlib_loader(struct texture_hook_info *thinfo)
         thinfo->bits = thinfo->mem_allocator->malloc(imgsz);
         copy_bits(thinfo->bits, thinfo->width * (thinfo->bitcount / 8), 0, 0, img->bits, img->width * (img->bitcount / 8), tex_origin_x, tex_origin_y - tex_height, tex_width, tex_height, thinfo->bitcount);
         clamp_rect(thinfo->bits, thinfo->width, thinfo->height, thinfo->bitcount, thinfo->width * (thinfo->bitcount / 8), 0, 0, tex_width, tex_height);
-        /*int i;
-        for (i = 0; i < thinfo->width * thinfo->height; i++) {
-            unsigned char *c = thinfo->bits + i * (thinfo->bitcount / 8);
-            c[0] = rand(); c[1] = rand(); c[2] = rand();
+        /*int i, j;
+        char *bits = thinfo->bits;
+        for (i = 0; i < thinfo->width; i++) {
+            for (j = 0; j < thinfo->height; j++) {
+                unsigned char *c = bits + (i + j * thinfo->width) * (thinfo->bitcount / 8);
+                c[0] = rand(); c[1] = rand(); c[2] = rand();
+            }
         }*/
     }
 }

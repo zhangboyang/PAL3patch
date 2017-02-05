@@ -16,7 +16,7 @@
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "PAL3patch_asm.lib")
 #define __func__ __FUNCTION__
-#define HAVE_D3DX9
+#define HAVE_D3D9SDK
 #endif
 
 #if (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)))

@@ -1312,6 +1312,55 @@ struct _Texture_Info {
     char _tex_valid;
 };
 
+struct GRP_KEYREG {
+    int Data;
+    int HoldTime;
+    int CountMode;
+    int PressTime;
+};
+
+struct GRPinput {
+    IDirectInput8 *m_lpDI;
+    IDirectInputDevice8 *m_lpDIDKeyboard;
+    IDirectInputDevice8 *m_lpDIDMouse;
+    float m_mouseSensitivity;
+    long m_mouseMinX;
+    long m_mouseMinY;
+    long m_mouseMaxX;
+    long m_mouseMaxY;
+    long m_joystickMinX;
+    long m_joystickMinY;
+    long m_joystickMaxX;
+    long m_joystickMaxY;
+    POINT m_mousept;
+    long m_mouseX;
+    long m_mouseY;
+    long m_mouseFreeX;
+    long m_mouseFreeY;
+    long m_mouseDeltaX;
+    long m_mouseDeltaY;
+    long m_joystickX;
+    long m_joystickY;
+    long m_joystickFreeX;
+    long m_joystickFreeY;
+    long m_joystickDeltaX;
+    long m_joystickDeltaY;
+    BYTE m_keyStates[270];
+    BYTE m_keyRaw[256];
+    ULONG m_keyPressTimes[270];
+    ULONG m_keyDragStartPositions[270][2];
+    BYTE m_shiftedKeyStates[270];
+    ULONG m_DIKToKEY[256];
+    DIMOUSESTATE2 MouseState;
+    ULONG charTOscan[256];
+    int KeyTransformation[10];
+    int m_bMouse;
+    int m_bKeyboard;
+    int m_bJoystick;
+    struct GRP_KEYREG KeyInfo[270];
+};
+
+
 // D3DX functions
 #define gbD3DXTex_CImage_ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346CA, void, struct D3DXTex_CImage *), this)
 #define gbD3DXTex_CImage_dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346E3, void, struct D3DXTex_CImage *), this)
@@ -1387,6 +1436,8 @@ struct _Texture_Info {
 #define HeadMsg_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402D20, void, struct HeadMsg *), this)
 #define _TextureLib_Data_GetLibInfo(this, filename) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053F960, bool, struct _TextureLib_Data *, const char *), this, filename)
 #define UIRenderQuad_color ((void (*)(int, int, int, int, float, float, struct gbColorQuad *, struct gbTextureArray *)) TOPTR(0x00540D20))
+#define GRPinput_AcquireMouse(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402310, void, struct GRPinput *this), this)
+#define GRPinput_AcquireKeyboard(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402380, void, struct GRPinput *this), this)
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)

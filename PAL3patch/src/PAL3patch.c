@@ -39,6 +39,7 @@ static void self_check()
     assert(sizeof(struct UIGameOver) == 0xE8);
     assert(sizeof(struct HeadMsg) == 0x24);
     assert(sizeof(struct gbTexture_D3D) == 0x60);
+    assert(sizeof(struct GRPinput) == 0x2958);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -84,6 +85,7 @@ static void init_stage2()
     INIT_PATCHSET(nocpk);
     INIT_PATCHSET(console);
     INIT_PATCHSET(relativetimer);
+    INIT_PATCHSET(fixacquire);
     INIT_PATCHSET(showfps);
     INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
     if (!INIT_PATCHSET(testcombat)) {
@@ -107,6 +109,7 @@ static void init_stage2()
                 INIT_PATCHSET(fixsceneui);
                 INIT_PATCHSET(uireplacetexf);
                 INIT_PATCHSET(clampuilib);
+                INIT_PATCHSET(fixuibuttonex);
             }
             INIT_PATCHSET(fixeffect);
             INIT_PATCHSET(forcesettexture);

@@ -303,19 +303,21 @@ static void vbuf_draw(const fRECT *frect_list, int frect_cnt)
     }
     IDirect3DVertexBuffer9_Unlock(uifb_vbuf);
     
-    // prepare d3d state
-    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ALPHABLENDENABLE, FALSE);
-    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_CULLMODE, D3DCULL_NONE);
-    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZENABLE, TRUE);
-    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
-    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_LIGHTING, FALSE);
-    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_SHADEMODE, D3DSHADE_FLAT);
-    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLOROP, D3DTOP_DISABLE);
-    
-    // draw
-    IDirect3DDevice9_SetFVF(GB_GfxMgr->m_pd3dDevice, UIFB_VERTEX_FVF);
-    IDirect3DDevice9_SetStreamSource(GB_GfxMgr->m_pd3dDevice, 0, uifb_vbuf, 0, UIFB_VERTEX_SIZE);
-    IDirect3DDevice9_DrawPrimitive(GB_GfxMgr->m_pd3dDevice, D3DPT_TRIANGLELIST, 0, UIFB_VBUF_TRANGLE_PER_RECT * draw_cnt);
+    if (draw_cnt > 0) {
+        // prepare d3d state
+        IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ALPHABLENDENABLE, FALSE);
+        IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_CULLMODE, D3DCULL_NONE);
+        IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZENABLE, TRUE);
+        IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
+        IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_LIGHTING, FALSE);
+        IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_SHADEMODE, D3DSHADE_FLAT);
+        IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_COLOROP, D3DTOP_DISABLE);
+        
+        // draw
+        IDirect3DDevice9_SetFVF(GB_GfxMgr->m_pd3dDevice, UIFB_VERTEX_FVF);
+        IDirect3DDevice9_SetStreamSource(GB_GfxMgr->m_pd3dDevice, 0, uifb_vbuf, 0, UIFB_VERTEX_SIZE);
+        IDirect3DDevice9_DrawPrimitive(GB_GfxMgr->m_pd3dDevice, D3DPT_TRIANGLELIST, 0, UIFB_VBUF_TRANGLE_PER_RECT * draw_cnt);
+    }
 
     IDirect3DStateBlock9_Apply(uifb_stateblock);
 }

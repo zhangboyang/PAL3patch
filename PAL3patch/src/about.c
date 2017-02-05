@@ -13,10 +13,10 @@ const char build_info[] =
 #else
 " -thiscall"
 #endif
-#ifdef HAVE_D3DX9
-" +d3dx9hdr"
+#ifdef HAVE_D3D9SDK
+" +d3d9sdk"
 #else
-" -d3dx9hdr"
+" -d3d9sdk"
 #endif
 #ifdef DYNLINK_D3DX9_AT_RUNTIME
 " +d3dx9dll"

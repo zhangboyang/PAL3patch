@@ -1,6 +1,36 @@
 #ifndef PAL3PATCH_D3D9SDK_H
 #define PAL3PATCH_D3D9SDK_H
 
+// DirectInput
+
+#define DIRECTINPUT_VERSION 0x0800
+
+#ifdef HAVE_D3D9SDK
+#include <dinput.h>
+#else
+
+struct IDirectInput8A;
+struct IDirectInputDevice8A;
+typedef struct IDirectInput8A IDirectInput8A;
+typedef struct IDirectInputDevice8A IDirectInputDevice8A;
+#define IDirectInput8 IDirectInput8A
+#define IDirectInputDevice8 IDirectInputDevice8A
+
+typedef struct _DIMOUSESTATE2 {
+    LONG    lX;
+    LONG    lY;
+    LONG    lZ;
+    BYTE    rgbButtons[8];
+} DIMOUSESTATE2, *LPDIMOUSESTATE2;
+
+#endif
+
+
+
+
+// D3DX
+
+
 #if defined(_MSC_VER) && !defined(DYNLINK_D3DX9_AT_RUNTIME)
 #ifdef _DEBUG
 #pragma comment(lib, "d3dx9d.lib")
@@ -13,13 +43,13 @@
 #endif
 
 
-#ifdef HAVE_D3DX9
+#ifdef HAVE_D3D9SDK
 // include d3dx9.h only, do not include d3d9.h here
 // d3dx9.h will include d3d9.h automaticly
 // this avoid confilits between DirectX SDK headers and DirectX headers in Windows 8 SDK
 #include <d3dx9.h>
 
-#else /* HAVE_D3DX9 */
+#else /* HAVE_D3D9SDK */
 
 #include <d3d9.h>
 
@@ -270,7 +300,7 @@ typedef VOID (WINAPI *LPD3DXFILL2D)(D3DXVECTOR4 *pOut,
     CONST D3DXVECTOR2 *pTexCoord, CONST D3DXVECTOR2 *pTexelSize, LPVOID pData);
 
 
-#endif /* HAVE_D3DX9 */
+#endif /* HAVE_D3D9SDK */
 
 
 
@@ -285,7 +315,7 @@ extern void d3dx9_dynlink();
 
 
 
-#if defined(DYNLINK_D3DX9_AT_RUNTIME) || !defined(HAVE_D3DX9)
+#if defined(DYNLINK_D3DX9_AT_RUNTIME) || !defined(HAVE_D3D9SDK)
 
 // functions for D3DX9
 HRESULT DECL_D3DX9FUNC(D3DXSaveTextureToFileA)(LPCTSTR pDestFile, D3DXIMAGE_FILEFORMAT DestFormat, LPDIRECT3DBASETEXTURE9 pSrcTexture, const PALETTEENTRY *pSrcPalette);
@@ -331,9 +361,6 @@ HRESULT DECL_D3DX9FUNC(D3DXFillTexture)(
 
 #endif
 
-
-
-
 // method macros
 
 #define ID3DXSprite_Release(p) (p)->lpVtbl->Release(p)
@@ -352,5 +379,6 @@ HRESULT DECL_D3DX9FUNC(D3DXFillTexture)(
 #define ID3DXFont_PreloadTextW(p,a,b) (p)->lpVtbl->PreloadTextW(p,a,b)
 #define ID3DXFont_OnLostDevice(p) (p)->lpVtbl->OnLostDevice(p)
 #define ID3DXFont_OnResetDevice(p) (p)->lpVtbl->OnResetDevice(p)
+
 
 #endif

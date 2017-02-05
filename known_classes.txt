@@ -46,5 +46,7 @@ UISceneMap（已修正）
 SceneMapPlayer
 UISceneFrm（已修正）
 HeadMsg（已修正）
+UIButtonEx
+UIButtonEXA
 
 

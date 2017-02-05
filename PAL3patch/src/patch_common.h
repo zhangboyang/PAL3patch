@@ -7,7 +7,7 @@
 
 // patchset based on integer config
 #define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
-#define INIT_PATCHSET(name) (GET_PATCHSET_FLAG(name) ? (MAKE_PATCHSET_NAME(name)(GET_PATCHSET_FLAG(name)), GET_PATCHSET_FLAG(name)) : 0)
+#define INIT_PATCHSET(name) (GET_PATCHSET_FLAG(name) ? (MAKE_PATCHSET_NAME(name)(GET_PATCHSET_FLAG(name)), 1) : 0)
 
 
 // patchset based on string config
@@ -32,6 +32,7 @@ MAKE_PATCHSET(nocpk);
 MAKE_PATCHSET(showfps);
 MAKE_PATCHSET(console);
 MAKE_PATCHSET(relativetimer);
+MAKE_PATCHSET(fixacquire);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
@@ -186,6 +187,7 @@ MAKE_PATCHSET(graphicspatch);
             #define scenedlgface_scalefactor (scalefactor_table[SF_SCENEDLGFACE])
         MAKE_PATCHSET(uireplacetexf);
         MAKE_PATCHSET(clampuilib);
+        MAKE_PATCHSET(fixuibuttonex);
 
     MAKE_PATCHSET(fixeffect);
     MAKE_PATCHSET(forcesettexture);
