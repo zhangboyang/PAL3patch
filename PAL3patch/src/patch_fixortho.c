@@ -69,7 +69,10 @@ static void init_gbcamera_wrappers()
     */
     INIT_WRAPPER_VFPTR(gbCamera_SetAsCurrent_wrapper, 0x0056A2DC); // dllexport
     INIT_WRAPPER_VFPTR(gbCamera_GetRayToScreen_wrapper, 0x0056A2EC); // dllexport
-    INIT_WRAPPER_CALL(gbCamera_PointEyeToScr_100220B0_wrapper, { 0x100222B4, 0x100226CD }); // xref
+    INIT_WRAPPER_CALL(gbCamera_PointEyeToScr_100220B0_wrapper, { // xreg
+        gboffset + 0x100222B4,
+        gboffset + 0x100226CD,
+    });
 }
 
 MAKE_PATCHSET(fixortho)

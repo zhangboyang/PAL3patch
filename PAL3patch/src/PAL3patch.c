@@ -86,34 +86,35 @@ static void init_stage2()
     INIT_PATCHSET(console);
     INIT_PATCHSET(relativetimer);
     INIT_PATCHSET(fixacquire);
+    INIT_PATCHSET(preciseresmgr);
+    
     INIT_PATCHSET(showfps);
     INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
-    if (!INIT_PATCHSET(testcombat)) {
-        // here are some patches not compatiable with 'testcombat'
-        INIT_PATCHSET(dpiawareness);
-        if (INIT_PATCHSET(graphicspatch)) {
-            // these are subpatchs of graphics patch
-            INIT_PATCHSET(fixfov);
-            INIT_PATCHSET(fixortho);
-            INIT_PATCHSET(nolockablebackbuffer);
-            INIT_PATCHSET(fixreset);
-            if (INIT_PATCHSET(fixui)) { 
-                // must called after INIT_PATCHSET(graphicspatch)
-                // must called after INIT_PATCHSET(setlocale) because of D3DXCreateFont need charset information
-                // ui fixes
-                INIT_PATCHSET(uireplacefont);
-                INIT_PATCHSET(fixcombatui);
-                INIT_PATCHSET(fix3dctrl);
-                INIT_PATCHSET(fixlineupui);
-                INIT_PATCHSET(fixuistaticex);
-                INIT_PATCHSET(fixsceneui);
-                INIT_PATCHSET(uireplacetexf);
-                INIT_PATCHSET(clampuilib);
-                INIT_PATCHSET(fixuibuttonex);
-            }
-            INIT_PATCHSET(fixeffect);
-            INIT_PATCHSET(forcesettexture);
+    INIT_PATCHSET(dpiawareness);
+    INIT_PATCHSET(testcombat);
+    if (INIT_PATCHSET(graphicspatch)) {
+        // these are subpatchs of graphics patch
+        INIT_PATCHSET(fixfov);
+        INIT_PATCHSET(fixortho);
+        INIT_PATCHSET(nolockablebackbuffer);
+        INIT_PATCHSET(fixreset);
+        if (INIT_PATCHSET(fixui)) { 
+            // must called after INIT_PATCHSET(graphicspatch)
+            // must called after INIT_PATCHSET(setlocale) because of D3DXCreateFont need charset information
+            // ui fixes
+            INIT_PATCHSET(uireplacefont);
+            INIT_PATCHSET(fixcombatui);
+            INIT_PATCHSET(fix3dctrl);
+            INIT_PATCHSET(fixlineupui);
+            INIT_PATCHSET(fixuistaticex);
+            INIT_PATCHSET(fixsceneui);
+            INIT_PATCHSET(uireplacetexf);
+            INIT_PATCHSET(clampuilib);
+            INIT_PATCHSET(fixuibuttonex);
         }
+        INIT_PATCHSET(fixeffect);
+        INIT_PATCHSET(forcesettexture);
+        INIT_PATCHSET(fixtrail);
     }
     
     // init_locale() must called after INIT_PATCHSET(setlocale)

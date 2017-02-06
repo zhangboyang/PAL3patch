@@ -19,13 +19,13 @@
 #define GAME_HEIGHT_ORG 600
 
 // all patchs
-MAKE_PATCHSET(testcombat);
 MAKE_PATCHSET(cdpatch);
 MAKE_PATCHSET(regredirect);
 MAKE_PATCHSET(disablekbdhook);
 MAKE_PATCHSET(depcompatible);
 MAKE_PATCHSET(setlocale);
 MAKE_PATCHSET(dpiawareness);
+MAKE_PATCHSET(testcombat);
 MAKE_PATCHSET(timerresolution);
 MAKE_PATCHSET(fixmemfree);
 MAKE_PATCHSET(nocpk);
@@ -33,6 +33,7 @@ MAKE_PATCHSET(showfps);
 MAKE_PATCHSET(console);
 MAKE_PATCHSET(relativetimer);
 MAKE_PATCHSET(fixacquire);
+MAKE_PATCHSET(preciseresmgr);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
@@ -191,5 +192,6 @@ MAKE_PATCHSET(graphicspatch);
 
     MAKE_PATCHSET(fixeffect);
     MAKE_PATCHSET(forcesettexture);
+    MAKE_PATCHSET(fixtrail);
 
 #endif

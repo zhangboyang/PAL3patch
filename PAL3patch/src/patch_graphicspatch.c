@@ -439,7 +439,7 @@ static void init_window_patch(int flag)
     add_setcursorpos_hook(setcursorpos_window_hookfunc);
     
     // clip cursor
-    if (get_int_from_configfile("clipcursor")) {
+    if (!GET_PATCHSET_FLAG(testcombat) && get_int_from_configfile("clipcursor")) {
         add_gameloop_hook(clipcursor_hook);
         add_atexit_hook(clipcursor_atexit);
     }
@@ -520,10 +520,20 @@ static void add_loading_splash()
 
 static void init_resolution_and_window_patch()
 {
+    // read config
     int window_cfg = get_int_from_configfile("game_windowed");
     const char *resolution_cfg = get_string_from_configfile("game_resolution");
-    if (window_cfg == WINDOW_NOBORDER) resolution_cfg = "current";
+    
+    // adjust config
+    if (GET_PATCHSET_FLAG(testcombat)) {
+        if (strcmp(resolution_cfg, "current") == 0) resolution_cfg = "800x600";
+        window_cfg = WINDOW_NOBORDER;
+    } else {
+        if (window_cfg == WINDOW_NOBORDER) resolution_cfg = "current";
+    }
     if (strcmp(resolution_cfg, "current") == 0 && window_cfg == WINDOW_NORMAL) window_cfg = WINDOW_NOBORDER;
+    
+    // init patches
     init_window_patch(window_cfg);
     patch_resolution_config(resolution_cfg);
 }

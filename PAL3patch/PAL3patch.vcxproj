@@ -107,6 +107,7 @@
     <ClCompile Include="src\patch_disablekbdhook.c" />
     <ClCompile Include="src\patch_dpiawareness.c" />
     <ClCompile Include="src\patch_fix3dctrl.c" />
+    <ClCompile Include="src\patch_fixacquire.c" />
     <ClCompile Include="src\patch_fixcombatui.c" />
     <ClCompile Include="src\patch_fixeffect.c" />
     <ClCompile Include="src\patch_fixfov.c" />
@@ -115,12 +116,15 @@
     <ClCompile Include="src\patch_fixortho.c" />
     <ClCompile Include="src\patch_fixreset.c" />
     <ClCompile Include="src\patch_fixsceneui.c" />
+    <ClCompile Include="src\patch_fixtrail.c" />
     <ClCompile Include="src\patch_fixui.c" />
+    <ClCompile Include="src\patch_fixuibuttonex.c" />
     <ClCompile Include="src\patch_fixuistaticex.c" />
     <ClCompile Include="src\patch_forcesettexture.c" />
     <ClCompile Include="src\patch_graphicspatch.c" />
     <ClCompile Include="src\patch_nocpk.c" />
     <ClCompile Include="src\patch_nolockablebackbuffer.c" />
+    <ClCompile Include="src\patch_preciseresmgr.c" />
     <ClCompile Include="src\patch_reduceinputlatency.c" />
     <ClCompile Include="src\patch_regredirect.c" />
     <ClCompile Include="src\patch_relativetimer.c" />

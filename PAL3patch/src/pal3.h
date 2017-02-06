@@ -113,6 +113,7 @@ struct D3DDriverBug {
     int Gamma_LowByte;
 };
 
+
 struct gbResManager {
     struct gbResource **pBuffer;
     int MaxNum;
@@ -1373,6 +1374,8 @@ struct GRPinput {
 #define UIWnd_SetRect(this, rect) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445FA0, void, struct UIWnd *, RECT *), this, rect)
 #define gbTexture_D3D_CreateForRenderTarget(this, width, height, format) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001BF80, int, struct gbTexture_D3D *, int, int, enum gbPixelFmtType), this, width, height, format)
 #define gbTexture_D3D_CreateFromFileMemory(this, data, len) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001C010, void, struct gbTexture_D3D *, void *, int), this, data, len)
+#define gbTexture_D3D_Ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001BA60, struct gbTexture_D3D *, struct gbTexture_D3D *), this)
+#define gbTexture_D3D_Dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001BAA0, void, struct gbTexture_D3D *), this)
 #define gbPrintFontMgr_GetFont(this, fonttype) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10004450, struct gbPrintFont *, struct gbPrintFontMgr *, enum gbFontType), this, fonttype)
 #define gbPrintFont_PrintString(this, str, x, y, endx, endy) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10022BF0, void, struct gbPrintFont *, const char *, float, float, float, float), this, str, x, y, endx, endy)
 #define _gbmalloc ((malloc_funcptr_t) (gboffset + 0x100E4B0D))
@@ -1386,13 +1389,14 @@ struct GRPinput {
 #define gbCamera_SetAsCurrent(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021A80, void, struct gbCamera *, int), this, a2)
 #define gbCamera_PointEyeToScr_100220B0(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100220B0, void, struct gbCamera *, struct gbVec3D *, float *, float *), this, a2, a3, a4)
 #define gbCamera_GetRayToScreen(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100222C0, void, struct gbCamera *, float, float, struct gbRay *), this, a2, a3, a4);
+#define gbCamera_SetDimention(this, a2, a3) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021C50, void, struct gbCamera *, int, int), this, a2, a3)
 #define gbMatrixStack_Scale(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10027520, void, struct gbMatrixStack *, float, float, float), this, a2, a3, a4);
 #define pUIWND(x) ((struct UIWnd *)(x))
 #define gbVFileSystem_OpenFile(this, filename, mode) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10030540, struct gbVFile *, struct gbVFileSystem *, const char *, unsigned int), this, filename, mode)
 #define gbVFileSystem_GetFileSize(this, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10030BE0, long, struct gbVFileSystem *, struct gbVFile *), this, fp)
 #define gbVFileSystem_Read(this, buf, size, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10030810, void, struct gbVFileSystem *, void *, unsigned int, struct gbVFile *), this, buf, size, fp)
 #define gbVFileSystem_CloseFile(this, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100307A0, void, struct gbVFileSystem *, struct gbVFile *), this, fp)
-
+#define gbCrc32Compute ((unsigned (*)(const char *)) TOPTR(gboffset + 0x100277E0))
 
 // PAL3 functions
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
@@ -1438,6 +1442,9 @@ struct GRPinput {
 #define UIRenderQuad_color ((void (*)(int, int, int, int, float, float, struct gbColorQuad *, struct gbTextureArray *)) TOPTR(0x00540D20))
 #define GRPinput_AcquireMouse(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402310, void, struct GRPinput *this), this)
 #define GRPinput_AcquireKeyboard(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402380, void, struct GRPinput *this), this)
+#define CTrail_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004C6460, bool, struct CTrail *), this)
+#define CTrail_Begin(this, pCam) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004C65F0, void, struct CTrail *, struct gbCamera *), this, pCam)
+
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)

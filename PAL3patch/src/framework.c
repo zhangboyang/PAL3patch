@@ -4,6 +4,12 @@
 
 void memcpy_to_process(unsigned dest, const void *src, unsigned size)
 {
+    // check dest address, debug purpose only
+    // should rebase and make sure GBENGINE.DLL loaded at 0x40000000
+    if (0x10000000 <= dest && dest < 0x10169000) {
+        fail("invalid dest address, dest = %08X, src = %p, size = %08X.", dest, src, size);
+    }
+    
     // using WriteProcessMemory may failed when writing to IAT
     // use VirtualProtect instead
     DWORD flOldProtect, tmp;
@@ -106,18 +112,35 @@ void *hook_import_table(void *image_base, const char *dllname, const char *funcn
     if (!oldptr) {
         fail("can't find address of %s in dll %s.", funcname, dllname);
     }
-    PIMAGE_DOS_HEADER pdoshdr = image_base;
-    PIMAGE_NT_HEADERS pnthdr = PTRADD(image_base, pdoshdr->e_lfanew);
-    PIMAGE_IMPORT_DESCRIPTOR pimpdesc;
-    IMAGE_IMPORT_DESCRIPTOR zeroimpdesc;
-    memset(&zeroimpdesc, 0, sizeof(IMAGE_IMPORT_DESCRIPTOR));
-    for (pimpdesc = PTRADD(image_base, pnthdr->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
-        memcmp(pimpdesc, &zeroimpdesc, sizeof(IMAGE_IMPORT_DESCRIPTOR)) && stricmp(PTRADD(image_base, pimpdesc->Name), dllname);
-        pimpdesc++);
-    if (!pimpdesc->Name) {
-        warning("can't find import descriptor for dll '%s' in module %p, iat hook failed.", dllname, image_base);
+    if (image_base == GetModuleHandle(NULL)) {
+        // we must hardcode IAT address since PAL3.EXE is packed
+        void *iatbase = NULL;
+        if (stricmp(dllname, "KERNEL32.DLL") == 0) {
+            iatbase = PAL3_KERNEL32_IATBASE;
+        } else if (stricmp(dllname, "WINMM.DLL") == 0) {
+            iatbase = PAL3_WINMM_IATBASE;
+        } else if (stricmp(dllname, "USER32.DLL") == 0) {
+            iatbase = PAL3_USER32_IATBASE;
+        } else {
+            warning("iatbase unknown for dll %s.", dllname);
+        }
+        if (iatbase) {
+            hook_iat(iatbase, oldptr, newptr);
+        }
     } else {
-        hook_iat(PTRADD(image_base, pimpdesc->FirstThunk), oldptr, newptr);
+        PIMAGE_DOS_HEADER pdoshdr = image_base;
+        PIMAGE_NT_HEADERS pnthdr = PTRADD(image_base, pdoshdr->e_lfanew);
+        PIMAGE_IMPORT_DESCRIPTOR pimpdesc;
+        IMAGE_IMPORT_DESCRIPTOR zeroimpdesc;
+        memset(&zeroimpdesc, 0, sizeof(IMAGE_IMPORT_DESCRIPTOR));
+        for (pimpdesc = PTRADD(image_base, pnthdr->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
+            memcmp(pimpdesc, &zeroimpdesc, sizeof(IMAGE_IMPORT_DESCRIPTOR)) && stricmp(PTRADD(image_base, pimpdesc->Name), dllname);
+            pimpdesc++);
+        if (!pimpdesc->Name) {
+            warning("can't find import descriptor for dll '%s' in module %p, iat hook failed.", dllname, image_base);
+        } else {
+            hook_iat(PTRADD(image_base, pimpdesc->FirstThunk), oldptr, newptr);
+        }
     }
     return oldptr;
 }

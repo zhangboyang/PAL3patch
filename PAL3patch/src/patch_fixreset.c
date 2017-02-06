@@ -45,6 +45,9 @@ static MAKE_THISCALL(int, gbGfxManager_D3D_SetRenderTarget, struct gbGfxManager_
                 g_pDefaultRenderTarget = NULL;
                 return 0;
             }
+            
+            // also backup default depth stencil surface
+            IDirect3DDevice9_GetDepthStencilSurface(this->m_pd3dDevice, &g_pDefaultDepthStencilSurface);
         }
         
         // get corresponding surface
@@ -56,14 +59,11 @@ static MAKE_THISCALL(int, gbGfxManager_D3D_SetRenderTarget, struct gbGfxManager_
         // set render target
         ret = IDirect3DDevice9_SetRenderTarget(this->m_pd3dDevice, 0, pNewSurface) >= 0;
         
-        // release the surface
-        IDirect3DSurface9_Release(pNewSurface);
-        
-        // backup default depth stencil surface
-        IDirect3DDevice9_GetDepthStencilSurface(this->m_pd3dDevice, &g_pDefaultDepthStencilSurface);
-        
         // set new depth stencil surface
         IDirect3DDevice9_SetDepthStencilSurface(this->m_pd3dDevice, g_pRenderTargetDepthStencilSurface);
+        
+        // release texture surface
+        IDirect3DSurface9_Release(pNewSurface);
         
         return ret;
     } else {
@@ -75,10 +75,12 @@ static MAKE_THISCALL(int, gbGfxManager_D3D_SetRenderTarget, struct gbGfxManager_
         IDirect3DSurface9_Release(g_pDefaultRenderTarget);
         g_pDefaultRenderTarget = NULL;
         
-        // restore default depth stencil surface
-        IDirect3DDevice9_SetDepthStencilSurface(this->m_pd3dDevice, g_pDefaultDepthStencilSurface);
-        IDirect3DSurface9_Release(g_pDefaultDepthStencilSurface);
-        g_pDefaultDepthStencilSurface = NULL;
+        if (g_pDefaultDepthStencilSurface) {
+            // restore default depth stencil surface
+            IDirect3DDevice9_SetDepthStencilSurface(this->m_pd3dDevice, g_pDefaultDepthStencilSurface);
+            IDirect3DSurface9_Release(g_pDefaultDepthStencilSurface);
+            g_pDefaultDepthStencilSurface = NULL;
+        }
         
         return 1;
     }
@@ -122,11 +124,14 @@ static MAKE_ASMPATCH(fixreset_RenderTarget_End_patch)
 
 
 // this is my own method!
+static int ctrail_tex_width, ctrail_tex_height;
 static void CTrail_OnDeviceLost(struct CTrail *this)
 {
     if (this->m_bSupport) {
         IDirect3DSurface9_Release(this->m_OriginSurface);
         this->m_OriginSurface = NULL;
+        ctrail_tex_width = this->m_texRT[0].baseclass.Width;
+        ctrail_tex_height = this->m_texRT[0].baseclass.Height;
         int i;
         for (i = 0; i < 8; i++) {
             gbTexture_D3D_ReleaseD3D(&this->m_texRT[i]);
@@ -140,9 +145,17 @@ static void CTrail_OnResetDevice(struct CTrail *this)
         enum gbPixelFmtType format = gbGfxManager_D3D_GetBackBufferFormat(GB_GfxMgr);
         int i;
         for (i = 0; i < 8; i++) {
-            THISCALL_WRAPPER(gbTexture_D3D_CreateForRenderTarget_wrapper, &this->m_texRT[i], 256, 256, format);
+            THISCALL_WRAPPER(gbTexture_D3D_CreateForRenderTarget_wrapper, &this->m_texRT[i], ctrail_tex_width, ctrail_tex_height, format);
         }
     }
+}
+static MAKE_ASMPATCH(CTrail_RestoreOriginSurface)
+{
+    if (g_pDefaultDepthStencilSurface) {
+        // also restore default depth stencil surface
+        IDirect3DDevice9_SetDepthStencilSurface(GB_GfxMgr->m_pd3dDevice, g_pDefaultDepthStencilSurface);
+    }
+    LINK_CALL(M_DWORD(M_DWORD(M_DWORD(R_ESP)) + 0x94));
 }
 
 
@@ -154,6 +167,10 @@ static void OnDeviceLost_hook()
     if (g_pDefaultRenderTarget) {
         IDirect3DSurface9_Release(g_pDefaultRenderTarget);
         g_pDefaultRenderTarget = NULL;
+    }
+    if (g_pDefaultDepthStencilSurface) {
+        IDirect3DSurface9_Release(g_pDefaultDepthStencilSurface);
+        g_pDefaultDepthStencilSurface = NULL;
     }
     RenderTarget_OnDeviceLost(pRenderTarget);
     CTrail_OnDeviceLost(pCTrail);
@@ -244,4 +261,9 @@ MAKE_PATCHSET(fixreset)
     
     // patch render target depth stencil format
     init_RenderTargetDepthStencilSurface();
+    
+    // patch CTrail::Create and CTrail::End for depth stencil surface
+    INIT_ASMPATCH(CTrail_RestoreOriginSurface, 0x004C6596, 6, "\xFF\x91\x94\x00\x00\x00");
+    INIT_ASMPATCH(CTrail_RestoreOriginSurface, 0x004C66A6, 6, "\xFF\x91\x94\x00\x00\x00");
+    
 }

@@ -27,11 +27,9 @@ struct trapframe {
     patch_proc_t patch_proc;
 };
 
-extern void __push_dword(struct trapframe *tf, unsigned data);
-extern unsigned __pop_dword(struct trapframe *tf);
 extern void patchentry(struct trapframe *tf);
 extern void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigned size);
-#define PUSH_DWORD(data) (*--(tf)->p_esp = (data))
+#define PUSH_DWORD(data) do { unsigned __data = (data); *--(tf)->p_esp = __data; } while (0)
 #define POP_DWORD() (*(tf)->p_esp++)
 #define M_DWORD(addr) (*(unsigned *)(addr))
 #define M_WORD(addr) (*(unsigned short *)(addr))
@@ -47,9 +45,9 @@ extern void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigne
 #define RETNADDR ((tf)->retn_addr)
 
 // these helpers must be call at end of asmpatch
-#define LINK_CALL(addr) do { PUSH_DWORD(RETNADDR); RETNADDR = (addr); } while (0)
+#define LINK_CALL(addr) do { unsigned __addr = (addr); PUSH_DWORD(RETNADDR); RETNADDR = __addr; } while (0)
 #define LINK_JMP(addr) do { RETNADDR = (addr); } while (0)
-#define LINK_RETN(arg_bytes) do { RETNADDR = POP_DWORD(); R_ESP += (arg_bytes); } while (0)
+#define LINK_RETN(arg_bytes) do { unsigned __arg_bytes = (arg_bytes); RETNADDR = POP_DWORD(); R_ESP += __arg_bytes; } while (0)
 
 // asmentry.S
 extern unsigned max_push_dwords;

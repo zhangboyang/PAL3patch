@@ -28,7 +28,7 @@ MAKE_PATCHSET(relativetimer)
     
     // hook timeGetTime
     Real_timeGetTime = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "WINMM.DLL", "timeGetTime", My_timeGetTime);
-    hook_iat(PAL3_WINMM_IATBASE, Real_timeGetTime, My_timeGetTime);
+    hook_import_table(GetModuleHandle(NULL), "WINMM.DLL", "timeGetTime", My_timeGetTime);
     
     // hook QueryPerformanceCounter
     Real_QueryPerformanceCounter = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "KERNEL32.DLL", "QueryPerformanceCounter", My_QueryPerformanceCounter);

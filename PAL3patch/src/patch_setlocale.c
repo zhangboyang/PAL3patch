@@ -38,9 +38,9 @@ MAKE_PATCHSET(setlocale)
         // hook GBENGINE.DLL's IAT
         Real_MultiByteToWideChar = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "KERNEL32.DLL", "MultiByteToWideChar", My_MultiByteToWideChar);
         Real_WideCharToMultiByte = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "KERNEL32.DLL", "WideCharToMultiByte", My_WideCharToMultiByte);
-        // hook PAL3.EXE's IAT, note we must hardcode IAT address since PAL3.EXE is packed
-        hook_iat(PAL3_KERNEL32_IATBASE, Real_MultiByteToWideChar, My_MultiByteToWideChar);
-        hook_iat(PAL3_KERNEL32_IATBASE, Real_WideCharToMultiByte, My_WideCharToMultiByte);
+        // hook PAL3.EXE's IAT
+        hook_import_table(GetModuleHandle(NULL), "KERNEL32.DLL", "MultiByteToWideChar", My_MultiByteToWideChar);
+        hook_import_table(GetModuleHandle(NULL), "KERNEL32.DLL", "WideCharToMultiByte", My_WideCharToMultiByte);
         
         if (GET_PATCHSET_FLAG(testcombat)) {
             // hook COMCTL32.DLL's IAT for testcombat
