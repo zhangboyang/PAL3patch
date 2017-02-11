@@ -4,8 +4,7 @@
 
 
 // movie frame related functions
-
-static int (*gbBinkVideo_SFLB_OpenFile)(struct gbBinkVideo *, const char *, HWND, int, int) = NULL;
+static int (WINAPI *BinkPause)(HBINK bink, int pause);
 
 // texture
 #define MF_TEX_WIDTH 1024
@@ -13,8 +12,11 @@ static int (*gbBinkVideo_SFLB_OpenFile)(struct gbBinkVideo *, const char *, HWND
 static IDirect3DTexture9 *mf_tex = NULL;
 static double mf_tex_u1, mf_tex_v1, mf_tex_u2, mf_tex_v2;
 static int mf_bink_dstsurfacetype;
-static int mf_movie_playing = 0;
 static fRECT mf_frect;
+
+// status
+static int mf_movie_playing = 0;
+static int mf_movie_paused = 0;
 
 // vertex buffer
 static IDirect3DVertexBuffer9 *mf_vbuf = NULL;
@@ -163,12 +165,18 @@ static int __stdcall BinkCopyToBuffer_wrapper(DWORD a1, DWORD a2, DWORD a3, DWOR
 {
     return last_BinkCopyToBuffer_retval = BinkCopyToBuffer(a1, a2, a3, a4, a5, a6, a7);
 }
-static MAKE_THISCALL(int, gbBinkVideo_OpenFile, struct gbBinkVideo *this, const char *szFileName, HWND hWnd, int bChangeScreenMode, int nOpenFlag)
-{
-    int ret = gbBinkVideo_SFLB_OpenFile(this, szFileName, hWnd, bChangeScreenMode, nOpenFlag);
 
+static void movie_playback_atopen(void *arg)
+{
+    struct game_loop_hook_data *hookarg = arg;
+    
+    // check hook type
+    if (hookarg->type != GAMEEVENT_MOVIE_ATOPEN) return;
+    
+    const char *moviefile = hookarg->data;
+    
     // init vertex buffer and texture
-    init_movieframe_texture(szFileName, gbBinkVideo_Width(this), gbBinkVideo_Height(this));
+    init_movieframe_texture(moviefile, gbBinkVideo_Width(&g_bink), gbBinkVideo_Height(&g_bink));
     
     // fill the texture with zeros
     D3DLOCKED_RECT lrc;
@@ -179,7 +187,8 @@ static MAKE_THISCALL(int, gbBinkVideo_OpenFile, struct gbBinkVideo *this, const 
     // set playing flag for cursor
     mf_movie_playing = 1;
     
-    return ret;
+    // set pause state
+    mf_movie_paused = 0;
 }
 
 static MAKE_THISCALL(int, gbBinkVideo_DrawFrame, struct gbBinkVideo *this)
@@ -247,10 +256,27 @@ static MAKE_THISCALL(int, gbBinkVideo_DrawFrame, struct gbBinkVideo *this)
     return ret;
 }
 
-static void movie_playback_atstop()
+static void movie_checkpause_hook(void *arg)
 {
+    int paused = *(int *) arg;
+    if (paused) {
+        mf_movie_paused = 1;
+        if (g_bink.m_hBink) {
+            BinkPause(g_bink.m_hBink, 1);
+        }
+    } else {
+        mf_movie_paused = 0;
+        if (g_bink.m_hBink) {
+            BinkPause(g_bink.m_hBink, 0);
+        }
+    }
+}
+static void movie_playback_atstop(void *arg)
+{
+    struct game_loop_hook_data *hookarg = arg;
+    
     // check hook type
-    if (gameloop_hookflag != GAMELOOP_MOVIE_ATEXIT) return;
+    if (hookarg->type != GAMEEVENT_MOVIE_ATEND) return;
     
     // reset cursor status
     mf_movie_playing = 0;
@@ -280,13 +306,20 @@ static MAKE_THISCALL(int, gbBinkVideo_BinkWait_wrapper, struct gbBinkVideo *this
 
 static void hook_gbBinkVideo()
 {
-    // hook member funtions
-    gbBinkVideo_SFLB_OpenFile = get_branch_jtarget(0x0053C455, 0xE8);
-    make_jmp(0x0053C440, gbBinkVideo_OpenFile);
+    // import BinkPause
+    BinkPause = TOPTR(GetProcAddress_check(GetModuleHandle_check("BINKW32.DLL"), "_BinkPause@8"));
+    
+    // hook member funtions    
     make_jmp(0x0053C470, gbBinkVideo_DrawFrame);
+    
+    // hook open operation
+    add_gameloop_hook(movie_playback_atopen);
     
     // cleanup when movie loop exits
     add_gameloop_hook(movie_playback_atstop);
+    
+    // check state for pausing movie
+    add_pauseresume_hook(movie_checkpause_hook);
     
     // hook WM_SETCURSOR
     make_call(0x00404DFF, wm_setcursor_hook);

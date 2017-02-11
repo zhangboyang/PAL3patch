@@ -100,6 +100,7 @@
     <ClCompile Include="src\misc.c" />
     <ClCompile Include="src\pal3.c" />
     <ClCompile Include="src\PAL3patch.c" />
+    <ClCompile Include="src\patch_audiofreq.c" />
     <ClCompile Include="src\patch_cdpatch.c" />
     <ClCompile Include="src\patch_clampuilib.c" />
     <ClCompile Include="src\patch_console.c" />
@@ -134,6 +135,7 @@
     <ClCompile Include="src\patch_timerresolution.c" />
     <ClCompile Include="src\patch_uireplacefont.c" />
     <ClCompile Include="src\patch_uireplacetexf.c" />
+    <ClCompile Include="src\patch_voice.c" />
     <ClCompile Include="src\sha1.c" />
     <ClCompile Include="src\texturehook.c" />
     <ClCompile Include="src\transform.c" />

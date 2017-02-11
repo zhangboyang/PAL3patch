@@ -4,11 +4,11 @@
 
 void memcpy_to_process(unsigned dest, const void *src, unsigned size)
 {
-    // check dest address, debug purpose only
+    /*// check dest address, debug purpose only
     // should rebase and make sure GBENGINE.DLL loaded at 0x40000000
     if (0x10000000 <= dest && dest < 0x10169000) {
         fail("invalid dest address, dest = %08X, src = %p, size = %08X.", dest, src, size);
-    }
+    }*/
     
     // using WriteProcessMemory may failed when writing to IAT
     // use VirtualProtect instead
@@ -57,9 +57,29 @@ void make_call(unsigned addr, const void *jtarget)
 {
     make_branch(addr, 0xE8, jtarget, 5);
 }
-void make_call_batch(unsigned *addr_list, int count, const void *jtarget)
+void make_wrapper_branch(unsigned addr, const void *jtarget)
 {
-    while (count--) make_call(*addr_list++, jtarget);
+    unsigned char opcode;
+    memcpy_from_process(&opcode, addr, 1);
+    switch (opcode) {
+        case 0xE9: make_jmp(addr, jtarget); break;
+        case 0xE8: make_call(addr, jtarget); break;
+        default: fail("unknown branch opcode %02X.", opcode);
+    }
+}
+void make_wrapper_branch_batch(unsigned *addr_list, int count, const void *jtarget)
+{
+    while (count--) make_wrapper_branch(*addr_list++, jtarget);
+}
+
+void make_uint(unsigned addr, unsigned uint)
+{
+    memcpy_to_process(addr, &uint, sizeof(uint));
+}
+
+void make_pointer(unsigned addr, void *ptr)
+{
+    make_uint(addr, TOUINT(ptr));
 }
 
 void check_code(unsigned addr, const void *code, unsigned size)

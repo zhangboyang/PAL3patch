@@ -237,14 +237,14 @@ static void set_cursor_virt(int enabled)
 {
     fs->no_cursor_virt = !enabled;
 }
-static void getcursorpos_virtualization_hookfunc()
+static void getcursorpos_virtualization_hookfunc(void *arg)
 {
-    if (!getcursorpos_hook_ret) return;
+    POINT *mousept = arg;
     fixui_update_gamestate();
     if (!fs->no_cursor_virt) {
         // src_frect should be original rect in game
         // dst_frect should be rect on screen
-        fixui_scale_POINT_round(getcursorpos_hook_lppoint, getcursorpos_hook_lppoint, &fs->src_frect, &fs->dst_frect);
+        fixui_scale_POINT_round(mousept, mousept, &fs->src_frect, &fs->dst_frect);
     }
 }
 

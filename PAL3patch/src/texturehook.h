@@ -64,6 +64,6 @@ extern void mark_texture_hook_noautoload(struct texture_hook_info *thinfo);
 
 // hook management functions
 extern void add_texture_hook(void (*funcptr)(struct texture_hook_info *));
-extern void init_texture_hooks();
+extern void init_texture_hooks(void);
 
 #endif

@@ -85,6 +85,7 @@ DONE: 允许使用MSVC编译
 DONE: 构建通用的纹理替换框架
 DONE: 很有可能出现用到GBENGINE.DLL中的地址却忘记加gboffset的情况。可以通过将gbengine重定位(rebase)到0x40000000然后在memcpy_to_process系列函数中判断来测试，需要枚举选项。（也许有更好方法）
 DONE: 处理“窗口化”与“分辨率”搭配问题（“有边框”不宜选“当前分辨率”，“无边框”宜选“当前分辨率”）
+DONE: 添加配音接口
 有可能出现不同补丁重复修改同一个内存位置而造成错误的情况，需要在底层检测
 繁体默认字体
 繁体翻译
@@ -99,7 +100,6 @@ ABANDONED: 允许交叉编译
 仅限制逻辑帧率，这样就算不开垂直同步/或者显示器刷新率极高的情况下，游戏也能正常工作
 限制FPS帧率时，下一个时间点取当前时间较好，还是取上一个时间点+间隔较好？
 更换截屏方式（不要用GetFrontBufferData，用StretchRect到RenderTarget上）
-添加配音接口
 使用Direct3D9Ex接口（没有D3DPOOL_MANAGED了）
 ABANDONED: 添加多屏幕支持（例如三屏幕，在不同屏幕之间使用不同的透视投影矩阵）
 ABANDONED: 添加VR支持

@@ -34,6 +34,8 @@ MAKE_PATCHSET(console);
 MAKE_PATCHSET(relativetimer);
 MAKE_PATCHSET(fixacquire);
 MAKE_PATCHSET(preciseresmgr);
+MAKE_PATCHSET(audiofreq);
+MAKE_PATCHSET(voice);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
@@ -64,7 +66,7 @@ MAKE_PATCHSET(graphicspatch);
     extern double scalefactor_table[SCALEFACTOR_COUNT];
     extern double str2scalefactor(const char *str);
     
-    extern void try_goto_desktop();
+    extern void try_goto_desktop(void);
     
     MAKE_PATCHSET(fixfov);
     MAKE_PATCHSET(fixortho);
@@ -85,7 +87,7 @@ MAKE_PATCHSET(graphicspatch);
 
         #define softcursor_scalefactor (scalefactor_table[SF_SOFTCURSOR])
         #define ui_scalefactor (scalefactor_table[SF_UI])
-        extern void fixui_update_gamestate();
+        extern void fixui_update_gamestate(void);
         
         enum uiwnd_rect_type { // PTR = pos tag rect
             PTR_GAMERECT,          // game_frect
@@ -102,11 +104,11 @@ MAKE_PATCHSET(graphicspatch);
         int parse_uiwnd_rect_type(const char *str);
         
         struct fixui_state *fixui_newstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor);
-        struct fixui_state *fixui_dupstate();
+        struct fixui_state *fixui_dupstate(void);
         extern void fixui_pushstate_node(struct fixui_state *cur);
         #define fixui_pushstate(src_frect, dst_frect, lr_method, tb_method, len_factor) \
             fixui_pushstate_node(fixui_newstate(src_frect, dst_frect, lr_method, tb_method, len_factor))
-        extern void fixui_popstate();
+        extern void fixui_popstate(void);
         #define fixui_pushidentity() fixui_pushstate(&game_frect, &game_frect, TR_LOW, TR_LOW, 1.0)
         
         struct uiwnd_ptag {

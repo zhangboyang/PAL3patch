@@ -9,7 +9,7 @@ CCLD := $(CC)
 AR := ar
 STRIP := strip
 
-CFLAGS := -Wall -Wpointer-arith -O0 -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing
+CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing
 SFLAGS :=
 CCLDFLAGS := -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lgdi32 -lcomctl32 -lwinmm
 CCLDFLAGS_MSVC :=

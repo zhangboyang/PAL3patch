@@ -63,7 +63,7 @@ static char *do_effhook_replace(struct effecthook_t *p, const char *eff)
         warning("no replace occured. (effhook: file='%s' old='%s' new='%s')", p->eff_file, p->old_str, p->new_str);
     }
     
-    assert(strlen(ret) == eff_new_len);
+    assert(strlen(ret) == (unsigned) eff_new_len);
     return ret;
 }
 

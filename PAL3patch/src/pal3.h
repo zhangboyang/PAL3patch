@@ -17,6 +17,13 @@ struct std_vector_int {
     int *_End;
 };
 
+struct std_vector_SoundItem {
+    char allocator;
+    struct SoundItem *_First;
+    struct SoundItem *_Last;
+    struct SoundItem *_End;
+};
+
 enum GAME_STATE {
     GAME_NONE,
     GAME_UI,
@@ -453,8 +460,15 @@ struct gbPrintFont_UNICODE {
     DWORD gapB0[5];
 };
 
+typedef struct BINK BINK, *HBINK;
 
-struct gbBinkVideo;
+struct gbBinkVideo {
+    struct gbBinkVideoVtbl *vfptr;
+    POINT m_pos;
+    HBINK m_hBink;
+    struct CPK m_Cpk;
+    struct CPK m_Cpk2;
+};
 
 
 struct C2DSpark_tagSpark {
@@ -1361,6 +1375,61 @@ struct GRPinput {
     struct GRP_KEYREG KeyInfo[270];
 };
 
+struct gbAudioMgrDesc {
+    unsigned int frequence;
+    unsigned int bits;
+    unsigned int channels;
+    char provider[256];
+};
+
+
+struct SoundMgr {
+    struct SoundMgrVtbl *vfptr;
+    char m_bScriptMusic;
+    struct std_basic_string m_szScriptMusic;
+    int m_nScriptLoop;
+    char m_szSceneMusic[256];
+    struct TxtFile m_MusicTable;
+    struct gbAudioManager *m_audiodrv;
+    struct std_vector_SoundItem m_cbbuf;
+    int m_cbcursor;
+    struct CPK m_Cpk;
+};
+
+typedef struct _SAMPLE *HSAMPLE;
+typedef struct _STREAM *HSTREAM;
+typedef struct _DIG_DRIVER *HDIGDRIVER;
+typedef struct h3DPOBJECT *H3DPOBJECT;
+#define AILCALLBACK WINAPI
+typedef void (AILCALLBACK FAR* AILSTREAMCB)(HSTREAM stream);
+
+struct SoundAttachObj {
+    union {
+        struct gbSound3DNode *p3d;
+        struct gbSound2DNode *p2d;
+    };
+    union {
+        H3DPOBJECT h3d;
+        HSAMPLE h2d;
+    };
+    unsigned int time;
+};
+
+struct gbAudioManager {
+    HSTREAM hStreamArray[3];
+    int StreamStatus[3];
+    HDIGDRIVER h2DDriver;
+    unsigned int h3DProvider;
+    struct SoundAttachObj Attach3D[10];
+    struct SoundAttachObj Attach2D[4];
+    unsigned int CurTime;
+    float S_3DMasterVol;
+    float S_2DMasterVol;
+    float MusicMasterVol;
+    H3DPOBJECT hListener;
+    struct gbVec3D ListenerPos;
+    struct gbResManager SndDataMgr;
+};
 
 // D3DX functions
 #define gbD3DXTex_CImage_ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346CA, void, struct D3DXTex_CImage *), this)
@@ -1397,6 +1466,12 @@ struct GRPinput {
 #define gbVFileSystem_Read(this, buf, size, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10030810, void, struct gbVFileSystem *, void *, unsigned int, struct gbVFile *), this, buf, size, fp)
 #define gbVFileSystem_CloseFile(this, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100307A0, void, struct gbVFileSystem *, struct gbVFile *), this, fp)
 #define gbCrc32Compute ((unsigned (*)(const char *)) TOPTR(gboffset + 0x100277E0))
+#define gbAudioManager_GetMusicMasterVolume(this) ((this)->MusicMasterVol)
+#define gbAudioManager_SetMusicMasterVolume(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10001C80, void, struct gbAudioManager *, float), this, a2)
+#define gbAudioManager_Get2DMasterVolume(this) ((this)->S_2DMasterVol)
+#define gbAudioManager_Set2DMasterVolume(this, a2) ((this)->S_2DMasterVol = (a2))
+#define gbAudioManager_Get3DMasterVolume(this) ((this)->S_3DMasterVol)
+#define gbAudioManager_Set3DMasterVolume(this, a2) ((this)->S_3DMasterVol = (a2))
 
 // PAL3 functions
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
@@ -1444,22 +1519,33 @@ struct GRPinput {
 #define GRPinput_AcquireKeyboard(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402380, void, struct GRPinput *this), this)
 #define CTrail_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004C6460, bool, struct CTrail *), this)
 #define CTrail_Begin(this, pCam) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004C65F0, void, struct CTrail *, struct gbCamera *), this, pCam)
-
+#define SoundMgr_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053DD70, void, struct SoundMgr *), this)
+#define SoundMgr_Destroy(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053DEF0, void, struct SoundMgr *), this)
+#define SoundMgr_Inst() ((struct SoundMgr *) TOPTR(0x017B41E8))
+#define SoundMgr_GetAudioMgr(this) ((this)->m_audiodrv)
+#define PAL3_Create ((void (*)(HINSTANCE)) TOPTR(0x00404800))
+#define PAL3_Destroy ((void (*)(void)) TOPTR(0x00406230))
+#define PAL3_Update ((void (*)(float)) TOPTR(0x004055D0))
+#define WndProc ((LRESULT (CALLBACK *)(HWND, UINT, WPARAM, LPARAM)) TOPTR(0x00404D60))
 
 // global variables
-#define GB_GfxMgr (*(struct gbGfxManager_D3D **) 0x00BFDA60)
+#define GB_GfxMgr (*(struct gbGfxManager_D3D **) TOPTR(0x00BFDA60))
 #define g_msgbk (*(struct UIStaticFlex *) TOPTR(0x00BFDAB0))
 #define PAL3_s_gamestate (*(int *) TOPTR(0x00BFDA6C))
 #define PAL3_s_drvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))
 #define PAL3_s_bActive (*(int *) TOPTR(0x005833B8))
 #define PAL3_s_flag (*(int *) TOPTR(0x005833BC))
-#define g_pVFileSys (*(struct gbVFileSystem **) (gboffset + 0x1015D3A8))
+#define g_pVFileSys (*(struct gbVFileSystem **) TOPTR(gboffset + 0x1015D3A8))
+#define g_gamefrm (*(struct UIGameFrm *) TOPTR(0x00DB9FD0))
+#define g_bink (*(struct gbBinkVideo *) TOPTR(0x00A3A7D8))
+#define g_CurrentTime (*(double *) TOPTR(gboffset + 0x1015D338))
+
 
 // self-written functions
 extern enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D *this);
 extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
 extern void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height, int *bitcount, struct memory_allocator *mem_allocator);
 extern void *vfs_readfile(const char *filepath, unsigned *length, struct memory_allocator *mem_allocator);
-extern const char *vfs_cpkname();
+extern const char *vfs_cpkname(void);
 
 #endif

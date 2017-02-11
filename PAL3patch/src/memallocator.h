@@ -1,7 +1,7 @@
 #ifndef PAL3PATCH_MEMALLOCATOR_H
 #define PAL3PATCH_MEMALLOCATOR_H
 
-extern void init_memory_allocators();
+extern void init_memory_allocators(void);
 
 // memory allocator structure
 typedef void *(*malloc_funcptr_t)(size_t);

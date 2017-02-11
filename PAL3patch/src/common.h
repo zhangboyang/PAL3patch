@@ -33,10 +33,13 @@
 
 #if defined(_MSC_VER)
 #define NORETURN __declspec(noreturn)
+#define INLINE __inline
 #elif defined(__GNUC__)
 #define NORETURN __attribute__((noreturn))
+#define INLINE inline
 #elif
 #define NORETURN
+#define INLINE
 #endif
 
 #ifdef HAVE_THISCALL

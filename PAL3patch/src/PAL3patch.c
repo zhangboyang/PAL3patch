@@ -40,6 +40,9 @@ static void self_check()
     assert(sizeof(struct HeadMsg) == 0x24);
     assert(sizeof(struct gbTexture_D3D) == 0x60);
     assert(sizeof(struct GRPinput) == 0x2958);
+    assert(sizeof(struct SoundMgr) == 0xE04FC);
+    assert(sizeof(struct gbAudioManager) == 0xF4);
+    assert(sizeof(struct gbBinkVideo) == 0x1C0388);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -87,6 +90,8 @@ static void init_stage2()
     INIT_PATCHSET(relativetimer);
     INIT_PATCHSET(fixacquire);
     INIT_PATCHSET(preciseresmgr);
+    INIT_PATCHSET(audiofreq);
+    INIT_PATCHSET(voice);
     
     INIT_PATCHSET(showfps);
     INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)

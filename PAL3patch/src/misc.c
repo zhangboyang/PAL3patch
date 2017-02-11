@@ -46,17 +46,29 @@ int fcmp(double a, double b)
     return d > 0 ? 1 : -1;
 }
 
-HMODULE LoadLibrary_safe(LPCTSTR lpFileName)
+HMODULE GetModuleHandle_check(LPCTSTR lpModuleName)
+{
+    HMODULE ret = LoadLibrary(lpModuleName);
+    if (!ret) fail("can't find library '%s'.", lpModuleName);
+    return ret;
+}
+
+HMODULE LoadLibrary_check(LPCTSTR lpFileName)
 {
     HMODULE ret = LoadLibrary(lpFileName);
     if (!ret) fail("can't load library '%s'.", lpFileName);
     return ret;
 }
 
-FARPROC GetProcAddress_safe(HMODULE hModule, LPCSTR lpProcName)
+FARPROC GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName)
 {
     FARPROC ret = GetProcAddress(hModule, lpProcName);
-    if (!ret) fail("can't find proc address for '%s'.", lpProcName);
+    if (!ret) {
+        char buf[MAXLINE];
+        GetModuleFileName(hModule, buf, sizeof(buf));
+        buf[MAXLINE - 1] = '\0';
+        fail("can't find proc address for '%s' in module '%s'.", lpProcName, buf);
+    }
     return ret;
 }
 

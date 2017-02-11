@@ -3,7 +3,7 @@
 
 extern unsigned system_codepage;
 extern unsigned target_codepage;
-extern void init_locale();
+extern void init_locale(void);
 extern const wchar_t *wstr_about_title;
 extern const wchar_t *wstr_about_text;
 extern const wchar_t *wstr_confirmquit_text;

@@ -250,12 +250,13 @@ static MAKE_THISCALL(bool, CCBLineupWindow_IsPtOnFace, struct CCBLineupWindow *t
     return PtInRect(&rc, pt);
 }
 
-static void setcursorpos_ccbcontrol_hookfunc()
+static void setcursorpos_ccbcontrol_hookfunc(void *arg)
 {
+    POINT *mousept = arg;
     // SetCursorPos is called only in CCBControl::Control
     // so we just translate the cursor position without any judgements
     CB_PUSHSTATE(TR_LOW, TR_HIGH);
-    fixui_adjust_POINT(&setcursorpos_hook_point, &setcursorpos_hook_point);
+    fixui_adjust_POINT(mousept, mousept);
     CB_POPSTATE();
 }
 

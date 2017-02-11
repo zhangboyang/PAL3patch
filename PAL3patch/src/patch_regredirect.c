@@ -198,7 +198,7 @@ MAKE_PATCHSET(regredirect)
         0x4B2840, 0x528190, 0x52F570,
     };
     
-    int i;
+    unsigned i;
     for (i = 0; i < sizeof(save_dword_funcs) / sizeof(unsigned); i++) {
         check_code(save_dword_funcs[i], save_dword_func_magic, sizeof(save_dword_func_magic) - 1);
         make_jmp(save_dword_funcs[i], save_dword);

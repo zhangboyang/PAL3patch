@@ -327,14 +327,15 @@ static HWND WINAPI CreateWindowExA_wrapper(DWORD dwExStyle, LPCSTR lpClassName, 
     gamehwnd = CreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
     return gamehwnd;
 }
-static void getcursorpos_window_hookfunc()
+static void getcursorpos_window_hookfunc(void *arg)
 {
-    if (!getcursorpos_hook_ret) return;
-    ScreenToClient(gamehwnd, getcursorpos_hook_lppoint);
+    POINT *mousept = arg;
+    ScreenToClient(gamehwnd, mousept);
 }
-static void setcursorpos_window_hookfunc()
+static void setcursorpos_window_hookfunc(void *arg)
 {
-    ClientToScreen(gamehwnd, &setcursorpos_hook_point);
+    POINT *mousept = arg;
+    ClientToScreen(gamehwnd, mousept);
 }
 
 
@@ -360,7 +361,7 @@ static void clipcursor_atexit()
 {
     clipcursor(0);
 }
-static void clipcursor_hook()
+static void clipcursor_hook(void *arg)
 {
     if (PAL3_s_bActive) {
         clipcursor(1);
@@ -370,10 +371,14 @@ static void clipcursor_hook()
 }
 static int confirm_quit()
 {
+    set_pauseresume(1);
     try_goto_desktop();
     ClipCursor(NULL);
-    return MessageBoxW(gamehwnd, wstr_confirmquit_text, wstr_confirmquit_title, MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES;
+    int ret = MessageBoxW(gamehwnd, wstr_confirmquit_text, wstr_confirmquit_title, MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES;
+    set_pauseresume(0);
+    return ret;
 }
+
 static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     if (Msg == WM_CLOSE) {
@@ -382,6 +387,34 @@ static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam,
     if (Msg == WM_KEYUP && wParam == VK_F12) { clipcursor_enabled ^= 1; return 0; }
     return DefWindowProcA(hWnd, Msg, wParam, lParam);
 }
+
+static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    if (Msg == WM_SETCURSOR && LOWORD(lParam) != HTCLIENT) goto usedefault;
+    
+    if (Msg == WM_SYSCOMMAND && (wParam & 0xFFF0) == SC_MOVE) {
+        set_pauseresume(1);
+        LRESULT ret = DefWindowProcA(hWnd, Msg, wParam, lParam);
+        set_pauseresume(0);
+        return ret;
+    }
+    
+    switch (Msg) {
+        case WM_ENTERSIZEMOVE:
+        case WM_ENTERMENULOOP:
+            set_pauseresume(1);
+            break;
+        case WM_EXITSIZEMOVE:
+        case WM_EXITMENULOOP:
+            set_pauseresume(0);
+            break;
+    }
+    
+    return WndProc(hWnd, Msg, wParam, lParam);
+usedefault:
+    return DefWindowProcA(hWnd, Msg, wParam, lParam);
+}
+
 static MAKE_THISCALL(void, gbGfxManager_D3D_BuildPresentParamsFromSettings_wrapper, struct gbGfxManager_D3D *this)
 {
     // by default, windowed mode ignore vsync settings
@@ -448,6 +481,9 @@ static void init_window_patch(int flag)
     // the game will use our clip cursor framework
     SIMPLE_PATCH(gboffset + 0x10018A1B, "\xC6\x86\x4A\x06\x00\x00\x01", "\xC6\x86\x4A\x06\x00\x00\x00", 7);
 
+    // hook WndProc
+    make_pointer(0x0040637F + 0x4, WndProc_wrapper);
+    
     // hook DefWindowProc
     make_branch(0x00404F8D, 0xE8, DefWindowProcA_wrapper, 6);
 

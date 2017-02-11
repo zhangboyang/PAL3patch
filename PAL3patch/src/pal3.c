@@ -38,8 +38,10 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
             if (PAL3_s_bActive) {
                 break;
             }
+            
+            set_pauseresume(1);
+            call_gameloop_hooks(GAMELOOP_SLEEP, NULL);
             Sleep(100);
-            call_gameloop_hooks(GAMELOOP_SLEEP);
         }
     }
     if (IDirect3DDevice9_TestCooperativeLevel(this->m_pd3dDevice) != D3D_OK) {
@@ -58,13 +60,16 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
             if (IDirect3DDevice9_TestCooperativeLevel(this->m_pd3dDevice) == D3DERR_DEVICENOTRESET) {
                 break;
             }
+            
+            set_pauseresume(1);
+            call_gameloop_hooks(GAMELOOP_DEVICELOST, NULL);
             Sleep(100);
-            call_gameloop_hooks(GAMELOOP_DEVICELOST);
         }
         if (gbGfxManager_D3D_Reset3DEnvironment(this) < 0) {
             fail("Reset3DEnvironment error!");
         }
         this->m_bDeviceLost = 0;
+        set_pauseresume(0);
     }
 }
 
