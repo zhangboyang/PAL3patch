@@ -310,7 +310,7 @@ static void voice_prepal3destroy_hook()
     plugin_init_flag = 0;
 }
 
-static void voice_postpal3create_hook()
+static void voice_postgamecreate_hook()
 {
     // allocate static memory
     static struct VoiceToolkit toolkit;
@@ -400,7 +400,7 @@ static void voice_gameloop_dispatcher(void *arg)
 MAKE_PATCHSET(voice)
 {
     // init hooks
-    add_postpal3create_hook(voice_postpal3create_hook);
+    add_postgamecreate_hook(voice_postgamecreate_hook);
     add_prepal3destroy_hook(voice_prepal3destroy_hook);
     add_gameloop_hook(voice_gameloop_dispatcher);
     add_pauseresume_hook(voice_checkpause_hook);

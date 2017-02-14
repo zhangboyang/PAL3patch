@@ -112,6 +112,10 @@ void add_postpal3create_hook(void (*funcptr)(void))
 {
     add_hook(HOOKID_POSTPAL3CREATE, funcptr);
 }
+void add_postgamecreate_hook(void (*funcptr)(void))
+{
+    add_hook(HOOKID_POSTGAMECREATE, funcptr);
+}
 void add_prepal3destroy_hook(void (*funcptr)(void))
 {
     add_hook(HOOKID_PREPAL3DESTROY, funcptr);
@@ -123,6 +127,12 @@ static void PAL3_Create_wrapper(HINSTANCE hinst)
     pal3_created = 1;
     run_hooks(HOOKID_POSTPAL3CREATE);
 }
+static MAKE_ASMPATCH(post_gamecreate)
+{
+    // this asmpatch shall run just before outputing 'Game Create OK ...' log message
+    run_hooks(HOOKID_POSTGAMECREATE);
+    PUSH_DWORD(0x005837E4);
+}
 static void PAL3_Destroy_wrapper()
 {
     if (pal3_created) {
@@ -133,6 +143,7 @@ static void PAL3_Destroy_wrapper()
 }
 static void init_postpal3create_prepal3destroy_hook()
 {
+    INIT_ASMPATCH(post_gamecreate, 0x004049FC, 5, "\x68\xE4\x37\x58\x00");
     INIT_WRAPPER_CALL(PAL3_Create_wrapper, { 0x00541AC0 });
     INIT_WRAPPER_CALL(PAL3_Destroy_wrapper, {
         0x004047F0,

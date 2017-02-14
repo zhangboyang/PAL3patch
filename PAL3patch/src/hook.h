@@ -15,6 +15,7 @@ enum hook_type {
     HOOKID_PREENDSCENE,
     HOOKID_POSTPRESENT,
     HOOKID_POSTPAL3CREATE,
+    HOOKID_POSTGAMECREATE,
     HOOKID_PREPAL3DESTROY,
     HOOKID_GAMEPAUSERESUME,
     
@@ -39,6 +40,7 @@ extern void add_postd3dcreate_hook(void (*funcptr)(void));
 
 // post PAL3::Create and pre PAL3::Destroy hooks
 extern void add_postpal3create_hook(void (*funcptr)(void));
+extern void add_postgamecreate_hook(void (*funcptr)(void));
 extern void add_prepal3destroy_hook(void (*funcptr)(void));
 
 // game pause and resume hooks
