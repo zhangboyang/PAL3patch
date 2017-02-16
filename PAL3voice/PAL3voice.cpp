@@ -15,7 +15,7 @@
 #define VOICECONFIGFILE "VoiceConfig.txt"
 #define LOGFILE "VoiceLog.txt"
 #define SPLASHFILE "VoiceSplash.txt"
-#define TEXTLOG "TextLog.txt"
+#define VDATALOG "VoiceDataLog.txt"
 
 #define AUDIO_SYNC_LIMIT 1000
 
@@ -128,16 +128,16 @@ static void AudioSync(int ms)
 static int log_counter = 0;
 static void MakeTextLogHeader()
 {
-	FILE *fp = fopen(TEXTLOG, "a");
+	FILE *fp = fopen(VDATALOG, "a");
 	if (!fp) return;
 	SYSTEMTIME SystemTime;
     GetLocalTime(&SystemTime);
     fprintf(fp, "\n\n; %04hu-%02hu-%02hu %02hu:%02hu:%02hu.%03hu\n\n", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
 	fclose(fp);
 }
-static void LogText(const char *text)
+static void LogVoiceData(const char *text)
 {
-	FILE *fp = fopen(TEXTLOG, "a");
+	FILE *fp = fopen(VDATALOG, "a");
 	if (!fp) return;
 	log_counter++;
 	fprintf(fp, "FIXME%04d.WAV|1.000|%08X|%s\n", log_counter, tools->CalcStringCRC32(text), text);
@@ -158,6 +158,7 @@ struct VoiceItem {
 };
 
 static std::map<std::pair<unsigned, std::string>, std::vector<VoiceItem> > vdata;
+static int text_enable = 1, caption_enable = 1, movie_enable = 1;
 static int log_known = 0, log_unknown = 0;
 
 static int LoadSingleVoiceData(const char *filename, int file_num)
@@ -241,8 +242,14 @@ static void LoadVoiceConfig()
 			fscanf(fp, "%d", &log_known);
 		} else if (_stricmp(cmd, "LOGUNKNOWN") == 0) {
 			fscanf(fp, "%d", &log_unknown);
-		} else if (_stricmp(cmd, "LOGCOUNTER") == 0) {
+		} else if (_stricmp(cmd, "LOGCOUNTFROM") == 0) {
 			fscanf(fp, "%d", &log_counter);
+		} else if (_stricmp(cmd, "TEXT") == 0) {
+			fscanf(fp, "%d", &text_enable);
+		} else if (_stricmp(cmd, "CAPTION") == 0) {
+			fscanf(fp, "%d", &caption_enable);
+		} else if (_stricmp(cmd, "MOVIE") == 0) {
+			fscanf(fp, "%d", &movie_enable);
 		} else {
 			fail("unknown command '%s' in index file.", cmd);
 		}
@@ -263,7 +270,7 @@ static void LoadVoiceConfig()
 static int text_total = 0, text_known = 0, text_unknown = 0;
 
 // item selector
-static int last_file_num = 0, last_line_num = 0;
+static int last_file_num = 0, last_line_num = 0, text_disabled = 0;
 static VoiceItem *ChooseBestVoiceItem(std::vector<VoiceItem> *itemlist)
 {
 	std::pair<int, int> mindist(INT_MAX, INT_MAX);
@@ -285,18 +292,26 @@ static VoiceItem *ChooseBestVoiceItem(std::vector<VoiceItem> *itemlist)
 
 static void AudioPrepareVoiceItem(const char *data, const char *type)
 {
-	std::string text = std::string(type) + "|" + std::string(data);
-	std::pair<unsigned, std::string> key(tools->CalcStringCRC32(text.c_str()), text);
-	std::map<std::pair<unsigned, std::string>, std::vector<VoiceItem> >::iterator it;
-	if ((it = vdata.find(key)) != vdata.end()) {
-		VoiceItem *pitem = ChooseBestVoiceItem(&it->second);
-		AudioPrepare(pitem->audiofile.c_str(), pitem->volume);
-		if (log_known) LogText(text.c_str());
-		text_known++;
+	if ((!text_enable && strcmp(type, TEXT_PREFIX) == 0) ||
+		(!caption_enable && strcmp(type, CAPTION_PREFIX) == 0) ||
+		(!movie_enable && strcmp(type, MOVIE_PREFIX) == 0)) {
+		AudioStop();
+		text_disabled++;
 	} else {
-		if (log_unknown) LogText(text.c_str());
-		text_unknown++;
+		std::string text = std::string(type) + "|" + std::string(data);
+		std::pair<unsigned, std::string> key(tools->CalcStringCRC32(text.c_str()), text);
+		std::map<std::pair<unsigned, std::string>, std::vector<VoiceItem> >::iterator it;
+		if ((it = vdata.find(key)) != vdata.end()) {
+			VoiceItem *pitem = ChooseBestVoiceItem(&it->second);
+			AudioPrepare(pitem->audiofile.c_str(), pitem->volume);
+			if (log_known) LogVoiceData(text.c_str());
+			text_known++;
+		} else {
+			if (log_unknown) LogVoiceData(text.c_str());
+			text_unknown++;
+		}
 	}
+
 	text_total++;
 }
 
@@ -327,7 +342,7 @@ void WINAPI VoiceInit(VoiceToolkit *toolkit)
 void WINAPI VoiceCleanup()
 {
 	AudioStop();
-	plog("statistics: total %d, known %d (%.2f%%), unknown %d (%.2f%%)", text_total, text_known, 100.0 * text_known / text_total, text_unknown, 100.0 * text_unknown / text_total);
+	plog("plugin unload, statistics: total %d, known %d (%.2f%%), unknown %d (%.2f%%), disabled %d (%.2f%%)", text_total, text_known, 100.0 * text_known / text_total, text_unknown, 100.0 * text_unknown / text_total, text_disabled, 100.0 * text_disabled / text_total);
 }
 void WINAPI GamePause()
 {

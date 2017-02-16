@@ -1543,9 +1543,12 @@ struct gbAudioManager {
 
 // self-written functions
 extern enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D *this);
+extern int gbGfxManager_D3D_GetBackBufferBitCount(struct gbGfxManager_D3D *this);
 extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
 extern void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height, int *bitcount, struct memory_allocator *mem_allocator);
 extern void *vfs_readfile(const char *filepath, unsigned *length, struct memory_allocator *mem_allocator);
 extern const char *vfs_cpkname(void);
+extern void clamp_rect(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom);
+extern void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, void *src, int src_pitch, int src_x, int src_y, int width, int height, int bitcount);
 
 #endif

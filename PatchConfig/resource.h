@@ -49,7 +49,6 @@
 #define IDC_CHOOSEFROMLIST              1013
 #define IDC_TOGGLEADVOPTS               1014
 #define IDC_ENUMLIST                    1015
-#define IDC_RADIO4                      1015
 #define IDC_WAITMESSAGE                 1016
 
 // Next default values for new objects

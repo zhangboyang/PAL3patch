@@ -19,6 +19,22 @@ enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D
     return type;
 }
 
+// this is my own method! not exists in original GBENGINE
+int gbGfxManager_D3D_GetBackBufferBitCount(struct gbGfxManager_D3D *this)
+{
+    switch (this->m_d3dsdBackBuffer.Format) {
+        case D3DFMT_A8R8G8B8:
+        case D3DFMT_X8R8G8B8:
+            return 32;
+        case D3DFMT_A1R5G5B5:
+        case D3DFMT_X1R5G5B5:
+        case D3DFMT_R5G6B5:
+            return 16;
+        default:
+            return 0;
+    }
+}
+
 // make sure cooperative level is D3D_OK
 // this is my own method! not exists in original GBENGINE
 void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus)
@@ -28,12 +44,12 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
             MSG msg;
             // we must process message queue here
             if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+                if (msg.message == WM_QUIT) {
+                    PostQuitMessage(msg.wParam);
+                    return;
+                }
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
-            }
-            if (msg.message == WM_QUIT) {
-                PostQuitMessage(msg.wParam);
-                return;
             }
             if (PAL3_s_bActive) {
                 break;
@@ -50,12 +66,12 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
             MSG msg;
             // we must process message queue here
             if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+                if (msg.message == WM_QUIT) {
+                    PostQuitMessage(msg.wParam);
+                    return;
+                }
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
-            }
-            if (msg.message == WM_QUIT) {
-                PostQuitMessage(msg.wParam);
-                return;
             }
             if (IDirect3DDevice9_TestCooperativeLevel(this->m_pd3dDevice) == D3DERR_DEVICENOTRESET) {
                 break;
@@ -150,4 +166,37 @@ const char *vfs_cpkname()
     }
     
     return cpkname ? cpkname : "";
+}
+
+void clamp_rect(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom)
+{
+    int i, j;
+    int bytecount = bitcount / 8;
+    for (i = 0; i < height; i++) {
+        char *line = PTRADD(bits, i * pitch);
+        for (j = 0; j < left; j++) {
+            memcpy(line + j * bytecount, line + left * bytecount, bytecount);
+        }
+        for (j = right; j < width; j++) {
+            memcpy(line + j * bytecount, line + (right - 1) * bytecount, bytecount);
+        }
+    }
+    for (i = 0; i < top; i++) {
+        memcpy(PTRADD(bits, i * pitch), PTRADD(bits, top * pitch), width * bytecount);
+    }
+    for (i = bottom; i < height; i++) {
+        memcpy(PTRADD(bits, i * pitch), PTRADD(bits, (bottom - 1) * pitch), width * bytecount);
+    }
+}
+void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, void *src, int src_pitch, int src_x, int src_y, int width, int height, int bitcount)
+{
+    dst = PTRADD(dst, dst_pitch * dst_y + dst_x * (bitcount / 8));
+    src = PTRADD(src, src_pitch * src_y + src_x * (bitcount / 8));
+    int copypitch = width * (bitcount / 8);
+    int i;
+    for (i = 0; i < height; i++) {
+        memcpy(dst, src, copypitch);
+        dst = PTRADD(dst, dst_pitch);
+        src = PTRADD(src, src_pitch);
+    }
 }

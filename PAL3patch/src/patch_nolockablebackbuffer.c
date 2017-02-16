@@ -11,6 +11,8 @@ static int (WINAPI *BinkPause)(HBINK bink, int pause);
 #define MF_TEX_HEIGHT 1024
 static IDirect3DTexture9 *mf_tex = NULL;
 static double mf_tex_u1, mf_tex_v1, mf_tex_u2, mf_tex_v2;
+static double mf_tex_ratio;
+static int mf_tex_clamp;
 static int mf_bink_dstsurfacetype;
 static fRECT mf_frect;
 
@@ -118,8 +120,15 @@ static void get_movie_uv(const char *filename, int movie_width, int movie_height
         }
     }
     if (!p->filename) {
-        mf_tex_u1 = mf_tex_v1 = 0.0f;
-        mf_tex_u2 = mf_tex_v2 = 1.0f;
+        mf_tex_u1 = mf_tex_v1 = 0.0;
+        mf_tex_u2 = mf_tex_v2 = 1.0;
+    }
+    
+    // calc movie ratio
+    mf_tex_ratio = ((mf_tex_u2 - mf_tex_u1) * movie_width) / ((mf_tex_v2 - mf_tex_v1) * movie_height);
+    if (!p->filename && movie_width == 800 && movie_height == 448) {
+        // special fix
+        mf_tex_ratio = 16.0 / 9.0;
     }
 
     // adjust to real texture coord
@@ -143,7 +152,7 @@ static void init_movieframe_texture(const char *filename, int movie_width, int m
     
     // set texture information
     get_movie_uv(filename, movie_width, movie_height);
-    get_ratio_frect(&mf_frect, &game_frect, (MF_TEX_WIDTH * (mf_tex_u2 - mf_tex_u1)) / (MF_TEX_HEIGHT * (mf_tex_v2 - mf_tex_v1)));
+    get_ratio_frect(&mf_frect, &game_frect, mf_tex_ratio);
     
     // prepare target surface type for BinkVideo
     switch (GB_GfxMgr->m_d3dsdBackBuffer.Format) {
@@ -206,6 +215,14 @@ static MAKE_THISCALL(int, gbBinkVideo_DrawFrame, struct gbBinkVideo *this)
     D3DLOCKED_RECT lrc;
     IDirect3DTexture9_LockRect(mf_tex, 0, &lrc, NULL, 0);
     ret = gbBinkVideo_DrawFrameEx(this, lrc.pBits, lrc.Pitch, gbBinkVideo_Height(this), 0, 0, mf_bink_dstsurfacetype);
+    int bitcount = gbGfxManager_D3D_GetBackBufferBitCount(GB_GfxMgr);
+    if (mf_tex_clamp && bitcount) {
+        int left = floor(MF_TEX_WIDTH * mf_tex_u1 + eps);
+        int top = floor(MF_TEX_HEIGHT * mf_tex_v1 + eps);
+        int right = floor(MF_TEX_WIDTH * mf_tex_u2 + eps);
+        int bottom = floor(MF_TEX_HEIGHT * mf_tex_v2 + eps);
+        clamp_rect(lrc.pBits, MF_TEX_WIDTH, MF_TEX_HEIGHT, bitcount, lrc.Pitch, left, top, right, bottom);
+    }
     IDirect3DTexture9_UnlockRect(mf_tex, 0);
 
     if (last_BinkDoFrame_retval || last_BinkCopyToBuffer_retval) {
@@ -230,9 +247,14 @@ static MAKE_THISCALL(int, gbBinkVideo_DrawFrame, struct gbBinkVideo *this)
     IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_LIGHTING, FALSE);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSU, D3DTADDRESS_BORDER);
-    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSV, D3DTADDRESS_BORDER);
-    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_BORDERCOLOR, 0x00000000);
+    if (mf_tex_clamp) {
+        IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+        IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+    } else {
+        IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSU, D3DTADDRESS_BORDER);
+        IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_ADDRESSV, D3DTADDRESS_BORDER);
+        IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_BORDERCOLOR, 0x00000000);
+    }
     
     IDirect3DDevice9_SetTexture(GB_GfxMgr->m_pd3dDevice, 0, (void *) mf_tex);
     
@@ -466,6 +488,9 @@ static MAKE_THISCALL(void, UnlockBackBuffer, struct gbGfxManager_D3D *this)
 
 MAKE_PATCHSET(nolockablebackbuffer)
 {
+    // load movie clamp settings
+    mf_tex_clamp = get_int_from_configfile("clampmovie");
+    
     // lock/unlock hooks
     SIMPLE_PATCH(gboffset + 0x1001A20F, "\xC7\x81\x08\x07\x00\x00\x03\x00\x00\x00", "\xC7\x81\x08\x07\x00\x00\x02\x00\x00\x00", 10);
     SIMPLE_PATCH(gboffset + 0x1001A23F, "\xC7\x81\x08\x07\x00\x00\x01\x00\x00\x00", "\xC7\x81\x08\x07\x00\x00\x00\x00\x00\x00", 10);

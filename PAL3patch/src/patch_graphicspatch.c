@@ -311,6 +311,7 @@ void try_goto_desktop()
 
 static ATOM WINAPI RegisterClass_wrapper(WNDCLASS *lpWndClass)
 {
+    lpWndClass->hIcon = LoadIcon(lpWndClass->hInstance, MAKEINTRESOURCE(101)); // brute force to find this icon ID
     lpWndClass->hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
     return RegisterClass(lpWndClass);
 }
@@ -388,8 +389,17 @@ static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam,
     return DefWindowProcA(hWnd, Msg, wParam, lParam);
 }
 
+static int early_msgloop = 1;
 static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+    if (early_msgloop) {
+        if (Msg == WM_CREATE || Msg == WM_DESTROY) {
+            goto usepal3;
+        } else {
+            goto usedefault;
+        }
+    }
+    
     if (Msg == WM_SETCURSOR && LOWORD(lParam) != HTCLIENT) goto usedefault;
     
     if (Msg == WM_SYSCOMMAND && (wParam & 0xFFF0) == SC_MOVE) {
@@ -409,10 +419,16 @@ static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
             set_pauseresume(0);
             break;
     }
-    
+
+usepal3:
     return WndProc(hWnd, Msg, wParam, lParam);
 usedefault:
     return DefWindowProcA(hWnd, Msg, wParam, lParam);
+}
+
+static void msgloop_postpal3create_hook()
+{
+    early_msgloop = 0;
 }
 
 static MAKE_THISCALL(void, gbGfxManager_D3D_BuildPresentParamsFromSettings_wrapper, struct gbGfxManager_D3D *this)
@@ -486,6 +502,9 @@ static void init_window_patch(int flag)
     
     // hook DefWindowProc
     make_branch(0x00404F8D, 0xE8, DefWindowProcA_wrapper, 6);
+    
+    // add early message loop flag resetting function
+    add_postpal3create_hook(msgloop_postpal3create_hook);
 
     // click X to quit game
     if (get_int_from_configfile("xquit")) {
