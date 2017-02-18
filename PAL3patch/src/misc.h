@@ -16,6 +16,7 @@ extern void __plog(int is_warning, const char *file, int line, const char *func,
 extern int str2int(const char *valstr);
 extern double str2double(const char *valstr);
 extern int str_iendwith(const char *a, const char *b);
+extern int iabs(int x);
 extern double fbound(double x, double low, double high);
 extern int fcmp(double a, double b);
 extern HMODULE GetModuleHandle_check(LPCTSTR lpModuleName);

@@ -1,0 +1,104 @@
+【kahantimer：解决帧数过高时游戏时间走动异常】
+游戏时间走动会在帧数很高时出现异常，大致的现象是：游戏时间走动太快或不动
+    当FPS在60或以下时，时间正常
+    当FPS在60以上128以下时，设fps=x，则速度变为x/60倍
+    当FPS在128或以上时，时间卡住不动
+实际上这是由于PAL3::Update项全局时间计数器PAL3::m_gametime累加时浮点精度问题导致的
+PAL3::Update(deltaTime)函数第一件事就是做m_gametime += deltaTime（它们都是单精度float）
+当游戏时间较大时，由于m_gametime较大，而deltaTime较小，所以会出现大数吃小数问题
+PAL3A中解决此问题的办法是，将m_gametime改为double类型，显著增加了精度
+但是PAL3中不能用此办法，因为需要分配内存空间、修改相关代码，十分繁琐
+考虑到许多小数累加起来很适合采用kahan累加算法
+因此使用kahan算法减小累加过程中误差，解决了此问题（具体通过ASMPATCH实现）
+
+// 测量误差程度的小程序
+// 可以对比kahan、直接加、用double三种方式
+#include <stdio.h>
+float f = 60 * 60 * 72;  // 和：当前已经进行的游戏时间
+float d = 1.0 / 1000;    // 加数：帧时
+int main()
+{
+    int N = 10000;
+    int i;
+
+    float fnaive = f;
+    double fdouble = f;
+    float c = 0;
+    for (i = 1; i <= N; i++) {
+        float y = d - c;
+        float t = f + y;
+        c = (t - f) - y;
+        f = t;
+
+        fnaive += d;
+        fdouble += d;
+
+        printf("delta  = %.50f\n", d);
+        printf("kahan  = %.50f\n", f);
+        printf("naive  = %.50f\n", fnaive);
+        printf("double = %.50f\n", fdouble);
+        printf("\n");
+    }
+    
+    return 0;
+}
+
+
+
+【fixlongkuiattack: 修正龙葵攻击时卡住的问题】
+因为龙葵攻击时是“闪现”的方式，其动画有一个从不透明变为透明的过程（或者反过来）
+动画的开始和停止是根据透明度决定的
+获取透明度的函数是CCBStageRole::GetBlend
+    程序根据此值和deltatime决定下一个透明度值，公式大致为 blend -= deltatime * 2.5
+设置透明度的函数是CCBStageRole::SetBlend
+    但是设置透明度过程中SetBlend函数会做一个“优化”，若不透明度大于0.98则不进行设置
+    一开始时设 blend = 1.0
+    若帧率大于 125 则有 deltatime * 2.5 < 0.02 因此 SetBlend 不会进行任何操作
+    于是下一次 GetBlend 仍会取得 1.0，这就导致“渐变”效果根本无法进行下去，因此龙葵攻击卡住
+解决办法很简单，只要把这个“优化”去掉就好了
+
+
+【改进限制帧率】
+现在会自动根据场景不同限制帧率，可以提高场景帧率的同时，对有问题的界面进行帧率限制
+
+【kfspeed: 修改打苍蝇小游戏的速度】
+将打苍蝇界面限制帧率后，苍蝇行动缓慢，此选项可以整数倍提升苍蝇行动速度
+原理是要想提高N倍速度，就调用N次UIKillFlyer::Update
+
+【测定状态: PAL3::m_gamestate g_gamefrm.m_curfrmid】
+PAL3::m_gamestate => enum GAME_STATE {
+    GAME_NONE,
+    GAME_UI,    // 欢迎界面（含前尘忆梦等）
+                    游戏内部菜单（人物状态、读档存档）
+                    读条画面
+                    鉴定小游戏
+                    打苍蝇小游戏
+                    御剑飞行大地图
+                    买物品卖物品，当铺经营
+    GAME_SCENE, // 一般游戏中场景（如城镇、迷宫）、星森
+    GAME_COMBAT, // 战斗界面
+    GAME_SUBGAME_ENCAMPMENT, // 四方四象枢
+    GAME_SUBGAME_SKEE, // 滑雪
+    GAME_SUBGAME_ROWING, // 船
+    GAME_SUBGAME_HIDEANDSEEK, // 山洞初体验
+    GAME_SUBGAME_NIGHTADVENTURE, // 夜探刺史府，永安当找衣服
+    GAME_OVER, // 死亡
+};
+g_gamefrm.m_curfrmid => enum PAL3_FRAME {
+    FRM_SCENE, // 场景
+    FRM_FIGHT, // 未用
+    FRM_DEAL, // 买卖
+    FRM_SMELT, // 冶炼
+    FRM_COVER, // 登陆界面
+    FRM_S_STATE, // 系统界面
+    FRM_COMBAT, // 战斗
+    FRM_HS_ENTRY, // 当铺
+    FRM_APPRAISE, // 鉴定
+    FRM_KF, // 打苍蝇
+    FRM_ENCAMPMENT, // 四方四象枢
+    FRM_SKEE, // 滑雪
+    FRM_ROWING, // 船
+    FRM_BIGMAP, // 大地图
+    FRM_LOADING, // 加载
+    FRM_GAMEOVER, // 死亡
+};

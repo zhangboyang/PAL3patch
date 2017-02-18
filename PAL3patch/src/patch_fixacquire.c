@@ -6,7 +6,7 @@ static int do_events()
 {
     MSG msg;
     // process message queue here
-    if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         if (msg.message == WM_QUIT) {
             PostQuitMessage(msg.wParam);
             return 0;

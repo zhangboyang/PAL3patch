@@ -410,6 +410,26 @@ static void fix_UISkee()
 
 
 
+// fix rowing game
+static MAKE_THISCALL(bool, UIRowing_Create_wrapper, struct UIRowing *this)
+{
+    bool ret = UIRowing_Create(this);
+    set_uiwnd_ptag(pUIWND(this), FIXUI_AUTO_TRANSFORM_PTAG);
+    return ret;
+}
+static MAKE_UIWND_RENDER_WRAPPER(UIRowing_Render_wrapper, 0x00524970)
+static MAKE_UIWND_UPDATE_WRAPPER(UIRowing_Update_wrapper, 0x005368A0)
+static void fix_UIRowing()
+{
+    INIT_WRAPPER_CALL(UIRowing_Create_wrapper, { 0x0053529F });
+    
+    // manually add wrapper to UIRowing::Render/Update()
+    INIT_WRAPPER_VFPTR(UIRowing_Render_wrapper, 0x005708EC);
+    INIT_WRAPPER_VFPTR(UIRowing_Update_wrapper, 0x005708F0);
+}
+
+
+
 // fix UIGameOver
 static MAKE_THISCALL(void, UIGameOver_Create_wrapper, struct UIGameOver *this)
 {
@@ -459,6 +479,9 @@ MAKE_PATCHSET(fixsceneui)
     
     // fix skee mini-game
     fix_UISkee();
+    
+    // fix rowing game
+    fix_UIRowing();
     
     // fix UIGameOver
     fix_UIGameOver();

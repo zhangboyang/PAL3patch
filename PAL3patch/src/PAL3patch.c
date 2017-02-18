@@ -43,6 +43,8 @@ static void self_check()
     assert(sizeof(struct SoundMgr) == 0xE04FC);
     assert(sizeof(struct gbAudioManager) == 0xF4);
     assert(sizeof(struct gbBinkVideo) == 0x1C0388);
+    assert(sizeof(struct CD3DSettings) == 0x6C);
+    assert(sizeof(struct gbGfxManager_D3D) == 0x8F0);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -88,6 +90,9 @@ static void init_stage2()
     INIT_PATCHSET(nocpk);
     INIT_PATCHSET(console);
     INIT_PATCHSET(relativetimer);
+    INIT_PATCHSET(kahantimer);
+    INIT_PATCHSET(fixlongkuiattack);
+    INIT_PATCHSET(kfspeed);
     INIT_PATCHSET(fixacquire);
     INIT_PATCHSET(preciseresmgr);
     INIT_PATCHSET(audiofreq);

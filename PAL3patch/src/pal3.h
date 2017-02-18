@@ -31,10 +31,29 @@ enum GAME_STATE {
     GAME_COMBAT,
     GAME_SUBGAME_ENCAMPMENT,
     GAME_SUBGAME_SKEE,
-    GAME_HIDE_FIGHT_FIXME, // FIXME: unsure
+    GAME_SUBGAME_ROWING,
     GAME_SUBGAME_HIDEANDSEEK,
     GAME_SUBGAME_NIGHTADVENTURE,
     GAME_OVER,
+};
+
+enum PAL3_FRAME {
+    FRM_SCENE,
+    FRM_FIGHT, // unused
+    FRM_DEAL,
+    FRM_SMELT,
+    FRM_COVER,
+    FRM_S_STATE, // StateUI
+    FRM_COMBAT,
+    FRM_HS_ENTRY, // HockShop
+    FRM_APPRAISE,
+    FRM_KF,
+    FRM_ENCAMPMENT,
+    FRM_SKEE,
+    FRM_ROWING,
+    FRM_BIGMAP,
+    FRM_LOADING,
+    FRM_GAMEOVER,
 };
 
 enum VertexProcessingType {
@@ -116,6 +135,47 @@ struct CD3DEnumeration {
     struct CArrayList *m_pAllowedAdapterFormatList;
 };
 
+struct D3DAdapterInfo {
+    int AdapterOrdinal;
+    D3DADAPTER_IDENTIFIER9 AdapterIdentifier;
+    struct CArrayList *pDisplayModeList;
+    struct CArrayList *pDeviceInfoList;
+};
+struct D3DDeviceInfo {
+    int AdapterOrdinal;
+    D3DDEVTYPE DevType;
+    D3DCAPS9 Caps;
+    struct CArrayList *pDeviceComboList;
+};
+
+struct CD3DSettings {
+    bool IsWindowed;
+
+    struct D3DAdapterInfo *pWindowed_AdapterInfo;
+    struct D3DDeviceInfo *pWindowed_DeviceInfo;
+    struct D3DDeviceCombo *pWindowed_DeviceCombo;
+
+    D3DDISPLAYMODE Windowed_DisplayMode;
+    D3DFORMAT Windowed_DepthStencilBufferFormat;
+    D3DMULTISAMPLE_TYPE Windowed_MultisampleType;
+    DWORD Windowed_MultisampleQuality;
+    enum VertexProcessingType Windowed_VertexProcessingType;
+    UINT Windowed_PresentInterval;
+    int Windowed_Width;
+    int Windowed_Height;
+
+    struct D3DAdapterInfo *pFullscreen_AdapterInfo;
+    struct D3DDeviceInfo *pFullscreen_DeviceInfo;
+    struct D3DDeviceCombo *pFullscreen_DeviceCombo;
+
+    D3DDISPLAYMODE Fullscreen_DisplayMode; // changable by the user
+    D3DFORMAT Fullscreen_DepthStencilBufferFormat;
+    D3DMULTISAMPLE_TYPE Fullscreen_MultisampleType;
+    DWORD Fullscreen_MultisampleQuality;
+    enum VertexProcessingType Fullscreen_VertexProcessingType;
+    UINT Fullscreen_PresentInterval;
+};
+
 struct D3DDriverBug {
     int Gamma_LowByte;
 };
@@ -152,7 +212,8 @@ struct gbGfxManager_D3D {
     struct gbResManager m_CursorMgr;
     struct gbCursorRes *m_pActiveCursor;
     int m_bShowCursor;
-    char padding3[0x70];
+    int m_bSoftVPMode;
+    struct CD3DSettings m_d3dSettings;
     D3DPRESENT_PARAMETERS m_d3dpp;
     struct IDirect3D9 *m_pD3D;
     struct IDirect3DDevice9 *m_pd3dDevice;
@@ -1139,10 +1200,7 @@ struct UIChatRest {
     struct PalScript *pRestOver;
     char m_bActive;
 };
-enum PAL3_FRAME {
-    FRM_SCENE = 0x0,
-    // many values unknown
-};
+
 enum UIEMOTE {
     EM_NONE = 0x0,
     EM_SHUI = 0x1,
@@ -1431,6 +1489,11 @@ struct gbAudioManager {
     struct gbResManager SndDataMgr;
 };
 
+struct UIKillFlyer;
+struct UIRowing;
+
+
+
 // D3DX functions
 #define gbD3DXTex_CImage_ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346CA, void, struct D3DXTex_CImage *), this)
 #define gbD3DXTex_CImage_dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346E3, void, struct D3DXTex_CImage *), this)
@@ -1527,6 +1590,8 @@ struct gbAudioManager {
 #define PAL3_Destroy ((void (*)(void)) TOPTR(0x00406230))
 #define PAL3_Update ((void (*)(float)) TOPTR(0x004055D0))
 #define WndProc ((LRESULT (CALLBACK *)(HWND, UINT, WPARAM, LPARAM)) TOPTR(0x00404D60))
+#define UIKillFlyer_Update(this, deltatime, haveinput) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00529E40, int, struct UIKillFlyer *, float, int), this, deltatime, haveinput)
+#define UIRowing_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00536560, bool, struct UIRowing *), this)
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) TOPTR(0x00BFDA60))
@@ -1535,6 +1600,7 @@ struct gbAudioManager {
 #define PAL3_s_drvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))
 #define PAL3_s_bActive (*(int *) TOPTR(0x005833B8))
 #define PAL3_s_flag (*(int *) TOPTR(0x005833BC))
+#define PAL3_m_gametime (*(float *) TOPTR(0x00BFDAA0))
 #define g_pVFileSys (*(struct gbVFileSystem **) TOPTR(gboffset + 0x1015D3A8))
 #define g_gamefrm (*(struct UIGameFrm *) TOPTR(0x00DB9FD0))
 #define g_bink (*(struct gbBinkVideo *) TOPTR(0x00A3A7D8))

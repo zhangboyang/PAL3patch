@@ -43,7 +43,7 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
         while (1) {
             MSG msg;
             // we must process message queue here
-            if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
                 if (msg.message == WM_QUIT) {
                     PostQuitMessage(msg.wParam);
                     return;
@@ -65,7 +65,7 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
         while (1) {
             MSG msg;
             // we must process message queue here
-            if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
                 if (msg.message == WM_QUIT) {
                     PostQuitMessage(msg.wParam);
                     return;

@@ -76,13 +76,6 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		}
 	},
 	{
-		1, TRUE,
-		_T("game_fpslimit"),
-		_T("限制帧率"),
-		_T("本选项可以限制游戏帧率。"),
-		_T("请在文本框内输入最大帧率数值，若设为 0 则禁用本功能。"),
-	},
-	{
 		0, FALSE,
 		NULL,
 		_T("图形设置"),

@@ -11,13 +11,40 @@ double game_scalefactor;
 
 static LARGE_INTEGER fpslimit_qwTicksPerSec;
 static LARGE_INTEGER fpslimit_qwLast;
+static int fpslimit_enabled;
 static double fpslimit_target_period;
+static double default_fps = -1;
+static double standard_fps = 60;
+
+static void set_fpslimit(double target_fps) // if target_fps is zero or negative, disable fpslimit
+{
+    if (target_fps > 0) {
+        fpslimit_target_period = 1.0 / target_fps;
+        fpslimit_enabled = 1;
+    } else {
+        fpslimit_enabled = 0;
+    }
+}
+static void update_fpslimit()
+{
+    double fps = default_fps;
+    switch (PAL3_s_gamestate) {
+        case GAME_SUBGAME_ENCAMPMENT:
+        case GAME_SUBGAME_SKEE:
+        case GAME_SUBGAME_ROWING:
+        case GAME_UI:
+            fps = standard_fps; break;
+    }
+    set_fpslimit(fps);
+}
 static void fpslimit_hook()
 {
+    update_fpslimit();
     if (fpslimit_qwTicksPerSec.QuadPart > 0) {
         LARGE_INTEGER qwTime;
         while (1) {
             QueryPerformanceCounter(&qwTime);
+            if (!fpslimit_enabled) break;
             double diff = (qwTime.QuadPart - fpslimit_qwLast.QuadPart) / (double) fpslimit_qwTicksPerSec.QuadPart;
             if (diff >= fpslimit_target_period) break;
             int sleepms = floor((fpslimit_target_period - diff) * 1000.0);
@@ -28,17 +55,17 @@ static void fpslimit_hook()
 }
 static void fpslimit_init()
 {
-    double target_fps = str2double(get_string_from_configfile("game_fpslimit"));
-    if (target_fps != 0) {
-        fpslimit_target_period = 1.0 / target_fps;
-        if (!QueryPerformanceFrequency(&fpslimit_qwTicksPerSec)) {
-            warning("can't query performance frequency.");
-            fpslimit_qwTicksPerSec.QuadPart = 0;
-        }
-        fpslimit_qwLast.QuadPart = 0;
-        
-        add_postpresent_hook(fpslimit_hook);
+    if (sscanf(get_string_from_configfile("game_fpslimit"), "%lf,%lf", &default_fps, &standard_fps) != 2) {
+        fail("invalid game_fpslimit config string.");
     }
+
+    if (!QueryPerformanceFrequency(&fpslimit_qwTicksPerSec)) {
+        warning("can't query performance frequency.");
+        fpslimit_qwTicksPerSec.QuadPart = 0;
+    }
+    fpslimit_qwLast.QuadPart = 0;
+    
+    add_postpresent_hook(fpslimit_hook);
 }
 
 
@@ -261,6 +288,36 @@ static void patch_resolution_config(const char *cfgstr)
 
 
 
+// refreshrate patch
+static int prefered_refreshrate = 60;
+static MAKE_ASMPATCH(recalc_fullscreen_refreshrate)
+{
+    struct gbGfxManager_D3D *this = TOPTR(R_ECX);
+    
+    struct D3DAdapterInfo *pBestAdapterInfo = this->m_d3dSettings.pFullscreen_AdapterInfo;
+    D3DDISPLAYMODE *pBestDisplayMode = &this->m_d3dSettings.Fullscreen_DisplayMode;
+
+    if (prefered_refreshrate > 0) {   
+        unsigned idm;
+        for (idm = 0; idm < pBestAdapterInfo->pDisplayModeList->m_NumEntries; idm++) {
+            D3DDISPLAYMODE *pdm = CArrayList_GetPtr(pBestAdapterInfo->pDisplayModeList, idm);
+            if (pBestDisplayMode->Width == pdm->Width && pBestDisplayMode->Height == pdm->Height && pBestDisplayMode->Format == pdm->Format) {
+                if (iabs(pdm->RefreshRate - prefered_refreshrate) < iabs(pBestDisplayMode->RefreshRate - prefered_refreshrate)) {
+                    pBestDisplayMode->RefreshRate = pdm->RefreshRate;
+                }
+            }
+        }
+    }
+    
+    // oldcode
+    R_EAX = pBestDisplayMode->RefreshRate;
+}
+static void patch_refreshrate_config(const char *cfgstr)
+{
+    prefered_refreshrate = str2int(cfgstr);
+    INIT_ASMPATCH(recalc_fullscreen_refreshrate, gboffset + 0x1001A354, 6, "\x8B\x81\xC0\x06\x00\x00");
+}
+
 
 
 
@@ -393,7 +450,7 @@ static int early_msgloop = 1;
 static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     if (early_msgloop) {
-        if (Msg == WM_CREATE || Msg == WM_DESTROY) {
+        if (Msg == WM_CREATE || Msg == WM_DESTROY || Msg == WM_SETCURSOR) {
             goto usepal3;
         } else {
             goto usedefault;
@@ -595,6 +652,7 @@ static void init_resolution_and_window_patch()
 
 MAKE_PATCHSET(graphicspatch)
 {
+    patch_refreshrate_config(get_string_from_configfile("game_refreshrate"));
     patch_depth_buffer_config(get_string_from_configfile("game_zbufferbits"));
     patch_multisample_config(get_string_from_configfile("game_multisample"));
     init_resolution_and_window_patch();

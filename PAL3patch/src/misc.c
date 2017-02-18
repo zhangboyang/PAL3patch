@@ -34,6 +34,11 @@ int str_iendwith(const char *a, const char *b)
     return lena >= lenb && stricmp(a + lena - lenb, b) == 0;
 }
 
+int iabs(int x)
+{
+    return x >= 0 ? x : -x;
+}
+
 double fbound(double x, double low, double high)
 {
     return fmin(fmax(x, low), high);

@@ -34,8 +34,7 @@ extern void *hook_import_table(void *image_base, const char *dllname, const char
     } while (0)
 #define INIT_WRAPPER_VFPTR(wrapper_func, vfptr_addr) \
     do { \
-        void *__func_ptr = (wrapper_func); \
-        memcpy_to_process((vfptr_addr), &__func_ptr, sizeof(__func_ptr)); \
+        make_pointer((vfptr_addr), (wrapper_func)); \
     } while (0)
 #define PATCH_FLOAT_MEMREF_PTR(float_addr, ...) \
     do { \
