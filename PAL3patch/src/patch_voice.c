@@ -1,23 +1,37 @@
 #include "common.h"
 
-// toolkit
+// avoid macro conflicts (dirty)
+#undef BinkDoFrame
+#undef BinkCopyToBuffer
+#undef BinkSetVolume
 
-struct VoiceToolkit {
-    // patch version
-    const char *patch_version;
-    const char *build_date;
-    
-    // some information
-    HWND hgfxwnd;
-    HBINK *phbink;
-    double *pcurtime;
-    
+
+// toolkit definition
+
+struct MiscToolkit {
     // error handling functions
     void (WINAPI *ReportFatalError)(const char *msg);
     
     // hash functions
     unsigned int (WINAPI *CalcStringCRC32)(const char *str);
+    void (WINAPI *CalcStringSHA1)(char *out_str, const char *str);
     
+    // rect functions
+    void (WINAPI *GetRatioRect)(RECT *out_rect, RECT *rect, double ratio);
+};
+
+struct GraphicsToolkit {
+    HWND hWnd;
+    int Width;
+    int Height;
+    IDirect3D9 *pD3D;
+    IDirect3DDevice9 *pd3dDevice;
+    void (WINAPI *EnsureCooperativeLevel)(void);
+    void (WINAPI *(WINAPI *SetOnLostDeviceCallback)(void (WINAPI *)(void)))(void);
+    void (WINAPI *(WINAPI *SetOnResetDeviceCallback)(void (WINAPI *)(void)))(void);
+};
+
+struct VolumeToolkit {
     // get and set background music volume
     float (WINAPI *GetMusicMasterVolume)(void);
     void (WINAPI *SetMusicMasterVolume)(float volume);
@@ -25,9 +39,26 @@ struct VoiceToolkit {
     void (WINAPI *Set2DMasterVolume)(float volume);
     float (WINAPI *Get3DMasterVolume)(void);
     void (WINAPI *Set3DMasterVolume)(float volume);
+};
+
+struct BinkToolkit {
+    HBINK *pMovieHandle; // currently opened movie
+    
+    // bink functions
+    HBINK (WINAPI *BinkOpen)(const char *file_name, unsigned open_flags);
+    int (WINAPI *BinkDoFrame)(HBINK bink);
+    void (WINAPI *BinkNextFrame)(HBINK bink);
+    int (WINAPI *BinkWait)(HBINK bink);
+    int (WINAPI *BinkCopyToBuffer)(HBINK bink, void *dest_addr, int dest_pitch, unsigned dest_height, unsigned dest_x, unsigned dest_y, unsigned copy_flags);
+    void (WINAPI *BinkClose)(HBINK bink);
+    void (WINAPI *BinkSetVolume)(HBINK bink, int volume);
+    int (WINAPI *BinkPause)(HBINK bink, int pause);
+};
+
+struct MSSToolkit {
+    HDIGDRIVER h2DDriver;
     
     // mss32 functions
-    HDIGDRIVER dig;
     HSTREAM (WINAPI *AIL_open_stream)(HDIGDRIVER dig, const char *name, int stream_mem);
     void (WINAPI *AIL_start_stream)(HSTREAM stream);
     void (WINAPI *AIL_close_stream)(HSTREAM stream);
@@ -37,8 +68,23 @@ struct VoiceToolkit {
     int (WINAPI *AIL_stream_status)(HSTREAM stream);
     AILSTREAMCB (WINAPI *AIL_register_stream_callback)(HSTREAM stream, AILSTREAMCB callback);
     void (WINAPI *AIL_stream_ms_position)(HSTREAM stream, int *total_milliseconds, int *current_milliseconds);
-    void (WINAPI *AIL_set_stream_ms_position)(HSTREAM hstream, int milliseconds);
+    void (WINAPI *AIL_set_stream_ms_position)(HSTREAM stream, int milliseconds);
 };
+
+struct VoiceToolkit {
+    // patch version
+    const char *patch_version;
+    const char *build_date;
+
+    struct MiscToolkit *misc;
+    struct GraphicsToolkit *gfx;
+    struct VolumeToolkit *vol;
+    struct BinkToolkit *bik;
+    struct MSSToolkit *mss;
+};
+
+
+
 
 
 
@@ -46,27 +92,23 @@ struct VoiceToolkit {
 
 // imported function pointers
 
-
-// plugin management functions
+//   plugin management functions
 static void (WINAPI *VoiceDLLAttached)(void);
 static void (WINAPI *VoiceInit)(struct VoiceToolkit *toolkit);
 static void (WINAPI *VoiceCleanup)(void);
 static void (WINAPI *GamePause)(void);
 static void (WINAPI *GameResume)(void);
-
-// dialog text functions
+//   dialog text functions
 static void (WINAPI *TextIdle)(int state);
 static void (WINAPI *TextPrepare)(const char *text, int mode);
 static void (WINAPI *TextStart)(void);
 static void (WINAPI *TextStop)(void);
-
-// caption functions
+//   caption functions
 static void (WINAPI *CaptionIdle)(int state);
 static void (WINAPI *CaptionPrepare)(const char *tex);
 static void (WINAPI *CaptionStart)(void);
 static void (WINAPI *CaptionStop)(void);
-
-// movie functions
+//   movie functions
 static void (WINAPI *MovieIdle)(int state);
 static void (WINAPI *MoviePrepare)(const char *movie);
 static void (WINAPI *MovieStart)(void);
@@ -74,6 +116,97 @@ static void (WINAPI *MovieStop)(void);
 
 
 
+
+
+
+
+
+
+
+
+
+
+// toolkit functions
+
+static void WINAPI ReportFatalError(const char *msg)
+{
+    fail("voice plugin fatal error: %s", msg ? msg : "no message");
+}
+
+static unsigned WINAPI CalcStringCRC32(const char *str)
+{
+    return gbCrc32Compute(str);
+}
+
+static void WINAPI CalcStringSHA1(char *out_str, const char *str)
+{
+    // out_str should at least SHA1_STR_SIZE bytes
+    unsigned char sha1buf[SHA1_BYTE];
+    sha1_hash_buffer(str, strlen(str), sha1buf);
+    strcpy(out_str, sha1_tostr(sha1buf));
+}
+
+static void WINAPI GetRatioRect(RECT *out_rect, RECT *rect, double ratio)
+{
+    fRECT frect;
+    set_frect_rect(&frect, rect);
+    get_ratio_frect(&frect, &frect, ratio);
+    set_rect_frect(out_rect, &frect);
+}
+
+static void WINAPI EnsureCooperativeLevel(void)
+{
+    gbGfxManager_D3D_EnsureCooperativeLevel(GB_GfxMgr, 1);
+};
+
+static void (WINAPI *OnLostDeviceCallback)(void) = NULL;
+static void (WINAPI *OnResetDeviceCallback)(void) = NULL;
+static void (WINAPI *(WINAPI SetOnLostDeviceCallback)(void (WINAPI *fp)(void)))(void)
+{
+    void (WINAPI *ret)(void) = fp;
+    OnLostDeviceCallback = fp;
+    return ret;
+}
+static void (WINAPI *(WINAPI SetOnResetDeviceCallback)(void (WINAPI *fp)(void)))(void)
+{
+    void (WINAPI *ret)(void) = fp;
+    OnResetDeviceCallback = fp;
+    return ret;
+}
+
+
+static float WINAPI GetMusicMasterVolume()
+{
+    return gbAudioManager_GetMusicMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()));
+}
+static void WINAPI SetMusicMasterVolume(float volume)
+{
+    gbAudioManager_SetMusicMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()), volume);
+}
+static float WINAPI Get2DMasterVolume()
+{
+    return gbAudioManager_Get2DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()));
+}
+static void WINAPI Set2DMasterVolume(float volume)
+{
+    gbAudioManager_Set2DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()), volume);
+}
+static float WINAPI Get3DMasterVolume()
+{
+    return gbAudioManager_Get3DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()));
+}
+static void WINAPI Set3DMasterVolume(float volume)
+{
+    gbAudioManager_Set3DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()), volume);
+}
+
+
+
+
+
+
+// voice plugin flags
+static int plugin_init_flag = 0;
 
 
 
@@ -173,41 +306,6 @@ static void try_idle(int is_opened)
     TextIdle(roledlg_state);
 }
 
-static void WINAPI ReportFatalError(const char *msg)
-{
-    fail("voice plugin fatal error: %s", msg ? msg : "no message");
-}
-
-static unsigned WINAPI CalcStringCRC32(const char *str)
-{
-    return gbCrc32Compute(str);
-}
-
-static float WINAPI GetMusicMasterVolume()
-{
-    return gbAudioManager_GetMusicMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()));
-}
-static void WINAPI SetMusicMasterVolume(float volume)
-{
-    gbAudioManager_SetMusicMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()), volume);
-}
-static float WINAPI Get2DMasterVolume()
-{
-    return gbAudioManager_Get2DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()));
-}
-static void WINAPI Set2DMasterVolume(float volume)
-{
-    gbAudioManager_Set2DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()), volume);
-}
-static float WINAPI Get3DMasterVolume()
-{
-    return gbAudioManager_Get3DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()));
-}
-static void WINAPI Set3DMasterVolume(float volume)
-{
-    gbAudioManager_Set3DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()), volume);
-}
-
 struct dlg_state_t {
     int visible;
     int bkstate;
@@ -301,8 +399,23 @@ static void movie_gameloop_proc(struct game_loop_hook_data *hookarg)
 
 
 
+
+// d3d lost and reset device
+
+static void voice_onlostdevice_hook()
+{
+    if (OnLostDeviceCallback) OnLostDeviceCallback();
+}
+
+static void voice_onresetdevice_hook()
+{
+    if (OnResetDeviceCallback) OnResetDeviceCallback();
+}
+
+
+
+
 // init and cleanup
-static int plugin_init_flag = 0;
 
 static void voice_prepal3destroy_hook()
 {
@@ -314,30 +427,69 @@ static void voice_postgamecreate_hook()
 {
     // allocate static memory
     static struct VoiceToolkit toolkit;
+    static struct MiscToolkit misc;
+    static struct GraphicsToolkit gfx;
+    static struct VolumeToolkit vol;
+    static struct BinkToolkit bik;
+    static struct MSSToolkit mss;
     
     // set toolkit
-    HMODULE mss32 = GetModuleHandle_check("MSS32.DLL");
+    
     toolkit = (struct VoiceToolkit) {
         .patch_version = patch_version,
         .build_date = build_date,
         
-        .hgfxwnd = PAL3_s_drvinfo.hgfxwnd,
-        .phbink = &g_bink.m_hBink,
-        .pcurtime = &g_CurrentTime,
-        
+        .misc = &misc,
+        .gfx = &gfx,
+        .vol = &vol,
+        .bik = &bik,
+        .mss = &mss,
+    };
+    
+    misc = (struct MiscToolkit) {
         .ReportFatalError = ReportFatalError,
-        
         .CalcStringCRC32 = CalcStringCRC32,
+        .CalcStringSHA1 = CalcStringSHA1,
+        .GetRatioRect = GetRatioRect,
+    };
+    
+    gfx = (struct GraphicsToolkit) {
+        .hWnd = PAL3_s_drvinfo.hgfxwnd,
+        .Width = PAL3_s_drvinfo.width,
+        .Height = PAL3_s_drvinfo.height,
+        .pD3D = GB_GfxMgr->m_pD3D,
+        .pd3dDevice = GB_GfxMgr->m_pd3dDevice,
+        .EnsureCooperativeLevel = EnsureCooperativeLevel,
+        .SetOnLostDeviceCallback = SetOnLostDeviceCallback,
+        .SetOnResetDeviceCallback = SetOnResetDeviceCallback,
+    };
         
+    vol = (struct VolumeToolkit) {
         .GetMusicMasterVolume = GetMusicMasterVolume,
         .SetMusicMasterVolume = SetMusicMasterVolume,
         .Get2DMasterVolume = Get2DMasterVolume,
         .Set2DMasterVolume = Set2DMasterVolume,
         .Get3DMasterVolume = Get3DMasterVolume,
         .Set3DMasterVolume = Set3DMasterVolume,
-        
-        .dig = SoundMgr_GetAudioMgr(SoundMgr_Inst())->h2DDriver,
-        .AIL_open_stream = TOPTR(GetProcAddress(mss32, "_AIL_open_stream@12")),
+    };
+    
+    HMODULE binkw32 = GetModuleHandle_check("BINKW32.DLL");
+    bik = (struct BinkToolkit) {
+        .pMovieHandle = &g_bink.m_hBink,
+        .BinkOpen = TOPTR(GetProcAddress_check(binkw32, "_BinkOpen@8")),
+        .BinkDoFrame = TOPTR(GetProcAddress_check(binkw32, "_BinkDoFrame@4")),
+        .BinkNextFrame = TOPTR(GetProcAddress_check(binkw32, "_BinkNextFrame@4")),
+        .BinkWait = TOPTR(GetProcAddress_check(binkw32, "_BinkWait@4")),
+        .BinkCopyToBuffer = TOPTR(GetProcAddress_check(binkw32, "_BinkCopyToBuffer@28")),
+        .BinkClose = TOPTR(GetProcAddress_check(binkw32, "_BinkClose@4")),
+        .BinkSetVolume = TOPTR(GetProcAddress_check(binkw32, "_BinkSetVolume@8")),
+        .BinkPause = TOPTR(GetProcAddress_check(binkw32, "_BinkPause@8")),
+    };
+    
+    HMODULE mss32 = GetModuleHandle_check("MSS32.DLL");
+    mss = (struct MSSToolkit) {
+        .h2DDriver = SoundMgr_GetAudioMgr(SoundMgr_Inst())->h2DDriver,
+        .AIL_open_stream = TOPTR(GetProcAddress_check(mss32, "_AIL_open_stream@12")),
         .AIL_start_stream = TOPTR(GetProcAddress_check(mss32, "_AIL_start_stream@4")),
         .AIL_close_stream = TOPTR(GetProcAddress_check(mss32, "_AIL_close_stream@4")),
         .AIL_pause_stream = TOPTR(GetProcAddress_check(mss32, "_AIL_pause_stream@8")),
@@ -404,6 +556,10 @@ MAKE_PATCHSET(voice)
     add_prepal3destroy_hook(voice_prepal3destroy_hook);
     add_gameloop_hook(voice_gameloop_dispatcher);
     add_pauseresume_hook(voice_checkpause_hook);
+    add_onlostdevice_hook(voice_onlostdevice_hook);
+    add_onresetdevice_hook(voice_onresetdevice_hook);
+
+
 
     // dynlink voice plugin    
     HMODULE hPlugin = LoadLibrary_check(get_string_from_configfile("voiceplugin"));
@@ -428,6 +584,8 @@ MAKE_PATCHSET(voice)
     MoviePrepare = TOPTR(GetProcAddress_check(hPlugin, "_MoviePrepare@4"));
     MovieStart = TOPTR(GetProcAddress_check(hPlugin, "_MovieStart@0"));
     MovieStop = TOPTR(GetProcAddress_check(hPlugin, "_MovieStop@0"));
+    
+    
     
     // call dll attach callback
     VoiceDLLAttached();

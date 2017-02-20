@@ -17,3 +17,6 @@
 !*.ico
 !*.props
 !*.vcxproj
+!*.vbp
+!*.frm
+!*.bas

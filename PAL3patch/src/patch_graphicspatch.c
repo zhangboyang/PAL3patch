@@ -458,12 +458,17 @@ static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
     }
     
     if (Msg == WM_SETCURSOR && LOWORD(lParam) != HTCLIENT) goto usedefault;
+    if (Msg == WM_SETCURSOR && !PAL3_s_bActive) goto usedefault;
     
     if (Msg == WM_SYSCOMMAND && (wParam & 0xFFF0) == SC_MOVE) {
         set_pauseresume(1);
         LRESULT ret = DefWindowProcA(hWnd, Msg, wParam, lParam);
         set_pauseresume(0);
         return ret;
+    }
+    
+    if (Msg == WM_ACTIVATE) {
+        set_pauseresume(!wParam);
     }
     
     switch (Msg) {

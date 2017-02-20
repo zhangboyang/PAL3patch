@@ -1,6 +1,14 @@
 #include "common.h"
 
-const char patch_version[] = "v1.0 beta";
+#if defined(__GNUC__) && defined(__VERSION__)
+#define BUILD_COMPILER "gcc " __VERSION__
+#elif defined(_MSC_VER)
+#define BUILD_COMPILER "Microsoft C " TOSTR(_MSC_VER)
+#else
+#define BUILD_COMPILER "unknown C compiler"
+#endif
+
+const char patch_version[] = "v1.0 RC";
 const char build_date[] = __DATE__ ", " __TIME__;
 const char build_compiler[] = BUILD_COMPILER;
 

@@ -28,25 +28,41 @@ typedef struct BINK {
 	unsigned int SndSize;
 } BINK, *HBINK;
 
+#define BINKSURFACE32 3
+#define BINKCOPYALL 0x80000000L
+
+
+
+
+
+
 
 // see patch_voice.c for details
 
-struct VoiceToolkit {
-    // patch version
-    const char *patch_version;
-    const char *build_date;
-    
-    // some information
-    HWND hgfxwnd;
-    HBINK *phbink;
-    double *pcurtime;
-    
+struct MiscToolkit {
     // error handling functions
     void (WINAPI *ReportFatalError)(const char *msg);
     
     // hash functions
     unsigned int (WINAPI *CalcStringCRC32)(const char *str);
+    void (WINAPI *CalcStringSHA1)(char *out_str, const char *str);
     
+    // rect functions
+    void (WINAPI *GetRatioRect)(RECT *out_rect, RECT *rect, double ratio);
+};
+
+struct GraphicsToolkit {
+    HWND hWnd;
+    int Width;
+    int Height;
+    IDirect3D9 *pD3D;
+    IDirect3DDevice9 *pd3dDevice;
+    void (WINAPI *EnsureCooperativeLevel)(void);
+    void (WINAPI *(WINAPI *SetOnLostDeviceCallback)(void (WINAPI *)(void)))(void);
+    void (WINAPI *(WINAPI *SetOnResetDeviceCallback)(void (WINAPI *)(void)))(void);
+};
+
+struct VolumeToolkit {
     // get and set background music volume
     float (WINAPI *GetMusicMasterVolume)(void);
     void (WINAPI *SetMusicMasterVolume)(float volume);
@@ -54,9 +70,26 @@ struct VoiceToolkit {
     void (WINAPI *Set2DMasterVolume)(float volume);
     float (WINAPI *Get3DMasterVolume)(void);
     void (WINAPI *Set3DMasterVolume)(float volume);
+};
+
+struct BinkToolkit {
+    HBINK *pMovieHandle; // currently opened movie
+    
+    // bink functions
+    HBINK (WINAPI *BinkOpen)(const char *file_name, unsigned open_flags);
+    int (WINAPI *BinkDoFrame)(HBINK bink);
+    void (WINAPI *BinkNextFrame)(HBINK bink);
+    int (WINAPI *BinkWait)(HBINK bink);
+    int (WINAPI *BinkCopyToBuffer)(HBINK bink, void *dest_addr, int dest_pitch, unsigned dest_height, unsigned dest_x, unsigned dest_y, unsigned copy_flags);
+    void (WINAPI *BinkClose)(HBINK bink);
+    void (WINAPI *BinkSetVolume)(HBINK bink, int volume);
+    int (WINAPI *BinkPause)(HBINK bink, int pause);
+};
+
+struct MSSToolkit {
+    HDIGDRIVER h2DDriver;
     
     // mss32 functions
-    HDIGDRIVER dig;
     HSTREAM (WINAPI *AIL_open_stream)(HDIGDRIVER dig, const char *name, int stream_mem);
     void (WINAPI *AIL_start_stream)(HSTREAM stream);
     void (WINAPI *AIL_close_stream)(HSTREAM stream);
@@ -66,8 +99,27 @@ struct VoiceToolkit {
     int (WINAPI *AIL_stream_status)(HSTREAM stream);
     AILSTREAMCB (WINAPI *AIL_register_stream_callback)(HSTREAM stream, AILSTREAMCB callback);
     void (WINAPI *AIL_stream_ms_position)(HSTREAM stream, int *total_milliseconds, int *current_milliseconds);
-    void (WINAPI *AIL_set_stream_ms_position)(HSTREAM hstream, int milliseconds);
+    void (WINAPI *AIL_set_stream_ms_position)(HSTREAM stream, int milliseconds);
 };
+
+struct VoiceToolkit {
+    // patch version
+    const char *patch_version;
+    const char *build_date;
+
+    struct MiscToolkit *misc;
+    struct GraphicsToolkit *gfx;
+    struct VolumeToolkit *vol;
+    struct BinkToolkit *bik;
+    struct MSSToolkit *mss;
+};
+
+
+
+
+
+
+
 
 enum {
     ROLEDLG_CLOSED,  // End() -> Prepare()

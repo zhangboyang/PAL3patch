@@ -85,8 +85,8 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
             fail("Reset3DEnvironment error!");
         }
         this->m_bDeviceLost = 0;
-        set_pauseresume(0);
     }
+    set_pauseresume(0);
 }
 
 // load image bits from file in memory, using D3DX

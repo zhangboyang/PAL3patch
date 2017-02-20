@@ -229,7 +229,7 @@ static MAKE_THISCALL(int, gbBinkVideo_OpenFile, struct gbBinkVideo *this, const 
 }
 static MAKE_ASMPATCH(gameloop_movie_atenter)
 {
-    call_gameloop_hooks(GAMEEVENT_MOVIE_ATBEGIN, NULL);
+    if (g_bink.m_hBink) call_gameloop_hooks(GAMEEVENT_MOVIE_ATBEGIN, NULL);
     R_EDI = R_ECX;
     R_EAX = M_DWORD(R_EDI + 0x0C);
 }

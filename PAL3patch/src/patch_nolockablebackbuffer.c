@@ -82,11 +82,11 @@ static void get_movie_uv(const char *filename, int movie_width, int movie_height
     // calc u, v as if texture size equals to movie size
     struct {
         const char *filename;
-        double u1, v1, u2, v2;
+        double u1, v1, u2, v2, r;
     } *p, uvdata[] = { // input custom U and V value here
         
         // opening
-        { "Movie\\Pal3op.bik", 0.0, (60.0 / 480.0), 1.0, (420.0 / 480.0) },
+        { "Movie\\Pal3op.bik", 0.0, (60.0 / 480.0), 1.0, (420.0 / 480.0), -1.0 },
         
         /* ending
                     id     name      top   bottom
@@ -97,11 +97,11 @@ static void get_movie_uv(const char *filename, int movie_width, int movie_height
                     4     HuaYing     *      Sub
                     5     Perfact     *      Sub
         */
-        { "Movie\\END1.bik",   0.0, (75.0 / 600.0), 1.0, (525.0 / 600.0) },
-        { "Movie\\END2.bik",   0.0, (75.0 / 600.0), 1.0, (575.0 / 600.0) },
-        { "Movie\\END3.bik",   0.0, (75.0 / 600.0), 1.0, (575.0 / 600.0) },
-        { "Movie\\END4.bik",   0.0, (75.0 / 600.0), 1.0, (575.0 / 600.0) },
-        { "Movie\\END5.bik",   0.0, (75.0 / 600.0), 1.0, (585.0 / 600.0) },
+        { "Movie\\END1.bik",   0.0, (76.0 / 600.0), 1.0, (524.0 / 600.0), 16.0 / 9.0 },
+        { "Movie\\END2.bik",   0.0, (76.0 / 600.0), 1.0, (575.0 / 600.0), -1.0 },
+        { "Movie\\END3.bik",   0.0, (76.0 / 600.0), 1.0, (575.0 / 600.0), -1.0 },
+        { "Movie\\END4.bik",   0.0, (75.0 / 600.0), 1.0, (575.0 / 600.0), -1.0 },
+        { "Movie\\END5.bik",   0.0, (75.0 / 600.0), 1.0, (585.0 / 600.0), -1.0 },
         
         { NULL } // EOF
     };
@@ -126,9 +126,15 @@ static void get_movie_uv(const char *filename, int movie_width, int movie_height
     
     // calc movie ratio
     mf_tex_ratio = ((mf_tex_u2 - mf_tex_u1) * movie_width) / ((mf_tex_v2 - mf_tex_v1) * movie_height);
-    if (!p->filename && movie_width == 800 && movie_height == 448) {
-        // special fix
-        mf_tex_ratio = 16.0 / 9.0;
+    if (p->filename) {
+        if (p->r > 0) {
+            mf_tex_ratio = p->r;
+        }
+    } else {
+        if (movie_width == 800 && movie_height == 448) {
+            // special fix
+            mf_tex_ratio = 16.0 / 9.0;
+        }
     }
 
     // adjust to real texture coord
@@ -166,13 +172,13 @@ static void init_movieframe_texture(const char *filename, int movie_width, int m
 
 static int last_BinkDoFrame_retval;
 static int last_BinkCopyToBuffer_retval;
-static int __stdcall BinkDoFrame_wrapper(DWORD a1)
+static int __stdcall BinkDoFrame_wrapper(HBINK bink)
 {
-    return last_BinkDoFrame_retval = BinkDoFrame(a1);
+    return last_BinkDoFrame_retval = BinkDoFrame(bink);
 }
-static int __stdcall BinkCopyToBuffer_wrapper(DWORD a1, DWORD a2, DWORD a3, DWORD a4, DWORD a5, DWORD a6, DWORD a7)
+static int __stdcall BinkCopyToBuffer_wrapper(HBINK bink, void *dest_addr, int dest_pitch, unsigned dest_height, unsigned dest_x, unsigned dest_y, unsigned copy_flags)
 {
-    return last_BinkCopyToBuffer_retval = BinkCopyToBuffer(a1, a2, a3, a4, a5, a6, a7);
+    return last_BinkCopyToBuffer_retval = BinkCopyToBuffer(bink, dest_addr, dest_pitch, dest_height, dest_x, dest_y, copy_flags);
 }
 
 static void movie_playback_atopen(void *arg)
@@ -181,6 +187,10 @@ static void movie_playback_atopen(void *arg)
     
     // check hook type
     if (hookarg->type != GAMEEVENT_MOVIE_ATOPEN) return;
+    
+    if (!g_bink.m_hBink) return;
+    
+    BinkSetVolume(g_bink.m_hBink, 32768.0 * gbAudioManager_GetMusicMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst())));
     
     const char *moviefile = hookarg->data;
     

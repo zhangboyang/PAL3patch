@@ -53,15 +53,6 @@
 #define THISCALL_WRAPPER(func, this, ...) func(this, 0, ##__VA_ARGS__)
 #endif
 
-#if defined(__GNUC__) && defined(__VERSION__)
-#define BUILD_COMPILER "gcc " __VERSION__
-#elif defined(_MSC_VER)
-#define BUILD_COMPILER "Microsoft C " TOSTR(_MSC_VER)
-#else
-#define BUILD_COMPILER "unknown C compiler"
-#endif
-
-
 
 // common macros
 #define _TOSTR(x) #x

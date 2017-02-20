@@ -133,7 +133,7 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		}
 	},
 	{
-		1, FALSE,
+		1, TRUE,
 		_T("reduceinputlatency"),
 		_T("减少输入延迟"),
 		_T("本选项可以减少输入延迟（即鼠标接收到动作到动作被显示到显示器上的延迟），也有助于减少帧时抖动，但会有少量性能开销。"),
