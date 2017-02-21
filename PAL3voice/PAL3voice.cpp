@@ -221,6 +221,30 @@ static void AudioSync(int ms)
 
 
 
+// sleep
+static void SleepDoModal(unsigned ms, bool canskip)
+{
+	DWORD tick;
+
+	tick = timeGetTime();
+	while (1) {
+		MSG msg;
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            if (msg.message == WM_QUIT) {
+                PostQuitMessage(msg.wParam);
+                return;
+            }
+			if (canskip && msg.message == WM_CHAR && msg.wParam == VK_ESCAPE) {
+				return;
+			}
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+
+		if (timeGetTime() - tick >= ms) return;
+		Sleep(1);
+	}
+}
 
 
 // Texture Quad
@@ -293,23 +317,33 @@ static void TexQuadRender(IDirect3DTexture9 *tex, unsigned bgcolor)
 	tools->gfx->pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	tools->gfx->pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 	tools->gfx->pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-	tools->gfx->pd3dDevice->SetTexture(0, tex);
 	tools->gfx->pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, bgcolor, 1.0f, 0);
 	tools->gfx->pd3dDevice->BeginScene();
-	tools->gfx->pd3dDevice->SetFVF(TQ_VERTEX_FVF);
-	tools->gfx->pd3dDevice->SetStreamSource(0, tqvbuf, 0, TQ_VERTEX_SIZE);
-	tools->gfx->pd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, TQ_VBUF_TRANGLE_COUNT);
+	if (tex) {
+		tools->gfx->pd3dDevice->SetFVF(TQ_VERTEX_FVF);
+		tools->gfx->pd3dDevice->SetTexture(0, tex);
+		tools->gfx->pd3dDevice->SetStreamSource(0, tqvbuf, 0, TQ_VERTEX_SIZE);
+		tools->gfx->pd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, TQ_VBUF_TRANGLE_COUNT);
+	}
 	tools->gfx->pd3dDevice->EndScene();
 	tools->gfx->pd3dDevice->Present(NULL, NULL, NULL, NULL);
 }
 
+
+// clear screen
+static void ClearScreen(unsigned bgcolor)
+{
+	CaptureStateBlock();
+	TexQuadRender(NULL, bgcolor);
+	RestoreStateBlock();
+}
 
 
 // picture viewer
 static void PictureDoModal(const char *filename, unsigned bgcolor, unsigned ms)
 {
 	std::string picpath = path_prefix + std::string(filename);
-	int tick;
+	DWORD tick;
 	IDirect3DTexture9 *tex = NULL;
 
 	D3DXIMAGE_INFO imginfo;
@@ -335,7 +369,7 @@ static void PictureDoModal(const char *filename, unsigned bgcolor, unsigned ms)
 
 	CaptureStateBlock();
 
-	tick = GetTickCount();
+	tick = timeGetTime();
 	while (1) {
 		MSG msg;
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -350,10 +384,9 @@ static void PictureDoModal(const char *filename, unsigned bgcolor, unsigned ms)
             DispatchMessage(&msg);
         }
 
-		if (GetTickCount() - tick >= ms) break;
-
 		tools->gfx->EnsureCooperativeLevel();
 		TexQuadRender(tex, bgcolor);
+		if (timeGetTime() - tick >= ms) break;
 		Sleep(1);
 	}
 
@@ -373,7 +406,7 @@ static void VideoResume()
 {
 	if (curbink) tools->bik->BinkPause(curbink, 0);
 }
-static void VideoDoModal(const char *filename, double volume)
+static void VideoDoModal(const char *filename, unsigned bgcolor, double volume)
 {
 	RECT rc;
 	std::string videopath = path_prefix + std::string(filename);
@@ -420,23 +453,25 @@ static void VideoDoModal(const char *filename, double volume)
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+		tools->gfx->EnsureCooperativeLevel();
 		if (tools->bik->BinkWait(bink)) {
 			Sleep(1);
 		} else {
-			tools->bik->BinkDoFrame(bink);
-			
-			// draw frame
-			tools->gfx->EnsureCooperativeLevel();
-			D3DLOCKED_RECT lrc;
-			if (SUCCEEDED(suf->LockRect(&lrc, NULL, 0))) {
-				tools->bik->BinkCopyToBuffer(bink, lrc.pBits, lrc.Pitch, bink->Height, 0, 0, BINKSURFACE32 | BINKCOPYALL);
-				suf->UnlockRect();
-				IDirect3DSurface9 *texsuf;
-				if (SUCCEEDED(tex->GetSurfaceLevel(0, &texsuf))) {
-					if (SUCCEEDED(D3DXLoadSurfaceFromSurface(texsuf, NULL, NULL, suf, NULL, NULL, D3DX_FILTER_LINEAR, 0))) {
-						TexQuadRender(tex, 0xFF000000);
+			if (tools->bik->BinkDoFrame(bink) == 0) {
+				// draw frame
+				D3DLOCKED_RECT lrc;
+				if (SUCCEEDED(suf->LockRect(&lrc, NULL, 0))) {
+					int ret = tools->bik->BinkCopyToBuffer(bink, lrc.pBits, lrc.Pitch, bink->Height, 0, 0, BINKSURFACE32 | BINKCOPYALL);
+					suf->UnlockRect();
+					if (ret == 0) {
+						IDirect3DSurface9 *texsuf;
+						if (SUCCEEDED(tex->GetSurfaceLevel(0, &texsuf))) {
+							if (SUCCEEDED(D3DXLoadSurfaceFromSurface(texsuf, NULL, NULL, suf, NULL, NULL, D3DX_FILTER_LINEAR, 0))) {
+								TexQuadRender(tex, bgcolor);
+							}
+							texsuf->Release();
+						}
 					}
-					texsuf->Release();
 				}
 			}
 
@@ -527,12 +562,24 @@ static void RunScript(const char *filename)
 			char str[MAXLINE];
 			ReadScriptString(fp, str, sizeof(str));
 			plog("script log: %s", str);
+		} else if (_stricmp(cmd, "SLEEP") == 0) {
+			unsigned ms;
+			int canskip;
+			if (fscanf(fp, "%u%d", &ms, &canskip) == 2) {
+				SleepDoModal(ms, !!canskip);
+			}
+		} else if (_stricmp(cmd, "CLS") == 0) {
+			unsigned bgcolor;
+			if (fscanf(fp, "%x", &bgcolor) == 1) {
+				ClearScreen(bgcolor);
+			}
 		} else if (_stricmp(cmd, "PLAYVIDEO") == 0) {
+			unsigned bgcolor;
 			double vol;
-			if (fscanf(fp, "%lf", &vol) == 1) {
+			if (fscanf(fp, "%x%lf", &bgcolor, &vol) == 2) {
 				char str[MAXLINE];
 				ReadScriptString(fp, str, sizeof(str));
-				VideoDoModal(str, vol);
+				VideoDoModal(str, bgcolor, vol);
 			}
 		} else if (_stricmp(cmd, "SHOWPICTURE") == 0) {
 			unsigned bgcolor;

@@ -449,6 +449,7 @@ static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam,
 static int early_msgloop = 1;
 static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+    // use default procdure when we are in early stage
     if (early_msgloop) {
         if (Msg == WM_CREATE || Msg == WM_DESTROY || Msg == WM_SETCURSOR) {
             goto usepal3;
@@ -457,9 +458,13 @@ static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
         }
     }
     
+    // show cursor when cursor is in our window but not client area
     if (Msg == WM_SETCURSOR && LOWORD(lParam) != HTCLIENT) goto usedefault;
+    
+    // show cursor when cursor is in our window but game is not active
     if (Msg == WM_SETCURSOR && !PAL3_s_bActive) goto usedefault;
     
+    // pause game when moving window
     if (Msg == WM_SYSCOMMAND && (wParam & 0xFFF0) == SC_MOVE) {
         set_pauseresume(1);
         LRESULT ret = DefWindowProcA(hWnd, Msg, wParam, lParam);
@@ -467,10 +472,12 @@ static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
         return ret;
     }
     
+    // pause or resume game when active status changed
     if (Msg == WM_ACTIVATE) {
         set_pauseresume(!wParam);
     }
     
+    // pause when system menu popup
     switch (Msg) {
         case WM_ENTERSIZEMOVE:
         case WM_ENTERMENULOOP:
@@ -488,8 +495,9 @@ usedefault:
     return DefWindowProcA(hWnd, Msg, wParam, lParam);
 }
 
-static void msgloop_postpal3create_hook()
+static void msgloop_gameloop_hook(void *arg)
 {
+    // any type of gameloop hook marks the end of early stage
     early_msgloop = 0;
 }
 
@@ -566,7 +574,7 @@ static void init_window_patch(int flag)
     make_branch(0x00404F8D, 0xE8, DefWindowProcA_wrapper, 6);
     
     // add early message loop flag resetting function
-    add_postpal3create_hook(msgloop_postpal3create_hook);
+    add_gameloop_hook(msgloop_gameloop_hook);
 
     // click X to quit game
     if (get_int_from_configfile("xquit")) {

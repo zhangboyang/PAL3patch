@@ -1,8 +1,8 @@
 Type=Exe
+Form=frmLogMonitor.frm
 Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\WINDOWS\system32\stdole2.tlb#OLE Automation
-Form=frmLog.frm
 Module=mdlMain; mdlMain.bas
-Form=frmDataLog.frm
+IconForm="frmLogMonitor"
 Startup="Sub Main"
 HelpFile=""
 ExeName32="VoiceLogMonitor.exe"

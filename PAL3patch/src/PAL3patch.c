@@ -100,7 +100,6 @@ static void init_stage2()
     INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
     INIT_PATCHSET(dpiawareness);
     INIT_PATCHSET(testcombat);
-    INIT_PATCHSET(voice);
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch
         INIT_PATCHSET(fixfov);
@@ -125,6 +124,7 @@ static void init_stage2()
         INIT_PATCHSET(forcesettexture);
         INIT_PATCHSET(fixtrail);
     }
+    INIT_PATCHSET(voice);
     
     // init_locale() must called after INIT_PATCHSET(setlocale)
     init_locale();
