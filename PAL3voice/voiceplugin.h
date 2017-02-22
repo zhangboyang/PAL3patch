@@ -48,7 +48,7 @@ struct MiscToolkit {
     void (WINAPI *CalcStringSHA1)(char *out_str, const char *str);
     
     // rect functions
-    void (WINAPI *GetRatioRect)(RECT *out_rect, RECT *rect, double ratio);
+    void (WINAPI *GetRatioRect)(RECT *out_rect, const RECT *rect, double ratio);
 };
 
 struct GraphicsToolkit {
@@ -113,6 +113,7 @@ struct VoiceToolkit {
     struct BinkToolkit *bik;
     struct MSSToolkit *mss;
 };
+
 
 
 

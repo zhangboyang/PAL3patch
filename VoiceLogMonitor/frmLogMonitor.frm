@@ -39,9 +39,11 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-Private Declare Function LockWindowUpdate Lib "user32" (ByVal hwndLock As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
+Private Const WM_VSCROLL = &H115
+Private Const SB_BOTTOM = 7
 
-Private Const intMaxLine = 100
+Private Const MaxLine As Long = 100
 Dim strLogFileName As String
 
 Public Sub SetLogFileName(strFileName As String, colBgColor As Long)
@@ -69,33 +71,35 @@ End Sub
 Private Sub tmrRefresh_Timer()
     OnTimer
     
-    Dim s(intMaxLine) As String, t As String
-    Dim m As Integer, i As Integer
+    Dim s(MaxLine) As String, t As String
+    Dim m As Long, i As Long
     
     On Error GoTo Err
     
     Open strLogFileName For Input As #1
     m = 1
     Do While Not EOF(1)
-        Line Input #1, s((m Mod intMaxLine) + 1)
+        Line Input #1, s((m Mod MaxLine) + 1)
         m = m + 1
     Loop
     
     t = "... more lines omited ..." & vbCrLf
-    For i = (m Mod intMaxLine) + 1 To intMaxLine
+    For i = (m Mod MaxLine) + 1 To MaxLine
         t = t & vbCrLf & s(i)
     Next i
-    For i = 1 To (m Mod intMaxLine)
+    For i = 1 To (m Mod MaxLine)
         t = t & vbCrLf & s(i)
     Next i
     t = t & vbCrLf
     
-    LockWindowUpdate txtLogMonitor.hWnd
     If txtLogMonitor.Text <> t Then
+        Me.BackColor = txtLogMonitor.BackColor
+        txtLogMonitor.Visible = False
         txtLogMonitor.Text = t
         txtLogMonitor.SelStart = Len(txtLogMonitor.Text)
+        SendMessage txtLogMonitor.hwnd, WM_VSCROLL, SB_BOTTOM, ByVal 0
+        txtLogMonitor.Visible = True
     End If
-    LockWindowUpdate 0
     
     Close #1
     UpdateTitle Str(Date) & " " & Str(Time) & " | Log Monitor: " & strLogFileName

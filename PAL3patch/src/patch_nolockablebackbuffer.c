@@ -1,8 +1,5 @@
 #include "common.h"
 
-//#define SAVE_MOVIESCREENSHOT_AT_STOP
-
-
 // movie frame related functions
 static int (WINAPI *BinkPause)(HBINK bink, int pause);
 
@@ -105,10 +102,6 @@ static void get_movie_uv(const char *filename, int movie_width, int movie_height
         
         { NULL } // EOF
     };
-    
-#ifdef SAVE_MOVIESCREENSHOT_AT_STOP
-    OutputDebugString(filename);
-#endif
 
     for (p = uvdata; p->filename; p++) {
         if (stricmp(p->filename, filename) == 0) {
@@ -312,13 +305,6 @@ static void movie_playback_atstop(void *arg)
     
     // reset cursor status
     mf_movie_playing = 0;
-    
-#ifdef SAVE_MOVIESCREENSHOT_AT_STOP
-    char fnbuf[MAXLINE];
-    snprintf(fnbuf, sizeof(fnbuf), "movie_%u.bmp", (unsigned) time(NULL));
-    OutputDebugString(fnbuf);
-    D3DXSaveTextureToFileA(fnbuf, D3DXIFF_BMP, (void *) mf_tex, NULL);
-#endif
 }
 
 

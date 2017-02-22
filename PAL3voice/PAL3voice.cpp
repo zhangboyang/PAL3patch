@@ -412,7 +412,6 @@ static void VideoDoModal(const char *filename, unsigned bgcolor, double volume)
 	std::string videopath = path_prefix + std::string(filename);
 	IDirect3DSurface9 *suf = NULL;
 	IDirect3DTexture9 *tex = NULL;
-	int fcnt;
 
 	CaptureStateBlock();
 
@@ -439,7 +438,6 @@ static void VideoDoModal(const char *filename, unsigned bgcolor, double volume)
 	tools->misc->GetRatioRect(&rc, &rc, (double) bink->Width / bink->Height);
 	TexQuadPrepare(&rc);
 
-	fcnt = 0;
 	while (1) {
 		MSG msg;
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -475,9 +473,8 @@ static void VideoDoModal(const char *filename, unsigned bgcolor, double volume)
 				}
 			}
 
-			if (bink->Frames == fcnt) break;
+			if (bink->Frames == bink->FrameNum) break;
 			tools->bik->BinkNextFrame(bink);
-			fcnt++;
 		}
 	}
 

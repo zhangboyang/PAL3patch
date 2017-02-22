@@ -1,0 +1,158 @@
+【语音插件接口】
+
+语音插件应编译为DLL，导出如下函数：（符号名字需按照stdcall的方式修饰）
+
+// plugin management functions
+void WINAPI VoiceDLLAttached(void); // 在刚加载DLL后调用
+void WINAPI VoiceInit(struct VoiceToolkit *toolkit); // 初始化，参数意义见后
+void WINAPI VoiceCleanup(void); // 退出时调用
+void WINAPI GamePause(void); // 游戏暂停是调用
+void WINAPI GameResume(void); // 游戏恢复时调用
+
+// dialog text functions
+void WINAPI TextIdle(int state); // 剧情对话空闲时调用，state为以下枚举类型
+enum {
+    ROLEDLG_CLOSED,  // End() -> Prepare() // 对话框已关闭
+    ROLEDLG_OPENING, // Prepare() -> Start()  // 对话框正弹出
+    ROLEDLG_OPENED,  // Start() -> End() // 对话框已经打开
+};
+
+void WINAPI TextPrepare(const char *text, int mode); // 剧情对话准备
+       // text是对话字符串，mode是对话模式（0代表普通对话，1代表计时对话）
+void WINAPI TextStart(void); // 开始播放剧情对话音频
+void WINAPI TextStop(void); // 结束播放剧情对话音频
+
+// caption functions
+void WINAPI CaptionIdle(int state); // 诗词空闲时调用，state为0表示没有正在显示的诗词，为1表示正在显示诗词
+void WINAPI CaptionPrepare(const char *tex); // 诗词准备，tex是诗词图片路径
+void WINAPI CaptionStart(void); // 开始播放诗词音频
+void WINAPI CaptionStop(void); // 结束播放诗词音频
+
+// movie functions
+void WINAPI MovieIdle(int state); // 过场动画空闲是调用，state为0表示没有正在显示的过场动画，为1表示正在显示过场动画
+void WINAPI MoviePrepare(const char *movie); // 过场动画准备，movie是动画文件路径
+void WINAPI MovieStart(void); // 开始播放过场动画音频
+void WINAPI MovieStop(void); // 结束播放过场动画音频
+
+
+结构体VoiceInit的参数struct VoiceToolkit *toolkit提供了一个工具箱
+其内有许多函数指针、变量，利用它们可以较为简便地播放音频、动画等
+结构体定义在patch_voice.c文件中
+
+// 杂项
+struct MiscToolkit {
+    // error handling functions
+    void (WINAPI *ReportFatalError)(const char *msg); // 报告致命错误
+    
+    // hash functions
+    unsigned int (WINAPI *CalcStringCRC32)(const char *str); // 计算字符串的CRC32哈希值
+    void (WINAPI *CalcStringSHA1)(char *out_str, const char *str); // 计算字符串的SHA1哈希值
+    
+    // rect functions
+    void (WINAPI *GetRatioRect)(RECT *out_rect, const RECT *rect, double ratio); // 按宽高比ratio取得在rect中居中的矩形
+};
+
+// 图形
+struct GraphicsToolkit {
+    HWND hWnd; // 窗口句柄
+    int Width; // 游戏宽度
+    int Height; // 游戏高度
+    IDirect3D9 *pD3D; // IDirect3D9 接口指针
+    IDirect3DDevice9 *pd3dDevice; // IDirect3DDevice9 接口指针
+    void (WINAPI *EnsureCooperativeLevel)(void); // 调用此函数确保CooperativeLevel（即处理Lost/Reset Device）
+    void (WINAPI *(WINAPI *SetOnLostDeviceCallback)(void (WINAPI *)(void)))(void); // 设置Lost Device时的回调函数
+    void (WINAPI *(WINAPI *SetOnResetDeviceCallback)(void (WINAPI *)(void)))(void); // 设置Reset Device时的回调函数
+};
+
+// 音量控制
+// 音量均是0～1的浮点数
+struct VolumeToolkit {
+    // get and set background music volume
+    float (WINAPI *GetMusicMasterVolume)(void); // 取得音乐音量
+    void (WINAPI *SetMusicMasterVolume)(float volume); // 设置音乐音量
+    float (WINAPI *Get2DMasterVolume)(void); // 取得2D音效音量
+    void (WINAPI *Set2DMasterVolume)(float volume); // 设置2D音效音量
+    float (WINAPI *Get3DMasterVolume)(void);  // 取得2D音效音量
+    void (WINAPI *Set3DMasterVolume)(float volume); // 设置3D音效音量
+};
+
+// bink视频
+struct BinkToolkit {
+    HBINK *pMovieHandle; // currently opened movie // 当前游戏播放的过场动画的句柄，若没有则为NULL
+    
+    // bink functions // 详细见BinkSDK
+    HBINK (WINAPI *BinkOpen)(const char *file_name, unsigned open_flags);
+    int (WINAPI *BinkDoFrame)(HBINK bink);
+    void (WINAPI *BinkNextFrame)(HBINK bink);
+    int (WINAPI *BinkWait)(HBINK bink);
+    int (WINAPI *BinkCopyToBuffer)(HBINK bink, void *dest_addr, int dest_pitch, unsigned dest_height, unsigned dest_x, unsigned dest_y, unsigned copy_flags);
+    void (WINAPI *BinkClose)(HBINK bink);
+    void (WINAPI *BinkSetVolume)(HBINK bink, int volume);
+    int (WINAPI *BinkPause)(HBINK bink, int pause);
+};
+
+// mss声音系统
+struct MSSToolkit {
+    HDIGDRIVER h2DDriver; // 游戏使用的2d音效设备的句柄
+    
+    // mss32 functions // 详细见MSS SDK
+    HSTREAM (WINAPI *AIL_open_stream)(HDIGDRIVER dig, const char *name, int stream_mem);
+    void (WINAPI *AIL_start_stream)(HSTREAM stream);
+    void (WINAPI *AIL_close_stream)(HSTREAM stream);
+    void (WINAPI *AIL_pause_stream)(HSTREAM stream, int onoff);
+    void (WINAPI *AIL_set_stream_volume)(HSTREAM stream, int volume);
+    void (WINAPI *AIL_set_stream_loop_count)(HSTREAM stream, int loop_count);
+    int (WINAPI *AIL_stream_status)(HSTREAM stream);
+    AILSTREAMCB (WINAPI *AIL_register_stream_callback)(HSTREAM stream, AILSTREAMCB callback);
+    void (WINAPI *AIL_stream_ms_position)(HSTREAM stream, int *total_milliseconds, int *current_milliseconds);
+    void (WINAPI *AIL_set_stream_ms_position)(HSTREAM stream, int milliseconds);
+};
+
+
+struct VoiceToolkit {
+    // patch version
+    const char *patch_version; // 分辨率补丁版本
+    const char *build_date; // 分辨率补丁的编译日期
+
+    // 指向各工具的指针
+    struct MiscToolkit *misc;
+    struct GraphicsToolkit *gfx;
+    struct VolumeToolkit *vol;
+    struct BinkToolkit *bik;
+    struct MSSToolkit *mss;
+};
+
+
+几点注意：
+（1）所有函数调用均为同步（即在游戏循环中调用），因此必须在处理完事件后立刻返回，否则游戏会卡住。
+（2）Prepare应做成幂等的（即可多次重复调用），其他函数则不必，状态转移如下
+        //        Prepare()
+        //      *<<<<<<<<<*
+        //      v         | Prepare()            Start()
+        //    CLOSED  >>>>*>>>>>>>>>>  OPENING  >>>>>>>> OPENED
+        //      ^                                          |
+        //      *<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*
+        //                         End()
+（3）在VoiceInit时不能做“复杂”的事（如播放视频等），因为此时游戏尚未初始化完成。如需要splash等，可以在播放logo.bik（即SOFTSTAR标志动画）时进行
+
+
+
+【语音插件样例：PAL3voice】
+这是一个全功能的语音插件，可以为剧情对话、诗词、过长动画配音
+另外可以在声音开始、结束后执行脚本，通过脚本可以显示图片、播放视频、播放音频等
+此语音插件样例可以直接作为成品使用
+
+代码文件：
+  PAL3voice.cpp 主程序
+  voiceplugin.h 含有语音插件函数原型和结构体定义的头文件
+
+使用方法：
+  编译为PAL3voice.dll，放置到游戏目录下，然后将分辨率补丁配置文件中“配音插件”功能启用
+
+语音插件配置文件：
+  VoiceConfig.txt 主配置文件
+
+语音插件日志文件：（运行时覆盖/生成，可以用VoiceLogMonitor即时查看）
+  VoiceLog.txt 程序日志文件，包含程序运行时的一些信息，如有错误也会写入此文件
+  VoiceDataLog.txt 数据日志文件，若开启“记录未知条目”则会将未找到的条目写入此文件
+

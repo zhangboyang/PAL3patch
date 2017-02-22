@@ -318,7 +318,6 @@ extern void d3dx9_dynlink();
 #if defined(DYNLINK_D3DX9_AT_RUNTIME) || !defined(HAVE_D3D9SDK)
 
 // functions for D3DX9
-HRESULT DECL_D3DX9FUNC(D3DXSaveTextureToFileA)(LPCTSTR pDestFile, D3DXIMAGE_FILEFORMAT DestFormat, LPDIRECT3DBASETEXTURE9 pSrcTexture, const PALETTEENTRY *pSrcPalette);
 HRESULT DECL_D3DX9FUNC(D3DXCreateFontW)(
     LPDIRECT3DDEVICE9       pDevice,  
     UINT                    Height,

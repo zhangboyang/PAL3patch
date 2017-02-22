@@ -1494,11 +1494,6 @@ struct UIRowing;
 
 
 
-// D3DX functions
-#define gbD3DXTex_CImage_ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346CA, void, struct D3DXTex_CImage *), this)
-#define gbD3DXTex_CImage_dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100346E3, void, struct D3DXTex_CImage *), this)
-#define gbD3DXTex_CImage_Load(this, data, len, pinfo, flag) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10037159, int, struct D3DXTex_CImage *, const void *, unsigned, D3DXIMAGE_INFO *, int), this, data, len, pinfo, flag)
-
 // GBENGINE functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
 #define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A190, void, struct gbGfxManager_D3D *), this)
