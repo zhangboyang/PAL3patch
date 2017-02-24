@@ -29,11 +29,16 @@ void WINAPI CaptionStart(void); // 开始播放诗词音频
 void WINAPI CaptionStop(void); // 结束播放诗词音频
 
 // movie functions
-void WINAPI MovieIdle(int state); // 过场动画空闲是调用，state为0表示没有正在显示的过场动画，为1表示正在显示过场动画
+void WINAPI MovieIdle(int state); // 过场动画空闲时调用，state为0表示没有正在显示的过场动画，为1表示正在显示过场动画
 void WINAPI MoviePrepare(const char *movie); // 过场动画准备，movie是动画文件路径
 void WINAPI MovieStart(void); // 开始播放过场动画音频
 void WINAPI MovieStop(void); // 结束播放过场动画音频
 
+// combat dialog functions
+void WINAPI CBDialogIdle(int state); // 战斗对话空闲时调用，state为0表示没有正在显示的战斗对话，为1表示正在显示战斗对话
+void WINAPI CBDialogPrepare(const char *text); // 战斗对话准备，text是战斗对话内容
+void WINAPI CBDialogStart(void); // 开始播放战斗对话音频
+void WINAPI CBDialogStop(void); // 结束播放战斗对话音频
 
 结构体VoiceInit的参数struct VoiceToolkit *toolkit提供了一个工具箱
 其内有许多函数指针、变量，利用它们可以较为简便地播放音频、动画等
@@ -138,7 +143,7 @@ struct VoiceToolkit {
 
 
 【语音插件样例：PAL3voice】
-这是一个全功能的语音插件，可以为剧情对话、诗词、过长动画配音
+这是一个全功能的语音插件，可以为剧情对话、诗词、过场动画、战斗对话配音
 另外可以在声音开始、结束后执行脚本，通过脚本可以显示图片、播放视频、播放音频等
 此语音插件样例可以直接作为成品使用
 

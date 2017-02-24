@@ -155,6 +155,12 @@ DLLEXPORT void WINAPI MoviePrepare(const char *movie);
 DLLEXPORT void WINAPI MovieStart(void);
 DLLEXPORT void WINAPI MovieStop(void);
 
+// combat dialog functions
+DLLEXPORT void WINAPI CBDialogIdle(int state);
+DLLEXPORT void WINAPI CBDialogPrepare(const char *text);
+DLLEXPORT void WINAPI CBDialogStart(void);
+DLLEXPORT void WINAPI CBDialogStop(void);
+
 #ifdef __cplusplus
 }
 #endif

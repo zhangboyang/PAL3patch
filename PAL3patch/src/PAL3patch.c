@@ -45,6 +45,10 @@ static void self_check()
     assert(sizeof(struct gbBinkVideo) == 0x1C0388);
     assert(sizeof(struct CD3DSettings) == 0x6C);
     assert(sizeof(struct gbGfxManager_D3D) == 0x8F0);
+    assert(sizeof(struct tagCmdData) == 0x2C);
+    assert(sizeof(struct tagThread) == 0x58);
+    assert(sizeof(struct tagPlayerSet) == 0x34);
+    assert(sizeof(struct CCBSystem) == 0x162D8);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)

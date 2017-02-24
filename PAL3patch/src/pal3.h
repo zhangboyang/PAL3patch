@@ -1492,7 +1492,103 @@ struct gbAudioManager {
 struct UIKillFlyer;
 struct UIRowing;
 
+enum ECBCombatState {
+    CBCS_Null = 0x0,
+    CBCS_Deactive = 0x1,
+    CBCS_Running = 0x2,
+    CBCS_Paused = 0x3,
+    CBCS_Flee = 0x4,
+    CBCS_Counting = 0x5,
+    CBCS_FleeCounting = 0x6,
+    CBCS_LoseCounting = 0x7,
+    CBCS_CombatEnd = 0x8,
+    CBCS_End = 0x9,
+};
 
+enum ECBCombatResult {
+    CBCR_Null = 0x0,
+    CBCR_NoResult = 0x1,
+    CBCR_Win = 0x2,
+    CBCR_Lose = 0x3,
+    CBCR_FleeOK = 0x4,
+    CBCR_End = 0x5,
+};
+
+struct tagCmdData {
+    unsigned int dwCmdKind;
+    union {
+        unsigned long dwCmdID;
+        unsigned long dwItemID;
+    };
+    int nSrcRole;
+    int nDestRole;
+    char bMultiSrcRole;
+    char bMultiDestRole;
+    char bSrcRole[11];
+    char bDestRole[11];
+    char bValid;
+};
+
+struct tagThread {
+    void *fp;
+    DWORD gap4[3];
+    unsigned int dwID;
+    int nTaskIndex;
+    unsigned int dwTaskID;
+    unsigned int dwReturn;
+    int nTemp;
+    char bValid;
+    char bExecuted;
+    struct tagCmdData cmd;
+    DWORD padding54;
+};
+
+struct tagPlayerSet {
+    struct tagCmdData LastRoleCmd;
+    int nMagicDefaultPage;
+    int nItemDefaultPage;
+};
+
+struct CCBSystem {
+    struct CUtil *m_pUtil;
+    struct CCBUI *m_pUI;
+    struct CCBControl *m_pControl;
+    struct CCBAttackSequen *m_pAttackSequen;
+    struct CCBRoleState *m_pRoleState;
+    struct CCBStage *m_pStage;
+    struct CCBAI *m_pAI;
+    struct CCBEditor *m_pEditor;
+    struct CEffectSystem *m_pES;
+    struct CEffectSimple *m_pEffectSimple;
+    struct TxtFile *m_pConfig;
+    struct CEffMgr *m_pEffMgr;
+    struct CEffMgr *m_pATSEffMgr;
+    struct C2DSpark *m_p2DSpark;
+    struct C3DSpark *m_p3DSpark;
+    double m_DeltaTime;
+    double m_dTimeFund;
+    float m_fTimeFund;
+    double m_AbsDeltaTime;
+    double m_dAbsTimeFund;
+    float m_fAbsTimeFund;
+    float m_fTimeScale;
+    struct FightInfo *m_pFightInfo;
+    char m_bQuitFlag;
+    char m_bPause;
+    enum ECBCombatState m_eState;
+    enum ECBCombatResult m_eResult;
+    int m_nTimesOfCombat;
+    char m_bAuto;
+    char m_bEditor;
+    char m_bLockCam;
+    char m_bFirstRender;
+    unsigned int m_dwIDHolder;
+    int m_nThread;
+    int m_nCurThread;
+    DWORD unknown;
+    struct tagThread m_Thread[1024];
+    struct tagPlayerSet m_Player[11];
+};
 
 // GBENGINE functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
@@ -1524,6 +1620,7 @@ struct UIRowing;
 #define gbVFileSystem_Read(this, buf, size, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10030810, void, struct gbVFileSystem *, void *, unsigned int, struct gbVFile *), this, buf, size, fp)
 #define gbVFileSystem_CloseFile(this, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100307A0, void, struct gbVFileSystem *, struct gbVFile *), this, fp)
 #define gbCrc32Compute ((unsigned (*)(const char *)) TOPTR(gboffset + 0x100277E0))
+#define gbCrc32Init ((void (*)(void)) TOPTR(gboffset + 0x10027730))
 #define gbAudioManager_GetMusicMasterVolume(this) ((this)->MusicMasterVol)
 #define gbAudioManager_SetMusicMasterVolume(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10001C80, void, struct gbAudioManager *, float), this, a2)
 #define gbAudioManager_Get2DMasterVolume(this) ((this)->S_2DMasterVol)
@@ -1597,6 +1694,7 @@ struct UIRowing;
 #define PAL3_s_bActive (*(int *) TOPTR(0x005833B8))
 #define PAL3_s_flag (*(int *) TOPTR(0x005833BC))
 #define PAL3_m_gametime (*(float *) TOPTR(0x00BFDAA0))
+#define PAL3_m_pCBSystem (*(struct CCBSystem **) TOPTR(0x00BFDA74))
 #define g_pVFileSys (*(struct gbVFileSystem **) TOPTR(gboffset + 0x1015D3A8))
 #define g_gamefrm (*(struct UIGameFrm *) TOPTR(0x00DB9FD0))
 #define g_bink (*(struct gbBinkVideo *) TOPTR(0x00A3A7D8))

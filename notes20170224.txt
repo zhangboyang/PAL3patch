@@ -1,0 +1,11 @@
+【gbengine.dll的CRC32不是标准的CRC】
+GBENGINE.DLL中自带的CRC32算法并不是标准的CRC32算法，初值和具体算法可能不标准
+
+【增强配音插件功能】
+现在配音插件可以为战斗中的对话配音啦
+
+【CBDialogExtract.cpp：从combat.ini中导出对话内容的小工具】
+basedata/datascript/combat.ini中存有战斗对话的具体内容
+该工具可以将其导出为PAL3voice配音插件可以识别的格式
+还可以检查是否有字符串重复（简体版中无重复，繁体版待测；若重复会造成角色与语音不对应的错误出现）
+

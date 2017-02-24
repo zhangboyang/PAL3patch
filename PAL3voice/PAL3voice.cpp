@@ -25,6 +25,7 @@
 #define TEXT_PREFIX "TXT"
 #define CAPTION_PREFIX "CAP"
 #define MOVIE_PREFIX "MOV"
+#define CBDIALOG_PREFIX "CBD"
 
 #define MAXLINE 4096
 #define MAXLINEFMT "%4095"
@@ -925,6 +926,27 @@ void WINAPI MovieStart(void)
 	AudioStart();
 }
 void WINAPI MovieStop(void)
+{
+	AudioStop();
+	RunScriptPost();
+}
+
+
+
+// combat dialog functions
+void WINAPI CBDialogIdle(int state)
+{
+}
+void WINAPI CBDialogPrepare(const char *text)
+{
+	PrepareVoiceItem(strtolower(std::string(text)).c_str(), CBDIALOG_PREFIX);
+}
+void WINAPI CBDialogStart(void)
+{
+	RunScriptPre();
+	AudioStart();
+}
+void WINAPI CBDialogStop(void)
 {
 	AudioStop();
 	RunScriptPost();

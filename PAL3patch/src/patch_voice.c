@@ -113,7 +113,11 @@ static void (WINAPI *MovieIdle)(int state);
 static void (WINAPI *MoviePrepare)(const char *movie);
 static void (WINAPI *MovieStart)(void);
 static void (WINAPI *MovieStop)(void);
-
+//   combat dialog functions
+static void (WINAPI *CBDialogIdle)(int state);
+static void (WINAPI *CBDialogPrepare)(const char *text);
+static void (WINAPI *CBDialogStart)(void);
+static void (WINAPI *CBDialogStop)(void);
 
 
 
@@ -306,13 +310,13 @@ static void try_idle(int is_opened)
     TextIdle(roledlg_state);
 }
 
-struct dlg_state_t {
+struct txt_state_t {
     int visible;
     int bkstate;
 };
 
-static struct dlg_state_t last_dlgstate;
-static struct dlg_state_t cur_dlgstate = {
+static struct txt_state_t last_txtstate;
+static struct txt_state_t cur_txtstate = {
     .visible = 0,
     .bkstate = UISTATICFLEX_OPENING,
 };
@@ -323,23 +327,23 @@ static void text_gameloop_proc()
     if (!pUIWND(&g_gamefrm.m_roledlg)->m_bcreateok) return;
     
     // roll state
-    last_dlgstate = cur_dlgstate;
+    last_txtstate = cur_txtstate;
     
     // dump current state
-    cur_dlgstate = (struct dlg_state_t) {
+    cur_txtstate = (struct txt_state_t) {
         .visible = pUIWND(&g_gamefrm.m_roledlg)->m_bvisible,
         .bkstate = g_gamefrm.m_roledlg.m_bk.m_state,
     };
     
     // check status
-    if (!last_dlgstate.visible && cur_dlgstate.visible) {
+    if (!last_txtstate.visible && cur_txtstate.visible) {
         try_prepare(g_gamefrm.m_roledlg.m_static.m_buf._Ptr, g_gamefrm.m_roledlg.m_mode);
-    } else if (last_dlgstate.bkstate != UISTATICFLEX_NORMAL && cur_dlgstate.bkstate == UISTATICFLEX_NORMAL) {
+    } else if (last_txtstate.bkstate != UISTATICFLEX_NORMAL && cur_txtstate.bkstate == UISTATICFLEX_NORMAL) {
         try_start();
-    } else if (last_dlgstate.visible && !cur_dlgstate.visible) {
+    } else if (last_txtstate.visible && !cur_txtstate.visible) {
         try_end();
     } else {
-        try_idle(cur_dlgstate.visible && cur_dlgstate.bkstate == UISTATICFLEX_NORMAL);
+        try_idle(cur_txtstate.visible && cur_txtstate.bkstate == UISTATICFLEX_NORMAL);
     }
 }
 
@@ -395,6 +399,52 @@ static void movie_gameloop_proc(struct game_loop_hook_data *hookarg)
         default: break;
     }
 }
+
+
+
+
+
+
+
+// combat dialog
+static int cbdialog_started = 0;
+static int cbdialog_lastvisible = 0;
+static char *cbdialog_laststr = NULL;
+static void cbdialog_gameloop_proc()
+{
+    if (!PAL3_m_pCBSystem || !PAL3_m_pCBSystem->m_pUI || !pUIWND(PAL3_m_pCBSystem->m_pUI->m_pDialogBack)->m_bcreateok) return;
+    
+    struct UIStatic *cbd = PAL3_m_pCBSystem->m_pUI->m_pDialogBack;
+
+    int curvisible = cbd->baseclass.m_bvisible;
+    char *curstr = cbd->m_text._Ptr;
+    
+    if ((!cbdialog_lastvisible && curvisible) || 
+        (curvisible && cbdialog_laststr && curstr && strcmp(cbdialog_laststr, curstr) != 0)) {
+        if (cbdialog_started) {
+            CBDialogStop();
+            cbdialog_started = 0;
+        }
+        if (curstr) {
+            CBDialogPrepare(curstr);
+            CBDialogStart();
+            cbdialog_started = 1;
+        }
+    } else if (cbdialog_lastvisible && !curvisible) {
+        if (cbdialog_started) {
+            CBDialogStop();
+            cbdialog_started = 0;
+        }
+    } else {
+        CBDialogIdle(!!curvisible);
+    }
+    
+    cbdialog_lastvisible = curvisible;
+    free(cbdialog_laststr);
+    cbdialog_laststr = curstr ? strdup(curstr) : NULL;
+}
+
+
 
 
 
@@ -536,6 +586,7 @@ static void voice_gameloop_dispatcher(void *arg)
             text_gameloop_proc();
             caption_gameloop_proc();
             movie_gameloop_proc(hookarg);
+            cbdialog_gameloop_proc();
             break;
         case GAMELOOP_MOVIE:
         case GAMEEVENT_MOVIE_ATOPEN:
@@ -585,6 +636,10 @@ MAKE_PATCHSET(voice)
     MovieStart = TOPTR(GetProcAddress_check(hPlugin, "_MovieStart@0"));
     MovieStop = TOPTR(GetProcAddress_check(hPlugin, "_MovieStop@0"));
     
+    CBDialogIdle = TOPTR(GetProcAddress_check(hPlugin, "_CBDialogIdle@4"));
+    CBDialogPrepare = TOPTR(GetProcAddress_check(hPlugin, "_CBDialogPrepare@4"));
+    CBDialogStart = TOPTR(GetProcAddress_check(hPlugin, "_CBDialogStart@0"));
+    CBDialogStop = TOPTR(GetProcAddress_check(hPlugin, "_CBDialogStop@0"));
     
     
     // call dll attach callback
