@@ -451,7 +451,7 @@ static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 {
     // use default procdure when we are in early stage
     if (early_msgloop) {
-        if (Msg == WM_CREATE || Msg == WM_DESTROY || Msg == WM_SETCURSOR) {
+        if (Msg == WM_CREATE || Msg == WM_DESTROY) {
             goto usepal3;
         } else {
             goto usedefault;

@@ -3,7 +3,7 @@
 语音插件应编译为DLL，导出如下函数：（符号名字需按照stdcall的方式修饰）
 
 // plugin management functions
-void WINAPI VoiceDLLAttached(void); // 在刚加载DLL后调用
+int WINAPI VoiceDLLAttached(void); // 在刚加载DLL后调用，返回值为插件所用的ABI版本号
 void WINAPI VoiceInit(struct VoiceToolkit *toolkit); // 初始化，参数意义见后
 void WINAPI VoiceCleanup(void); // 退出时调用
 void WINAPI GamePause(void); // 游戏暂停是调用
@@ -50,7 +50,7 @@ struct MiscToolkit {
     void (WINAPI *ReportFatalError)(const char *msg); // 报告致命错误
     
     // hash functions
-    unsigned int (WINAPI *CalcStringCRC32)(const char *str); // 计算字符串的CRC32哈希值
+    unsigned int (WINAPI *CalcStringGBCRC32)(const char *str); // 计算字符串的CRC32哈希值（使用GBENGINE.DLL中的特殊算法）
     void (WINAPI *CalcStringSHA1)(char *out_str, const char *str); // 计算字符串的SHA1哈希值
     
     // rect functions

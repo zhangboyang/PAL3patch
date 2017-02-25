@@ -622,7 +622,7 @@ static void LogVoiceData(const char *text)
 {
 	FILE *fp = fopen(VDATALOG, "a");
 	if (!fp) return;
-	fprintf(fp, "VOICE%04d.WAV|1.000|:|%08X|%s\n", log_counter, tools->misc->CalcStringCRC32(text), text);
+	fprintf(fp, "VOICE%04d.WAV|1.000|:|%08X|%s\n", log_counter, tools->misc->CalcStringGBCRC32(text), text);
 	log_counter++;
 	fclose(fp);
 }
@@ -671,7 +671,7 @@ static int LoadSingleVoiceData(const char *filename, int file_num)
 		char text[MAXLINE];
 
 		if (sscanf(buf, "%[^|]|%lf|%[^|]|%x|%[^\n]", audiofile, &volume, scriptbuf, &texthash, text) == 5) {
-			if (tools->misc->CalcStringCRC32(text) != texthash) {
+			if (tools->misc->CalcStringGBCRC32(text) != texthash) {
 				plog("WARN: unmatched text and hash at %s:%d", filename, line_num);
 			}
 			char *scriptfile_pre = scriptbuf;
@@ -810,7 +810,7 @@ static void PrepareVoiceItem(const char *data, const char *type)
 		text_disabled++;
 	} else {
 		std::string text = std::string(type) + "|" + std::string(data);
-		std::pair<unsigned, std::string> key(tools->misc->CalcStringCRC32(text.c_str()), text);
+		std::pair<unsigned, std::string> key(tools->misc->CalcStringGBCRC32(text.c_str()), text);
 		std::map<std::pair<unsigned, std::string>, std::vector<VoiceItem> >::iterator it;
 		if ((it = vdata.find(key)) != vdata.end()) {
 			VoiceItem *pitem = ChooseBestVoiceItem(&it->second);
@@ -829,8 +829,9 @@ static void PrepareVoiceItem(const char *data, const char *type)
 
 
 // plugin management functions
-void WINAPI VoiceDLLAttached()
+int WINAPI VoiceDLLAttached()
 {
+	return VOICEPLUGIN_ABI_VERSION;
 }
 void WINAPI VoiceInit(VoiceToolkit *toolkit)
 {

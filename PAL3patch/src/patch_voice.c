@@ -6,6 +6,10 @@
 #undef BinkSetVolume
 
 
+// ABI version
+#define VOICEPLUGIN_ABI_VERSION 1
+
+
 // toolkit definition
 
 struct MiscToolkit {
@@ -13,7 +17,7 @@ struct MiscToolkit {
     void (WINAPI *ReportFatalError)(const char *msg);
     
     // hash functions
-    unsigned int (WINAPI *CalcStringCRC32)(const char *str);
+    unsigned int (WINAPI *CalcStringGBCRC32)(const char *str);
     void (WINAPI *CalcStringSHA1)(char *out_str, const char *str);
     
     // rect functions
@@ -93,7 +97,7 @@ struct VoiceToolkit {
 // imported function pointers
 
 //   plugin management functions
-static void (WINAPI *VoiceDLLAttached)(void);
+static int (WINAPI *VoiceDLLAttached)(void);
 static void (WINAPI *VoiceInit)(struct VoiceToolkit *toolkit);
 static void (WINAPI *VoiceCleanup)(void);
 static void (WINAPI *GamePause)(void);
@@ -137,7 +141,7 @@ static void WINAPI ReportFatalError(const char *msg)
     fail("voice plugin fatal error: %s", msg ? msg : "no message");
 }
 
-static unsigned WINAPI CalcStringCRC32(const char *str)
+static unsigned WINAPI CalcStringGBCRC32(const char *str)
 {
     return gbCrc32Compute(str);
 }
@@ -412,7 +416,7 @@ static int cbdialog_lastvisible = 0;
 static char *cbdialog_laststr = NULL;
 static void cbdialog_gameloop_proc()
 {
-    if (!PAL3_m_pCBSystem || !PAL3_m_pCBSystem->m_pUI || !pUIWND(PAL3_m_pCBSystem->m_pUI->m_pDialogBack)->m_bcreateok) return;
+    if (!PAL3_m_pCBSystem || !PAL3_m_pCBSystem->m_pUI || !PAL3_m_pCBSystem->m_pUI->m_pDialogBack || !pUIWND(PAL3_m_pCBSystem->m_pUI->m_pDialogBack)->m_bcreateok) return;
     
     struct UIStatic *cbd = PAL3_m_pCBSystem->m_pUI->m_pDialogBack;
 
@@ -498,7 +502,7 @@ static void voice_postgamecreate_hook()
     
     misc = (struct MiscToolkit) {
         .ReportFatalError = ReportFatalError,
-        .CalcStringCRC32 = CalcStringCRC32,
+        .CalcStringGBCRC32 = CalcStringGBCRC32,
         .CalcStringSHA1 = CalcStringSHA1,
         .GetRatioRect = GetRatioRect,
     };
@@ -616,6 +620,11 @@ MAKE_PATCHSET(voice)
     HMODULE hPlugin = LoadLibrary_check(get_string_from_configfile("voiceplugin"));
 
     VoiceDLLAttached = TOPTR(GetProcAddress_check(hPlugin, "_VoiceDLLAttached@0"));
+    int abiver = VoiceDLLAttached();
+    if (abiver != VOICEPLUGIN_ABI_VERSION) {
+        fail("voice plugin requires unsupported ABI version %d.", abiver);
+    }
+    
     VoiceInit = TOPTR(GetProcAddress_check(hPlugin, "_VoiceInit@4"));
     VoiceCleanup = TOPTR(GetProcAddress_check(hPlugin, "_VoiceCleanup@0"));
     GamePause = TOPTR(GetProcAddress_check(hPlugin, "_GamePause@0"));
@@ -640,8 +649,4 @@ MAKE_PATCHSET(voice)
     CBDialogPrepare = TOPTR(GetProcAddress_check(hPlugin, "_CBDialogPrepare@4"));
     CBDialogStart = TOPTR(GetProcAddress_check(hPlugin, "_CBDialogStart@0"));
     CBDialogStop = TOPTR(GetProcAddress_check(hPlugin, "_CBDialogStop@0"));
-    
-    
-    // call dll attach callback
-    VoiceDLLAttached();
 }

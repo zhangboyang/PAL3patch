@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+// miles SDK
 typedef struct _SAMPLE *HSAMPLE;
 typedef struct _STREAM *HSTREAM;
 typedef struct _DIG_DRIVER *HDIGDRIVER;
@@ -12,6 +13,7 @@ typedef struct h3DPOBJECT *H3DPOBJECT;
 #define AILCALLBACK WINAPI
 typedef void (AILCALLBACK FAR* AILSTREAMCB)(HSTREAM stream);
 
+// bink SDK
 typedef struct BINK {
 	unsigned int Width;
 	unsigned int Height;
@@ -27,7 +29,6 @@ typedef struct BINK {
 	unsigned int FrameSize;
 	unsigned int SndSize;
 } BINK, *HBINK;
-
 #define BINKSURFACE32 3
 #define BINKCOPYALL 0x80000000L
 
@@ -37,14 +38,20 @@ typedef struct BINK {
 
 
 
+
+
+
 // see patch_voice.c for details
+
+#define VOICEPLUGIN_ABI_VERSION 1
+
 
 struct MiscToolkit {
     // error handling functions
     void (WINAPI *ReportFatalError)(const char *msg);
     
     // hash functions
-    unsigned int (WINAPI *CalcStringCRC32)(const char *str);
+    unsigned int (WINAPI *CalcStringGBCRC32)(const char *str);
     void (WINAPI *CalcStringSHA1)(char *out_str, const char *str);
     
     // rect functions
@@ -114,24 +121,17 @@ struct VoiceToolkit {
     struct MSSToolkit *mss;
 };
 
-
-
-
-
-
-
-
-
 enum {
     ROLEDLG_CLOSED,  // End() -> Prepare()
     ROLEDLG_OPENING, // Prepare() -> Start()
     ROLEDLG_OPENED,  // Start() -> End()
 };
 
+
 #define DLLEXPORT __declspec(dllexport)
 
 // plugin management functions
-DLLEXPORT void WINAPI VoiceDLLAttached(void);
+DLLEXPORT int WINAPI VoiceDLLAttached(void);
 DLLEXPORT void WINAPI VoiceInit(struct VoiceToolkit *toolkit);
 DLLEXPORT void WINAPI VoiceCleanup(void);
 DLLEXPORT void WINAPI GamePause(void);
@@ -160,6 +160,9 @@ DLLEXPORT void WINAPI CBDialogIdle(int state);
 DLLEXPORT void WINAPI CBDialogPrepare(const char *text);
 DLLEXPORT void WINAPI CBDialogStart(void);
 DLLEXPORT void WINAPI CBDialogStop(void);
+
+
+
 
 #ifdef __cplusplus
 }
