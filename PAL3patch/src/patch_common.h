@@ -70,6 +70,7 @@ MAKE_PATCHSET(graphicspatch);
     extern double str2scalefactor(const char *str);
     
     extern void try_goto_desktop(void);
+    extern void try_refresh_clipcursor(void);
     
     MAKE_PATCHSET(fixfov);
     MAKE_PATCHSET(fixortho);
@@ -179,7 +180,11 @@ MAKE_PATCHSET(graphicspatch);
             MAKE_UIWND_RENDER_WRAPPER_CUSTOM(render_wrapper_name, original_render_address, push_ptag_state, pop_ptag_state)
         #define MAKE_UIWND_UPDATE_WRAPPER(update_wrapper_name, original_wrapper_address) \
             MAKE_UIWND_UPDATE_WRAPPER_CUSTOM(update_wrapper_name, original_wrapper_address, push_ptag_state, pop_ptag_state)
-
+        
+        extern void render_softcursor(void);
+        extern int get_showcursor_state(void);
+        extern void set_showcursor_state(int show);
+        
         MAKE_PATCHSET(uireplacefont);
         MAKE_PATCHSET(fixcombatui);
             #define cb_scalefactor (scalefactor_table[SF_COMBAT])

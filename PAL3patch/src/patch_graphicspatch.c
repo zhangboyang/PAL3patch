@@ -356,7 +356,7 @@ void try_goto_desktop()
 {
     // this function is called by fail(), warning()
     // should switch to desktop if necessary
-    // note: the graphics patch might not initialized when this function is called
+    // NOTE: the graphics patch might not initialized when this function is called
     //       must use static initialize method
     
     if (gamehwnd) {
@@ -397,10 +397,19 @@ static void setcursorpos_window_hookfunc(void *arg)
 }
 
 
+// try_refresh_clipcursor() is called by wndproc and extern funtions
+// should refresh clipcursor status immediately
+// NOTE: the graphics patch (or clipcursor) might not initialized
+//       must use static initialize method
+static int clipcursor_inited = 0;
 static int clipcursor_enabled = 1;
-static void clipcursor(int flag)
+static void clipcursor(int clip)
 {
-    if (clipcursor_enabled && flag) {
+    // check if clipcursor is initialized
+    // if not, do nothing
+    if (!clipcursor_inited) return;
+    
+    if (clipcursor_enabled && clip) {
         RECT Rect;
         POINT Point;
         Point.x = Point.y = 0;
@@ -415,11 +424,7 @@ static void clipcursor(int flag)
         ClipCursor(NULL);
     }
 }
-static void clipcursor_atexit()
-{
-    clipcursor(0);
-}
-static void clipcursor_hook(void *arg)
+void try_refresh_clipcursor()
 {
     if (PAL3_s_bActive) {
         clipcursor(1);
@@ -427,11 +432,32 @@ static void clipcursor_hook(void *arg)
         clipcursor(0);
     }
 }
+
+static void clipcursor_hook(void *arg)
+{
+    try_refresh_clipcursor();
+}
+static void clipcursor_atexit()
+{
+    clipcursor(0);
+}
+static void clipcursor_init()
+{
+    clipcursor_inited = 1;
+    add_gameloop_hook(clipcursor_hook);
+    add_atexit_hook(clipcursor_atexit);
+}
+
+
+
+
+
+
 static int confirm_quit()
 {
     set_pauseresume(1);
     try_goto_desktop();
-    ClipCursor(NULL);
+    clipcursor(0);
     int ret = MessageBoxW(gamehwnd, wstr_confirmquit_text, wstr_confirmquit_title, MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES;
     set_pauseresume(0);
     return ret;
@@ -442,7 +468,11 @@ static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam,
     if (Msg == WM_CLOSE) {
         if (!confirm_quit()) return 0;
     }
-    if (Msg == WM_KEYUP && wParam == VK_F12) { clipcursor_enabled ^= 1; return 0; }
+    if (Msg == WM_KEYUP && wParam == VK_F12) {
+        clipcursor_enabled = !clipcursor_enabled;
+        try_refresh_clipcursor();
+        return 0;
+    }
     return DefWindowProcA(hWnd, Msg, wParam, lParam);
 }
 
@@ -458,11 +488,19 @@ static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
         }
     }
     
-    // show cursor when cursor is in our window but not client area
-    if (Msg == WM_SETCURSOR && LOWORD(lParam) != HTCLIENT) goto usedefault;
     
-    // show cursor when cursor is in our window but game is not active
-    if (Msg == WM_SETCURSOR && !PAL3_s_bActive) goto usedefault;
+    if (Msg == WM_SETCURSOR) {
+        // show cursor when cursor is in our window but not client area
+        if (LOWORD(lParam) != HTCLIENT) goto usedefault;
+        
+        // show cursor when cursor is in our window but game is not active
+        if (!PAL3_s_bActive) goto usedefault;
+        
+        // otherwise, refresh cursor state
+        SetCursor(NULL);
+        set_showcursor_state(get_showcursor_state());
+        return TRUE;
+    }
     
     // pause game when moving window
     if (Msg == WM_SYSCOMMAND && (wParam & 0xFFF0) == SC_MOVE) {
@@ -559,8 +597,7 @@ static void init_window_patch(int flag)
     
     // clip cursor
     if (!GET_PATCHSET_FLAG(testcombat) && get_int_from_configfile("clipcursor")) {
-        add_gameloop_hook(clipcursor_hook);
-        add_atexit_hook(clipcursor_atexit);
+        clipcursor_init();
     }
     
     // patch gbGfxManager_D3D::m_bClipCursorWhenFullscreen

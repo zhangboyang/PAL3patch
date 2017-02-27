@@ -33,6 +33,7 @@
 
 static std::string path_prefix = "";
 static double voicevol = 1.0;
+static int log_unknown = 0, log_known = 0;
 static VoiceToolkit *tools;
 
 // helper functions
@@ -150,6 +151,17 @@ static void StateBlockOnLostDevice()
 
 
 
+// cursor state saver
+static int showcursor_state = 1;
+static void SaveCursorState()
+{
+	showcursor_state = tools->curs->GetShowCursorState();
+}
+static void RestoreCursorState()
+{
+	tools->curs->SetShowCursorState(showcursor_state);
+}
+
 
 // pre and post script
 static void RunScript(const char *filename);
@@ -191,10 +203,11 @@ static void AudioPrepare(const char *filename, double volume)
 	std::string audiopath = path_prefix + std::string(filename);
 
 	if (hstream) AudioStop();
-	if (stricmp(filename, "x") != 0) {
+	if (*filename && stricmp(filename, "x") != 0) {
 		hstream = tools->mss->AIL_open_stream(tools->mss->h2DDriver, audiopath.c_str(), 0);
 		if (hstream) {
 			tools->mss->AIL_set_stream_volume(hstream, floor(voicevol * volume * 127.0 + eps));
+			if (log_known) plog("playing: %s", audiopath.c_str());
 		} else {
 			plog("unable to open stream '%s'", audiopath.c_str());
 		}
@@ -326,6 +339,7 @@ static void TexQuadRender(IDirect3DTexture9 *tex, unsigned bgcolor)
 		tools->gfx->pd3dDevice->SetStreamSource(0, tqvbuf, 0, TQ_VERTEX_SIZE);
 		tools->gfx->pd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, TQ_VBUF_TRANGLE_COUNT);
 	}
+	tools->curs->RenderSoftCursor();
 	tools->gfx->pd3dDevice->EndScene();
 	tools->gfx->pd3dDevice->Present(NULL, NULL, NULL, NULL);
 }
@@ -335,8 +349,11 @@ static void TexQuadRender(IDirect3DTexture9 *tex, unsigned bgcolor)
 static void ClearScreen(unsigned bgcolor)
 {
 	CaptureStateBlock();
+	SaveCursorState();
+	tools->curs->SetShowCursorState(0);
 	TexQuadRender(NULL, bgcolor);
 	RestoreStateBlock();
+	RestoreCursorState();
 }
 
 
@@ -346,10 +363,13 @@ static void PictureDoModal(const char *filename, unsigned bgcolor, unsigned ms)
 	std::string picpath = path_prefix + std::string(filename);
 	DWORD tick;
 	IDirect3DTexture9 *tex = NULL;
+	CaptureStateBlock();
+	SaveCursorState();
 
 	D3DXIMAGE_INFO imginfo;
 	if (FAILED(D3DXGetImageInfoFromFile(picpath.c_str(), &imginfo))) {
 		plog("unable to open picture '%s'", picpath.c_str());
+		goto done;
 	}
 
 	if (FAILED(D3DXCreateTexture(tools->gfx->pd3dDevice, imginfo.Width, imginfo.Height, 1, 0, D3DFMT_X8R8G8B8, D3DPOOL_MANAGED, &tex))) {
@@ -360,6 +380,8 @@ static void PictureDoModal(const char *filename, unsigned bgcolor, unsigned ms)
 		if (SUCCEEDED(tex->GetSurfaceLevel(0, &texsuf))) {
 			D3DXLoadSurfaceFromFile(texsuf, NULL, NULL, picpath.c_str(), NULL, D3DX_FILTER_LINEAR, 0, NULL);
 			texsuf->Release();
+		} else {
+			goto done;
 		}
 	}
 
@@ -368,7 +390,7 @@ static void PictureDoModal(const char *filename, unsigned bgcolor, unsigned ms)
 	tools->misc->GetRatioRect(&rc, &rc, (double) imginfo.Width / imginfo.Height);
 	TexQuadPrepare(&rc);
 
-	CaptureStateBlock();
+	tools->curs->SetShowCursorState(0);
 
 	tick = timeGetTime();
 	while (1) {
@@ -386,6 +408,7 @@ static void PictureDoModal(const char *filename, unsigned bgcolor, unsigned ms)
         }
 
 		tools->gfx->EnsureCooperativeLevel();
+
 		TexQuadRender(tex, bgcolor);
 		if (timeGetTime() - tick >= ms) break;
 		Sleep(1);
@@ -394,6 +417,7 @@ static void PictureDoModal(const char *filename, unsigned bgcolor, unsigned ms)
 done:
 	if (tex) tex->Release();
 	RestoreStateBlock();
+	RestoreCursorState();
 }
 
 
@@ -413,8 +437,8 @@ static void VideoDoModal(const char *filename, unsigned bgcolor, double volume)
 	std::string videopath = path_prefix + std::string(filename);
 	IDirect3DSurface9 *suf = NULL;
 	IDirect3DTexture9 *tex = NULL;
-
 	CaptureStateBlock();
+	SaveCursorState();
 
 	HBINK bink = tools->bik->BinkOpen(videopath.c_str(), 0);
 	if (!bink) {
@@ -439,6 +463,8 @@ static void VideoDoModal(const char *filename, unsigned bgcolor, double volume)
 	tools->misc->GetRatioRect(&rc, &rc, (double) bink->Width / bink->Height);
 	TexQuadPrepare(&rc);
 
+	tools->curs->SetShowCursorState(0);
+
 	while (1) {
 		MSG msg;
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -452,7 +478,9 @@ static void VideoDoModal(const char *filename, unsigned bgcolor, double volume)
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+
 		tools->gfx->EnsureCooperativeLevel();
+
 		if (tools->bik->BinkWait(bink)) {
 			Sleep(1);
 		} else {
@@ -485,6 +513,7 @@ done:
 	if (suf) suf->Release();
 	if (tex) tex->Release();
 	RestoreStateBlock();
+	RestoreCursorState();
 }
 
 
@@ -539,6 +568,7 @@ static void RunScript(const char *filename)
 		plog("can't open script file '%s'", scriptpath.c_str());
 		goto done;
 	}
+	if (log_known) plog("running script: %s", scriptpath.c_str());
 	
 	char cmd[MAXLINE];
 	while (fscanf(fp, MAXLINEFMT "s", cmd) == 1) {
@@ -618,12 +648,16 @@ static void MakeTextLogHeader()
     fprintf(fp, "\n\n; %04hu-%02hu-%02hu %02hu:%02hu:%02hu.%03hu\n\n", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
 	fclose(fp);
 }
-static void LogVoiceData(const char *text)
+static void LogVoiceData(const char *text, bool valid)
 {
 	FILE *fp = fopen(VDATALOG, "a");
 	if (!fp) return;
-	fprintf(fp, "VOICE%04d.WAV|1.000|:|%08X|%s\n", log_counter, tools->misc->CalcStringGBCRC32(text), text);
-	log_counter++;
+	if (valid) {
+		fprintf(fp, "VOICE%04d.WAV|1.000|:|%08X|%s\n", log_counter, tools->misc->CalcStringGBCRC32(text), text);
+		log_counter++;
+	} else {
+		fprintf(fp, ";                    |%08X|%s\n", tools->misc->CalcStringGBCRC32(text), text);
+	}
 	fclose(fp);
 }
 
@@ -643,8 +677,7 @@ struct VoiceItem {
 };
 
 static std::map<std::pair<unsigned, std::string>, std::vector<VoiceItem> > vdata;
-static int text_enable = 1, caption_enable = 1, movie_enable = 1;
-static int log_unknown = 0;
+static int text_enable = 1, caption_enable = 1, movie_enable = 1, cbdialog_enable = 1;
 
 static int LoadSingleVoiceData(const char *filename, int file_num)
 {
@@ -742,6 +775,8 @@ static void LoadVoiceConfig()
 			fscanf(fp, "%lf", &voicevol);
 		} else if (_stricmp(cmd, "LOGUNKNOWN") == 0) {
 			fscanf(fp, "%d", &log_unknown);
+		} else if (_stricmp(cmd, "LOGKNOWN") == 0) {
+			fscanf(fp, "%d", &log_known);
 		} else if (_stricmp(cmd, "LOGCOUNTFROM") == 0) {
 			fscanf(fp, "%d", &log_counter);
 		} else if (_stricmp(cmd, "TEXT") == 0) {
@@ -750,13 +785,15 @@ static void LoadVoiceConfig()
 			fscanf(fp, "%d", &caption_enable);
 		} else if (_stricmp(cmd, "MOVIE") == 0) {
 			fscanf(fp, "%d", &movie_enable);
+		} else if (_stricmp(cmd, "CBDIALOG") == 0) {
+			fscanf(fp, "%d", &cbdialog_enable);
 		} else {
 			fail("unknown command '%s' in config file.", cmd);
 		}
 	}
 	fclose(fp);
 
-	if (log_unknown) {
+	if (log_unknown || log_known) {
 		MakeTextLogHeader();
 	}
 
@@ -805,7 +842,8 @@ static void PrepareVoiceItem(const char *data, const char *type)
 {
 	if ((!text_enable && strcmp(type, TEXT_PREFIX) == 0) ||
 		(!caption_enable && strcmp(type, CAPTION_PREFIX) == 0) ||
-		(!movie_enable && strcmp(type, MOVIE_PREFIX) == 0)) {
+		(!movie_enable && strcmp(type, MOVIE_PREFIX) == 0) ||
+		(!cbdialog_enable && strcmp(type, CBDIALOG_PREFIX) == 0)) {
 		AudioStop();
 		text_disabled++;
 	} else {
@@ -816,9 +854,10 @@ static void PrepareVoiceItem(const char *data, const char *type)
 			VoiceItem *pitem = ChooseBestVoiceItem(&it->second);
 			AudioPrepare(pitem->audiofile.c_str(), pitem->volume);
 			SetScript(pitem->scriptfile_pre.c_str(), pitem->scriptfile_post.c_str());
+			if (log_known) LogVoiceData(text.c_str(), false);
 			text_known++;
 		} else {
-			if (log_unknown) LogVoiceData(text.c_str());
+			if (log_unknown) LogVoiceData(text.c_str(), true);
 			text_unknown++;
 		}
 	}
@@ -949,6 +988,7 @@ void WINAPI CBDialogStart(void)
 }
 void WINAPI CBDialogStop(void)
 {
-	AudioStop();
+	// no AudioStop() here
+	// because the voice may longer than combat dialog display time
 	RunScriptPost();
 }

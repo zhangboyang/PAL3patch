@@ -43,8 +43,11 @@ typedef struct BINK {
 
 // see patch_voice.c for details
 
-#define VOICEPLUGIN_ABI_VERSION 1
+// ABI version
+#define VOICEPLUGIN_ABI_VERSION 2
 
+
+// toolkit definition
 
 struct MiscToolkit {
     // error handling functions
@@ -67,6 +70,12 @@ struct GraphicsToolkit {
     void (WINAPI *EnsureCooperativeLevel)(void);
     void (WINAPI *(WINAPI *SetOnLostDeviceCallback)(void (WINAPI *)(void)))(void);
     void (WINAPI *(WINAPI *SetOnResetDeviceCallback)(void (WINAPI *)(void)))(void);
+};
+
+struct CursorToolkit {
+    void (WINAPI *RenderSoftCursor)(void);
+    int (WINAPI *GetShowCursorState)(void);
+    void (WINAPI *SetShowCursorState)(int show);
 };
 
 struct VolumeToolkit {
@@ -116,10 +125,16 @@ struct VoiceToolkit {
 
     struct MiscToolkit *misc;
     struct GraphicsToolkit *gfx;
+    struct CursorToolkit *curs;
     struct VolumeToolkit *vol;
     struct BinkToolkit *bik;
     struct MSSToolkit *mss;
 };
+
+
+
+
+
 
 enum {
     ROLEDLG_CLOSED,  // End() -> Prepare()

@@ -49,6 +49,7 @@ static void self_check()
     assert(sizeof(struct tagThread) == 0x58);
     assert(sizeof(struct tagPlayerSet) == 0x34);
     assert(sizeof(struct CCBSystem) == 0x162D8);
+    assert(sizeof(struct UICursor) == 0x20);
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)

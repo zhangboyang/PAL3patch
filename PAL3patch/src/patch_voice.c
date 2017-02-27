@@ -7,7 +7,7 @@
 
 
 // ABI version
-#define VOICEPLUGIN_ABI_VERSION 1
+#define VOICEPLUGIN_ABI_VERSION 2
 
 
 // toolkit definition
@@ -33,6 +33,12 @@ struct GraphicsToolkit {
     void (WINAPI *EnsureCooperativeLevel)(void);
     void (WINAPI *(WINAPI *SetOnLostDeviceCallback)(void (WINAPI *)(void)))(void);
     void (WINAPI *(WINAPI *SetOnResetDeviceCallback)(void (WINAPI *)(void)))(void);
+};
+
+struct CursorToolkit {
+    void (WINAPI *RenderSoftCursor)(void);
+    int (WINAPI *GetShowCursorState)(void);
+    void (WINAPI *SetShowCursorState)(int show);
 };
 
 struct VolumeToolkit {
@@ -82,6 +88,7 @@ struct VoiceToolkit {
 
     struct MiscToolkit *misc;
     struct GraphicsToolkit *gfx;
+    struct CursorToolkit *curs;
     struct VolumeToolkit *vol;
     struct BinkToolkit *bik;
     struct MSSToolkit *mss;
@@ -181,8 +188,22 @@ static void (WINAPI *(WINAPI SetOnResetDeviceCallback)(void (WINAPI *fp)(void)))
     OnResetDeviceCallback = fp;
     return ret;
 }
-
-
+static void WINAPI RenderSoftCursor(void)
+{
+    // force vertex buffer update in gbDynVertBuf_D3D::End()
+    GB_GfxMgr->m_pCacheVB = NULL;
+    
+    // render cursor
+    render_softcursor();
+}
+static int WINAPI GetShowCursorState(void)
+{
+    return get_showcursor_state();
+}
+static void WINAPI SetShowCursorState(int show)
+{
+    set_showcursor_state(show);
+}
 static float WINAPI GetMusicMasterVolume()
 {
     return gbAudioManager_GetMusicMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()));
@@ -483,6 +504,7 @@ static void voice_postgamecreate_hook()
     static struct VoiceToolkit toolkit;
     static struct MiscToolkit misc;
     static struct GraphicsToolkit gfx;
+    static struct CursorToolkit curs;
     static struct VolumeToolkit vol;
     static struct BinkToolkit bik;
     static struct MSSToolkit mss;
@@ -495,6 +517,7 @@ static void voice_postgamecreate_hook()
         
         .misc = &misc,
         .gfx = &gfx,
+        .curs = &curs,
         .vol = &vol,
         .bik = &bik,
         .mss = &mss,
@@ -516,6 +539,12 @@ static void voice_postgamecreate_hook()
         .EnsureCooperativeLevel = EnsureCooperativeLevel,
         .SetOnLostDeviceCallback = SetOnLostDeviceCallback,
         .SetOnResetDeviceCallback = SetOnResetDeviceCallback,
+    };
+    
+    curs = (struct CursorToolkit) {
+        .RenderSoftCursor = RenderSoftCursor,
+        .GetShowCursorState = GetShowCursorState,
+        .SetShowCursorState = SetShowCursorState,
     };
         
     vol = (struct VolumeToolkit) {
@@ -622,7 +651,7 @@ MAKE_PATCHSET(voice)
     VoiceDLLAttached = TOPTR(GetProcAddress_check(hPlugin, "_VoiceDLLAttached@0"));
     int abiver = VoiceDLLAttached();
     if (abiver != VOICEPLUGIN_ABI_VERSION) {
-        fail("voice plugin requires unsupported ABI version %d.", abiver);
+        fail("voice plugin requires unsupported ABI version %d (only %d is supported in this patch).", abiver, VOICEPLUGIN_ABI_VERSION);
     }
     
     VoiceInit = TOPTR(GetProcAddress_check(hPlugin, "_VoiceInit@4"));

@@ -86,6 +86,8 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
         }
         this->m_bDeviceLost = 0;
     }
+    
+    try_refresh_clipcursor();
     set_pauseresume(0);
 }
 

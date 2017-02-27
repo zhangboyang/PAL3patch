@@ -308,13 +308,6 @@ static void movie_playback_atstop(void *arg)
 }
 
 
-static int wm_setcursor_hook()
-{
-    int m_curfrmid = *(int *) 0x00DBD898;
-    // if the condition is TRUE, UICursor::Show(1) will be called
-    return m_curfrmid != 9 && !mf_movie_playing;
-}
-
 static MAKE_THISCALL(int, gbBinkVideo_BinkWait_wrapper, struct gbBinkVideo *this)
 {
     int ret = gbBinkVideo_BinkWait(this);
@@ -338,10 +331,6 @@ static void hook_gbBinkVideo()
     
     // check state for pausing movie
     add_pauseresume_hook(movie_checkpause_hook);
-    
-    // hook WM_SETCURSOR
-    make_call(0x00404DFF, wm_setcursor_hook);
-    SIMPLE_PATCH(0x00404E04, "\x00\x09", "\x85\xC0", 2);
     
     // hook BinkDoFrame() and BinkCopyToBuffer()
     make_branch(0x0053C544, 0xE8, BinkDoFrame_wrapper, 6);

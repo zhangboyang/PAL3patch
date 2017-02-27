@@ -374,15 +374,45 @@ static void init_fillborder()
 
 
 // hook UICursor_IRender to change cursor size (only in soft-cursor mode)
+// 
+// render_softcursor() may called by extern funtions
+// NOTE: the fixui patch might not initialized
+//       must use static initialize method
+static int softcursor_sizepatch_inited = 0;
+void render_softcursor()
+{
+    if (softcursor_sizepatch_inited) {
+        // if patch is initialize, make proper fixui state and call UICursor::IRender()
+        fixui_pushstate(&game_frect, &game_frect, TR_SCALE_LOW, TR_SCALE_LOW, softcursor_scalefactor);
+        UICursor_IRender(UICursor_Inst());
+        fixui_popstate();
+    } else {
+        // otherwise, only call UICursor::IRender()
+        UICursor_IRender(UICursor_Inst());
+    }
+}
+int get_showcursor_state()
+{
+    // see UICursor::Show() for details
+    if (UICursor_Inst()->m_bSoftMode) {
+        return !!UICursor_Inst()->m_bShow;
+    } else {
+        return !!GB_GfxMgr->m_bShowCursor;
+    }
+}
+void set_showcursor_state(int show)
+{
+    UICursor_Show(UICursor_Inst(), !!show);
+}
+
 static MAKE_THISCALL(void, UICursor_IRender_wrapper, struct UICursor *this)
 {
     uifb_precursordraw();
-    fixui_pushstate(&game_frect, &game_frect, TR_SCALE_LOW, TR_SCALE_LOW, softcursor_scalefactor);
-    UICursor_IRender(this);
-    fixui_popstate();
+    render_softcursor();
 }
 static void init_softcursor_sizepatch()
 {
+    softcursor_sizepatch_inited = 1;
     softcursor_scalefactor = str2scalefactor(get_string_from_configfile("softcursor_scalefactor"));
     INIT_WRAPPER_CALL(UICursor_IRender_wrapper, { 0x004061D2 });
 }
