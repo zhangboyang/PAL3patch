@@ -69,6 +69,13 @@ struct GraphicsToolkit {
     void (WINAPI *(WINAPI *SetOnResetDeviceCallback)(void (WINAPI *)(void)))(void); // 设置Reset Device时的回调函数
 };
 
+// 鼠标指针
+struct CursorToolkit {
+    void (WINAPI *RenderSoftCursor)(void); // 渲染软件光标，会破坏一部分D3D状态
+    int (WINAPI *GetShowCursorState)(void); // 取得当前是否显示光标
+    void (WINAPI *SetShowCursorState)(int show); // 设置当前是否显示光标
+};
+
 // 音量控制
 // 音量均是0～1的浮点数
 struct VolumeToolkit {
@@ -120,8 +127,10 @@ struct VoiceToolkit {
     const char *build_date; // 分辨率补丁的编译日期
 
     // 指向各工具的指针
+
     struct MiscToolkit *misc;
     struct GraphicsToolkit *gfx;
+    struct CursorToolkit *curs;
     struct VolumeToolkit *vol;
     struct BinkToolkit *bik;
     struct MSSToolkit *mss;
@@ -160,4 +169,15 @@ struct VoiceToolkit {
 语音插件日志文件：（运行时覆盖/生成，可以用VoiceLogMonitor即时查看）
   VoiceLog.txt 程序日志文件，包含程序运行时的一些信息，如有错误也会写入此文件
   VoiceDataLog.txt 数据日志文件，若开启“记录未知条目”则会将未找到的条目写入此文件
+
+
+【语音插件辅助工具】 在 PAL3voice_extra 目录下
+CBDialogExtract.cpp： 从combat.ini中导出对话内容的小工具
+    basedata/datascript/combat.ini中存有战斗对话的具体内容
+    该工具可以将其导出为PAL3voice配音插件可以识别的格式
+    还可以检查是否有字符串重复（简体版中无重复，繁体版待测；若重复会造成角色与语音不对应的错误出现）
+
+
+【语音插件配置示例】 在 PAL3voice_example 目录下
+详细说明见其内README.TXT
 

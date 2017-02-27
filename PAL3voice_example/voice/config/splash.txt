@@ -1,0 +1,3 @@
+; 这是用来配置欢迎脚本的数据配置文件
+
+x|1.000|script\splash.txt:|5188E0FC|MOV|movie\logo.bik

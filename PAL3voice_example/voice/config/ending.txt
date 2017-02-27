@@ -1,0 +1,20 @@
+; 这是用来配置结局脚本的数据配置文件
+; 如要对结局动画进行配音，直接修改对应条目即可
+
+; 雪见结局
+x|1.000|:script\ending\setvar\end1setvar.txt|43251A18|MOV|movie\end1.bik
+
+; 龙葵结局
+x|1.000|:script\ending\setvar\end2setvar.txt|4E663CC1|MOV|movie\end2.bik
+
+; 紫萱结局
+x|1.000|:script\ending\setvar\end3setvar.txt|4AA72176|MOV|movie\end3.bik
+
+; 花楹结局
+x|1.000|:script\ending\setvar\end4setvar.txt|54E07173|MOV|movie\end4.bik
+
+; 完美结局
+x|1.000|:script\ending\setvar\end5setvar.txt|50216CC4|MOV|movie\end5.bik
+
+; 制作群
+x|1.000|:script\ending\common.txt|95F85F6E|MOV|movie\end.bik

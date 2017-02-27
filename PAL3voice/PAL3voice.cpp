@@ -184,30 +184,31 @@ static void SetScript(const char *pre, const char *post)
 }
 
 // audio player
+static std::string audiopath;
 static HSTREAM hstream = NULL;
 static void AudioStart()
 {
 	if (hstream) {
+		if (log_known) plog("playing audio: %s", audiopath.c_str());
 		tools->mss->AIL_start_stream(hstream);
 	}
 }
 static void AudioStop()
 {
 	if (hstream) {
+		if (log_known) plog("audio stopped: %s", audiopath.c_str());
 		tools->mss->AIL_close_stream(hstream);
 		hstream = NULL;
 	}
 }
 static void AudioPrepare(const char *filename, double volume)
 {
-	std::string audiopath = path_prefix + std::string(filename);
-
 	if (hstream) AudioStop();
 	if (*filename && stricmp(filename, "x") != 0) {
+		audiopath = path_prefix + std::string(filename);
 		hstream = tools->mss->AIL_open_stream(tools->mss->h2DDriver, audiopath.c_str(), 0);
 		if (hstream) {
 			tools->mss->AIL_set_stream_volume(hstream, floor(voicevol * volume * 127.0 + eps));
-			if (log_known) plog("playing: %s", audiopath.c_str());
 		} else {
 			plog("unable to open stream '%s'", audiopath.c_str());
 		}
@@ -447,7 +448,7 @@ static void VideoDoModal(const char *filename, unsigned bgcolor, double volume)
 	}
 	curbink = bink;
 
-	tools->bik->BinkSetVolume(bink, tools->vol->GetMusicMasterVolume() * volume * 32768.0);
+	tools->bik->BinkSetVolume(bink, floor(tools->vol->GetMusicMasterVolume() * volume * 32768.0 + eps));
 
 	if (FAILED(tools->gfx->pd3dDevice->CreateOffscreenPlainSurface(bink->Width, bink->Height, D3DFMT_X8R8G8B8, D3DPOOL_SCRATCH, &suf, NULL))) {
 		suf = NULL;
@@ -578,8 +579,6 @@ static void RunScript(const char *filename)
 			char str[MAXLINE];
 			ReadScriptString(fp, str, sizeof(str));
 			RunScript(str);
-		} else if (_stricmp(cmd, "RETN") == 0) {
-			goto done;
 		} else if (_stricmp(cmd, "SETVAR") == 0) {
 			char varname[MAXLINE];
 			char varvalue[MAXLINE];
@@ -631,6 +630,8 @@ static void RunScript(const char *filename)
 			fail("unknown command '%s' in script file '%s'.", cmd, scriptpath.c_str());
 		}
 	}
+
+	if (log_known) plog("script finished: %s", scriptpath.c_str());
 done:
 	if (fp)	fclose(fp);
 }

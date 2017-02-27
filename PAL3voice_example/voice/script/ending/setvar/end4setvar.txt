@@ -1,0 +1,1 @@
+SETVAR "ENDSCRIPT" "script\\ending\\end4.txt"

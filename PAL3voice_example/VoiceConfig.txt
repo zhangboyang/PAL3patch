@@ -1,0 +1,43 @@
+; 这是配音插件配置文件，以“;”开头的行是注释，选项以“名字 值”给出
+; 若是字符串，需要用半角引号引起来，使用类似 C 语言的转义：用“\\”代表“\”、用“\n”代表换行
+
+
+; 设置默认音量，音量范围为 0 - 1 之间的浮点数
+;   MUSICVOL - 音乐音量
+;   SOUNDVOL - 音效音量
+;   VOICEVOL - 语音音量
+; 因为存档中包含音量设置，这里的设置只对新开始的游戏有作用
+MUSICVOL 1.000
+SOUNDVOL 1.000
+VOICEVOL 1.000
+
+
+; 设置语音数据日志
+;   LOGUNKNOWN   - 是否记录未知条目，0 表示关闭，1 表示开启
+;   LOGKNOWN     - 是否记录已知条目，0 表示关闭，1 表示开启
+;   LOGCOUNTFROM - 日志条目计数器起始值，只在记录未知条目开启后才有意义
+LOGUNKNOWN   1
+LOGKNOWN     1
+LOGCOUNTFROM 1000
+
+
+; 配音开关
+;   TEXT     - 是否对剧情对话进行配音，0 表示关闭，1 表示开启
+;   CAPTION  - 是否对诗词进行配音，0 表示关闭，1 表示开启
+;   MOVIE    - 是否对过场动画进行配音，0 表示关闭，1 表示开启
+;   CBDIALOG - 是否对战斗对话进行配音，0 表示关闭，1 表示开启
+TEXT 1
+CAPTION 1
+MOVIE 1
+CBDIALOG 1
+
+
+; 设置配音数据目录
+PREFIX "voice\\"
+
+
+; 加载配音数据配置文件
+; 可以在此添加更多数据配置文件
+LOAD "config\\splash.txt"
+LOAD "config\\ending.txt"
+LOAD "config\\cbdialog.txt"
