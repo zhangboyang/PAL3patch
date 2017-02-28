@@ -109,7 +109,7 @@ void NORETURN __fail(const char *file, int line, const char *func, const char *f
     snprintf(msgbuf, sizeof(msgbuf), "  file: %s\n  line: %d\n  func: %s\nmessage:\n  ", file, line, func);
     len = strlen(msgbuf);
     vsnprintf(msgbuf + len, sizeof(msgbuf) - len, fmt, ap);
-    OutputDebugString(msgbuf);
+    OutputDebugString(msgbuf); OutputDebugString("\n");
     FILE *fp = fopen(ERROR_FILE, "w");
     if (fp) {
         fputs("build information:\n", fp);
@@ -149,7 +149,7 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
     snprintf(msgbuf, sizeof(msgbuf), "  file: %s\n  line: %d\n  func: %s\nmessage:\n  ", file, line, func);
     len = strlen(msgbuf);
     vsnprintf(msgbuf + len, sizeof(msgbuf) - len, fmt, ap);
-    OutputDebugString(msgbuf);
+    OutputDebugString(msgbuf); OutputDebugString("\n");
     plog_lines++;
     if (plog_lines <= MAXLOGLINES) {
         FILE *fp = fopen(WARNING_FILE, plog_lines > 1 ? "a" : "w");

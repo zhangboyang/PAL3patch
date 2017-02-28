@@ -1,4 +1,18 @@
+#if defined(_MSC_VER)
+#define _CRT_SECURE_NO_WARNINGS
 #pragma warning(disable: 4786)
+#if _MSC_VER >= 1900
+#pragma comment(lib, "legacy_stdio_definitions.lib")
+#endif
+#endif
+
+#if defined(_MSC_VER)
+#define NORETURN __declspec(noreturn)
+#elif defined(__GNUC__)
+#define NORETURN __attribute__((noreturn))
+#elif
+#define NORETURN
+#endif
 
 #include <map>
 #include <utility>
@@ -12,6 +26,12 @@
 #include <windows.h>
 #include <d3dx9.h>
 #include "voiceplugin.h"
+
+#define MAXLINE 4096
+#define MAXLINEFMT "%4095"
+#define eps 1e-6
+
+#define stricmp _stricmp
 
 #define PLUGIN_VERSION "v1.0 RC"
 #define PLUGIN_BUILDDATE __DATE__ ", " __TIME__
@@ -27,9 +47,6 @@
 #define MOVIE_PREFIX "MOV"
 #define CBDIALOG_PREFIX "CBD"
 
-#define MAXLINE 4096
-#define MAXLINEFMT "%4095"
-#define eps 1e-6
 
 static std::string path_prefix = "";
 static double voicevol = 1.0;
@@ -52,7 +69,7 @@ static void plog(const char *fmt, ...)
 	char buf[MAXLINE];
     _vsnprintf(buf, MAXLINE - 1, fmt, ap);
 	buf[MAXLINE - 1] = '\0';
-	OutputDebugString(buf);
+	OutputDebugString(buf); OutputDebugString("\n");
 	FILE *fp = fopen(LOGFILE, "a");
 	if (fp) {
 		SYSTEMTIME SystemTime;
@@ -64,7 +81,7 @@ static void plog(const char *fmt, ...)
     va_end(ap);
 }
 
-static void fail(const char *fmt, ...)
+static void NORETURN fail(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -206,7 +223,7 @@ static void AudioPrepare(const char *filename, double volume)
 	if (hstream) AudioStop();
 	if (*filename && stricmp(filename, "x") != 0) {
 		audiopath = path_prefix + std::string(filename);
-		hstream = tools->mss->AIL_open_stream(tools->mss->h2DDriver, audiopath.c_str(), 0);
+		hstream = tools->mss->h2DDriver ? tools->mss->AIL_open_stream(tools->mss->h2DDriver, audiopath.c_str(), 0) : NULL;
 		if (hstream) {
 			tools->mss->AIL_set_stream_volume(hstream, floor(voicevol * volume * 127.0 + eps));
 		} else {

@@ -33,20 +33,18 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="PAL3patch.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="PAL3patch.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(IncludePath);$(D3D9SDK_PATH)\Include</IncludePath>
-    <LibraryPath>$(LibraryPath);$(D3D9SDK_PATH)\Lib</LibraryPath>
+    <IncludePath>$(IncludePath);C:\DX90SDK\Include</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(IncludePath);$(D3D9SDK_PATH)\Include</IncludePath>
-    <LibraryPath>$(LibraryPath);$(D3D9SDK_PATH)\Lib</LibraryPath>
+    <IncludePath>$(IncludePath);C:\DX90SDK\Include</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

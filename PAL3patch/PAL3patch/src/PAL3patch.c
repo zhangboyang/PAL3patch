@@ -52,6 +52,16 @@ static void self_check()
     assert(sizeof(struct UICursor) == 0x20);
 }
 
+static void fix_unpacker_bug()
+{
+    unsigned funcaddr = get_branch_jtarget(0x004229A6, 0xE8);
+    if (*(unsigned char *) funcaddr == 0xE9) {
+        // if there is a JMP, follow it
+        funcaddr = get_branch_jtarget(funcaddr, 0xE9);
+    }
+    make_uint(funcaddr + 0x6B, 0x00000014);
+}
+
 // init_stage1() should be called before unpacker is executed (if exists)
 static void init_stage1()
 {
@@ -73,6 +83,9 @@ static void init_stage1()
 // init_stage2() should be called after EXE is unpacked
 static void init_stage2()
 {
+    // fix unpacker bug that would crash game when music is disabled in config.ini
+    fix_unpacker_bug();
+    
     // init system_codepage
     // PATCHSET 'setlocale' may overwrite target_codepage
     target_codepage = system_codepage = GetACP();

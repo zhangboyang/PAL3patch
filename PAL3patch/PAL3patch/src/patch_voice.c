@@ -142,6 +142,7 @@ static void (WINAPI *CBDialogStop)(void);
 
 
 // toolkit functions
+static struct gbAudioManager *pAudioMgr = NULL;
 
 static void WINAPI ReportFatalError(const char *msg)
 {
@@ -206,27 +207,27 @@ static void WINAPI SetShowCursorState(int show)
 }
 static float WINAPI GetMusicMasterVolume()
 {
-    return gbAudioManager_GetMusicMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()));
+    return pAudioMgr ? gbAudioManager_GetMusicMasterVolume(pAudioMgr) : 0.0f;
 }
 static void WINAPI SetMusicMasterVolume(float volume)
 {
-    gbAudioManager_SetMusicMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()), volume);
+    if (pAudioMgr) gbAudioManager_SetMusicMasterVolume(pAudioMgr, volume);
 }
 static float WINAPI Get2DMasterVolume()
 {
-    return gbAudioManager_Get2DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()));
+    return pAudioMgr ? gbAudioManager_Get2DMasterVolume(pAudioMgr) : 0.0f;
 }
 static void WINAPI Set2DMasterVolume(float volume)
 {
-    gbAudioManager_Set2DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()), volume);
+    if (pAudioMgr) gbAudioManager_Set2DMasterVolume(pAudioMgr, volume);
 }
 static float WINAPI Get3DMasterVolume()
 {
-    return gbAudioManager_Get3DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()));
+    return pAudioMgr ? gbAudioManager_Get3DMasterVolume(pAudioMgr) : 0.0f;
 }
 static void WINAPI Set3DMasterVolume(float volume)
 {
-    gbAudioManager_Set3DMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst()), volume);
+    if (pAudioMgr) gbAudioManager_Set3DMasterVolume(pAudioMgr, volume);
 }
 
 
@@ -509,6 +510,9 @@ static void voice_postgamecreate_hook()
     static struct BinkToolkit bik;
     static struct MSSToolkit mss;
     
+    // get AudioManager
+    pAudioMgr = SoundMgr_GetAudioMgr(SoundMgr_Inst());
+    
     // set toolkit
     
     toolkit = (struct VoiceToolkit) {
@@ -571,7 +575,7 @@ static void voice_postgamecreate_hook()
     
     HMODULE mss32 = GetModuleHandle_check("MSS32.DLL");
     mss = (struct MSSToolkit) {
-        .h2DDriver = SoundMgr_GetAudioMgr(SoundMgr_Inst())->h2DDriver,
+        .h2DDriver = pAudioMgr ? pAudioMgr->h2DDriver : NULL,
         .AIL_open_stream = TOPTR(GetProcAddress_check(mss32, "_AIL_open_stream@12")),
         .AIL_start_stream = TOPTR(GetProcAddress_check(mss32, "_AIL_start_stream@4")),
         .AIL_close_stream = TOPTR(GetProcAddress_check(mss32, "_AIL_close_stream@4")),

@@ -26,15 +26,15 @@ void memcpy_from_process(void *dest, unsigned src, unsigned size)
     memcpy(dest, (void *) src, size);
 }
 
-void *get_branch_jtarget(unsigned addr, unsigned char opcode)
+unsigned get_branch_jtarget(unsigned addr, unsigned char opcode)
 {
     // assume instr length is 5
     unsigned char buf[5];
     memcpy_from_process(buf, addr, 5);
     if (buf[0] != opcode) fail("jtarget opcode mismatch");
-    void *off;
+    unsigned off;
     memcpy(&off, &buf[1], 4);
-    return PTRADD(off, addr + 5);
+    return off + addr + 5;
 }
 
 void make_branch(unsigned addr, unsigned char opcode, const void *jtarget, unsigned size)

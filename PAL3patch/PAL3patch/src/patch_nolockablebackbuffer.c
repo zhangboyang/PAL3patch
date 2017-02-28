@@ -183,7 +183,12 @@ static void movie_playback_atopen(void *arg)
     
     if (!g_bink.m_hBink) return;
     
-    BinkSetVolume(g_bink.m_hBink, 32768.0 * gbAudioManager_GetMusicMasterVolume(SoundMgr_GetAudioMgr(SoundMgr_Inst())));
+    struct gbAudioManager *pAudioMgr = SoundMgr_GetAudioMgr(SoundMgr_Inst());
+    if (pAudioMgr) {
+        BinkSetVolume(g_bink.m_hBink, floor(32768.0 * gbAudioManager_GetMusicMasterVolume(pAudioMgr)) + eps);
+    } else {
+        BinkSetVolume(g_bink.m_hBink, 0);
+    }
     
     const char *moviefile = hookarg->data;
     

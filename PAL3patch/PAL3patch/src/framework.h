@@ -4,7 +4,7 @@
 extern void memcpy_to_process(unsigned dest, const void *src, unsigned size);
 extern void memcpy_from_process(void *dest, unsigned src, unsigned size);
 extern void make_branch(unsigned addr, unsigned char opcode, const void *jtarget, unsigned size);
-extern void *get_branch_jtarget(unsigned addr, unsigned char opcode);
+extern unsigned get_branch_jtarget(unsigned addr, unsigned char opcode);
 extern void make_jmp(unsigned addr, const void *jtarget);
 extern void make_call(unsigned addr, const void *jtarget);
 extern void make_wrapper_branch(unsigned addr, const void *jtarget);

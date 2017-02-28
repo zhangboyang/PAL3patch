@@ -251,7 +251,7 @@ static void init_gameloop_hook()
     INIT_ASMPATCH(gameloop_sleep, 0x541BAF, 8, "\x6A\x64\xFF\x15\x4C\xA0\x56\x00");
 
     // patch movie loop
-    gbBinkVideo_SFLB_OpenFile = get_branch_jtarget(0x0053C455, 0xE8);
+    gbBinkVideo_SFLB_OpenFile = TOPTR(get_branch_jtarget(0x0053C455, 0xE8));
     make_jmp(0x0053C440, gbBinkVideo_OpenFile);
     INIT_ASMPATCH(gameloop_movie_atenter, 0x53C5A7, 5, "\x8B\xF9\x8B\x47\x0C");
     SIMPLE_PATCH(0x53C67A, "\xB3", "\x67", 1);

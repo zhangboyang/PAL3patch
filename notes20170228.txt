@@ -1,0 +1,12 @@
+【修正在CONFIG.INI中关闭音乐开关会导致游戏读档时崩溃的问题】
+这是因为破解补丁有BUG，有一处JE指令的跳转目标没有正确改正，此判断正是“是否开启音乐”的判断。
+如果音乐关闭，则JE发生跳转，进而转到了不正确的位置，程序崩溃。
+针对这一bug已在PAL3patch.c中fix_unpacker_bug()函数中进行了修正。
+
+【已将PAL3patch和PAL3voice合并到同一目录下】
+现在PAL3patch和PAL3voice都放到了同一个目录下，并且有统一的编译方式
+（1）VC6+GCC+DX90SDK编译方式：有统一的Makefile，它会进入这两个子目录，然后分别执行相应的Makefile（需实现已在VC6中配置好DX90SDK的目录）
+      编译产生的文件位于 PAL3patch\PAL3patch.dll PAL3voice\Release\PAL3voice.dll
+（2）VS2013+DX90SDK编译方式：有统一的解决方案文件，直接打开并构建即可（默认DX90SDK位于C:\DX90SDK中，可在项目的VC++目录下更改）
+      编译产生的文件位于 Release\PAL3patch.dll Release\PAL3voice.dll
+
