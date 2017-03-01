@@ -6,6 +6,19 @@
 static IDirect3D9 *pD3D = NULL;
 static CD3DEnumeration *pD3DEnum = NULL;
 
+int CheckDX90SDKVersion()
+{
+	if (D3D_SDK_VERSION != 31) {
+        MessageBox(NULL, _T("wrong D3D_SDK_VERSION."), NULL, MB_ICONERROR);
+		return 0;
+    }
+    if (D3DX_SDK_VERSION != 21) {
+        MessageBox(NULL, _T("wrong D3DX_SDK_VERSION."), NULL, MB_ICONERROR);
+		return 0;
+    }
+	return 1;
+}
+
 void InitD3DEnumeration()
 {
 	pD3D = Direct3DCreate9(D3D_SDK_VERSION);
@@ -32,7 +45,7 @@ void CleanupD3DEnumeration()
 
 void EnumDisplayMode(std::vector<std::pair<CString, std::pair<CString, CString> > > &result)
 {
-	int i;
+	unsigned i;
 	std::vector<std::pair<int, int> > dlist;
 	std::vector<std::pair<int, int> >::iterator it;
 	D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
@@ -56,7 +69,7 @@ void EnumDisplayMode(std::vector<std::pair<CString, std::pair<CString, CString> 
 
 void EnumDepthBuffer(std::vector<std::pair<CString, std::pair<CString, CString> > > &result)
 {
-	int i, j;
+	unsigned i, j;
 	D3DFORMAT fmt;
 	std::set<D3DFORMAT> fmtset;
 	D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
@@ -102,7 +115,7 @@ void EnumDepthBuffer(std::vector<std::pair<CString, std::pair<CString, CString> 
 
 void EnumMultisample(std::vector<std::pair<CString, std::pair<CString, CString> > > &result)
 {
-	int i, j;
+	unsigned i, j;
 	int q, maxq;
 	D3DMULTISAMPLE_TYPE mtype;
 	std::set<D3DMULTISAMPLE_TYPE> mtypeset;

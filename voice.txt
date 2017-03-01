@@ -179,5 +179,5 @@ CBDialogExtract.cpp： 从combat.ini中导出对话内容的小工具
 
 
 【语音插件配置示例】 在 PAL3voice_example 目录下
-详细说明见其内README.TXT
+详细说明见其内VOICE_README.txt
 

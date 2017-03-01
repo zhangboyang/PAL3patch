@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Application" 0x0101
 
-CFG=PatchConfig - Win32 Unicode Debug
+CFG=PatchConfig - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,16 +13,16 @@ CFG=PatchConfig - Win32 Unicode Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "PatchConfig.mak" CFG="PatchConfig - Win32 Unicode Debug"
+!MESSAGE NMAKE /f "PatchConfig.mak" CFG="PatchConfig - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
+!MESSAGE "PatchConfig - Win32 MBCS Release" (based on "Win32 (x86) Application")
+!MESSAGE "PatchConfig - Win32 MBCS Debug" (based on "Win32 (x86) Application")
 !MESSAGE "PatchConfig - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE "PatchConfig - Win32 Debug" (based on "Win32 (x86) Application")
-!MESSAGE "PatchConfig - Win32 Unicode Debug" (based on "Win32 (x86) Application")
-!MESSAGE "PatchConfig - Win32 Unicode Release" (based on "Win32 (x86) Application")
+!MESSAGE "PatchConfig - Win32 Static MBCS Release" (based on "Win32 (x86) Application")
 !MESSAGE "PatchConfig - Win32 Static Release" (based on "Win32 (x86) Application")
-!MESSAGE "PatchConfig - Win32 Static Unicode Release" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -33,17 +33,17 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "PatchConfig - Win32 Release"
+!IF  "$(CFG)" == "PatchConfig - Win32 MBCS Release"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "Release"
-# PROP BASE Intermediate_Dir "Release"
+# PROP BASE Output_Dir "PatchConfig___Win32_MBCS_Release"
+# PROP BASE Intermediate_Dir "PatchConfig___Win32_MBCS_Release"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 6
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release"
-# PROP Intermediate_Dir "Release"
+# PROP Output_Dir "MBCS_Release"
+# PROP Intermediate_Dir "MBCS_Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /c
@@ -59,17 +59,17 @@ LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
 # ADD LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
 
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Debug"
+!ELSEIF  "$(CFG)" == "PatchConfig - Win32 MBCS Debug"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "Debug"
-# PROP BASE Intermediate_Dir "Debug"
+# PROP BASE Output_Dir "PatchConfig___Win32_MBCS_Debug"
+# PROP BASE Intermediate_Dir "PatchConfig___Win32_MBCS_Debug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 6
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug"
-# PROP Intermediate_Dir "Debug"
+# PROP Output_Dir "MBCS_Debug"
+# PROP Intermediate_Dir "MBCS_Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
@@ -85,45 +85,18 @@ LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Unicode Debug"
-
-# PROP BASE Use_MFC 6
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "PatchConfig___Win32_Unicode_Debug"
-# PROP BASE Intermediate_Dir "PatchConfig___Win32_Unicode_Debug"
-# PROP BASE Ignore_Export_Lib 0
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 6
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Unicode_Debug"
-# PROP Intermediate_Dir "Unicode_Debug"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /FR /Yu"stdafx.h" /FD /GZ /c
-# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x804 /d "_DEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x804 /d "_DEBUG" /d "_AFXDLL"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
-
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Unicode Release"
+!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Release"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "PatchConfig___Win32_Unicode_Release"
-# PROP BASE Intermediate_Dir "PatchConfig___Win32_Unicode_Release"
+# PROP BASE Output_Dir "Release"
+# PROP BASE Intermediate_Dir "Release"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 6
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Unicode_Release"
-# PROP Intermediate_Dir "Unicode_Release"
+# PROP Output_Dir "Release"
+# PROP Intermediate_Dir "Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
@@ -139,18 +112,45 @@ LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
 # ADD LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
 
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Static Release"
+!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Debug"
+
+# PROP BASE Use_MFC 6
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "Debug"
+# PROP BASE Intermediate_Dir "Debug"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 6
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "Debug"
+# PROP Intermediate_Dir "Debug"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x804 /d "_DEBUG" /d "_AFXDLL"
+# ADD RSC /l 0x804 /d "_DEBUG" /d "_AFXDLL"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
+
+!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Static MBCS Release"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "PatchConfig___Win32_Static_Release"
-# PROP BASE Intermediate_Dir "PatchConfig___Win32_Static_Release"
+# PROP BASE Output_Dir "PatchConfig___Win32_Static_MBCS_Release"
+# PROP BASE Intermediate_Dir "PatchConfig___Win32_Static_MBCS_Release"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 5
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Static_Release"
-# PROP Intermediate_Dir "Static_Release"
+# PROP Output_Dir "Static_MBCS_Release"
+# PROP Intermediate_Dir "Static_MBCS_Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
@@ -166,18 +166,18 @@ LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
 # ADD LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
 
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Static Unicode Release"
+!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Static Release"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "PatchConfig___Win32_Static_Unicode_Release"
-# PROP BASE Intermediate_Dir "PatchConfig___Win32_Static_Unicode_Release"
+# PROP BASE Output_Dir "PatchConfig___Win32_Static_Release"
+# PROP BASE Intermediate_Dir "PatchConfig___Win32_Static_Release"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 5
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Static_Unicode_Release"
-# PROP Intermediate_Dir "Static_Unicode_Release"
+# PROP Output_Dir "Static_Release"
+# PROP Intermediate_Dir "Static_Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /Yu"stdafx.h" /FD /c
@@ -197,12 +197,12 @@ LINK32=link.exe
 
 # Begin Target
 
-# Name "PatchConfig - Win32 Release"
+# Name "PatchConfig - Win32 MBCS Release"
+# Name "PatchConfig - Win32 MBCS Debug"
 # Name "PatchConfig - Win32 Debug"
-# Name "PatchConfig - Win32 Unicode Debug"
-# Name "PatchConfig - Win32 Unicode Release"
+# Name "PatchConfig - Win32 Release"
+# Name "PatchConfig - Win32 Static MBCS Release"
 # Name "PatchConfig - Win32 Static Release"
-# Name "PatchConfig - Win32 Static Unicode Release"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

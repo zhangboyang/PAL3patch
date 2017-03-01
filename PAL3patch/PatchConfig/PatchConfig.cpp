@@ -94,7 +94,7 @@ BOOL CPatchConfigApp::InitInstance()
 
 	CPatchConfigDlg dlg;
 
-
+	if (!CheckDX90SDKVersion()) goto err;
 
 	ShowPleaseWaitDlg(STRTABLE(IDS_WAITINGVERIFY)); //Sleep(1000);
 	if (!VerifyPatchFiles()) goto err;

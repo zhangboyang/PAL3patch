@@ -3,10 +3,13 @@
 //      are changed infrequently
 //
 
-// disable C4786
 #pragma warning(disable: 4786)
-// for CryptoAPI
+#define _CRT_SECURE_NO_WARNINGS
+#if _MSC_VER >= 1800
+#define _WIN32_WINNT 0x0501
+#else
 #define _WIN32_WINNT 0x0400
+#endif
 
 
 #if !defined(AFX_STDAFX_H__0805558B_5300_41CA_A709_53787B08FC89__INCLUDED_)
@@ -35,6 +38,7 @@
 #include "D3DEnum.h"
 #include "ConfigDescData.h"
 
+#define stricmp _stricmp
 
 // load CString from StringTable
 #define STRTABLE(x) (CString(MAKEINTRESOURCE((x))))

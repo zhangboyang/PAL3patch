@@ -1,1 +1,3 @@
+; 设置结局脚本变量，使得制作群动画播放完毕后，执行紫萱结局脚本
+; 如无必要，请不要修改此文件
 SETVAR "ENDSCRIPT" "script\\ending\\end3.txt"

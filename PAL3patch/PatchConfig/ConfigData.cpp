@@ -140,7 +140,7 @@ int TrySaveConfigData()
 #if defined(_UNICODE)
 		int keylen = WideCharToMultiByte(CP_ACP, 0, keystr, -1, NULL, 0, NULL, NULL);
 		int vallen = WideCharToMultiByte(CP_ACP, 0, valstr, -1, NULL, 0, NULL, NULL);
-		if (!keylen || !vallen) goto done;
+		if (!keylen || !vallen) break;
 		char *keybuf = (char *) malloc(keylen);
 		char *valbuf = (char *) malloc(vallen);
 		WideCharToMultiByte(CP_ACP, 0, keystr, -1, keybuf, keylen, NULL, NULL);
@@ -162,7 +162,6 @@ int TrySaveConfigData()
 #error 
 #endif
 	}
-done:
 	if (fp) fclose(fp);
 	return 1;
 }

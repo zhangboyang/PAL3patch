@@ -207,27 +207,27 @@ static void WINAPI SetShowCursorState(int show)
 }
 static float WINAPI GetMusicMasterVolume()
 {
-    return pAudioMgr ? gbAudioManager_GetMusicMasterVolume(pAudioMgr) : 0.0f;
+    return pAudioMgr && !xmusic ? gbAudioManager_GetMusicMasterVolume(pAudioMgr) : 0.0f;
 }
 static void WINAPI SetMusicMasterVolume(float volume)
 {
-    if (pAudioMgr) gbAudioManager_SetMusicMasterVolume(pAudioMgr, volume);
+    if (pAudioMgr && !xmusic) gbAudioManager_SetMusicMasterVolume(pAudioMgr, volume);
 }
 static float WINAPI Get2DMasterVolume()
 {
-    return pAudioMgr ? gbAudioManager_Get2DMasterVolume(pAudioMgr) : 0.0f;
+    return pAudioMgr && !xsnd ? gbAudioManager_Get2DMasterVolume(pAudioMgr) : 0.0f;
 }
 static void WINAPI Set2DMasterVolume(float volume)
 {
-    if (pAudioMgr) gbAudioManager_Set2DMasterVolume(pAudioMgr, volume);
+    if (pAudioMgr && !xsnd) gbAudioManager_Set2DMasterVolume(pAudioMgr, volume);
 }
 static float WINAPI Get3DMasterVolume()
 {
-    return pAudioMgr ? gbAudioManager_Get3DMasterVolume(pAudioMgr) : 0.0f;
+    return pAudioMgr && !xsnd ? gbAudioManager_Get3DMasterVolume(pAudioMgr) : 0.0f;
 }
 static void WINAPI Set3DMasterVolume(float volume)
 {
-    if (pAudioMgr) gbAudioManager_Set3DMasterVolume(pAudioMgr, volume);
+    if (pAudioMgr && !xsnd) gbAudioManager_Set3DMasterVolume(pAudioMgr, volume);
 }
 
 

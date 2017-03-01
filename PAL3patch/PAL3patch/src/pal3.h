@@ -1705,6 +1705,8 @@ struct UICursor {
 #define WndProc ((LRESULT (CALLBACK *)(HWND, UINT, WPARAM, LPARAM)) TOPTR(0x00404D60))
 #define UIKillFlyer_Update(this, deltatime, haveinput) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00529E40, int, struct UIKillFlyer *, float, int), this, deltatime, haveinput)
 #define UIRowing_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00536560, bool, struct UIRowing *), this)
+#define xsnd ((PAL3_s_flag & 1) == 0)
+#define xmusic ((PAL3_s_flag & 4) == 0)
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) TOPTR(0x00BFDA60))
@@ -1712,7 +1714,7 @@ struct UICursor {
 #define PAL3_s_gamestate (*(int *) TOPTR(0x00BFDA6C))
 #define PAL3_s_drvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00BFD6C8))
 #define PAL3_s_bActive (*(int *) TOPTR(0x005833B8))
-#define PAL3_s_flag (*(int *) TOPTR(0x005833BC))
+#define PAL3_s_flag (*(unsigned *) TOPTR(0x005833BC))
 #define PAL3_m_gametime (*(float *) TOPTR(0x00BFDAA0))
 #define PAL3_m_pCBSystem (*(struct CCBSystem **) TOPTR(0x00BFDA74))
 #define g_pVFileSys (*(struct gbVFileSystem **) TOPTR(gboffset + 0x1015D3A8))

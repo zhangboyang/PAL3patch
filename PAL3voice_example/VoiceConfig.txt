@@ -37,7 +37,8 @@ PREFIX "voice\\"
 
 
 ; 加载配音数据配置文件
-; 可以在此添加更多数据配置文件
 LOAD "config\\splash.txt"
 LOAD "config\\ending.txt"
 LOAD "config\\cbdialog.txt"
+
+; TODO: 在此添加更多数据配置文件
