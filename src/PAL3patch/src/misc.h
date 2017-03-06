@@ -8,6 +8,7 @@
 #define MAXWARNMSGBOXES 3
 
 extern int is_win9x(void);
+extern void NORETURN die(void);
 #define fail(fmt, ...) __fail(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
 extern void NORETURN __fail(const char *file, int line, const char *func, const char *fmt, ...);
 #define warning(fmt, ...) __plog(1, __FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)

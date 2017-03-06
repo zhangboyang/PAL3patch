@@ -69,6 +69,7 @@ MAKE_PATCHSET(graphicspatch);
     extern double scalefactor_table[SCALEFACTOR_COUNT];
     extern double str2scalefactor(const char *str);
     
+    extern HWND game_hwnd;
     extern void try_goto_desktop(void);
     extern void try_refresh_clipcursor(void);
     

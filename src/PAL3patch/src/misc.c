@@ -99,6 +99,12 @@ fail:
     return wcsdup(L"cs2wcs failed.");
 }
 
+void NORETURN die()
+{
+    TerminateProcess(GetCurrentProcess(), 1);
+    while (1);
+}
+
 void NORETURN __fail(const char *file, int line, const char *func, const char *fmt, ...)
 {
     va_list ap;
@@ -132,8 +138,7 @@ void NORETURN __fail(const char *file, int line, const char *func, const char *f
     }
     try_goto_desktop();
     MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
-    TerminateProcess(GetCurrentProcess(), 1);
-    while (1);
+    die();
     va_end(ap);
 }
 

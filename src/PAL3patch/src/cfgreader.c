@@ -23,7 +23,10 @@ void read_config_file()
 {
     cfglines = 0;
     FILE *fp = fopen(CONFIG_FILE, "r");
-    if (!fp) fail("Can't open config file '%s'.", CONFIG_FILE);
+    if (!fp) {
+        MessageBoxW(NULL, wstr_nocfgfile_text, wstr_nocfgfile_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+        die();
+    }
     char buf[MAXLINE];
     char *ptr;
     while (fgets(buf, sizeof(buf), fp)) {

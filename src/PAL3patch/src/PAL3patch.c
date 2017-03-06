@@ -65,18 +65,24 @@ static void fix_unpacker_bug()
 // init_stage1() should be called before unpacker is executed (if exists)
 static void init_stage1()
 {
+    // do self-check
     self_check();
+    
+    // init gboffset
     gboffset = get_module_base("GBENGINE.DLL") - 0x10000000;
     
 #ifdef DYNLINK_D3DX9_AT_RUNTIME
+    // dynlink d3dx9
     d3dx9_dynlink();
 #endif
 
+    // init early locale
+    init_locale_early();
+    
+    // read config
     read_config_file();
-    sha1_init();
-    add_atexit_hook(sha1_cleanup);
 
-    //MessageBox(NULL, "stage1", "stage1", 0);
+    // must init depcompatible in stage1
     INIT_PATCHSET(depcompatible);
 }
 
@@ -86,9 +92,9 @@ static void init_stage2()
     // fix unpacker bug that would crash game when music is disabled in config.ini
     fix_unpacker_bug();
     
-    // init system_codepage
-    // PATCHSET 'setlocale' may overwrite target_codepage
-    target_codepage = system_codepage = GetACP();
+    // init SHA-1
+    sha1_init();
+    add_atexit_hook(sha1_cleanup);
     
     // init memory allocators
     init_memory_allocators();

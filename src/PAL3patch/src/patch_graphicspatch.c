@@ -350,7 +350,7 @@ static void init_scalefactor_table()
 #define WINDOW_NOBORDER 2
 static char winname[0x80];
 
-static HWND gamehwnd = NULL;
+HWND game_hwnd = NULL;
 static int window_patch_cfg = -1;
 void try_goto_desktop()
 {
@@ -359,9 +359,9 @@ void try_goto_desktop()
     // NOTE: the graphics patch might not initialized when this function is called
     //       must use static initialize method
     
-    if (gamehwnd) {
+    if (game_hwnd) {
         if (window_patch_cfg == WINDOW_FULLSCREEN) {
-            ShowWindow(gamehwnd, SW_MINIMIZE);
+            ShowWindow(game_hwnd, SW_MINIMIZE);
         }
     }
 }
@@ -382,18 +382,18 @@ static HWND WINAPI CreateWindowExA_wrapper(DWORD dwExStyle, LPCSTR lpClassName, 
         if (y < 0) y = 0;
     }
     lpWindowName = winname;
-    gamehwnd = CreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
-    return gamehwnd;
+    game_hwnd = CreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+    return game_hwnd;
 }
 static void getcursorpos_window_hookfunc(void *arg)
 {
     POINT *mousept = arg;
-    ScreenToClient(gamehwnd, mousept);
+    ScreenToClient(game_hwnd, mousept);
 }
 static void setcursorpos_window_hookfunc(void *arg)
 {
     POINT *mousept = arg;
-    ClientToScreen(gamehwnd, mousept);
+    ClientToScreen(game_hwnd, mousept);
 }
 
 
@@ -413,8 +413,8 @@ static void clipcursor(int clip)
         RECT Rect;
         POINT Point;
         Point.x = Point.y = 0;
-        ClientToScreen(gamehwnd, &Point);
-        GetClientRect(gamehwnd, &Rect);
+        ClientToScreen(game_hwnd, &Point);
+        GetClientRect(game_hwnd, &Rect);
         Rect.left = Point.x;
         Rect.top = Point.y;
         Rect.right += Point.x;
@@ -458,7 +458,7 @@ static int confirm_quit()
     set_pauseresume(1);
     try_goto_desktop();
     clipcursor(0);
-    int ret = MessageBoxW(gamehwnd, wstr_confirmquit_text, wstr_confirmquit_title, MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES;
+    int ret = MessageBoxW(game_hwnd, wstr_confirmquit_text, wstr_confirmquit_title, MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES;
     set_pauseresume(0);
     return ret;
 }

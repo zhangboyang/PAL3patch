@@ -1,8 +1,8 @@
 #include "common.h"
 
 // language, see patch_setlocale.c for details
-UINT system_codepage;
-UINT target_codepage;
+unsigned system_codepage;
+unsigned target_codepage;
 
 
 static const wchar_t wstr_about_title_CHS[] = L"关于";
@@ -31,14 +31,38 @@ static const wchar_t wstr_confirmquit_title_CHS[] = L"退出";
 static const wchar_t wstr_defaultfont_CHS[] = L"宋体";
 static const wchar_t wstr_gameloading_CHS[] = L"游戏加载中，请稍候……";
 
+static const wchar_t wstr_cantsavereg_text_CHS[] = L"无法保存注册表数据到存档文件夹，部分存档数据可能会丢失。\n请确认游戏对存档文件夹有可写权限。";
+static const wchar_t wstr_cantsavereg_title_CHS[] = L"注册表重定向";
+
+static const wchar_t wstr_nocfgfile_text_CHS[] = L"无法读取补丁配置文件。请运行“补丁配置工具”来生成默认配置文件。";
+static const wchar_t wstr_nocfgfile_title_CHS[] = L"无法加载配置";
+
+
 const wchar_t *wstr_about_title;
 const wchar_t *wstr_about_text;
 const wchar_t *wstr_confirmquit_text;
 const wchar_t *wstr_confirmquit_title;
 const wchar_t *wstr_defaultfont;
 const wchar_t *wstr_gameloading;
+const wchar_t *wstr_cantsavereg_text;
+const wchar_t *wstr_cantsavereg_title;
+const wchar_t *wstr_nocfgfile_text;
+const wchar_t *wstr_nocfgfile_title;
 
 
+
+
+
+void init_locale_early()
+{
+    // init codepage
+    // PATCHSET 'setlocale' may overwrite target_codepage
+    target_codepage = system_codepage = GetACP();
+    
+    // init early strings
+    wstr_nocfgfile_text = wstr_nocfgfile_text_CHS;
+    wstr_nocfgfile_title = wstr_nocfgfile_title_CHS;
+}
 
 void init_locale()
 {
@@ -49,4 +73,6 @@ void init_locale()
     wstr_confirmquit_title = wstr_confirmquit_title_CHS;
     wstr_defaultfont = wstr_defaultfont_CHS;
     wstr_gameloading = wstr_gameloading_CHS;
+    wstr_cantsavereg_text = wstr_cantsavereg_text_CHS;
+    wstr_cantsavereg_title = wstr_cantsavereg_title_CHS;
 }

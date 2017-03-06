@@ -67,7 +67,7 @@ static int VerifyPatchFiles()
 static int LoadConfigData()
 {
 	while (!TryLoadConfigData()) {
-		if (MessageBox(GetWaitDlgHandle(), STRTABLE(IDS_CORRUPTCONFIG), STRTABLE(IDS_CORRUPTCONFIG_TITLE), MB_ICONWARNING | MB_YESNO) == IDYES) {
+		if (MessageBox(GetWaitDlgHandle(), STRTABLE(IDS_CORRUPTCONFIG), STRTABLE(IDS_CORRUPTCONFIG_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
 			TryRebuildConfigFile();
 		} else {
 			return 0;
