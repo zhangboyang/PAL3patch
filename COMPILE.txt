@@ -76,4 +76,6 @@
          src\PAL3patch\PAL3patch.dll
          src\PAL3voice\Release\PAL3voice.dll
          src\PatchConfig\Release\PatchConfig.exe
+        此外，供 MSVC 使用的汇编代码的库文件位于：
+         src\PAL3patch\PAL3patch_asm.lib
 
