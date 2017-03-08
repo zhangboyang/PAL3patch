@@ -456,6 +456,27 @@ static void fix_UIGameOver()
 }
 
 
+
+
+
+// fix GrayScale
+static MAKE_THISCALL(void, GrayScale_End_wrapper, struct GrayScale *this)
+{
+    fixui_pushidentity();
+    fs->no_align = 1;
+    GrayScale_End(this);
+    fixui_popstate();
+}
+static void fix_GrayScale()
+{
+    INIT_WRAPPER_CALL(GrayScale_End_wrapper, { 0x00405F84 });
+}
+
+
+
+
+
+
 MAKE_PATCHSET(fixsceneui)
 {
     sceneui_dstrect_type = parse_uiwnd_rect_type(get_string_from_configfile("fixsceneui_scaletype"));
@@ -485,4 +506,7 @@ MAKE_PATCHSET(fixsceneui)
     
     // fix UIGameOver
     fix_UIGameOver();
+    
+    // fix GrayScale
+    fix_GrayScale();
 }

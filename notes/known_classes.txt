@@ -49,4 +49,5 @@ HeadMsg（已修正）
 UIButtonEx
 UIButtonEXA
 UIParticle
+GrayScale
 

@@ -1605,6 +1605,8 @@ struct UICursor {
     char m_bSoftMode;
 };
 
+struct GrayScale;
+
 
 
 
@@ -1707,6 +1709,8 @@ struct UICursor {
 #define UIRowing_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00536560, bool, struct UIRowing *), this)
 #define xsnd ((PAL3_s_flag & 1) == 0)
 #define xmusic ((PAL3_s_flag & 4) == 0)
+#define GrayScale_End(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004B6E20, void, struct GrayScale *), this)
+
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) TOPTR(0x00BFDA60))
