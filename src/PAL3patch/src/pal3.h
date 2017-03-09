@@ -1627,6 +1627,8 @@ struct GrayScale;
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
 #define x2gbx(x) ((x) * 2.0 / PAL3_s_drvinfo.width - 1.0)
 #define y2gby(y) (1.0 - (y) * 2.0 / PAL3_s_drvinfo.height)
+#define dx2gbdx(dx) ((dx) * 2.0 / PAL3_s_drvinfo.width)
+#define dy2gbdy(dy) (-(dy) * 2.0 / PAL3_s_drvinfo.height)
 #define scale_gbxdiff(xdiff, scalefactor) ((double)(xdiff) * (scalefactor) * GAME_WIDTH_ORG / PAL3_s_drvinfo.width)
 #define scale_gbydiff(ydiff, scalefactor) ((double)(ydiff) * (scalefactor) * GAME_HEIGHT_ORG / PAL3_s_drvinfo.height)
 #define gbCamera_SetAsCurrent(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021A80, void, struct gbCamera *, int), this, a2)

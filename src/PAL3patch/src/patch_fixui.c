@@ -28,7 +28,7 @@ struct fixui_state *fixui_newstate(fRECT *src_frect, fRECT *dst_frect, int lr_me
     cur->tb_method = tb_method;
     cur->len_factor = len_factor;
     cur->no_cursor_virt = 0;
-    cur->no_align = 0;
+    cur->gb_align = 0;
     cur->prev = NULL;
     return cur;
 }
@@ -69,7 +69,10 @@ void fixui_adjust_gbUIQuad(struct gbUIQuad *out_uiquad, const struct gbUIQuad *u
     
     double left = frect.left;
     double top = frect.top;
-    if (!fs->no_align) {
+    if (fs->gb_align) {
+        left -= dx2gbdx(0.5);
+        top -= dy2gbdy(0.5);
+    } else {
         if (fcmp(fs->len_factor, 1.0) == 0) {
             left = floor(left + eps);
             top = floor(top + eps);

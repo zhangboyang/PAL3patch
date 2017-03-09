@@ -77,7 +77,7 @@ static MAKE_ASMPATCH(UISceneMap_Render_hookpart1)
     // step1: transform rect and push identity
     fixui_adjust_RECT(rc, rc);
     fixui_pushidentity();
-    fs->no_align = 1;
+    fs->gb_align = 1;
 }
 static MAKE_THISCALL(void, UISceneMap_Render_hookpart2, struct UIWnd *this)
 {
@@ -463,7 +463,7 @@ static void fix_UIGameOver()
 static MAKE_THISCALL(void, GrayScale_End_wrapper, struct GrayScale *this)
 {
     fixui_pushidentity();
-    fs->no_align = 1;
+    fs->gb_align = 1;
     GrayScale_End(this);
     fixui_popstate();
 }

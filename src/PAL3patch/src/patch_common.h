@@ -86,7 +86,7 @@ MAKE_PATCHSET(graphicspatch);
             double len_factor;
             struct fixui_state *prev;
             int no_cursor_virt; // if set to non-zero, there is no cursor virtualizion
-            int no_align; // if set to non-zero, disable uirect alignment
+            int gb_align; // if set to non-zero, use gb-coord for uirect alignment
         };
         extern struct fixui_state *fs;
 
