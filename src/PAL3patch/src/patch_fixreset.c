@@ -106,14 +106,13 @@ static void RenderTarget_OnDeviceLost(struct RenderTarget *this)
     gbTexture_D3D_ReleaseD3D(&this->m_Texture);
     gbTexture_D3D_ReleaseD3D(&this->m_ScreenPlane);
 }
-static BYTE RenderTarget_OnResetDevice(struct RenderTarget *this)
+static void RenderTarget_OnResetDevice(struct RenderTarget *this)
 {
     int m_iMode_save = this->m_iMode;
     int m_nState_save = this->m_nState;
     RenderTarget_Create(this);
     this->m_iMode = m_iMode_save;
     this->m_nState = m_nState_save;
-    return 1;
 }
 
 static MAKE_ASMPATCH(fixreset_RenderTarget_End_patch)
@@ -160,6 +159,25 @@ static MAKE_ASMPATCH(CTrail_RestoreOriginSurface)
 
 
 
+
+
+static MAKE_ASMPATCH(fixreset_UnderWater_1)
+{
+    PUSH_DWORD(D3DPOOL_MANAGED);
+    PUSH_DWORD(D3DFMT_INDEX16);
+    PUSH_DWORD(D3DUSAGE_WRITEONLY);
+}
+static void UnderWater_OnResetDevice()
+{
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT00, 0x3C23D70A); // 0.01
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT01, 0x00000000);
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT10, 0x00000000);
+    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT11, 0x3C23D70A);
+}
+
+
+
+
 #define pRenderTarget ((struct RenderTarget *) 0x00DE7AA0)
 #define pCTrail ((struct CTrail *) 0x00DE93B0)
 static void OnDeviceLost_hook()
@@ -180,6 +198,7 @@ static void OnResetDevice_hook()
 {
     RenderTarget_OnResetDevice(pRenderTarget);
     CTrail_OnResetDevice(pCTrail);
+    UnderWater_OnResetDevice();
     call_onresetdevice_hooks();
 }
 
@@ -211,13 +230,6 @@ static MAKE_ASMPATCH(fixreset_gbGfxManager_D3D_BeginScene_patch)
     PUSH_DWORD(R_ESI);
     PUSH_DWORD(R_EDI);
     R_ESI = R_ECX;
-}
-
-static MAKE_ASMPATCH(fixreset_UnderWater_1)
-{
-    PUSH_DWORD(D3DPOOL_MANAGED);
-    PUSH_DWORD(D3DFMT_INDEX16);
-    PUSH_DWORD(D3DUSAGE_WRITEONLY);
 }
 
 
