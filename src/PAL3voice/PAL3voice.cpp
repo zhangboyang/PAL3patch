@@ -33,7 +33,7 @@
 
 #define stricmp _stricmp
 
-#define PLUGIN_VERSION "v1.0"
+#define PLUGIN_VERSION "v1.1"
 #define PLUGIN_BUILDDATE __DATE__ ", " __TIME__
 
 #define VOICECONFIGFILE "VoiceConfig.txt"

@@ -50,6 +50,8 @@ static void self_check()
     assert(sizeof(struct tagPlayerSet) == 0x34);
     assert(sizeof(struct CCBSystem) == 0x162D8);
     assert(sizeof(struct UICursor) == 0x20);
+    assert(sizeof(struct UnderWater) == 0x18);
+    assert(sizeof(struct RenderTarget) == 0xC8);
 }
 
 static void fix_unpacker_bug()
@@ -143,10 +145,12 @@ static void init_stage2()
             INIT_PATCHSET(uireplacetexf);
             INIT_PATCHSET(clampuilib);
             INIT_PATCHSET(fixuibuttonex);
+            INIT_PATCHSET(fixunderwater);
         }
         INIT_PATCHSET(fixeffect);
         INIT_PATCHSET(forcesettexture);
         INIT_PATCHSET(fixtrail);
+        INIT_PATCHSET(screenshot);
     }
     INIT_PATCHSET(voice);
     

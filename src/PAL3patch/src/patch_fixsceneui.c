@@ -347,7 +347,7 @@ static void fix_YeTan_timer()
 static void pre_UIEncampment(struct UIWnd *this)
 {
     fRECT dst_frect_area, dst_frect;
-    get_ratio_frect(&dst_frect_area, &sceneui_dstrect, 4.0 / 3.0);
+    get_ratio_frect(&dst_frect_area, &sceneui_dstrect, 4.0 / 3.0, TR_CENTER, TR_CENTER);
     transform_frect(&dst_frect_area, &dst_frect_area, &dst_frect_area, &sceneui_dstrect, TR_LOW, TR_LOW, 1.0);
     transform_frect(&dst_frect, &game_frect_original, &dst_frect_area, &dst_frect_area, TR_CENTER, TR_CENTER, ui_scalefactor);
     fixui_pushstate(&game_frect_original, &dst_frect, TR_SCALE_LOW, TR_SCALE_LOW, ui_scalefactor);
@@ -389,7 +389,7 @@ static MAKE_THISCALL(void, UISkee_Create_wrapper, struct UISkee *this)
 static void pre_UISkee(struct UIWnd *this)
 {
     fRECT dst_frect;
-    get_ratio_frect(&dst_frect, &game_frect, 4.0 / 3.0);
+    get_ratio_frect(&dst_frect, &game_frect, 4.0 / 3.0, TR_CENTER, TR_CENTER);
     fixui_pushstate(&game_frect_original, &dst_frect, TR_SCALE_MID, TR_SCALE_MID, sceneicon_scalefactor);
 }
 static void post_UISkee(struct UIWnd *this)

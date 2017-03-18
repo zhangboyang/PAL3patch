@@ -4,6 +4,7 @@
 int game_width, game_height;
 fRECT game_frect, game_frect_43, game_frect_original;
 fRECT game_frect_custom[MAX_CUSTOM_GAME_FRECT];
+fRECT game_frect_sqrtex; // normalized ratio rect for square texture
 double game_scalefactor;
 
 
@@ -263,9 +264,13 @@ static void patch_resolution_config(const char *cfgstr)
     /* calc basic game rect */
     set_frect_ltwh(&game_frect_original, 0, 0, GAME_WIDTH_ORG, GAME_HEIGHT_ORG);
     set_frect_ltwh(&game_frect, 0, 0, game_width, game_height);
-    get_ratio_frect(&game_frect_43, &game_frect, 4.0 / 3.0);
+    get_ratio_frect(&game_frect_43, &game_frect, 4.0 / 3.0, TR_CENTER, TR_CENTER);
     game_scalefactor = get_frect_min_scalefactor(&game_frect_43, &game_frect_original);
-    
+
+    /* calc ratio rect for square texture */
+    set_frect_ltrb(&game_frect_sqrtex, 0.0, 0.0, 1.0, 1.0);
+    get_ratio_frect(&game_frect_sqrtex, &game_frect_sqrtex, get_frect_aspect_ratio(&game_frect), TR_LOW, TR_LOW);
+        
     /* calc custom game rect */
     int i;
     for (i = 0; i < MAX_CUSTOM_GAME_FRECT; i++) {
@@ -277,7 +282,7 @@ static void patch_resolution_config(const char *cfgstr)
             fail("invalid config line '%s' for custom rect %d.", cfgline, i);
         }
         transform_frect(&game_frect_custom[i], &game_frect, &game_frect, &game_frect, TR_SCALE_MID, TR_SCALE_MID, sizefactor);
-        get_ratio_frect(&game_frect_custom[i], &game_frect_custom[i], rwidth / rheight);
+        get_ratio_frect(&game_frect_custom[i], &game_frect_custom[i], rwidth / rheight, TR_CENTER, TR_CENTER);
     }
 
     INIT_WRAPPER_CALL(Readn, {
@@ -465,8 +470,19 @@ static int confirm_quit()
 
 static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+    // debug purpose only
+    /*if (Msg == WM_KEYUP && wParam == VK_F11) { // press F11 to toggle UnderWater
+        UnderWater_Inst()->m_bEnable ^= 1;
+    }*/
+
+    // normal procdure
     if (Msg == WM_CLOSE) {
         if (!confirm_quit()) return 0;
+    }
+    if (Msg == WM_KEYUP && wParam == VK_F8) {
+        if (try_screenshot()) {
+            return 0;
+        }
     }
     if (Msg == WM_KEYUP && wParam == VK_F12) {
         clipcursor_enabled = !clipcursor_enabled;
@@ -699,6 +715,7 @@ static void init_resolution_and_window_patch()
     init_window_patch(window_cfg);
     patch_resolution_config(resolution_cfg);
 }
+
 
 MAKE_PATCHSET(graphicspatch)
 {

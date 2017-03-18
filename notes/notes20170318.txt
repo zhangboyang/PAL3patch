@@ -1,0 +1,15 @@
+【截屏功能】
+现在为仙剑3添加了截屏功能！只要在游戏中按F8就可以截屏了，截屏图片存放在snap目录下。
+原理就是在EndScene前，获取BackBuffer然后用D3DXSaveSurfaceToFileA保存即可。
+
+【修复“水波效果”】
+修改了RenderTarget行为：当RenderTarget渲染到正方形纹理时，在正方形左上角找一个符合屏幕比例的矩形作为ViewPort，其余部分留黑
+通过在IDirect3DVertexBuffer9::Unlock处进行hook，对纹理坐标进行变换，需要判断很多条件（见下）
+需要针对很多条件进行组合测试：
+（1）RenderTarget 只能使用 m_Texture 而不能使用 m_ScreenPlane （即不能使用屏幕平面）
+（2）UnderWater 只能使用 m_iMode == 1 （即不能使用 bumpmap）
+（3）游戏宽高比，>1还是<1也会有影响
+几个调试小程序片段
+patch_graphicspatch.c中，按F11可以切换UnderWater是否开启
+patch_fixunderwater.c最末尾，可以强制RenderTarget使用m_Texture，或是强制UnderWater使用m_iMode==1
+

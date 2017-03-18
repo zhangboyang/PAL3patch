@@ -45,6 +45,7 @@ MAKE_PATCHSET(graphicspatch);
     extern fRECT game_frect, game_frect_43, game_frect_original;
     #define MAX_CUSTOM_GAME_FRECT 4 // NOTE: pay attention to enum uiwnd_rect_type
     extern fRECT game_frect_custom[MAX_CUSTOM_GAME_FRECT];
+    extern fRECT game_frect_sqrtex;
     extern double game_scalefactor;
     enum scalefactor_index_name {
         // all scalefactor should be set when stage2 is complete
@@ -201,9 +202,12 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(uireplacetexf);
         MAKE_PATCHSET(clampuilib);
         MAKE_PATCHSET(fixuibuttonex);
+        MAKE_PATCHSET(fixunderwater);
 
     MAKE_PATCHSET(fixeffect);
     MAKE_PATCHSET(forcesettexture);
     MAKE_PATCHSET(fixtrail);
+    MAKE_PATCHSET(screenshot);
+        extern int try_screenshot(void);
 
 #endif

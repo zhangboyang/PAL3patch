@@ -21,7 +21,8 @@ void d3dx9_dynlink()
     IMPORT_D3DX9_FUNCPTR(D3DXCreateSprite);
     IMPORT_D3DX9_FUNCPTR(D3DXGetImageInfoFromFileInMemory);
     IMPORT_D3DX9_FUNCPTR(D3DXLoadSurfaceFromFileInMemory);
-    IMPORT_D3DX9_FUNCPTR(D3DXFillTexture);    
+    IMPORT_D3DX9_FUNCPTR(D3DXFillTexture);
+    IMPORT_D3DX9_FUNCPTR(D3DXSaveSurfaceToFileA);
 }
 
 #endif

@@ -1607,7 +1607,14 @@ struct UICursor {
 
 struct GrayScale;
 
-
+struct UnderWater {
+    char m_bEnable;
+    IDirect3DIndexBuffer9 *m_pIB;
+    IDirect3DVertexBuffer9 *m_pVB;
+    IDirect3DTexture9 *m_pBumpmapTex;
+    int m_iMode;
+    float m_fTime;
+};
 
 
 // GBENGINE functions
@@ -1649,6 +1656,7 @@ struct GrayScale;
 #define gbAudioManager_Set2DMasterVolume(this, a2) ((this)->S_2DMasterVol = (a2))
 #define gbAudioManager_Get3DMasterVolume(this) ((this)->S_3DMasterVol)
 #define gbAudioManager_Set3DMasterVolume(this, a2) ((this)->S_3DMasterVol = (a2))
+#define gbVertPoolMgr_GetDynVertBuf(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021680, struct gbDynVertBuf *, struct gbVertPoolMgr *, unsigned int), this, a2)
 
 // PAL3 functions
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
@@ -1694,7 +1702,6 @@ struct GrayScale;
 #define UIRenderObj_Dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00540FA0, void, struct UIRenderObj *), this)
 #define HeadMsg_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402D20, void, struct HeadMsg *), this)
 #define _TextureLib_Data_GetLibInfo(this, filename) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053F960, bool, struct _TextureLib_Data *, const char *), this, filename)
-#define UIRenderQuad_color ((void (*)(int, int, int, int, float, float, struct gbColorQuad *, struct gbTextureArray *)) TOPTR(0x00540D20))
 #define GRPinput_AcquireMouse(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402310, void, struct GRPinput *this), this)
 #define GRPinput_AcquireKeyboard(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402380, void, struct GRPinput *this), this)
 #define CTrail_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004C6460, bool, struct CTrail *), this)
@@ -1712,7 +1719,9 @@ struct GrayScale;
 #define xsnd ((PAL3_s_flag & 1) == 0)
 #define xmusic ((PAL3_s_flag & 4) == 0)
 #define GrayScale_End(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004B6E20, void, struct GrayScale *), this)
-
+#define UnderWater_Inst ((struct UnderWater *(*)(void)) TOPTR(0x004BFD20))
+#define ui_tex_color_gbf (*(struct gbRenderEffect **) TOPTR(0x01895058))
+#define RenderTarget_Inst ((struct RenderTarget *(*)(void)) TOPTR(0x004BDB10))
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) TOPTR(0x00BFDA60))

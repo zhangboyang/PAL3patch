@@ -34,24 +34,23 @@ static MAKE_THISCALL(void, CTrail_Begin_wrapper, struct CTrail *this, struct gbC
 {
     CTrail_Begin(this, pCam);
     if (this->m_bEnable && this->m_bSupport) {
-        // update camera dimention
-        if (this->m_pCam) {
-            gbCamera_SetDimention(this->m_pCam, tex_width, tex_height);
-        }
-        // update screenquad
+        // update camera dimention and screenquad
         if (tex_flag) {
+            if (this->m_pCam) {
+                gbCamera_SetDimention(this->m_pCam, tex_width, tex_height);
+            }
             this->m_ScreenQuad.sv = 1.0f;
             this->m_ScreenQuad.eu = 1.0f;
             this->m_ScreenQuad.ex = tex_width;
             this->m_ScreenQuad.sy = tex_height;
         } else {
-            fRECT view_frect;
-            set_frect_ltrb(&view_frect, 0.0, 0.0, 1.0, 1.0);
-            get_ratio_frect(&view_frect, &view_frect, get_frect_aspect_ratio(&game_frect));
-            this->m_ScreenQuad.su = view_frect.left;
-            this->m_ScreenQuad.sv = view_frect.bottom;
-            this->m_ScreenQuad.eu = view_frect.right;
-            this->m_ScreenQuad.ev = view_frect.top;
+            if (this->m_pCam) {
+                gbCamera_SetDimention(this->m_pCam, floor(256.0 * get_frect_width(&game_frect_sqrtex) + eps), floor(256.0 * get_frect_height(&game_frect_sqrtex) + eps));
+            }
+            this->m_ScreenQuad.su = game_frect_sqrtex.left;
+            this->m_ScreenQuad.sv = game_frect_sqrtex.bottom;
+            this->m_ScreenQuad.eu = game_frect_sqrtex.right;
+            this->m_ScreenQuad.ev = game_frect_sqrtex.top;
             this->m_ScreenQuad.ex = get_frect_width(&game_frect);
             this->m_ScreenQuad.sy = get_frect_height(&game_frect);
         }

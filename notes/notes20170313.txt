@@ -1,0 +1,6 @@
+【RenderTarget::m_iMode的含义】
+0 -> 只使用texture（大小为256x256）
+1 -> 只使用screenplane（大小为游戏区域大小）
+2 -> 既使用texture也使用screenplane
+后两种模式要求设备有能力创建screenplane
+

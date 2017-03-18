@@ -93,28 +93,25 @@ void frect2gbfrect(fRECT *out_frect, const fRECT *frect)
 }
 
 // get maximum rect with ratio (width / height) inside an existing rect
-// the out_frect in centered in frect
 // out_frect == frect is allowed
-void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double ratio)
+void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double ratio, int lr_method, int tb_method)
 {
     double width = get_frect_width(frect);
     double height = get_frect_height(frect);
     double new_width, new_height;
-    double new_width_shift, new_height_shift;
     
     if (width >= height * ratio) {
         new_width = height * ratio;
         new_height = height;
-        new_width_shift = (width - new_width) / 2;
-        new_height_shift = 0;
     } else {
         new_width = width;
         new_height = width / ratio;
-        new_width_shift = 0;
-        new_height_shift = (height - new_height) / 2;
     }
     
-    set_frect_ltwh(out_frect, frect->left + new_width_shift, frect->top + new_height_shift, new_width, new_height);
+    fRECT tmp_frect;
+    set_frect_ltwh(&tmp_frect, 0, 0, new_width, new_height);
+    transform_frect(&tmp_frect, &tmp_frect, frect, frect, lr_method, tb_method, 1.0);
+    *out_frect = tmp_frect;
 }
 
 
@@ -207,4 +204,18 @@ void transform_frect(fRECT *out_frect, const fRECT *frect, const fRECT *src_frec
     set_fseg(&tb, frect->top - src_frect->top, get_frect_height(frect));
     transform_fseg(&tb, &tb, get_frect_height(src_frect), get_frect_height(dst_frect), tb_method, len_factor);
     set_frect_ltwh(out_frect, lr.start + dst_frect->left, tb.start + dst_frect->top, lr.length, tb.length);
+}
+
+
+/*
+    transform an fPOINT
+    
+    a simple wrapper of transform_frect
+*/
+void transform_fpoint(fPOINT *out_fpoint, const fPOINT *fpoint, const fRECT *src_frect, const fRECT *dst_frect, int lr_method, int tb_method, double len_factor)
+{
+    fRECT frect;
+    set_frect_ltwh(&frect, fpoint->x, fpoint->y, 0.0, 0.0);
+    transform_frect(&frect, &frect, src_frect, dst_frect, lr_method, tb_method, len_factor);
+    set_fpoint(out_fpoint, frect.left, frect.top);
 }

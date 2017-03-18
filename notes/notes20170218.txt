@@ -84,6 +84,8 @@ PAL3::m_gamestate => enum GAME_STATE {
     GAME_SUBGAME_NIGHTADVENTURE, // 夜探刺史府，永安当找衣服
     GAME_OVER, // 死亡
 };
+
+
 g_gamefrm.m_curfrmid => enum PAL3_FRAME {
     FRM_SCENE, // 场景
     FRM_FIGHT, // 未用

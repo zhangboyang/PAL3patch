@@ -49,7 +49,7 @@ extern void translate_frect_rel(fRECT *out_frect, const fRECT *frect, double lr,
 extern void scale_frect_fixlt(fRECT *out_frect, const fRECT *frect, double wf, double hf);
 extern void gbfrect2frect(fRECT *out_frect, const fRECT *frect);
 extern void frect2gbfrect(fRECT *out_frect, const fRECT *frect);
-extern void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double ratio);
+extern void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double ratio, int lr_method, int tb_method);
 extern double get_frect_min_scalefactor(const fRECT *dst_frect, const fRECT *src_frect);
 
 // segment functions
@@ -58,5 +58,6 @@ extern void set_fseg(fSEG *fseg, double start, double length);
 // transform functions
 extern void transform_fseg(fSEG *out_fseg, const fSEG *fseg, double total, double dst_total, int method, double len_factor);
 extern void transform_frect(fRECT *out_frect, const fRECT *frect, const fRECT *src_frect, const fRECT *dst_frect, int lr_method, int tb_method, double len_factor);
+extern void transform_fpoint(fPOINT *out_fpoint, const fPOINT *fpoint, const fRECT *src_frect, const fRECT *dst_frect, int lr_method, int tb_method, double len_factor);
 
 #endif

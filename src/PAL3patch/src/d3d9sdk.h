@@ -357,6 +357,13 @@ HRESULT DECL_D3DX9FUNC(D3DXFillTexture)(
     LPD3DXFILL2D pFunction,
     LPVOID pData
 );
+HRESULT DECL_D3DX9FUNC(D3DXSaveSurfaceToFileA)(
+    LPCTSTR pDestFile,
+    D3DXIMAGE_FILEFORMAT DestFormat,
+    LPDIRECT3DSURFACE9 pSrcSurface,
+    const PALETTEENTRY *pSrcPalette,
+    const RECT *pSrcRect
+);
 
 #endif
 

@@ -101,10 +101,7 @@ void fixui_adjust_RECT(RECT *out_rect, const RECT *rect)
 }
 void fixui_adjust_fPOINT(fPOINT *out_fpoint, const fPOINT *fpoint)
 {
-    fRECT frect;
-    set_frect_ltwh(&frect, fpoint->x, fpoint->y, 0.0, 0.0);
-    fixui_adjust_fRECT(&frect, &frect);
-    set_fpoint(out_fpoint, frect.left, frect.top);
+    transform_fpoint(out_fpoint, fpoint, &fs->src_frect, &fs->dst_frect, fs->lr_method, fs->tb_method, fs->len_factor);
 }
 void fixui_adjust_POINT(POINT *out_point, const POINT *point)
 {
@@ -627,19 +624,33 @@ static void init_align_uirect()
 
 
 
-static void __cdecl UIRenderQuad_color_wrapper(int left, int top, int right, int bottom, float sv, float ev, struct gbColorQuad *color, struct gbTextureArray *atex)
+static void __cdecl UIRenderQuad_color(int left, int top, int right, int bottom, float sv, float ev, struct gbColorQuad *color, struct gbTextureArray *atex)
 {
     fixui_pushidentity();
-    left = floor(game_frect.left + eps);
-    top = floor(game_frect.top + eps);
-    right = floor(game_frect.right + eps);
-    bottom = floor(game_frect.bottom + eps);
-    UIRenderQuad_color(left, top, right, bottom, sv, ev, color, atex);
+    struct gbUIQuad uiquad;
+    uiquad.z = 0;
+    uiquad.color = *color;
+    uiquad.sx = floor(game_frect.left + eps);
+    uiquad.ey = floor(game_frect.top + eps);
+    uiquad.ex = floor(game_frect.right + eps);
+    uiquad.sy = floor(game_frect.bottom + eps);
+    if (RenderTarget_Inst()->m_ScreenPlane.pTex) {
+        uiquad.su = 0.0f;
+        uiquad.sv = 1.0f;
+        uiquad.eu = 1.0f;
+        uiquad.ev = 0.0f;
+    } else {
+        uiquad.su = game_frect_sqrtex.left;
+        uiquad.sv = game_frect_sqrtex.bottom;
+        uiquad.eu = game_frect_sqrtex.right;
+        uiquad.ev = game_frect_sqrtex.top;
+    }
+    THISCALL_WRAPPER(gbDynVertBuf_RenderUIQuad_wrapper, gbVertPoolMgr_GetDynVertBuf(GB_GfxMgr->pVertPoolMgr, 0x114u), &uiquad, 1, ui_tex_color_gbf, atex);
     fixui_popstate();
 }
 static void hook_UIRenderQuad_color()
 {
-    INIT_WRAPPER_CALL(UIRenderQuad_color_wrapper, {
+    INIT_WRAPPER_CALL(UIRenderQuad_color, {
         0x0045995D,
         0x0047C2BD,
         0x004A487D,
@@ -648,6 +659,18 @@ static void hook_UIRenderQuad_color()
         0x00529CDB,
     });
 }
+
+
+
+static MAKE_THISCALL(void, gbCamera_SetDimention_wrapper_for_RenderTarget_Begin, struct gbCamera *this, int a2, int a3)
+{
+    gbCamera_SetDimention(this, floor(512.0 * get_frect_width(&game_frect_sqrtex) + eps), floor(512.0 * get_frect_height(&game_frect_sqrtex) + eps));
+}
+static void fix_RenderTarget_ratio()
+{
+    make_branch(0x004BDCCF, 0xE8, gbCamera_SetDimention_wrapper_for_RenderTarget_Begin, 6);
+}
+
 
 
 MAKE_PATCHSET(fixui)
@@ -680,4 +703,7 @@ MAKE_PATCHSET(fixui)
     
     // hook UIRenderQuad_color for drawing system ui background
     hook_UIRenderQuad_color();
+    
+    // fix RenderTarget ratio problem when using 512x512 texture
+    fix_RenderTarget_ratio();
 }

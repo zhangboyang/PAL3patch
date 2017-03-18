@@ -166,7 +166,7 @@ static void WINAPI GetRatioRect(RECT *out_rect, const RECT *rect, double ratio)
 {
     fRECT frect;
     set_frect_rect(&frect, rect);
-    get_ratio_frect(&frect, &frect, ratio);
+    get_ratio_frect(&frect, &frect, ratio, TR_CENTER, TR_CENTER);
     set_rect_frect(out_rect, &frect);
 }
 

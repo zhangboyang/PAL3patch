@@ -167,12 +167,14 @@ static MAKE_ASMPATCH(fixreset_UnderWater_1)
     PUSH_DWORD(D3DFMT_INDEX16);
     PUSH_DWORD(D3DUSAGE_WRITEONLY);
 }
-static void UnderWater_OnResetDevice()
+static void UnderWater_OnResetDevice(struct UnderWater *this)
 {
-    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT00, 0x3C23D70A); // 0.01
-    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT01, 0x00000000);
-    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT10, 0x00000000);
-    IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT11, 0x3C23D70A);
+    if (this->m_iMode == 0) {
+        IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT00, 0x3C23D70A); // 0.01
+        IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT01, 0x00000000);
+        IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT10, 0x00000000);
+        IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_BUMPENVMAT11, 0x3C23D70A);
+    }
 }
 
 
@@ -198,7 +200,7 @@ static void OnResetDevice_hook()
 {
     RenderTarget_OnResetDevice(pRenderTarget);
     CTrail_OnResetDevice(pCTrail);
-    UnderWater_OnResetDevice();
+    UnderWater_OnResetDevice(UnderWater_Inst());
     call_onresetdevice_hooks();
 }
 
