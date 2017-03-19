@@ -106,11 +106,14 @@ static void init_stage2()
     init_effect_hooks();
     init_texture_hooks();
     
+    // init_locale() must called after INIT_PATCHSET(setlocale)
+    INIT_PATCHSET(setlocale);
+    init_locale();
+    
     // init patchsets
     INIT_PATCHSET(cdpatch);
     INIT_PATCHSET(regredirect);
     INIT_PATCHSET(disablekbdhook);
-    INIT_PATCHSET(setlocale);
     INIT_PATCHSET(timerresolution);
     INIT_PATCHSET(fixmemfree);
     INIT_PATCHSET(nocpk);
@@ -153,9 +156,6 @@ static void init_stage2()
         INIT_PATCHSET(screenshot);
     }
     INIT_PATCHSET(voice);
-    
-    // init_locale() must called after INIT_PATCHSET(setlocale)
-    init_locale();
     
     // show_about() must called after init_locale()
     show_about();

@@ -216,6 +216,12 @@ BEGIN
     IDS_APPTITLE            "补丁配置工具"
 END
 
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DEFAULTFONT         "默认字体"
+    IDS_DEFAULTFONT_DESC    "使用游戏默认字体。"
+END
+
 #endif    // Chinese (P.R.C.) resources
 /////////////////////////////////////////////////////////////////////////////
 

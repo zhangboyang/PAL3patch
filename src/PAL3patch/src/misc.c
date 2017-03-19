@@ -51,17 +51,33 @@ int fcmp(double a, double b)
     return d > 0 ? 1 : -1;
 }
 
-HMODULE GetModuleHandle_check(LPCTSTR lpModuleName)
+HMODULE GetModuleHandle_check(LPCSTR lpModuleName)
 {
     HMODULE ret = LoadLibrary(lpModuleName);
     if (!ret) fail("can't find library '%s'.", lpModuleName);
     return ret;
 }
 
-HMODULE LoadLibrary_check(LPCTSTR lpFileName)
+HMODULE LoadLibrary_check(LPCSTR lpFileName)
 {
     HMODULE ret = LoadLibrary(lpFileName);
     if (!ret) fail("can't load library '%s'.", lpFileName);
+    return ret;
+}
+
+HMODULE LoadLibraryW_check(LPCWSTR lpFileName)
+{
+    if (is_win9x()) {
+        // fallback to ANSI version
+        char *path = wcs2cs_alloc(lpFileName, CP_ACP);
+        HMODULE ret = LoadLibrary_check(path);
+        free(path);
+        return ret;
+    }
+    HMODULE (WINAPI *MyLoadLibraryW)(LPCWSTR lpFileName);
+    MyLoadLibraryW = get_func_address("KERNEL32.DLL", "LoadLibraryW");
+    HMODULE ret = MyLoadLibraryW(lpFileName);
+    if (!ret) fail("can't load library '%s'.", wcs2cs_alloc(lpFileName, CP_UTF8)); // string leak
     return ret;
 }
 
@@ -77,33 +93,13 @@ FARPROC GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName)
     return ret;
 }
 
-// convert a c-string to c-wide-string, alloc memory, don't forget to free()
-wchar_t *cs2wcs(const char *cstr, UINT src_cp)
-{
-    wchar_t *ret;
-    size_t len;
-    
-    // get string length first
-    len = MultiByteToWideChar(src_cp, 0, cstr, -1, NULL, 0);
-    if (len == 0) goto fail;
-    
-    // alloc buffer
-    ret = malloc(sizeof(wchar_t) * len);
-    if (!ret) goto fail;
-    
-    MultiByteToWideChar(src_cp, 0, cstr, -1, ret, len);
-    return ret;
-    
-fail:
-    // no need to free(ret)
-    return wcsdup(L"cs2wcs failed.");
-}
-
 void NORETURN die()
 {
     TerminateProcess(GetCurrentProcess(), 1);
     while (1);
 }
+
+static wchar_t *msgbox_buf = NULL;
 
 void NORETURN __fail(const char *file, int line, const char *func, const char *fmt, ...)
 {
@@ -118,12 +114,13 @@ void NORETURN __fail(const char *file, int line, const char *func, const char *f
     OutputDebugString(msgbuf); OutputDebugString("\n");
     FILE *fp = fopen(ERROR_FILE, "w");
     if (fp) {
+        fputs("\xEF\xBB\xBF", fp);
+        
         fputs("build information:\n", fp);
         fputs(build_info, fp);
         
-        get_all_config(buf, sizeof(buf));
         fputs("patch configuration:\n", fp);
-        fputs(buf, fp);
+        dump_all_config(fp);
         
         SYSTEMTIME SystemTime;
         GetLocalTime(&SystemTime);
@@ -137,7 +134,7 @@ void NORETURN __fail(const char *file, int line, const char *func, const char *f
         fclose(fp);
     }
     try_goto_desktop();
-    MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+    MessageBoxW(NULL, cs2wcs_managed(msgbuf + len, CP_UTF8, &msgbox_buf), L"PAL3patch", MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
     die();
     va_end(ap);
 }
@@ -160,12 +157,13 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
         FILE *fp = fopen(WARNING_FILE, plog_lines > 1 ? "a" : "w");
         if (fp) {
             if (plog_lines == 1) {
+                fputs("\xEF\xBB\xBF", fp);
+                
                 fputs("build information:\n", fp);
                 fputs(build_info, fp);
                 
-                get_all_config(buf, sizeof(buf));
                 fputs("patch configuration:\n", fp);
-                fputs(buf, fp);
+                dump_all_config(fp);
                 fputs("========== start ==========\n\n", fp);
             }
             
@@ -191,7 +189,7 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
                     msgbuf[sizeof(msgbuf) - 1] = '\0';
                 }
                 try_goto_desktop();
-                MessageBoxA(NULL, msgbuf + len, "PAL3patch", MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
+                MessageBoxW(NULL, cs2wcs_managed(msgbuf + len, CP_UTF8, &msgbox_buf), L"PAL3patch", MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
             }
         }
     }

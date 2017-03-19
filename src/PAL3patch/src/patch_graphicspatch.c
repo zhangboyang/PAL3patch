@@ -602,7 +602,7 @@ static void init_window_patch(int flag)
     make_branch(0x00406564, 0xE8, CreateWindowExA_wrapper, 6);
 
     // modify window title
-    strncpy(winname, get_string_from_configfile("windowtitle"), sizeof(winname));
+    strncpy(winname, wcs2cs(cs2wcs(get_string_from_configfile("windowtitle"), CP_UTF8), CP_ACP), sizeof(winname));
     winname[sizeof(winname) - 1] = 0;
     unsigned titleaddr = TOUINT(winname);
     SIMPLE_PATCH(0x00541925, "\xC4\x39\x58\x00", &titleaddr, 4);

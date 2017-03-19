@@ -33,6 +33,8 @@
 #define IDS_AUTOMAXIMUM_DESC            29
 #define IDS_MSAA_NONE_DESC              30
 #define IDS_APPTITLE                    31
+#define IDS_DEFAULTFONT                 32
+#define IDS_DEFAULTFONT_DESC            33
 #define IDD_PATCHCONFIG_DIALOG          102
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129

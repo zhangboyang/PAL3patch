@@ -650,7 +650,7 @@ MAKE_PATCHSET(voice)
 
 
     // dynlink voice plugin    
-    HMODULE hPlugin = LoadLibrary_check(get_string_from_configfile("voiceplugin"));
+    HMODULE hPlugin = LoadLibraryW_check(cs2wcs(get_string_from_configfile("voiceplugin"), CP_UTF8));
 
     VoiceDLLAttached = TOPTR(GetProcAddress_check(hPlugin, "_VoiceDLLAttached@0"));
     int abiver = VoiceDLLAttached();

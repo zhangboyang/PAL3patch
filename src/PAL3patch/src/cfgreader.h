@@ -7,6 +7,6 @@
 extern void read_config_file(void);
 extern const char *get_string_from_configfile(const char *key);
 extern int get_int_from_configfile(const char *key);
-extern void get_all_config(char *buf, unsigned size);
+extern void dump_all_config(FILE *fp);
 
 #endif

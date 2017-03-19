@@ -142,6 +142,7 @@
     <ClCompile Include="src\sha1.c" />
     <ClCompile Include="src\texturehook.c" />
     <ClCompile Include="src\transform.c" />
+    <ClCompile Include="src\wstr.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\about.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="src\sha1.h" />
     <ClInclude Include="src\texturehook.h" />
     <ClInclude Include="src\transform.h" />
+    <ClInclude Include="src\wstr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

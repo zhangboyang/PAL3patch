@@ -20,9 +20,10 @@ extern int str_iendwith(const char *a, const char *b);
 extern int iabs(int x);
 extern double fbound(double x, double low, double high);
 extern int fcmp(double a, double b);
-extern HMODULE GetModuleHandle_check(LPCTSTR lpModuleName);
-extern HMODULE LoadLibrary_check(LPCTSTR lpFileName);
+extern HMODULE GetModuleHandle_check(LPCSTR lpModuleName);
+extern HMODULE LoadLibrary_check(LPCSTR lpFileName);
+extern HMODULE LoadLibraryW_check(LPCWSTR lpFileName);
 extern FARPROC GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName);
-extern wchar_t *cs2wcs(const char *cstr, UINT src_cp);
+
 
 #endif

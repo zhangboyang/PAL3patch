@@ -13,7 +13,7 @@ enum {
 
 static DWORD d3dxfont_charset;
 static DWORD d3dxfont_quality;
-static LPWSTR d3dxfont_facename;
+static LPCWSTR d3dxfont_facename;
 static int d3dxfont_sizelist_orig[D3DXFONT_COUNT] = {12, 16, 20};
 static int d3dxfont_sizelist[D3DXFONT_COUNT];
 static int d3dxfont_boldflag[D3DXFONT_COUNT];
@@ -293,7 +293,7 @@ static MAKE_THISCALL(void, gbPrintFont_UNICODE_PrintString, struct gbPrintFont_U
     // make a node
     struct d3dxfont_strnode *node = malloc(sizeof(struct d3dxfont_strnode));
     node->fontid = d3dxfont_selectbysize(this->fontsize);
-    node->wstr = cs2wcs(str, target_codepage);
+    node->wstr = cs2wcs_alloc(str, target_codepage);
     node->color = this->curColor.Color; // FIXME: should we check gbColorQuad::ColorQuadFmt ?
 
     // calc coord
@@ -354,7 +354,12 @@ static void ui_replacefont_d3dxfont_init()
         default:  d3dxfont_charset = DEFAULT_CHARSET; break;
     }
     d3dxfont_quality = get_int_from_configfile("uireplacefont_quality");
-    d3dxfont_facename = cs2wcs(get_string_from_configfile("uireplacefont_facename"), CP_ACP); // let it leak
+    const char *facename = get_string_from_configfile("uireplacefont_facename");
+    if (stricmp(facename, "default") == 0) {
+        d3dxfont_facename = wstr_defaultfont;
+    } else {
+        d3dxfont_facename = cs2wcs_alloc(facename, CP_UTF8); // let it leak
+    }
     if (sscanf(get_string_from_configfile("uireplacefont_size"), "%d,%d,%d", &d3dxfont_sizelist[D3DXFONT_U12], &d3dxfont_sizelist[D3DXFONT_U16], &d3dxfont_sizelist[D3DXFONT_U20]) != 3) {
         fail("can't parse font size string.");
     }

@@ -199,8 +199,8 @@ LINK32=link.exe
 
 # Name "PatchConfig - Win32 MBCS Release"
 # Name "PatchConfig - Win32 MBCS Debug"
-# Name "PatchConfig - Win32 Debug"
 # Name "PatchConfig - Win32 Release"
+# Name "PatchConfig - Win32 Debug"
 # Name "PatchConfig - Win32 Static MBCS Release"
 # Name "PatchConfig - Win32 Static Release"
 # Begin Group "Source Files"
@@ -266,6 +266,10 @@ SOURCE=.\PleaseWaitDlg.cpp
 
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\wstr.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -334,6 +338,10 @@ SOURCE=.\Resource.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\wstr.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

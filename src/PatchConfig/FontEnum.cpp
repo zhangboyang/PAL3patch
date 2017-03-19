@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Resource.h"
 #include "FontEnum.h"
 
 class helper_arg {
@@ -25,4 +26,5 @@ void EnumFontface(std::vector<std::pair<CString, std::pair<CString, CString> > >
 	EnumFontFamiliesEx(GetDC(NULL), &lf, (FONTENUMPROC) EnumFontfaceHelper, (LPARAM) &arg, 0);
 	std::sort(result.begin(), result.end());
 	result.erase(std::unique(result.begin(), result.end()), result.end());
+	result.insert(result.begin(), std::make_pair(CString(_T("default")), std::make_pair(STRTABLE(IDS_DEFAULTFONT), STRTABLE(IDS_DEFAULTFONT_DESC))));
 }

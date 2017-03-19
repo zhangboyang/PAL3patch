@@ -5,6 +5,8 @@ unsigned system_codepage;
 unsigned target_codepage;
 
 
+
+// CHS
 static const wchar_t wstr_about_title_CHS[] = L"关于";
 static const wchar_t wstr_about_text_CHS[] = 
     L"欢迎使用《仙剑奇侠传三》分辨率补丁 %hs\n" 
@@ -37,6 +39,16 @@ static const wchar_t wstr_cantsavereg_title_CHS[] = L"注册表重定向";
 static const wchar_t wstr_nocfgfile_text_CHS[] = L"无法读取补丁配置文件。请运行“补丁配置工具”来生成默认配置文件。";
 static const wchar_t wstr_nocfgfile_title_CHS[] = L"无法加载配置";
 
+
+
+// CHT
+
+static const wchar_t wstr_defaultfont_CHT[] = L"細明體";
+
+
+
+
+// string pointers
 
 const wchar_t *wstr_about_title;
 const wchar_t *wstr_about_text;
@@ -75,4 +87,8 @@ void init_locale()
     wstr_gameloading = wstr_gameloading_CHS;
     wstr_cantsavereg_text = wstr_cantsavereg_text_CHS;
     wstr_cantsavereg_title = wstr_cantsavereg_title_CHS;
+
+    if (target_codepage == 950) { // CHT
+        wstr_defaultfont = wstr_defaultfont_CHT;
+    }
 }

@@ -37,6 +37,7 @@
 
 #include "D3DEnum.h"
 #include "ConfigDescData.h"
+#include "wstr.h"
 
 #define stricmp _stricmp
 

@@ -125,6 +125,7 @@ typedef unsigned char bool;
 #include "asmpatch.h"
 #include "about.h"
 #include "misc.h"
+#include "wstr.h"
 #include "cfgreader.h"
 #include "locale.h"
 #include "framework.h"
