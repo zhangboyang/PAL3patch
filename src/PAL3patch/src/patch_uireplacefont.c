@@ -348,11 +348,18 @@ static MAKE_THISCALL(void, gbPrintFont_UNICODE_Flush, struct gbPrintFont_UNICODE
 static void ui_replacefont_d3dxfont_init()
 {
     // read configurations
-    switch (target_codepage) {
+    UINT d3dxfont_codepage;
+    switch (get_int_from_configfile("uireplacefont_locale")) {
+        case 1:  d3dxfont_codepage = 936; break;
+        case 2:  d3dxfont_codepage = 950; break;
+        default: d3dxfont_codepage = target_codepage; break;
+    }
+    switch (d3dxfont_codepage) {
         case 936: d3dxfont_charset = GB2312_CHARSET; break;
         case 950: d3dxfont_charset = CHINESEBIG5_CHARSET; break;
         default:  d3dxfont_charset = DEFAULT_CHARSET; break;
     }
+    
     d3dxfont_quality = get_int_from_configfile("uireplacefont_quality");
     const char *facename = get_string_from_configfile("uireplacefont_facename");
     if (stricmp(facename, "default") == 0) {

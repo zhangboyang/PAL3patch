@@ -4,8 +4,6 @@
 unsigned system_codepage;
 unsigned target_codepage;
 
-
-
 // CHS
 static const wchar_t wstr_about_title_CHS[] = L"¹ØÓÚ";
 static const wchar_t wstr_about_text_CHS[] = 
@@ -55,6 +53,7 @@ const wchar_t *wstr_about_text;
 const wchar_t *wstr_confirmquit_text;
 const wchar_t *wstr_confirmquit_title;
 const wchar_t *wstr_defaultfont;
+DWORD defaultfont_charset;
 const wchar_t *wstr_gameloading;
 const wchar_t *wstr_cantsavereg_text;
 const wchar_t *wstr_cantsavereg_title;
@@ -84,11 +83,13 @@ void init_locale()
     wstr_confirmquit_text = wstr_confirmquit_text_CHS;
     wstr_confirmquit_title = wstr_confirmquit_title_CHS;
     wstr_defaultfont = wstr_defaultfont_CHS;
+    defaultfont_charset = GB2312_CHARSET;
     wstr_gameloading = wstr_gameloading_CHS;
     wstr_cantsavereg_text = wstr_cantsavereg_text_CHS;
     wstr_cantsavereg_title = wstr_cantsavereg_title_CHS;
 
     if (target_codepage == 950) { // CHT
         wstr_defaultfont = wstr_defaultfont_CHT;
+        defaultfont_charset = CHINESEBIG5_CHARSET;
     }
 }

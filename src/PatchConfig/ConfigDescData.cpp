@@ -277,18 +277,6 @@ ConfigDescItem ConfigDescList_CHS[] = {
 	},
 	{
 		2, TRUE,
-		_T("uireplacefont_quality"),
-		_T("质量"),
-		_T("指定字体的质量参数。"),
-		NULL,
-		{
-			{ _T("ClearType"), _T("选择此项后，文字会以 ClearType 的质量显示。"), _T("5") },
-			{ _T("仅平滑"), _T("选择此项后，字体会使用抗锯齿的质量显示。"), _T("4") },
-			{ _T("无平滑"), _T("选择此项后，字体会使用无抗锯齿的质量显示。"), _T("3") },
-		}
-	},
-	{
-		2, TRUE,
 		_T("uireplacefont_bold"),
 		_T("加粗"),
 		_T("指定字体是否要加粗。"),
