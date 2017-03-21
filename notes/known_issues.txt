@@ -81,6 +81,7 @@ FIXED: RenderTarget创建的RTT纹理分辨率只有256x256，是否可以改大
 FIXED: 如果配置文件中有效行总大小超过4KB，则fail和warning时可能显示不全
 FIXED: 配置文件应使用UTF8，增强繁体系统的用户体验（需要时，在程序内部由UTF8转为UNICODE）
 若双开，某些系统下，第二个示例检测到双开，在WinMain返回后某处崩溃（未打任何补丁时也会崩溃，也许直接TerminateProcess是个好办法）（待测）
+繁体字默认加粗可能不好看
 
 
 ===== TODO =====

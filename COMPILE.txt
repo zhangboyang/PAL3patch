@@ -27,7 +27,7 @@
     （1）编译出的程序只能在 Windows XP SP3 或更高版本的操作系统上运行
     （2）由于 VC++ 不支持编译 .S 文件，因此需要已编译好的 PAL3patch_asm.lib 文件
    环境配置：
-    （1）安装 VC++ 2013 或更高版本
+    （1）安装 VC++ 2013 或更高版本（VC++ 2013, 2015, 2017 均已测试，可以正常编译）
     （2）解压缩 SDK 安装包 dx90updatesdk.exe 到 C:\DX90SDK 目录下（注意只需解压缩，无需安装）
    编译方法：
     （1）将 extra\PAL3patch\PAL3patch_asm\PAL3patch_asm.lib 复制到 src\PAL3patch 目录下
@@ -49,8 +49,9 @@
          最后点“确定”关闭属性页
     （7）然后按 F5 直接运行即可
    调试可能遇到的问题：
-    （1）运行时提示找不到 d3dx9.dll
-         将 C:\DX90SDK\Developer Runtime\Win2k\d3dx9d.dll 复制到游戏目录下即可
+    （1）运行时提示找不到 d3dx9d.dll
+         这是因为 Debug 版本会链接 d3dx9d.lib 这个 Debug 版的库导致的（Release 版则不会）
+         将 C:\DX90SDK\Developer Runtime\Win2k\d3dx9d.dll 复制到游戏目录下即可解决
     （2）提示找不到 PAL3.exe 的调试信息，问是否继续调试
          仙剑三主程序当然没有提供调试信息，所以应该选择“继续调试”
     （3）运行后提示找不到 PAL3patch.conf
