@@ -114,6 +114,7 @@ static void init_stage2()
     INIT_PATCHSET(cdpatch);
     INIT_PATCHSET(regredirect);
     INIT_PATCHSET(disablekbdhook);
+    INIT_PATCHSET(terminateatexit);
     INIT_PATCHSET(timerresolution);
     INIT_PATCHSET(fixmemfree);
     INIT_PATCHSET(nocpk);

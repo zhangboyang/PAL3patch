@@ -49,6 +49,7 @@ extern void add_pauseresume_hook(void (*funcptr)(void *));
 extern void set_pauseresume(int state);
 
 // atexit hooks
+extern void call_atexit_hooks(void);
 extern void add_atexit_hook(void (*funcptr)(void));
 
 // gameloop hooks

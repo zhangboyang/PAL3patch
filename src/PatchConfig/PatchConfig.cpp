@@ -84,15 +84,13 @@ BOOL CPatchConfigApp::InitInstance()
 {
 	// Standard initialization
 
+	TrySetUACVirtualization(TRUE);
+
 #ifdef _AFXDLL
 	Enable3dControls();			// Call this when using MFC in a shared DLL
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
-
-
-
-	CPatchConfigDlg dlg;
 
 	if (!CheckDX90SDKVersion()) goto err;
 
@@ -107,16 +105,19 @@ BOOL CPatchConfigApp::InitInstance()
 
 	DestoryPleaseWaitDlg();
 
+	// use block to surround dlg
+	{
+		CPatchConfigDlg dlg;
+		// leave m_pMainWnd NULL, or we can't popup MessageBox after DoModal()
+		//m_pMainWnd = &dlg;
+		dlg.DoModal();
 
-	// leave m_pMainWnd NULL, or we can't popup MessageBox after DoModal()
-	//m_pMainWnd = &dlg;
-	dlg.DoModal();
+		CleanupD3DEnumeration();
 
-	CleanupD3DEnumeration();
-
-	// Since the dialog has been closed, return FALSE so that we exit the
-	//  application, rather than start the application's message pump.
-	return FALSE;
+		// Since the dialog has been closed, return FALSE so that we exit the
+		//  application, rather than start the application's message pump.
+		return FALSE;
+	}
 
 err:
 	DestoryPleaseWaitDlg();

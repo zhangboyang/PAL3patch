@@ -29,67 +29,62 @@ static int TryReadConfigFile()
     if (!fp) goto done;
     char buf[MAXLINE];
     char *ptr;
-	if (fgets(buf, sizeof(buf), fp)) {
-		// remove utf-8 bom if needed
-		if (strncmp(buf, "\xEF\xBB\xBF", 3) == 0) {
-			memmove(buf, buf + 3, strlen(buf + 3) + 1);
-		}
-		do {
-			seq++;
+	fscanf(fp, "\xEF\xBB\xBF");
+	while (fgets(buf, sizeof(buf), fp)) {
+		seq++;
 
-			// ltrim the line
-			for (ptr = buf; *ptr && is_spacechar(*ptr); ptr++);
-			memmove(buf, ptr, strlen(ptr) + 1);
-        
-			// skip empty and comment lines
-			if (!buf[0] || buf[0] == ';' || buf[0] == '#' || (buf[0] == '/' && buf[1] == '/')) {
-				ptr = strrchr(buf, '\n');
-				if (ptr) *ptr = '\0';
-				if (buf[0] != ';') {
-					cs2wcs_managed(buf, CP_UTF8, &valbuf_w);
-#if defined(_UNICODE)
-					cfgcomments.push_back(std::make_pair(seq, CString(valbuf_w)));
-#elif defined(_MBCS)
-					wcs2cs_managed(valbuf_w, CP_ACP, &valbuf_a);
-					cfgcomments.push_back(std::make_pair(seq, CString(valbuf_a)));
-#else
-#error
-#endif
-				}
-				continue;
-			}
-        
-			// remove '\n' and end of line
+		// ltrim the line
+		for (ptr = buf; *ptr && is_spacechar(*ptr); ptr++);
+		memmove(buf, ptr, strlen(ptr) + 1);
+    
+		// skip empty and comment lines
+		if (!buf[0] || buf[0] == ';' || buf[0] == '#' || (buf[0] == '/' && buf[1] == '/')) {
 			ptr = strrchr(buf, '\n');
 			if (ptr) *ptr = '\0';
-        
-			// parse 'key' and 'value'
-			ptr = strchr(buf, '=');
-			if (!ptr) goto done;
-			*ptr = '\0';
-			char *keystr = buf, *valstr = ptr + 1;
-        
-			// rtrim 'key'
-			if (ptr > buf) ptr--;
-			while (ptr >= buf && is_spacechar(*ptr)) *ptr-- = '\0';
-			if (!*ptr) goto done;
-        
-			// ltrim 'value'
-			while (*valstr && is_spacechar(*valstr)) valstr++;
-        
-			// save this config line to array
-			cs2wcs_managed(keystr, CP_UTF8, &keybuf_w);
-			cs2wcs_managed(valstr, CP_UTF8, &valbuf_w);
+			if (buf[0] != ';') {
+				cs2wcs_managed(buf, CP_UTF8, &valbuf_w);
 #if defined(_UNICODE)
-			cfgdata.insert(std::make_pair(CString(keybuf_w), std::make_pair(seq, CString(valbuf_w))));
+				cfgcomments.push_back(std::make_pair(seq, CString(valbuf_w)));
 #elif defined(_MBCS)
-			wcs2cs_managed(keybuf_w, CP_ACP, &keybuf_a);
-			wcs2cs_managed(valbuf_w, CP_ACP, &valbuf_a);
-			cfgdata.insert(std::make_pair(CString(keybuf_a), std::make_pair(seq, CString(valbuf_a))));
+				wcs2cs_managed(valbuf_w, CP_ACP, &valbuf_a);
+				cfgcomments.push_back(std::make_pair(seq, CString(valbuf_a)));
 #else
 #error
 #endif
-		} while (fgets(buf, sizeof(buf), fp));
+			}
+			continue;
+		}
+    
+		// remove '\n' and end of line
+		ptr = strrchr(buf, '\n');
+		if (ptr) *ptr = '\0';
+    
+		// parse 'key' and 'value'
+		ptr = strchr(buf, '=');
+		if (!ptr) goto done;
+		*ptr = '\0';
+		char *keystr = buf, *valstr = ptr + 1;
+    
+		// rtrim 'key'
+		if (ptr > buf) ptr--;
+		while (ptr >= buf && is_spacechar(*ptr)) *ptr-- = '\0';
+		if (!*ptr) goto done;
+    
+		// ltrim 'value'
+		while (*valstr && is_spacechar(*valstr)) valstr++;
+    
+		// save this config line to array
+		cs2wcs_managed(keystr, CP_UTF8, &keybuf_w);
+		cs2wcs_managed(valstr, CP_UTF8, &valbuf_w);
+#if defined(_UNICODE)
+		cfgdata.insert(std::make_pair(CString(keybuf_w), std::make_pair(seq, CString(valbuf_w))));
+#elif defined(_MBCS)
+		wcs2cs_managed(keybuf_w, CP_ACP, &keybuf_a);
+		wcs2cs_managed(valbuf_w, CP_ACP, &valbuf_a);
+		cfgdata.insert(std::make_pair(CString(keybuf_a), std::make_pair(seq, CString(valbuf_a))));
+#else
+#error
+#endif
 	}
 
     ret = 1;

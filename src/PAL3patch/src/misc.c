@@ -93,9 +93,9 @@ FARPROC GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName)
     return ret;
 }
 
-void NORETURN die()
+void NORETURN die(int status)
 {
-    TerminateProcess(GetCurrentProcess(), 1);
+    TerminateProcess(GetCurrentProcess(), status);
     while (1);
 }
 
@@ -135,7 +135,7 @@ void NORETURN __fail(const char *file, int line, const char *func, const char *f
     }
     try_goto_desktop();
     MessageBoxW(NULL, cs2wcs_managed(msgbuf + len, CP_UTF8, &msgbox_buf), L"PAL3patch", MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
-    die();
+    die(1);
     va_end(ap);
 }
 

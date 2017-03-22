@@ -116,7 +116,15 @@ static void showfps_onendscene()
     IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
     IDirect3DDevice9_SetTextureStageState(GB_GfxMgr->m_pd3dDevice, 0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
     
-    ID3DXSprite_Begin(pFPSSprite, 0);
+    // setup matrices manually
+    set_d3dxfont_matrices(GB_GfxMgr->m_pd3dDevice);
+    
+    // draw chars
+    ID3DXSprite_Begin(pFPSSprite, D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+    
     RECT rc;
     set_rect(&rc, 10, 10, 0, 0);
     ID3DXFont_DrawTextW(pFPSFont, pFPSSprite, buf, -1, &rc, DT_NOCLIP, 0xFFFFFFFF);

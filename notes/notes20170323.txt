@@ -1,0 +1,20 @@
+【替换字体后，繁体字看起来不一样的原因】
+例如替换前，走之旁有两个点，而更新后只有一个点
+这是因为微软在WinXP时代更新了“细明体”这个字体，详见维基百科
+
+【字体相关改进】
+现在uireplacefont和showfps使用的是改进后的字体绘制方法
+（1）现在使用自己定义的world, view, projection矩阵了（其实没必要）
+（2）在ID3DXSprite::Begin后，设置纹理过滤器为“点采用”，这样可以解决某些机器上字体显示模糊的问题
+
+【退出时直接强制结束进程：terminateatexit】
+原本在游戏退出时，会调用各种析构函数，进行很多清理工作
+现在在游戏退出时，直接调用TerminateProcess结束自己
+这样可以防止一些意外情况（比如退出时游戏崩溃等），同时还可以加快游戏退出的速度
+坏处在于，如果操作系统本身有BUG，未能将进程清理干净，可能会导致一些问题
+
+【补丁配置工具会尝试启用自身的UAC虚拟化】
+由于补丁配置工具自带的manifest中将requestedExecutionLevel设为了asInvoker（目的是为了避免使用管理员权限）
+因此UAC会自动关闭对补丁配置工具的UAC虚拟化，这样导致如果游戏安装在Program Files中，没有管理员权限就无法写入配置文件的问题
+通过在程序启动时调用SetTokenInformation将TokenVirtualizationEnabled置1，可以在运行时启用UAC虚拟化，从而解决此问题
+

@@ -180,9 +180,13 @@ static void init_pauseresume_hook()
 
 
 // atexit hook
-static MAKE_ASMPATCH(atexit)
+void call_atexit_hooks()
 {
     run_hooks(HOOKID_ATEXIT);
+}
+static MAKE_ASMPATCH(atexit_normal)
+{
+    call_atexit_hooks();
     
     LINK_RETN(0x10);
 }
@@ -192,7 +196,7 @@ void add_atexit_hook(void (*funcptr)(void))
 }
 static void init_atexit_hook()
 {
-    INIT_ASMPATCH(atexit, 0x00541C35, 5, "\xC2\x10\x00\x90\x90");
+    INIT_ASMPATCH(atexit_normal, 0x00541C35, 5, "\xC2\x10\x00\x90\x90");
 }
 
 

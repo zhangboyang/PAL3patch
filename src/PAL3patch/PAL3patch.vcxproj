@@ -134,6 +134,7 @@
     <ClCompile Include="src\patch_screenshot.c" />
     <ClCompile Include="src\patch_setlocale.c" />
     <ClCompile Include="src\patch_showfps.c" />
+    <ClCompile Include="src\patch_terminateatexit.c" />
     <ClCompile Include="src\patch_testcombat.c" />
     <ClCompile Include="src\patch_timerresolution.c" />
     <ClCompile Include="src\patch_uireplacefont.c" />

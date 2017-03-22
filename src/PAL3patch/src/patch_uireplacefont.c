@@ -325,8 +325,15 @@ static MAKE_THISCALL(void, gbPrintFont_UNICODE_Flush, struct gbPrintFont_UNICODE
     // make text in front of other pixels
     IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
     
+    // setup matrices manually
+    set_d3dxfont_matrices(GB_GfxMgr->m_pd3dDevice);
+
     // draw strings in linked-list
-    ID3DXSprite_Begin(d3dxfont_sprite, D3DXSPRITE_ALPHABLEND);
+    ID3DXSprite_Begin(d3dxfont_sprite, D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+    
     for (node = d3dxfont_strlist_head; node; node = node->next) {
         d3dxfont_printwstr(d3dxfont_sprite, node->fontid, node->wstr, node->left, node->top, node->color);
     }

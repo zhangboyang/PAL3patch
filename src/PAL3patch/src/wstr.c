@@ -4,7 +4,7 @@
 // will alloc memory, don't forget to free()
 wchar_t *cs2wcs_alloc(const char *cstr, UINT src_cp)
 {
-    wchar_t *ret;
+    wchar_t *ret = NULL;
     size_t len;
     
     // get string length first
@@ -20,6 +20,7 @@ wchar_t *cs2wcs_alloc(const char *cstr, UINT src_cp)
     return ret;
 
 fail:
+    free(ret);
     return L"cs2wcs() failed.";
 }
 
@@ -27,7 +28,7 @@ fail:
 // will alloc memory, don't forget to free()
 char *wcs2cs_alloc(const wchar_t *wstr, UINT dst_cp)
 {
-    char *ret;
+    char *ret = NULL;
     size_t len;
     
     // get string length first
@@ -43,6 +44,7 @@ char *wcs2cs_alloc(const wchar_t *wstr, UINT dst_cp)
     return ret;
     
 fail:
+    free(ret);
     return "wcs2cs() failed.";
 }
 

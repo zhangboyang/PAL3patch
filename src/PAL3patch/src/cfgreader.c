@@ -25,48 +25,43 @@ void read_config_file()
     FILE *fp = fopen(CONFIG_FILE, "r");
     if (!fp) {
         MessageBoxW(NULL, wstr_nocfgfile_text, wstr_nocfgfile_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
-        die();
+        die(1);
     }
     
     char buf[MAXLINE];
     char *ptr;
-    if (fgets(buf, sizeof(buf), fp)) {
-        // remove utf-8 bom if needed
-        if (strncmp(buf, "\xEF\xBB\xBF", 3) == 0) {
-            memmove(buf, buf + 3, strlen(buf + 3) + 1);
-        }
-        do {
-            // ltrim the line
-            for (ptr = buf; *ptr && is_spacechar(*ptr); ptr++);
-            memmove(buf, ptr, strlen(ptr) + 1);
-            
-            // skip empty and comment lines
-            if (!buf[0] || buf[0] == ';' || buf[0] == '#' || (buf[0] == '/' && buf[1] == '/')) continue;
-            
-            // remove '\n' and end of line
-            ptr = strchr(buf, '\n');
-            if (ptr) *ptr = '\0';
-            
-            // parse 'key' and 'value'
-            ptr = strchr(buf, '=');
-            if (!ptr) fail("can't parse config line:\n  %s", buf);
-            *ptr = '\0';
-            char *keystr = buf, *valstr = ptr + 1;
-            
-            // rtrim 'key'
-            if (ptr > buf) ptr--;
-            while (ptr >= buf && is_spacechar(*ptr)) *ptr-- = '\0';
-            if (!*ptr) fail("keystr is empty");
-            
-            // ltrim 'value'
-            while (*valstr && is_spacechar(*valstr)) valstr++;
-            
-            // save this config line to array
-            if (cfglines >= MAX_CONFIG_LINES) fail("too many config lines.");
-            cfgdata[cfglines].key = strdup(keystr);
-            cfgdata[cfglines].val = strdup(valstr);
-            cfglines++;
-        } while (fgets(buf, sizeof(buf), fp));
+    fscanf(fp, "\xEF\xBB\xBF");
+    while (fgets(buf, sizeof(buf), fp)) {
+        // ltrim the line
+        for (ptr = buf; *ptr && is_spacechar(*ptr); ptr++);
+        memmove(buf, ptr, strlen(ptr) + 1);
+        
+        // skip empty and comment lines
+        if (!buf[0] || buf[0] == ';' || buf[0] == '#' || (buf[0] == '/' && buf[1] == '/')) continue;
+        
+        // remove '\n' and end of line
+        ptr = strchr(buf, '\n');
+        if (ptr) *ptr = '\0';
+        
+        // parse 'key' and 'value'
+        ptr = strchr(buf, '=');
+        if (!ptr) fail("can't parse config line:\n  %s", buf);
+        *ptr = '\0';
+        char *keystr = buf, *valstr = ptr + 1;
+        
+        // rtrim 'key'
+        if (ptr > buf) ptr--;
+        while (ptr >= buf && is_spacechar(*ptr)) *ptr-- = '\0';
+        if (!*ptr) fail("keystr is empty");
+        
+        // ltrim 'value'
+        while (*valstr && is_spacechar(*valstr)) valstr++;
+        
+        // save this config line to array
+        if (cfglines >= MAX_CONFIG_LINES) fail("too many config lines.");
+        cfgdata[cfglines].key = strdup(keystr);
+        cfgdata[cfglines].val = strdup(valstr);
+        cfglines++;
     }
     fclose(fp);
     

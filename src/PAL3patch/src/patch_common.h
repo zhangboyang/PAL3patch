@@ -22,6 +22,7 @@
 MAKE_PATCHSET(cdpatch);
 MAKE_PATCHSET(regredirect);
 MAKE_PATCHSET(disablekbdhook);
+MAKE_PATCHSET(terminateatexit);
 MAKE_PATCHSET(depcompatible);
 MAKE_PATCHSET(setlocale);
 MAKE_PATCHSET(dpiawareness);

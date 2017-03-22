@@ -38,6 +38,7 @@
 #include "D3DEnum.h"
 #include "ConfigDescData.h"
 #include "wstr.h"
+#include "UACVirtualization.h"
 
 #define stricmp _stricmp
 

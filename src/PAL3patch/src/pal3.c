@@ -190,6 +190,7 @@ void clamp_rect(void *bits, int width, int height, int bitcount, int pitch, int 
         memcpy(PTRADD(bits, i * pitch), PTRADD(bits, (bottom - 1) * pitch), width * bytecount);
     }
 }
+
 void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, void *src, int src_pitch, int src_x, int src_y, int width, int height, int bitcount)
 {
     dst = PTRADD(dst, dst_pitch * dst_y + dst_x * (bitcount / 8));
@@ -202,3 +203,30 @@ void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, void *src, int sr
         src = PTRADD(src, src_pitch);
     }
 }
+
+// setup matrices for d3dxfont manually
+void set_d3dxfont_matrices(IDirect3DDevice9 *pd3dDevice)
+{
+    float world[4][4] = {
+        { 1.0f, 0.0f, 0.0f, 0.0f },
+        { 0.0f, 1.0f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 1.0f, 0.0f },
+        { 0.0f, 0.0f, 0.0f, 1.0f },
+    };
+    float view[4][4] = {
+        { 1.0f, 0.0f, 0.0f, 0.0f },
+        { 0.0f, 1.0f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 1.0f, 0.0f },
+        { -0.5f, -0.5f, 0.0f, 1.0f },
+    };
+    float projection[4][4] = {
+		{ 2.0f / get_frect_width(&game_frect), 0.0f, 0.0f, 0.0f },
+		{ 0.0f, -2.0f / get_frect_height(&game_frect), 0.0f, 0.0f },
+		{ 0.0f, 0.0f, 1.0f, 0.0f },
+		{ -1.0f, 1.0f, 0.0f, 1.0f },
+    };
+    IDirect3DDevice9_SetTransform(pd3dDevice, D3DTS_WORLD, (D3DMATRIX *) &world);
+    IDirect3DDevice9_SetTransform(pd3dDevice, D3DTS_VIEW, (D3DMATRIX *) &view);
+    IDirect3DDevice9_SetTransform(pd3dDevice, D3DTS_PROJECTION, (D3DMATRIX *) &projection);
+}
+

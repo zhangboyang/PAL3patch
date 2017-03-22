@@ -17,12 +17,12 @@ CFG=PatchConfig - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
+!MESSAGE "PatchConfig - Win32 Static MBCS Release" (based on "Win32 (x86) Application")
+!MESSAGE "PatchConfig - Win32 Static Release" (based on "Win32 (x86) Application")
 !MESSAGE "PatchConfig - Win32 MBCS Release" (based on "Win32 (x86) Application")
 !MESSAGE "PatchConfig - Win32 MBCS Debug" (based on "Win32 (x86) Application")
 !MESSAGE "PatchConfig - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE "PatchConfig - Win32 Debug" (based on "Win32 (x86) Application")
-!MESSAGE "PatchConfig - Win32 Static MBCS Release" (based on "Win32 (x86) Application")
-!MESSAGE "PatchConfig - Win32 Static Release" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -33,7 +33,61 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "PatchConfig - Win32 MBCS Release"
+!IF  "$(CFG)" == "PatchConfig - Win32 Static MBCS Release"
+
+# PROP BASE Use_MFC 6
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "PatchConfig___Win32_Static_MBCS_Release"
+# PROP BASE Intermediate_Dir "PatchConfig___Win32_Static_MBCS_Release"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 5
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Static_MBCS_Release"
+# PROP Intermediate_Dir "Static_MBCS_Release"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Yu"stdafx.h" /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
+# ADD RSC /l 0x804 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
+# ADD LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
+
+!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Static Release"
+
+# PROP BASE Use_MFC 6
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "PatchConfig___Win32_Static_Release"
+# PROP BASE Intermediate_Dir "PatchConfig___Win32_Static_Release"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 5
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Static_Release"
+# PROP Intermediate_Dir "Static_Release"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /Yu"stdafx.h" /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
+# ADD RSC /l 0x804 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
+# ADD LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
+
+!ELSEIF  "$(CFG)" == "PatchConfig - Win32 MBCS Release"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 0
@@ -139,60 +193,6 @@ LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Static MBCS Release"
-
-# PROP BASE Use_MFC 6
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "PatchConfig___Win32_Static_MBCS_Release"
-# PROP BASE Intermediate_Dir "PatchConfig___Win32_Static_MBCS_Release"
-# PROP BASE Ignore_Export_Lib 0
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 5
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Static_MBCS_Release"
-# PROP Intermediate_Dir "Static_MBCS_Release"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x804 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
-
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Static Release"
-
-# PROP BASE Use_MFC 6
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "PatchConfig___Win32_Static_Release"
-# PROP BASE Intermediate_Dir "PatchConfig___Win32_Static_Release"
-# PROP BASE Ignore_Export_Lib 0
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 5
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Static_Release"
-# PROP Intermediate_Dir "Static_Release"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /Yu"stdafx.h" /FD /c
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x804 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
-
 !ENDIF 
 
 # Begin Target
@@ -269,6 +269,10 @@ SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\UACVirtualization.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\wstr.cpp
 # End Source File
 # End Group
@@ -338,6 +342,10 @@ SOURCE=.\Resource.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\UACVirtualization.h
 # End Source File
 # Begin Source File
 
