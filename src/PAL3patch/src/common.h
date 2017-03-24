@@ -19,7 +19,7 @@
 #define HAVE_D3D9SDK
 #endif
 
-#if (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)))
+#if (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
 #define HAVE_THISCALL
 #endif
 
@@ -27,7 +27,7 @@
 #define func_return_address() _ReturnAddress()
 #elif defined(__GNUC__)
 #define func_return_address() __builtin_return_address(0)
-#elif
+#else
 #error
 #endif
 
@@ -37,7 +37,7 @@
 #elif defined(__GNUC__)
 #define NORETURN __attribute__((noreturn))
 #define INLINE inline
-#elif
+#else
 #define NORETURN
 #define INLINE
 #endif
