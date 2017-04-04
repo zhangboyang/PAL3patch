@@ -86,4 +86,7 @@
          src\PatchConfig\Release\PatchConfig.exe
         此外，供 MSVC 使用的汇编代码的库文件位于：
          src\PAL3patch\PAL3patch_asm.lib
+   注意：
+    （1）如果使用 Dev-C++ 4.9.9.2 随附的 GCC 3.4.2 编译，请不要打开编译优化，否则可能生成错误的代码
+    （2）如果编译补丁时不想静态链接 D3DX9，可以将 src\PAL3patch\Makefile 中的“LINK_D3DX9 := 1”改为“LINK_D3DX9 := 0”
 

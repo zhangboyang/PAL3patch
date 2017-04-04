@@ -505,6 +505,10 @@ static void ui_replacefont_bitmapfont_init()
 
 MAKE_PATCHSET(uireplacefont)
 {
+    if (flag == 1 && is_win9x()) {
+        warning("d3dxfont doesn't support win9x.");
+        flag = 2;
+    }
     switch (flag) {
         case 1: ui_replacefont_d3dxfont_init(); break;
         case 2: ui_replacefont_bitmapfont_init(); break;
