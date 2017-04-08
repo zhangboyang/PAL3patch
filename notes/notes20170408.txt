@@ -1,0 +1,33 @@
+【在 linux 系统下用 wine 2.5 或更低版本运行时，会在读取配置文件时发生错误】
+这是由于 wine 中 msvcrt.dll 模块对于 scanf 系列函数实现不正确的缘故。
+wine 中 scanf 在处理格式字符串中>=0x80的字符时有bug（无符号数和有符号数的转换相关）
+详情见：
+Bug 42736 - scanf doesn't work as expected when using format string contains non-ascii chars
+https://bugs.winehq.org/show_bug.cgi?id=42736
+
+解决办法有两种：
+（1）升级到 wine 2.6 或更高版本
+（2）在 wine 环境中安装 VC++ 6.0 的运行库（vcrun6sp6），然后用 winecfg 配置使用原生的（native，windows）的 MSVCRT.DLL
+
+除此之外，由于 wine 中缺少 MFC42.DLL 而导致无法执行 PatchConfig.exe，解决办法是安装 vc6 运行库即可。
+
+
+
+
+【用新版 mingw-gcc 编译时，若不开启内联函数优化，则会在编译时弹出警告而导致编译终止】
+这是由于 mingw-gcc 附带的头文件中有逻辑错误，导致 _stricmp() 在未开启内联函数优化是没有被定义。
+此 bug 已在最新版本的 mingwrt 中修复
+详情见：
+#2322 _stricmp() is not declared when inline is disabled
+https://sourceforge.net/p/mingw/bugs/2322/
+
+
+
+
+【用 mingw-gcc 编译时，有可能因为缺少 iconv 而导致编译失败】
+找不到 iconv 的原因未知。
+解决办法：
+(1) 将 locale.c 转换为 UTF-8 编码（仅此文件中有中文字符；低版本 GCC 可能不认识 UTF-8 BOM，需要手动删去）
+(2) 将 src/PAL3patch/Makefile 中 CFLAG 处的 -finput-charset=cp936 -fexec-charset=cp936 删去
+(3) make clean 后再运行 make 应该可以编译成功
+

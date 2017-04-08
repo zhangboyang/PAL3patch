@@ -2,8 +2,10 @@
 gcc 3.4.2 (mingw-special) 是 dev-c++ 4.9.9.2 随附的
 如果开启 -O2 编译优化，则会产生错误的代码，错误的代码位于 patch_fixui.c 中的
 gbCamera_SetDimention_wrapper_for_RenderTarget_Begin 函数处。
-测试发现 gcc 3.4.2 在 -O0 和 -O1 时产生的是正确的代码，但是在 -O2 是产生了错误的代码，
+测试发现 gcc 3.4.2 在 -O0 和 -O1 时产生的是正确的代码，但是在 -O2 时产生了错误的代码，
+（使用 mingw gcc-v3 的最新版本 3.4.5 也有此问题）
 此外 vs2017（Release）、gcc 5.3.0（-O0和-O2）也都产生了正确的代码。
+造成此bug的具体原因未知
 解决方案就是——不要开启编译优化（反正也没有性能瓶颈，速度慢些就慢些吧）
 
 

@@ -6,6 +6,7 @@
     （1）使用 VC++ 2013（或更高版本）编译
     （2）使用 GCC & VC++ 6.0 编译
    两种方式各有利弊，但编译出来的结果是一样的
+   编译过程中若遇到问题，可以参考 notes/known_issues.txt 中 NOTOURBUG 部分
 
 
 编译过程中需要的 DirectX SDK：
@@ -28,6 +29,7 @@
     （2）由于 VC++ 不支持编译 .S 文件，因此需要已编译好的 PAL3patch_asm.lib 文件
    环境配置：
     （1）安装 VC++ 2013 或更高版本（VC++ 2013, 2015, 2017 均已测试，可以正常编译）
+         注意需要安装“对 C++ 的 Windows XP 支持”、“MFC 和 ATL 支持”（如果有必要的话）
     （2）解压缩 SDK 安装包 dx90updatesdk.exe 到 C:\DX90SDK 目录下（注意只需解压缩，无需安装）
    编译方法：
     （1）将 extra\PAL3patch\PAL3patch_asm\PAL3patch_asm.lib 复制到 src\PAL3patch 目录下
@@ -75,7 +77,7 @@
     （1）强烈建议使用 Windows XP 操作系统
     （2）安装 VC++ 6.0，需要打 SP6 补丁
     （3）安装 Dev-C++ 4.9.9.2
-    （4）安装 MSYS 1.0.11（安装时需配置好路径，让其使用 Dev-C++ 带有的 GCC 3.4.2）
+    （4）安装 MSYS 1.0.11（安装时需配置好路径，让其使用 Dev-C++ 带有的 GCC 3.4.2，即在 msys 命令行中能够执行 gcc）
    编译方法：
     （1）解压缩 SDK 安装包 dx90updatesdk.exe 到 C:\DX90SDK 目录下（注意只需解压缩，无需安装）
     （2）在 VC++ 6.0 中配置好 VC++ 目录（添加 C:\DX90SDK\Include 到引用目录末尾，添加 C:\DX90SDK\Lib 到库目录末尾）
