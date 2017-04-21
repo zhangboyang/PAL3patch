@@ -137,6 +137,7 @@
     <ClCompile Include="src\patch_terminateatexit.c" />
     <ClCompile Include="src\patch_testcombat.c" />
     <ClCompile Include="src\patch_timerresolution.c" />
+    <ClCompile Include="src\patch_traditionalfont.c" />
     <ClCompile Include="src\patch_uireplacefont.c" />
     <ClCompile Include="src\patch_uireplacetexf.c" />
     <ClCompile Include="src\patch_voice.c" />

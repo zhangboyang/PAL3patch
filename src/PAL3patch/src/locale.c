@@ -28,6 +28,7 @@ static const wchar_t wstr_about_text_CHS[] =
 static const wchar_t wstr_confirmquit_text_CHS[] = L"您确定要退出游戏吗？\n未保存的游戏进度将会丢失。";
 static const wchar_t wstr_confirmquit_title_CHS[] = L"退出";
 
+static const wchar_t wstr_defaultfont_filename_CHS[] = L"simsun.ttc";
 static const wchar_t wstr_defaultfont_CHS[] = L"宋体";
 static const wchar_t wstr_gameloading_CHS[] = L"游戏加载中，请稍候……";
 
@@ -41,6 +42,7 @@ static const wchar_t wstr_nocfgfile_title_CHS[] = L"无法加载配置";
 
 // CHT
 
+static const wchar_t wstr_defaultfont_filename_CHT[] = L"mingliu.ttc";
 static const wchar_t wstr_defaultfont_CHT[] = L"細明體";
 
 
@@ -52,6 +54,7 @@ const wchar_t *wstr_about_title;
 const wchar_t *wstr_about_text;
 const wchar_t *wstr_confirmquit_text;
 const wchar_t *wstr_confirmquit_title;
+const wchar_t *wstr_defaultfont_filename;
 const wchar_t *wstr_defaultfont;
 DWORD defaultfont_charset;
 const wchar_t *wstr_gameloading;
@@ -82,6 +85,7 @@ void init_locale()
     wstr_about_text = wstr_about_text_CHS;
     wstr_confirmquit_text = wstr_confirmquit_text_CHS;
     wstr_confirmquit_title = wstr_confirmquit_title_CHS;
+    wstr_defaultfont_filename = wstr_defaultfont_filename_CHS;
     wstr_defaultfont = wstr_defaultfont_CHS;
     defaultfont_charset = GB2312_CHARSET;
     wstr_gameloading = wstr_gameloading_CHS;
@@ -89,6 +93,7 @@ void init_locale()
     wstr_cantsavereg_title = wstr_cantsavereg_title_CHS;
 
     if (target_codepage == 950) { // CHT
+        wstr_defaultfont_filename = wstr_defaultfont_filename_CHT;
         wstr_defaultfont = wstr_defaultfont_CHT;
         defaultfont_charset = CHINESEBIG5_CHARSET;
     }

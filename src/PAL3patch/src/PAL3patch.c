@@ -109,6 +109,7 @@ static void init_stage2()
     // init_locale() must called after INIT_PATCHSET(setlocale)
     INIT_PATCHSET(setlocale);
     init_locale();
+    INIT_PATCHSET(traditionalfont);
     
     // init patchsets
     INIT_PATCHSET(cdpatch);

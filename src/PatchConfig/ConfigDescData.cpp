@@ -288,6 +288,18 @@ ConfigDescItem ConfigDescList_CHS[] = {
 	},
 	{
 		2, TRUE,
+		_T("uireplacefont_quality"),
+		_T("质量"),
+		_T("指定字体的输出质量。"),
+		NULL,
+		{
+			{ _T("较差"), _T("选择此项后，不启用文字抗锯齿。"), _T("3") },
+			{ _T("正常"), _T("选择此项后，启用文字抗锯齿。"), _T("4") },
+			{ _T("清晰"), _T("选择此项后，文字会使用 ClearType 质量输出。"), _T("5") },
+		}
+	},
+	{
+		2, TRUE,
 		_T("uireplacefont_preloadfontset"),
 		_T("预加载"),
 		_T("指定是否要预加载字体。"),

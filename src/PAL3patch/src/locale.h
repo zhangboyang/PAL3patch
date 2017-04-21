@@ -11,6 +11,7 @@ extern const wchar_t *wstr_about_title;
 extern const wchar_t *wstr_about_text;
 extern const wchar_t *wstr_confirmquit_text;
 extern const wchar_t *wstr_confirmquit_title;
+extern const wchar_t *wstr_defaultfont_filename;
 extern const wchar_t *wstr_defaultfont;
 extern DWORD defaultfont_charset;
 extern const wchar_t *wstr_gameloading;

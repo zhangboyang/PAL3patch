@@ -25,6 +25,7 @@ MAKE_PATCHSET(disablekbdhook);
 MAKE_PATCHSET(terminateatexit);
 MAKE_PATCHSET(depcompatible);
 MAKE_PATCHSET(setlocale);
+MAKE_PATCHSET(traditionalfont);
 MAKE_PATCHSET(dpiawareness);
 MAKE_PATCHSET(testcombat);
 MAKE_PATCHSET(timerresolution);
