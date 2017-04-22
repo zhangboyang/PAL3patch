@@ -1,0 +1,21 @@
+【解决系统已装字体与自带字体冲突问题】
+以细明体为例，如果系统已经装了 MingLiU （在繁体补充字体中）
+则系统会优先使用系统的字体，而不是游戏通过 AddFontResourceEx 添加的字体
+经逆向 fontview.exe 和多次尝试后表明：
+（1）除非 CreateFont 时字体参数与自带字体匹配程度，比与系统字体的匹配程度高，才会选择自带字体
+（2）在 win10 上用 winxp 带有的 fontview.exe，即使打开旧版细明体，也会显示系统自带的新版
+（3）在 win10 上用 win10 自己的 fontview.exe，打开文件会显示旧版细明体，但上方信息错误
+（4）添加字体后 CreateFont 时，weight 必须为 FW_NORMAL，pitchandfamily 必须为 FIXED_PITCH | FF_MORDEN
+    系统才会用旧细明体创建字体，否则使用新细明体；（即参数需近乎精确匹配，这些参数通过用 OD 调试 fontview.exe 得到）
+因此直接使用原版的旧细明体是不行了，解决办法：把原版旧细明体改名！这样就可以多个版本共存了
+改名工具使用 FDK（Adobe Font Development Kit for OpenType），步骤：
+（1）解包 TTC 文件：otc2otf MINGLIU.TTC
+（2）修改 TTF 的 name 表
+     解出 name 表
+        ttx -t name d:\xpfont\rename\MingLiU.ttf
+     用文本编辑器修改 d:\xpfont\rename\MingLiU.ttx
+     注意修改后的文件不能有 UTF-8 BOM
+     然后写回 name 表
+        ttx -o MingLiU-PAL3.ttf -m d:\xpfont\rename\MingLiU.ttf d:\xpfont\rename\MingLiU.ttx
+通过将 MingLiU 改名为 MingLiU-PAL3，即可避免冲突问题而在游戏中使用旧的细明体了
+

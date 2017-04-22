@@ -10,7 +10,7 @@ static int font_count;
 static void remove_font_hook(void)
 {
     if (font_count > 0 && my_RemoveFontResourceExW) {
-        my_RemoveFontResourceExW(wstr_defaultfont_filename, MY_FR_PRIVATE, 0);
+        my_RemoveFontResourceExW(wstr_defaultfont_traditional_filename, MY_FR_PRIVATE, 0);
     }
 }
 
@@ -26,12 +26,15 @@ MAKE_PATCHSET(traditionalfont)
     // load font
     font_count = 0;
     if (my_AddFontResourceExW) {
-        font_count = my_AddFontResourceExW(wstr_defaultfont_filename, MY_FR_PRIVATE, 0);
+        font_count = my_AddFontResourceExW(wstr_defaultfont_traditional_filename, MY_FR_PRIVATE, 0);
     }
     if (font_count == 0) {
-        warning("unable to add font resource '%ls'.", wstr_defaultfont_filename);
+        warning("unable to add font resource '%ls'.", wstr_defaultfont_traditional_filename);
+    } else {
+        // set default font
+        wstr_defaultfont = wstr_defaultfont_traditional;
+        
+        // add atexit hook to remove font when exiting
+        add_atexit_hook(remove_font_hook);
     }
-    
-    // add atexit hook to remove font when exiting
-    add_atexit_hook(remove_font_hook);
 }
