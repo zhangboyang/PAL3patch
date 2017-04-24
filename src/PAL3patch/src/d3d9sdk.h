@@ -373,6 +373,7 @@ HRESULT DECL_D3DX9FUNC(D3DXSaveSurfaceToFileA)(
 #define ID3DXSprite_SetTransform(p,a) (p)->lpVtbl->SetTransform(p,a)
 #define ID3DXSprite_SetWorldViewRH(p,a,b) (p)->lpVtbl->SetWorldViewRH(p,a,b)
 #define ID3DXSprite_SetWorldViewLH(p,a,b) (p)->lpVtbl->SetWorldViewLH(p,a,b)
+#define ID3DXSprite_Draw(p,a,b,c,d,e) (p)->lpVtbl->Draw(p,a,b,c,d,e)
 #define ID3DXSprite_Begin(p,a) (p)->lpVtbl->Begin(p,a)
 #define ID3DXSprite_End(p) (p)->lpVtbl->End(p)
 #define ID3DXSprite_OnLostDevice(p) (p)->lpVtbl->OnLostDevice(p)

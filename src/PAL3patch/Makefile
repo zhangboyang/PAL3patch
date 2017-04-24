@@ -2,6 +2,8 @@
 # MUST run 'make clean' after modifying this option
 LINK_D3DX9 := 1
 
+# freetype headers
+FREETYPE_INCLUDE_PATH := /c/src/freetype-2.7.1/include
 
 CC := gcc
 CCAS := $(CC)
@@ -9,7 +11,7 @@ CCLD := $(CC)
 AR := ar
 STRIP := strip
 
-CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing
+CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing -I $(FREETYPE_INCLUDE_PATH)
 SFLAGS :=
 CCLDFLAGS := -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lgdi32 -lcomctl32 -lwinmm
 CCLDFLAGS_MSVC :=

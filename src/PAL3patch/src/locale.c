@@ -28,8 +28,10 @@ static const wchar_t wstr_about_text_CHS[] =
 static const wchar_t wstr_confirmquit_text_CHS[] = L"您确定要退出游戏吗？\n未保存的游戏进度将会丢失。";
 static const wchar_t wstr_confirmquit_title_CHS[] = L"退出";
 
-static const wchar_t wstr_defaultfont_traditional_filename_CHS[] = L"SimSun-PAL3.ttf";
-static const wchar_t wstr_defaultfont_traditional_CHS[] = L"SimSun-PAL3";
+static const char ftfont_filename_CHS[] = "simsun.ttc";
+static const int ftfont_index_CHS = 0;
+static const int defaultfont_bold_CHS = 64;
+
 static const wchar_t wstr_defaultfont_CHS[] = L"宋体";
 static const wchar_t wstr_gameloading_CHS[] = L"游戏加载中，请稍候……";
 
@@ -42,8 +44,10 @@ static const wchar_t wstr_nocfgfile_title_CHS[] = L"无法加载配置";
 
 
 // CHT
-static const wchar_t wstr_defaultfont_traditional_filename_CHT[] = L"MingLiU-PAL3.ttf";
-static const wchar_t wstr_defaultfont_traditional_CHT[] = L"MingLiU-PAL3";
+static const char ftfont_filename_CHT[] = "mingliu.ttc";
+static const int ftfont_index_CHT = 0;
+static const int defaultfont_bold_CHT = 32;
+
 static const wchar_t wstr_defaultfont_CHT[] = L"細明體";
 
 
@@ -55,10 +59,11 @@ const wchar_t *wstr_about_title;
 const wchar_t *wstr_about_text;
 const wchar_t *wstr_confirmquit_text;
 const wchar_t *wstr_confirmquit_title;
-const wchar_t *wstr_defaultfont_traditional_filename;
-const wchar_t *wstr_defaultfont_traditional;
+const char *ftfont_filename;
+int ftfont_index;
 const wchar_t *wstr_defaultfont;
 DWORD defaultfont_charset;
+int defaultfont_bold;
 const wchar_t *wstr_gameloading;
 const wchar_t *wstr_cantsavereg_text;
 const wchar_t *wstr_cantsavereg_title;
@@ -87,18 +92,20 @@ void init_locale()
     wstr_about_text = wstr_about_text_CHS;
     wstr_confirmquit_text = wstr_confirmquit_text_CHS;
     wstr_confirmquit_title = wstr_confirmquit_title_CHS;
-    wstr_defaultfont_traditional_filename = wstr_defaultfont_traditional_filename_CHS;
-    wstr_defaultfont_traditional = wstr_defaultfont_traditional_CHS;
+    ftfont_filename = ftfont_filename_CHS;
+    ftfont_index = ftfont_index_CHS;
     wstr_defaultfont = wstr_defaultfont_CHS;
     defaultfont_charset = GB2312_CHARSET;
+    defaultfont_bold = defaultfont_bold_CHS;
     wstr_gameloading = wstr_gameloading_CHS;
     wstr_cantsavereg_text = wstr_cantsavereg_text_CHS;
     wstr_cantsavereg_title = wstr_cantsavereg_title_CHS;
 
     if (target_codepage == 950) { // CHT
-        wstr_defaultfont_traditional_filename = wstr_defaultfont_traditional_filename_CHT;
-        wstr_defaultfont_traditional = wstr_defaultfont_traditional_CHT;
+        ftfont_filename = ftfont_filename_CHT;
+        ftfont_index = ftfont_index_CHT;
         wstr_defaultfont = wstr_defaultfont_CHT;
         defaultfont_charset = CHINESEBIG5_CHARSET;
+        defaultfont_bold = defaultfont_bold_CHT;
     }
 }

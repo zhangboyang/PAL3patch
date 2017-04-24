@@ -12,7 +12,7 @@ enum {
 #define D3DXFONT_MAXFONTS (D3DXFONT_COUNT * (SCALEFACTOR_COUNT + 1))
 
 static DWORD d3dxfont_charset;
-static DWORD d3dxfont_quality;
+static int d3dxfont_quality;
 static LPCWSTR d3dxfont_facename;
 static int d3dxfont_sizelist_orig[D3DXFONT_COUNT] = {12, 16, 20};
 static int d3dxfont_sizelist[D3DXFONT_COUNT];
@@ -30,8 +30,11 @@ enum { // preload type, higher value means more preload chars
 struct d3dxfont_desc {
     int fontsize;
     int boldflag;
-    ID3DXFont *pfont;
     int preload;
+    
+    int use_ftfont;
+    ID3DXFont *pfont;
+    struct ftfont *pftfont;
 };
 static struct d3dxfont_desc d3dxfont_fontlist[D3DXFONT_MAXFONTS];
 static int d3dxfont_fontcnt = 0;
@@ -39,6 +42,10 @@ static int d3dxfont_fontcnt = 0;
 static ID3DXSprite *d3dxfont_sprite = NULL;
 static IDirect3DStateBlock9 *d3dxfont_stateblock = NULL;
 
+static int d3dxfont_shoulduse_ftfont(int size, int bold)
+{
+    return 1; //FIXME
+}
 static int d3dxfont_desc_cmp(const void *a, const void *b)
 {
     const struct d3dxfont_desc *pa = a, *pb = b;
@@ -62,8 +69,10 @@ static int d3dxfont_selectbysize(int fontsize_orig)
     struct d3dxfont_desc key = {
         .fontsize = floor(fs->len_factor * d3dxfont_sizelist[fontid_orig] + eps),
         .boldflag = d3dxfont_boldflag[fontid_orig],
-        .pfont = NULL,
         .preload = 0,
+        .use_ftfont = 0,
+        .pfont = NULL,
+        .pftfont = NULL,
     };
     
     struct d3dxfont_desc *ptr = bsearch(&key, d3dxfont_fontlist, d3dxfont_fontcnt, sizeof(struct d3dxfont_desc), d3dxfont_desc_cmp);
@@ -73,8 +82,10 @@ static int d3dxfont_selectbysize(int fontsize_orig)
         key = (struct d3dxfont_desc) {
             .fontsize = d3dxfont_sizelist[fontid_orig],
             .boldflag = d3dxfont_boldflag[fontid_orig],
-            .pfont = NULL,
             .preload = 0,
+            .use_ftfont = 0,
+            .pfont = NULL,
+            .pftfont = NULL,
         };
         ptr = bsearch(&key, d3dxfont_fontlist, d3dxfont_fontcnt, sizeof(struct d3dxfont_desc), d3dxfont_desc_cmp);
         if (!ptr) fail("d3dx font not found.");
@@ -91,8 +102,10 @@ static void d3dxfont_insertfont(int fontsize, int boldflag, int preload)
     struct d3dxfont_desc key = {
         .fontsize = fontsize,
         .boldflag = boldflag,
-        .pfont = NULL,
         .preload = preload,
+        .use_ftfont = 0,
+        .pfont = NULL,
+        .pftfont = NULL,
     };
     
     struct d3dxfont_desc *ptr = bsearch(&key, d3dxfont_fontlist, d3dxfont_fontcnt, sizeof(struct d3dxfont_desc), d3dxfont_desc_cmp);
@@ -102,9 +115,29 @@ static void d3dxfont_insertfont(int fontsize, int boldflag, int preload)
         return;
     }
     
-    // create the font
-    if (FAILED(D3DXFUNC(D3DXCreateFontW)(GB_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, d3dxfont_quality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
-        fail("can't create ID3DXFont for size '%d'.", fontsize);
+    key.use_ftfont = d3dxfont_shoulduse_ftfont(fontsize, boldflag);
+    
+    if (key.use_ftfont) {
+        // create the font using FreeType font
+        key.pftfont = ftfont_create(ftfont_filename, ftfont_index, fontsize, boldflag, d3dxfont_quality);
+        if (!key.pftfont) {
+            // if create failed, fallback to D3DXFont
+            warning("can't create freetype font for size '%d', fallback to d3dxfont.", fontsize);
+            key.use_ftfont = 0;
+        }
+    }
+    
+    if (!key.use_ftfont) {
+        // create the font using D3DXFont
+        DWORD fdwQuality = 0;
+        switch (d3dxfont_quality) {
+            case 0: fdwQuality = 3; break; // NONANTIALIASED_QUALITY
+            case 1: fdwQuality = 4; break; // ANTIALIASED_QUALITY
+            case 2: fdwQuality = 5; break; // CLEARTYPE_QUALITY
+        }
+        if (FAILED(D3DXFUNC(D3DXCreateFontW)(GB_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, fdwQuality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
+            fail("can't create ID3DXFont for size '%d'.", fontsize);
+        }
     }
     
     // insert to list
@@ -113,33 +146,44 @@ static void d3dxfont_insertfont(int fontsize, int boldflag, int preload)
     qsort(d3dxfont_fontlist, d3dxfont_fontcnt, sizeof(struct d3dxfont_desc), d3dxfont_desc_cmp);
 }
 
-static void d3dxfont_preload_asciiprintable(ID3DXFont *pFont)
+static void d3dxfont_preload_range(struct d3dxfont_desc *font, wchar_t low, wchar_t high)
 {
-    if (FAILED(ID3DXFont_PreloadCharacters(pFont, 0x0020, 0x007E))) {
-        warning("can't preload ascii printable chars.");
+    if (font->use_ftfont) {
+        ftfont_preload_range(font->pftfont, low, high);
+    } else {
+        ID3DXFont_PreloadCharacters(font->pfont, low, high);
     }
 }
 
-static void d3dxfont_preload_frequentlyused(ID3DXFont *pFont)
+static void d3dxfont_preload_string(struct d3dxfont_desc *font, const wchar_t *wstr)
 {
-    d3dxfont_preload_asciiprintable(pFont);
+    if (font->use_ftfont) {
+        ftfont_preload_string(font->pftfont, wstr);
+    } else {
+        ID3DXFont_PreloadTextW(font->pfont, wstr, wcslen(wstr));
+    }
+}
+
+static void d3dxfont_preload_asciiprintable(struct d3dxfont_desc *font)
+{
+    d3dxfont_preload_range(font, 0x0020, 0x007E);
+}
+
+static void d3dxfont_preload_frequentlyused(struct d3dxfont_desc *font)
+{
+    d3dxfont_preload_asciiprintable(font);
     
     const static wchar_t pal3table[] = {
         0x5EFB, // Hui
         0 // EOF
     };
 
-    if (FAILED(ID3DXFont_PreloadTextW(pFont, cjktable, wcslen(cjktable)))) {
-        warning("can't preload cjktable.");
-    }
-    if (FAILED(ID3DXFont_PreloadTextW(pFont, pal3table, wcslen(pal3table)))) {
-        warning("can't preload pal3table.");
-    }
-
+    d3dxfont_preload_string(font, cjktable);
+    d3dxfont_preload_string(font, pal3table);
 }
-static void d3dxfont_preload_fullcjk(ID3DXFont *pFont)
+static void d3dxfont_preload_fullcjk(struct d3dxfont_desc *font)
 {
-    d3dxfont_preload_asciiprintable(pFont);
+    d3dxfont_preload_asciiprintable(font);
     
     const static unsigned preload_range[] = {
         // CJK
@@ -168,9 +212,7 @@ static void d3dxfont_preload_fullcjk(ID3DXFont *pFont)
     
     const unsigned *p;
     for (p = preload_range; *p; p += 2) {
-        if (FAILED(ID3DXFont_PreloadCharacters(pFont, p[0], p[1]))) {
-            warning("can't preload characters, range %04X - %04X.", p[0], p[1]);
-        }
+        d3dxfont_preload_range(font, p[0], p[1]);
     }
 }
 static void d3dxfont_preload(int charset_level)
@@ -178,13 +220,13 @@ static void d3dxfont_preload(int charset_level)
     int i;
     for (i = 0; i < d3dxfont_fontcnt; i++) {
         int cur_level = d3dxfont_fontlist[i].preload;
-        ID3DXFont *pfont = d3dxfont_fontlist[i].pfont;
+        struct d3dxfont_desc *font = &d3dxfont_fontlist[i];
         if (cur_level > charset_level) cur_level = charset_level;
         switch (cur_level) {
             case FONTPRELOAD_NONE: break;
-            case FONTPRELOAD_ASCIIPRINTABLE: d3dxfont_preload_asciiprintable(pfont); break;
-            case FONTPRELOAD_FREQUENTLYUSED: d3dxfont_preload_frequentlyused(pfont); break;
-            case FONTPRELOAD_FULLCJK: d3dxfont_preload_fullcjk(pfont); break;
+            case FONTPRELOAD_ASCIIPRINTABLE: d3dxfont_preload_asciiprintable(font); break;
+            case FONTPRELOAD_FREQUENTLYUSED: d3dxfont_preload_frequentlyused(font); break;
+            case FONTPRELOAD_FULLCJK: d3dxfont_preload_fullcjk(font); break;
             default: break;
         }
     }
@@ -249,16 +291,23 @@ static void d3dxfont_init()
 }
 static void d3dxfont_printwstr(ID3DXSprite *sprite, int fontid, LPWSTR wstr, int left, int top, D3DCOLOR color)
 {
-    RECT rc;
-    set_rect(&rc, left, top, 0, 0);
-    ID3DXFont_DrawTextW(d3dxfont_fontlist[fontid].pfont, sprite, wstr, -1, &rc, DT_NOCLIP, color);
+    struct d3dxfont_desc *font = &d3dxfont_fontlist[fontid];
+    if (font->use_ftfont) {
+        ftfont_draw(font->pftfont, wstr, left, top, color, sprite);
+    } else {
+        RECT rc;
+        set_rect(&rc, left, top, 0, 0);
+        ID3DXFont_DrawTextW(font->pfont, sprite, wstr, -1, &rc, DT_NOCLIP, color);
+    }
 }
 
 static void d3dxfont_onlostdevice()
 {
     int i;
     for (i = 0; i < D3DXFONT_COUNT; i++) {
-        ID3DXFont_OnLostDevice(d3dxfont_fontlist[i].pfont);
+        if (!d3dxfont_fontlist[i].use_ftfont) {
+            ID3DXFont_OnLostDevice(d3dxfont_fontlist[i].pfont);
+        }
     }
     ID3DXSprite_OnLostDevice(d3dxfont_sprite);
     IDirect3DStateBlock9_Release(d3dxfont_stateblock);
@@ -267,7 +316,9 @@ static void d3dxfont_onresetdevice()
 {
     int i;
     for (i = 0; i < D3DXFONT_COUNT; i++) {
-        ID3DXFont_OnResetDevice(d3dxfont_fontlist[i].pfont);
+        if (!d3dxfont_fontlist[i].use_ftfont) {
+            ID3DXFont_OnResetDevice(d3dxfont_fontlist[i].pfont);
+        }
     }
     ID3DXSprite_OnResetDevice(d3dxfont_sprite);
     if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &d3dxfont_stateblock))) {
@@ -379,6 +430,11 @@ static void ui_replacefont_d3dxfont_init()
     }
     if (sscanf(get_string_from_configfile("uireplacefont_bold"), "%d,%d,%d", &d3dxfont_boldflag[D3DXFONT_U12], &d3dxfont_boldflag[D3DXFONT_U16], &d3dxfont_boldflag[D3DXFONT_U20]) != 3) {
         fail("can't parse font bold flag string.");
+    }
+    
+    int i;
+    for (i = 0; i < D3DXFONT_COUNT; i++) {
+        d3dxfont_boldflag[i] *= defaultfont_bold;
     }
     
     // add hooks
@@ -505,10 +561,6 @@ static void ui_replacefont_bitmapfont_init()
 
 MAKE_PATCHSET(uireplacefont)
 {
-    if (flag == 1 && is_win9x()) {
-        warning("d3dxfont doesn't support win9x.");
-        flag = 2;
-    }
     switch (flag) {
         case 1: ui_replacefont_d3dxfont_init(); break;
         case 2: ui_replacefont_bitmapfont_init(); break;

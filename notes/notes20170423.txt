@@ -1,0 +1,44 @@
+【使用freetype绘制文本】
+之前使用D3DXFont绘制文本的方式有以下缺点：
+（1）D3DXFont底层使用GDI相关函数，最好的效果就是ClearType，但是有些情况ClearType显示不佳（游戏横线中间可能断开）
+（2）在Win10创意者更新后，GDI底层采用DirectWrite实现；这DirectWrite对宋体粗体十分不友好，渲染得很轻，不易阅读
+（3）D3DXFont需要进行预加载才会让显示时不卡顿，但这会占用非常多的内存，且严重拖慢游戏启动速度
+（4）D3DXFont在Win9x下效果很不好（不知道什么原因，标点符号显示得有问题）
+因此决定使用freetype进行文本绘制，有以下优点：
+（1）在任何操作系统下都能获得一致的渲染效果
+（2）占用内存相对较少，速度快
+（3）可以控制渲染的细节（例如粗体到底多粗之类的）
+
+代码方面，由于原先已经有可以使用的D3DXFont代码，因此决定让两种渲染方式并存
+目前，只在字体设置为default的情况下使用freetype渲染，使用的字体文件是simsun.ttc和mingliu.ttc
+如果将字体设置为非default（用户指定了自定义字体），则使用原先的D3DXFont进行渲染
+
+渲染的过程分为“1.用freetype生成位图”和“2.将位图放进纹理然后用Direct3D绘制”两个步骤
+1.在freetype的样例程序的基础上稍加改动即可
+2.采用了多个文字拼成一个贴图的办法（类似D3DXFont或者gbPrintFont）
+用到的结构体（类）：
+struct ftlayout;  // 用来存放排版相关数据（为贴图上的文字排版，而不是为真正的输出排版）
+struct fttexture; // 用来存放已经生成好的贴图，是一个链表
+struct ftchar;    // 用来存放单个字符相关的数据（纹理位置、大小、位图等）
+struct ftfont;    // 对应一个字体、大小的总的大结构体
+
+粗体方面：针对点阵和轮廓字体采用不同的办法
+针对点阵用横向平移1个像素的办法制作伪粗体
+针对轮廓使用FT_Outline_Embolden可以制作伪粗体（粗细程度还可定制）
+
+编译方面：采用VC6编译lib库文件，然后GCC只引用头文件的方式；最后在VC6链接是链接freetype.lib
+有一点会导致问题的是，freetype的头文件中，include/freetype/freetype.h的 3153行有一个非ascii字符：
+/* results in 50% brightness -- 128 ends up too dark on both bright */ 
+这一行中间的那个破折号不是ascii字符，这对导致加了-finput-charset=cp936参数的GCC编译失败
+解决办法就是手动把这个字符删掉
+已经将此问题汇报给freetype，已在最新的git版本中解决
+https://savannah.nongnu.org/bugs/index.php?50858
+
+【freetype在使用宋体（simsun.ttc）时，较小字号下，中文是点阵但英文（西文）却没有使用点阵】
+这个问题早在2002年就有人在邮件列表中提出了，但是却没人回复：
+https://lists.nongnu.org/archive/html/freetype/2002-12/msg00061.html
+此外，在2004年，有人在CSDN论坛上提出了一样的问题
+该人声称读了win2000和freetype源码后解决了该问题，但是却没有给出任何解决方案：
+http://bbs.csdn.net/topics/60300938
+无奈之下我也去读win2000和freetype源码，但是我却没在win2000源码中找到所谓的“TextOut的实现”
+

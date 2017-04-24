@@ -38,6 +38,7 @@ extern void set_fpoint_point(fPOINT *fpoint, const POINT *point);
 
 // rect functions
 #define set_rect SetRect
+extern void set_rect_ltwh(RECT *rect, int left, int top, int width, int height);
 extern void set_rect_frect(RECT *rect, const fRECT *frect);
 extern void set_frect_rect(fRECT *frect, const RECT *rect);
 extern double get_frect_width(const fRECT *frect);

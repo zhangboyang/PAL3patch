@@ -106,10 +106,12 @@ static void init_stage2()
     init_effect_hooks();
     init_texture_hooks();
     
+    // init freetype
+    init_ftfont();
+    
     // init_locale() must called after INIT_PATCHSET(setlocale)
     INIT_PATCHSET(setlocale);
     init_locale();
-    INIT_PATCHSET(traditionalfont);
     
     // init patchsets
     INIT_PATCHSET(cdpatch);

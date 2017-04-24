@@ -1,5 +1,10 @@
 #include "common.h"
 
+void set_rect_ltwh(RECT *rect, int left, int top, int width, int height)
+{
+    set_rect(rect, left, top, left + width, top + height);
+}
+
 // convert betwenn fPOINT and POINT
 void set_point(POINT *point, LONG x, LONG y)
 {
