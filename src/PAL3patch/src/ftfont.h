@@ -4,11 +4,20 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
+#include FT_TRUETYPE_DRIVER_H
+#include FT_MODULE_H
+#include FT_BITMAP_H
 
 
 #define FTFONT_MAXCHARS 0x10000
 #define FTFONT_BITMAP_BOLD_LIMIT 64
+#define FTFONT_BITMAP_TEST_CHAR L'\x6587'
 
+enum ftquality {
+    FTFONT_NOAA,
+    FTFONT_AA,
+    FTFONT_AUTO,
+};
 struct ftlayout {
     int w, h;
     int u, v, vnext;

@@ -7,8 +7,10 @@ static FT_Library library;
 void init_ftfont()
 {
     FT_Init_FreeType(&library);
+    
+    FT_UInt v = TT_INTERPRETER_VERSION_35;
+    FT_Property_Set(library, "truetype", "interpreter-version", &v);
 }
-
 
 
 
@@ -67,12 +69,7 @@ struct ftfont *ftfont_create(const char *filename, int face_index, int size, int
     // alloc memory
     ret = malloc(sizeof(struct ftfont));
     if (!ret) goto fail;
-    
-    // initialize
     memset(ret, 0, sizeof(struct ftfont));
-    ret->size = size;
-    ret->bold = bold;
-    ret->quality = quality;
     
     // calc texture size and set layout to full
     for (ret->texsize = 64; ret->texsize < size; ret->texsize *= 2);
@@ -83,9 +80,51 @@ struct ftfont *ftfont_create(const char *filename, int face_index, int size, int
     if (e) goto fail;
     ret->face = face;
     
+    // choose bitmap size
+    if (quality != FTFONT_AA) {
+        int i;
+        int max_fixed_size = 0;
+        int lower_fixed_size = 0;
+        int upper_fixed_size = INT_MAX;
+        for (i = 0; i < face->num_fixed_sizes; i++) {
+            int cursize = face->available_sizes[i].size / 64;
+            if (cursize > max_fixed_size) max_fixed_size = cursize; 
+            if (cursize <= size) {
+                if (cursize > lower_fixed_size) lower_fixed_size = cursize;
+            }
+            if (cursize >= size) {
+                if (cursize < upper_fixed_size) upper_fixed_size = cursize;
+            }
+        }
+        if (max_fixed_size > 0) {
+            if (size == upper_fixed_size - 1) {
+                size = upper_fixed_size;
+            } else if (size == lower_fixed_size + 1) {
+                size = lower_fixed_size;
+            }
+        }
+        if (size <= max_fixed_size) {
+            quality = FTFONT_NOAA;
+        }
+    }
+    
     // set char size
     e = FT_Set_Pixel_Sizes(face, 0, size);
     if (e) goto fail;
+    
+    // check if using bitmap font
+    if (quality != FTFONT_AA) {
+        e = FT_Load_Char(face, FTFONT_BITMAP_TEST_CHAR, FT_LOAD_DEFAULT);
+        if (!e) {
+            if (face->glyph->format == FT_GLYPH_FORMAT_BITMAP) {
+                quality = FTFONT_NOAA;
+            }
+        }
+    }
+    
+    ret->size = size;
+    ret->bold = bold;
+    ret->quality = quality;
     
     return ret;
 fail:
@@ -102,31 +141,33 @@ static void ftfont_loadchar(struct ftfont *font, wchar_t c)
     int w, bw;
     int h, bh;
     int i, j;
-    int bold_applied = 0;
+    int should_embolden_bitmap = 0;
     FT_Int32 load_flags = FT_LOAD_DEFAULT;
     FT_Render_Mode render_mode = FT_RENDER_MODE_NORMAL;
+    FT_Bitmap bmp;
     
     // check if already loaded
     if (font->ch[c]) return;
     
     // process quality setting
     switch (font->quality) {
-        case 0: load_flags = FT_LOAD_TARGET_MONO; render_mode = FT_RENDER_MODE_MONO; break;
-        case 1: load_flags = FT_LOAD_NO_BITMAP; break;
-        case 2: break;
+        case FTFONT_NOAA: load_flags = FT_LOAD_TARGET_MONO; render_mode = FT_RENDER_MODE_MONO; break;
+        case FTFONT_AA: load_flags = FT_LOAD_NO_BITMAP; break;
+        case FTFONT_AUTO: break;
     }
     
     // load char with freetype
     e = FT_Load_Char(font->face, c, load_flags);
     if (e) goto fail;
     
-    // embolden if needed
+    // embolden outline if needed
     if (font->bold) {
-        if (slot->format == FT_GLYPH_FORMAT_OUTLINE) {
-            if (render_mode != FT_RENDER_MODE_MONO) {
-                FT_Outline_Embolden(&slot->outline, font->bold);
-                bold_applied = 1;
+        if (slot->format == FT_GLYPH_FORMAT_BITMAP || font->quality == FTFONT_NOAA) {
+            if (font->bold >= FTFONT_BITMAP_BOLD_LIMIT) {
+                should_embolden_bitmap = 1;
             }
+        } else if (slot->format == FT_GLYPH_FORMAT_OUTLINE) {
+            FT_Outline_Embolden(&slot->outline, font->bold);
         }
     }
     
@@ -134,12 +175,19 @@ static void ftfont_loadchar(struct ftfont *font, wchar_t c)
     e = FT_Render_Glyph(slot, render_mode);
     if (e) goto fail;
     
-    // get width and height of current char
-    w = bw = slot->bitmap.width;
-    h = bh = slot->bitmap.rows;
-    if (slot->bitmap.pixel_mode == FT_PIXEL_MODE_MONO && font->bold >= FTFONT_BITMAP_BOLD_LIMIT && !bold_applied) {
-        w++;
+    // convert bitmap
+    FT_Bitmap_Init(&bmp);
+    e = FT_Bitmap_Convert(library, &slot->bitmap, &bmp, 1);
+    if (e) goto bmpfail; 
+    
+    // embolden bitmap if needed
+    if (should_embolden_bitmap) {
+        FT_Bitmap_Embolden(library, &bmp, 64, 0);
     }
+    
+    // get width and height of current char
+    w = bw = bmp.width;
+    h = bh = bmp.rows;
     if (w == 0) w++;
     if (h == 0) h++;
     
@@ -153,27 +201,18 @@ static void ftfont_loadchar(struct ftfont *font, wchar_t c)
     ch->l = slot->bitmap_left;
     ch->t = slot->bitmap_top;
     ch->adv = round(slot->advance.x / 64.0);
-    if (slot->bitmap.pixel_mode == FT_PIXEL_MODE_GRAY) {
-        for (i = 0; i < bh; i++) {
-            memcpy(ch->bitmap + w * i, slot->bitmap.buffer + slot->bitmap.pitch * i, bw);
+    
+    // copy bitmap
+    for (i = 0; i < bh; i++) {
+        for (j = 0; j < bw; j++) {
+            ch->bitmap[w * i + j] = bmp.buffer[bmp.pitch * i + j] * 255 / (bmp.num_grays - 1);
         }
-    } else if (slot->bitmap.pixel_mode == FT_PIXEL_MODE_MONO) {
-        for (i = 0; i < bh; i++) {
-            for (j = 0; j < bw; j++) {
-                ch->bitmap[w * i + j] = (*(slot->bitmap.buffer + slot->bitmap.pitch * i + j / 8) & (1 << (7 - j % 8))) ? 0xff : 0;
-            }
-            if (font->bold >= FTFONT_BITMAP_BOLD_LIMIT && !bold_applied) {
-                for (j = bw; j >= 1; j--) {
-                    ch->bitmap[w * i + j] |= ch->bitmap[w * i + j - 1];
-                }
-            }
-        }
-    } else {
-        goto fail;
     }
 
     font->ch[c] = ch;
-    return;
+    ch = NULL;
+bmpfail:
+    FT_Bitmap_Done(library, &bmp);
 fail:
     if (ch) free(ch);
 }
@@ -212,7 +251,6 @@ static void ftfont_assign_texture(struct ftfont *font, wchar_t c)
     
     // layout char
     r = ftfont_do_layout(&font->texlayout, ch->w, ch->h, &u, &v);
-    //plog("r=%d l->u=%d l->v=%d l->w=%d l->h=%d w=%d h=%d", r, font->texlayout.u, font->texlayout.v, font->texlayout.w, font->texlayout.h, ch->w, ch->h);
     if (r < 0) return;
     if (r == 0) {
         new_node = malloc(sizeof(struct fttexture));
@@ -254,7 +292,6 @@ fail:
 
 static int ftfont_draw_char(struct ftfont *font, wchar_t c, int left, int top, D3DCOLOR color, ID3DXSprite *sprite)
 {
-c=L'A';
     int adv = font->size;
     ftfont_assign_texture(font, c);
     struct ftchar *ch = font->ch[c];

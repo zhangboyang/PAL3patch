@@ -42,10 +42,12 @@ static int d3dxfont_fontcnt = 0;
 static ID3DXSprite *d3dxfont_sprite = NULL;
 static IDirect3DStateBlock9 *d3dxfont_stateblock = NULL;
 
+static int d3dxfont_ftfont = 0;
 static int d3dxfont_shoulduse_ftfont(int size, int bold)
 {
-    return 1; //FIXME
+    return d3dxfont_ftfont;
 }
+
 static int d3dxfont_desc_cmp(const void *a, const void *b)
 {
     const struct d3dxfont_desc *pa = a, *pb = b;
@@ -131,9 +133,9 @@ static void d3dxfont_insertfont(int fontsize, int boldflag, int preload)
         // create the font using D3DXFont
         DWORD fdwQuality = 0;
         switch (d3dxfont_quality) {
-            case 0: fdwQuality = 3; break; // NONANTIALIASED_QUALITY
-            case 1: fdwQuality = 4; break; // ANTIALIASED_QUALITY
-            case 2: fdwQuality = 5; break; // CLEARTYPE_QUALITY
+            case FTFONT_NOAA: fdwQuality = 3; break; // NONANTIALIASED_QUALITY
+            case FTFONT_AA: fdwQuality = 4; break; // ANTIALIASED_QUALITY
+            case FTFONT_AUTO: fdwQuality = 5; break; // CLEARTYPE_QUALITY
         }
         if (FAILED(D3DXFUNC(D3DXCreateFontW)(GB_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, fdwQuality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
             fail("can't create ID3DXFont for size '%d'.", fontsize);
@@ -422,6 +424,7 @@ static void ui_replacefont_d3dxfont_init()
     const char *facename = get_string_from_configfile("uireplacefont_facename");
     if (stricmp(facename, "default") == 0) {
         d3dxfont_facename = wstr_defaultfont;
+        d3dxfont_ftfont = 1;
     } else {
         d3dxfont_facename = cs2wcs_alloc(facename, CP_UTF8); // let it leak
     }

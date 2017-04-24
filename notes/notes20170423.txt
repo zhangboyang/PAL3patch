@@ -34,6 +34,8 @@ struct ftfont;    // 对应一个字体、大小的总的大结构体
 已经将此问题汇报给freetype，已在最新的git版本中解决
 https://savannah.nongnu.org/bugs/index.php?50858
 
+
+
 【freetype在使用宋体（simsun.ttc）时，较小字号下，中文是点阵但英文（西文）却没有使用点阵】
 这个问题早在2002年就有人在邮件列表中提出了，但是却没人回复：
 https://lists.nongnu.org/archive/html/freetype/2002-12/msg00061.html
@@ -41,4 +43,14 @@ https://lists.nongnu.org/archive/html/freetype/2002-12/msg00061.html
 该人声称读了win2000和freetype源码后解决了该问题，但是却没有给出任何解决方案：
 http://bbs.csdn.net/topics/60300938
 无奈之下我也去读win2000和freetype源码，但是我却没在win2000源码中找到所谓的“TextOut的实现”
+
+后来自己研究解决此问题：
+（1）该问题只在使用宋体（simsun.ttc）时出现，在细明体中（mingliu.ttc）却不出现，推测是字体本身问题
+（2）用fontforge打开宋体，会发现英文部分根本没有内嵌点阵！也就是说，所谓点阵，其实还是根据字形画出来的
+（3）强制让freetype渲染为黑白图片（而不是灰度），则渲染结果与win下有细微的差别（例如小写字母w在字号较小时）
+（4）强制用FT_Property_Set函数将truetype的interpreter-version设为TT_INTERPRETER_VERSION_35后，渲染结果完全一样了！
+（5）但是这样设置只在“强制黑白”的模式下有效，因此先使用一个中文字符检测是否正在使用点阵，然后根据需要设置“强制黑白”标志即可。
+
+参考资料：
+https://www.freetype.org/freetype2/docs/reference/ft2-tt_driver.html
 
