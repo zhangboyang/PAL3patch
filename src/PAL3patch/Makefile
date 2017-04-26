@@ -3,7 +3,7 @@
 LINK_D3DX9 := 1
 
 # freetype headers
-FREETYPE_INCLUDE_PATH := /c/src/freetype-2.7.1/include
+FREETYPE_INCLUDE_PATH := C:\freetype\include
 
 CC := gcc
 CCAS := $(CC)

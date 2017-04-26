@@ -9,8 +9,18 @@
 #include FT_BITMAP_H
 
 
+#if defined(_MSC_VER) && !defined(DYNLINK_D3DX9_AT_RUNTIME)
+#ifdef _DEBUG
+#pragma comment(lib, "freetype" TOSTR(FREETYPE_MAJOR) TOSTR(FREETYPE_MINOR) TOSTR(FREETYPE_PATCH) "d.lib")
+#else
+#pragma comment(lib, "freetype" TOSTR(FREETYPE_MAJOR) TOSTR(FREETYPE_MINOR) TOSTR(FREETYPE_PATCH) ".lib")
+#endif
+#endif
+
+
+
 #define FTFONT_MAXCHARS 0x10000
-#define FTFONT_BITMAP_BOLD_LIMIT 64
+#define FTFONT_BITMAP_BOLD_LIMIT 48
 #define FTFONT_BITMAP_TEST_CHAR L'\x6587'
 
 enum ftquality {
@@ -42,8 +52,11 @@ struct ftfont {
     int size;
     int bold;
     int quality;
-    int texsize;
+
+    int xshift;
+    int yshift;
     
+    int texsize;
     struct fttexture *texhead;
     struct ftlayout texlayout;
 
@@ -51,7 +64,7 @@ struct ftfont {
 };
 
 extern void init_ftfont();
-extern struct ftfont *ftfont_create(const char *filename, int face_index, int size, int bold, int quality);
+extern struct ftfont *ftfont_create(const char *filename, int face_index, int req_size, int req_bold, int req_quality);
 extern void ftfont_preload_range(struct ftfont *font, wchar_t low, wchar_t high);
 extern void ftfont_preload_string(struct ftfont *font, const wchar_t *wstr);
 extern void ftfont_draw(struct ftfont *font, const wchar_t *wstr, int left, int top, D3DCOLOR color, ID3DXSprite *sprite);

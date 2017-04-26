@@ -1747,6 +1747,7 @@ extern void *vfs_readfile(const char *filepath, unsigned *length, struct memory_
 extern const char *vfs_cpkname(void);
 extern void clamp_rect(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom);
 extern void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, void *src, int src_pitch, int src_x, int src_y, int width, int height, int bitcount);
+extern void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color);
 extern void set_d3dxfont_matrices(IDirect3DDevice9 *pd3dDevice);
 
 #endif

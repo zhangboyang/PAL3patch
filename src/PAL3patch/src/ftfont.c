@@ -8,8 +8,8 @@ void init_ftfont()
 {
     FT_Init_FreeType(&library);
     
-    FT_UInt v = TT_INTERPRETER_VERSION_35;
-    FT_Property_Set(library, "truetype", "interpreter-version", &v);
+    //FT_UInt v = TT_INTERPRETER_VERSION_35;
+    //FT_Property_Set(library, "truetype", "interpreter-version", &v);
 }
 
 
@@ -56,9 +56,45 @@ static int ftfont_do_layout(struct ftlayout *l, int w, int h, int *u, int *v)
 
 
 
+// font face has initialized
+// adjust size and quality
+void ftfont_optimize_size_quality(struct ftfont *font)
+{
+    // dirty hack: disable bitmap font for MingLiU > 17px
+    if (font->face->family_name && strstr(font->face->family_name, "MingLiU")) {
+        if (font->size > 17 && font->quality != FTFONT_NOAA) {
+            font->quality = FTFONT_AA;
+        }
+    }
+    
+    // choose bitmap size
+    if (font->quality != FTFONT_AA) {
+        int i;
+        int max_fixed_size = 0;
+        int lower_fixed_size = 0;
+        int upper_fixed_size = INT_MAX;
+        for (i = 0; i < font->face->num_fixed_sizes; i++) {
+            int cursize = font->face->available_sizes[i].size / 64;
+            if (cursize > max_fixed_size) max_fixed_size = cursize; 
+            if (cursize <= font->size) {
+                if (cursize > lower_fixed_size) lower_fixed_size = cursize;
+            }
+            if (cursize >= font->size) {
+                if (cursize < upper_fixed_size) upper_fixed_size = cursize;
+            }
+        }
+        if (max_fixed_size > 0 && lower_fixed_size > 0 && font->size <= max_fixed_size) {
+            if (font->size == upper_fixed_size - 1) {
+                font->size = upper_fixed_size;
+            } else {
+                font->size = lower_fixed_size;
+            }
+            font->quality = FTFONT_NOAA;
+        }
+    }
+}
 
-
-struct ftfont *ftfont_create(const char *filename, int face_index, int size, int bold, int quality)
+struct ftfont *ftfont_create(const char *filename, int face_index, int req_size, int req_bold, int req_quality)
 {
     struct ftfont *ret = NULL;
     FT_Face face = NULL;
@@ -71,60 +107,37 @@ struct ftfont *ftfont_create(const char *filename, int face_index, int size, int
     if (!ret) goto fail;
     memset(ret, 0, sizeof(struct ftfont));
     
-    // calc texture size and set layout to full
-    for (ret->texsize = 64; ret->texsize < size; ret->texsize *= 2);
-    ftfont_clear_layout(&ret->texlayout, ret->texsize, ret->texsize, 1);
-    
     // create face object
     e = FT_New_Face(library, filename, face_index, &face);
     if (e) goto fail;
     ret->face = face;
+    ret->size = req_size;
+    ret->bold = req_bold;
+    ret->quality = req_quality;
     
-    // choose bitmap size
-    if (quality != FTFONT_AA) {
-        int i;
-        int max_fixed_size = 0;
-        int lower_fixed_size = 0;
-        int upper_fixed_size = INT_MAX;
-        for (i = 0; i < face->num_fixed_sizes; i++) {
-            int cursize = face->available_sizes[i].size / 64;
-            if (cursize > max_fixed_size) max_fixed_size = cursize; 
-            if (cursize <= size) {
-                if (cursize > lower_fixed_size) lower_fixed_size = cursize;
-            }
-            if (cursize >= size) {
-                if (cursize < upper_fixed_size) upper_fixed_size = cursize;
-            }
-        }
-        if (max_fixed_size > 0) {
-            if (size == upper_fixed_size - 1) {
-                size = upper_fixed_size;
-            } else if (size == lower_fixed_size + 1) {
-                size = lower_fixed_size;
-            }
-        }
-        if (size <= max_fixed_size) {
-            quality = FTFONT_NOAA;
-        }
-    }
-    
+    // choose better size and quality
+    ftfont_optimize_size_quality(ret);
+
     // set char size
-    e = FT_Set_Pixel_Sizes(face, 0, size);
+    e = FT_Set_Pixel_Sizes(face, 0, ret->size);
     if (e) goto fail;
     
+    // calc texture size and set layout to full
+    for (ret->texsize = 64; ret->texsize < ret->size; ret->texsize *= 2);
+    ftfont_clear_layout(&ret->texlayout, ret->texsize, ret->texsize, 1);
+    
+    // set shift data
+    ret->yshift = ret->size * face->descender / face->units_per_EM;
+
     // check if using bitmap font
-    if (quality != FTFONT_AA) {
+    if (ret->quality != FTFONT_AA) {
         e = FT_Load_Char(face, FTFONT_BITMAP_TEST_CHAR, FT_LOAD_DEFAULT);
         if (!e) {
             if (face->glyph->format == FT_GLYPH_FORMAT_BITMAP) {
-                quality = FTFONT_NOAA;
+                ret->quality = FTFONT_NOAA;
             }
         }
     }
-    
-    ret->size = size;
-    ret->bold = bold;
-    ret->quality = quality;
     
     return ret;
 fail:
@@ -132,6 +145,177 @@ fail:
     if (ret) free(ret);
     return NULL;
 }
+
+
+struct ftcharhack_bitmap {
+    int w, h;
+    int yshift;
+    const char *data;
+};
+struct ftcharhack {
+    const char *fontname;
+    int size;
+    const wchar_t *charmap;
+    struct ftcharhack_bitmap bitmap[];
+};
+
+static struct ftcharhack simsun_12 = {
+    "SimSun", 12, L"0123456789/", {
+        { 6, 12, -2, "000000000000011100100010100010100010100010100010100010011100000000000000" },
+        { 6, 12, -2, "000000000000001000011000001000001000001000001000001000011100000000000000" },
+        { 6, 12, -2, "000000000000011100100010100010000100001000010000100000111110000000000000" },
+        { 6, 12, -2, "000000000000011100100010000010001100000010000010100010011100000000000000" },
+        { 6, 12, -2, "000000000000000100001100010100010100100100011110000100000110000000000000" },
+        { 6, 12, -2, "000000000000111110100000100000111100000010000010100010011100000000000000" },
+        { 6, 12, -2, "000000000000011100100100100000111100100010100010100010011100000000000000" },
+        { 6, 12, -2, "000000000000111110100100000100001000001000001000001000001000000000000000" },
+        { 6, 12, -2, "000000000000011100100010100010011100100010100010100010011100000000000000" },
+        { 6, 12, -2, "000000000000011100100010100010100010011110000010010010011100000000000000" },
+        { 6, 12, -2, "000000000010000100000100000100001000001000010000010000010000100000000000" },
+    }
+};
+static struct ftcharhack simsun_13 = {
+    "SimSun", 13, L"0123456789/", {
+        { 7, 13, -2, "0000000000000000111000100010010001001000100100010010001001000100100010001110000000000000000" },
+        { 7, 13, -2, "0000000000000000010000011000000100000010000001000000100000010000001000001110000000000000000" },
+        { 7, 13, -2, "0000000000000000111000100010010001000000100000100000100000100000100000011111000000000000000" },
+        { 7, 13, -2, "0000000000000000111000100010000001000011000000010000001000000100100010001110000000000000000" },
+        { 7, 13, -2, "0000000000000000001000001100001010001001000100100100010001111000000100000111000000000000000" },
+        { 7, 13, -2, "0000000000000001111100100000010000001111000100010000001001000100100010001110000000000000000" },
+        { 7, 13, -2, "0000000000000000011100010010010000001011000110010010001001000100100010001110000000000000000" },
+        { 7, 13, -2, "0000000000000001111100100100000010000001000001000000100000010000001000000100000000000000000" },
+        { 7, 13, -2, "0000000000000000111000100010010001000101000011100010001001000100100010001110000000000000000" },
+        { 7, 13, -2, "0000000000000000111000100010010001001000100100110001101000000100100100011100000000000000000" },
+        { 7, 13, -2, "0000000000001000001000000100000100000010000010000001000001000000100000100000010000000000000" },
+    }
+};
+static struct ftcharhack simsun_14 = {
+    "SimSun", 14, L"0123456789/", {
+        { 7, 14, -2, "00000000000000000000000110000100100100001010000101000010100001010000100100100001100000000000000000" },
+        { 7, 14, -2, "00000000000000000000000010000111000000100000010000001000000100000010000001000011111000000000000000" },
+        { 7, 14, -2, "00000000000000000000000111000100010010001000000100000100000100000100000100010011111000000000000000" },
+        { 7, 14, -2, "00000000000000000000000111000100010010001000011000000010000001001000100100010001110000000000000000" },
+        { 7, 14, -2, "00000000000000000010000001000001100001010001001000100100100010001111100000100000111000000000000000" },
+        { 7, 14, -2, "00000000000000000000001111100100000010000001111000100010000001001000100100010001110000000000000000" },
+        { 7, 14, -2, "00000000000000000000000111100100010100000010111001100010100001010000101000010011110000000000000000" },
+        { 7, 14, -2, "00000000000000000000001111100100010010010000001000001000000100000010000001000000100000000000000000" },
+        { 7, 14, -2, "00000000000000000000001111001000010100001001001000111100100001010000101000010011110000000000000000" },
+        { 7, 14, -2, "00000000000000000000001111001000010100001010000101000110011101000000101000100111100000000000000000" },
+        { 7, 14, -2, "00000000000001000001000000100000010000010000001000001000000100000100000010000001000001000000000000" },
+    }
+};
+static struct ftcharhack simsun_15 = {
+    "SimSun", 15, L"0123456789/", {
+        { 8, 15, -2, "000000000000000000000000000110000010010001000010010000100100001001000010010000100100001000100100000110000000000000000000" },
+        { 8, 15, -2, "000000000000000000000000000100000111000000010000000100000001000000010000000100000001000000010000011111000000000000000000" },
+        { 8, 15, -2, "000000000000000000000000001111000100001001000010000000100000010000001000000100000010000001000010011111100000000000000000" },
+        { 8, 15, -2, "000000000000000000000000001111000100001001000010000001000001100000000100000000100100001001000010001111000000000000000000" },
+        { 8, 15, -2, "000000000000000000000000000010000000100000011000001010000100100001001000011111100000100000001000000111100000000000000000" },
+        { 8, 15, -2, "000000000000000000000000011111100100000001000000010111000110001000000010000000100100001001000010001111000000000000000000" },
+        { 8, 15, -2, "000000000000000000000000000111000010010001000000010000000101110001100010010000100100001001000010001111000000000000000000" },
+        { 8, 15, -2, "000000000000000000000000011111100100010001000100000010000000100000010000000100000001000000010000000100000000000000000000" },
+        { 8, 15, -2, "000000000000000000000000001111000100001001000010010000100011110000100100010000100100001001000010001111000000000000000000" },
+        { 8, 15, -2, "000000000000000000000000001110000100010001000010010000100100011000111010000000100000001000100100001110000000000000000000" },
+        { 8, 15, -2, "000000000000001000000100000001000000010000001000000010000001000000010000000100000010000000100000010000000100000000000000" },
+    }
+};
+static struct ftcharhack simsun_16 = {
+    "SimSun", 16, L"0123456789/", {
+        { 8, 16, -2, "00000000000000000000000000011000001001000100001001000010010000100100001001000010010000100100001000100100000110000000000000000000" },
+        { 8, 16, -2, "00000000000000000000000000010000011100000001000000010000000100000001000000010000000100000001000000010000011111000000000000000000" },
+        { 8, 16, -2, "00000000000000000000000000111100010000100100001001000010000001000000010000001000000100000010000001000010011111100000000000000000" },
+        { 8, 16, -2, "00000000000000000000000000111100010000100100001000000100000110000000010000000010000000100100001001000100001110000000000000000000" },
+        { 8, 16, -2, "00000000000000000000000000000100000011000001010000100100001001000100010001000100011111100000010000000100000111100000000000000000" },
+        { 8, 16, -2, "00000000000000000000000001111110010000000100000001000000010110000110010000000010000000100100001001000100001110000000000000000000" },
+        { 8, 16, -2, "00000000000000000000000000011100001001000100000001000000010110000110010001000010010000100100001000100100000110000000000000000000" },
+        { 8, 16, -2, "00000000000000000000000001111110010001000100010000001000000010000001000000010000000100000001000000010000000100000000000000000000" },
+        { 8, 16, -2, "00000000000000000000000000111100010000100100001001000010001001000001100000100100010000100100001001000010001111000000000000000000" },
+        { 8, 16, -2, "00000000000000000000000000011000001001000100001001000010010000100010011000011010000000100000001000100100001110000000000000000000" },
+        { 8, 16, -2, "00000000000000000000000100000010000000100000010000000100000010000000100000010000000100000010000000100000010000000100000000000000" },
+    }
+};
+static struct ftcharhack simsun_17 = {
+    "SimSun", 17, L"0123456789/", {
+        { 9, 17, -2, "000000000000000000000000000000000000000111000001000100010000010010000010010000010010000010010000010010000010010000010001000100000111000000000000000000000" },
+        { 9, 17, -2, "000000000000000000000000000000000000000010000001110000000010000000010000000010000000010000000010000000010000000010000000010000001111100000000000000000000" },
+        { 9, 17, -2, "000000000000000000000000000000000000001111000010000100010000100010000100000001000000001000000010000000100000001000000010000100011111100000000000000000000" },
+        { 9, 17, -2, "000000000000000000000000000000000000001111000010000100010000100000001000000110000000001000000000100000000100010000100010000100001111000000000000000000000" },
+        { 9, 17, -2, "000000000000000000000000000000001000000001000000011000000101000001001000001001000010001000010001000001111100000001000000001000000111110000000000000000000" },
+        { 9, 17, -2, "000000000000000000000000000000000000011111100010000000010000000010000000010111000011000100000000100000000100010000100010000100001111000000000000000000000" },
+        { 9, 17, -2, "000000000000000000000000000000000000000111100001000100010000000010000000010111000011000100010000010010000010010000010001000100000111000000000000000000000" },
+        { 9, 17, -2, "000000000000000000000000000000000000011111110010000100010001000000001000000010000000010000000100000000100000000100000000100000000100000000000000000000000" },
+        { 9, 17, -2, "000000000000000000000000000000000000000111000001000100010000010010000010001000100000111000001000100010000010010000010001000100000111000000000000000000000" },
+        { 9, 17, -2, "000000000000000000000000000000000000000111000001000100010000010010000010010000010001000110000111010000000010000000010001000100001111000000000000000000000" },
+        { 9, 17, -2, "000000000000000000000000010000000100000000100000001100000001000000001000000010000000010000000100000000100000001100000001000000001000000010000000000000000" },
+    }
+};
+static const struct ftcharhack *charhack[] = {
+    &simsun_12,
+    &simsun_13,
+    &simsun_14,
+    &simsun_15,
+    &simsun_16,
+    &simsun_17,
+    NULL // EOF
+};
+
+
+static struct ftchar *ftfont_charhack(struct ftfont *font, wchar_t c)
+{
+    struct ftchar *ret = NULL;
+    
+    // get font name
+    const char *fontname = font->face->family_name;
+    if (!fontname) goto fail;
+    
+    // check quality
+    if (font->quality == FTFONT_AA) goto fail;
+    
+    // lookup for hacks
+    const struct ftcharhack **p;
+    for (p = charhack; *p; p++) {
+        const wchar_t *f;
+        if (font->size == (*p)->size && strstr(fontname, (*p)->fontname) && (f = wcschr((*p)->charmap, c))) {
+            const struct ftcharhack_bitmap *bitmap = &(*p)->bitmap[f - (*p)->charmap];
+            assert((int) strlen(bitmap->data) == bitmap->w * bitmap->h);
+            int should_embolden = font->bold >= FTFONT_BITMAP_BOLD_LIMIT;
+            ret = malloc(sizeof(struct ftchar) + (bitmap->w + should_embolden) * bitmap->h);
+            if (!ret) goto fail;
+            ret->tex = NULL;
+            ret->u = ret->v = 0;
+            ret->w = bitmap->w + should_embolden;
+            ret->h = bitmap->h;
+            ret->l = 0;
+            ret->t = bitmap->h + bitmap->yshift;
+            ret->adv = bitmap->w;
+            const char *src = bitmap->data;
+            unsigned char *dst = ret->bitmap;
+            if (should_embolden) {
+                int i, j;
+                for (i = 0; i < bitmap->h; i++) {
+                    unsigned char *dst_line = dst;
+                    *dst++ = 0;
+                    for (j = 0; j < bitmap->w; j++) {
+                        *dst++ = *src++ == '1' ? 0xFF : 0;
+                    }
+                    for (j = 0; j < bitmap->w; j++) {
+                        *dst_line |= *(dst_line + 1);
+                        dst_line++;
+                    }
+                }
+            } else {
+                while (*src) *dst++ = *src++ == '1' ? 0xFF : 0;
+            }
+            break;
+        }
+    }
+    
+    return ret;
+fail:
+    if (ret) free(ret);
+    return NULL;
+}
+
 
 static void ftfont_loadchar(struct ftfont *font, wchar_t c)
 {
@@ -147,6 +331,10 @@ static void ftfont_loadchar(struct ftfont *font, wchar_t c)
     FT_Bitmap bmp;
     
     // check if already loaded
+    if (font->ch[c]) return;
+    
+    // check if there is a hack
+    font->ch[c] = ftfont_charhack(font, c);
     if (font->ch[c]) return;
     
     // process quality setting
@@ -193,7 +381,9 @@ static void ftfont_loadchar(struct ftfont *font, wchar_t c)
     
     // alloc memory
     ch = malloc(sizeof(struct ftchar) + w * h);
+    if (!ch) goto bmpfail;
     memset(ch, 0, sizeof(struct ftchar) + w * h);
+    
     ch->tex = NULL;
     ch->u = ch->v = 0;
     ch->w = w;
@@ -255,10 +445,13 @@ static void ftfont_assign_texture(struct ftfont *font, wchar_t c)
     if (r == 0) {
         new_node = malloc(sizeof(struct fttexture));
         if (!new_node) goto fail;
+        memset(new_node, 0, sizeof(struct fttexture));
+        
         if (FAILED(IDirect3DDevice9_CreateTexture(pd3dDevice, font->texsize, font->texsize, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &new_tex, NULL))) {
             new_tex = NULL;
             goto fail;
         }
+        fill_texture(new_tex, 0x00000000);
         new_node->tex = new_tex;
         new_node->next = font->texhead;
         font->texhead = new_node;
@@ -295,17 +488,15 @@ static int ftfont_draw_char(struct ftfont *font, wchar_t c, int left, int top, D
     int adv = font->size;
     ftfont_assign_texture(font, c);
     struct ftchar *ch = font->ch[c];
-    top += font->size;
+    top += font->size + font->yshift;
+    left += font->xshift;
     if (ch && ch->tex) {
         adv = ch->adv;
         RECT rc;
         set_rect_ltwh(&rc, ch->u, ch->v, ch->w, ch->h);
         left += ch->l;
         top -= ch->t;
-        D3DXVECTOR3 pos;
-        pos.x = left;
-        pos.y = top;
-        pos.z = 0.0f;
+        D3DXVECTOR3 pos = { left, top, 0.0f };
         ID3DXSprite_Draw(sprite, ch->tex->tex, &rc, NULL, &pos, color);
     }
     return adv;

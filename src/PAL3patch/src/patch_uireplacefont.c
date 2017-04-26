@@ -431,14 +431,16 @@ static void ui_replacefont_d3dxfont_init()
     if (sscanf(get_string_from_configfile("uireplacefont_size"), "%d,%d,%d", &d3dxfont_sizelist[D3DXFONT_U12], &d3dxfont_sizelist[D3DXFONT_U16], &d3dxfont_sizelist[D3DXFONT_U20]) != 3) {
         fail("can't parse font size string.");
     }
-    if (sscanf(get_string_from_configfile("uireplacefont_bold"), "%d,%d,%d", &d3dxfont_boldflag[D3DXFONT_U12], &d3dxfont_boldflag[D3DXFONT_U16], &d3dxfont_boldflag[D3DXFONT_U20]) != 3) {
+    
+    double boldfactor_u12, boldfactor_u16, boldfactor_u20;
+    if (sscanf(get_string_from_configfile("uireplacefont_bold"), "%lf,%lf,%lf", &boldfactor_u12, &boldfactor_u16, &boldfactor_u20) != 3) {
         fail("can't parse font bold flag string.");
     }
     
-    int i;
-    for (i = 0; i < D3DXFONT_COUNT; i++) {
-        d3dxfont_boldflag[i] *= defaultfont_bold;
-    }
+    d3dxfont_boldflag[D3DXFONT_U12] = round(boldfactor_u12 * defaultfont_bold + eps);
+    d3dxfont_boldflag[D3DXFONT_U16] = round(boldfactor_u16 * defaultfont_bold + eps);
+    d3dxfont_boldflag[D3DXFONT_U20] = round(boldfactor_u20 * defaultfont_bold + eps);
+
     
     // add hooks
     add_postd3dcreate_hook(d3dxfont_init);

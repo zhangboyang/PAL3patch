@@ -1,15 +1,11 @@
 #include "common.h"
 
 // hook gbTexture_D3D::CreateForRenderTarget, clear texture after creation
-static VOID WINAPI fill_black(D3DXVECTOR4 *pOut, const D3DXVECTOR2 *pTexCoord, const D3DXVECTOR2 *pTexelSize, LPVOID pData)
-{
-   *pOut = (D3DXVECTOR4) { 0.0f, 0.0f, 0.0f, 1.0f };
-}
 static MAKE_THISCALL(int, gbTexture_D3D_CreateForRenderTarget_wrapper, struct gbTexture_D3D *this, int width, int height, enum gbPixelFmtType format)
 {
     int ret = gbTexture_D3D_CreateForRenderTarget(this, width, height, format);
     if (ret) {
-        D3DXFUNC(D3DXFillTexture)((IDirect3DTexture9 *) this->pTex, fill_black, NULL);
+        fill_texture((IDirect3DTexture9 *) this->pTex, 0xFF000000);
     }
     return ret;
 }

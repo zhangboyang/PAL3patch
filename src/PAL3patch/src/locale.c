@@ -30,7 +30,7 @@ static const wchar_t wstr_confirmquit_title_CHS[] = L"退出";
 
 static const char ftfont_filename_CHS[] = "simsun.ttc";
 static const int ftfont_index_CHS = 0;
-static const int defaultfont_bold_CHS = 64;
+static const int defaultfont_bold_CHS = 48;
 
 static const wchar_t wstr_defaultfont_CHS[] = L"宋体";
 static const wchar_t wstr_gameloading_CHS[] = L"游戏加载中，请稍候……";

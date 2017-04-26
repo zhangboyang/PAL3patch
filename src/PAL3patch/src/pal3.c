@@ -230,3 +230,18 @@ void set_d3dxfont_matrices(IDirect3DDevice9 *pd3dDevice)
     IDirect3DDevice9_SetTransform(pd3dDevice, D3DTS_PROJECTION, (D3DMATRIX *) &projection);
 }
 
+
+// fill texture with given color
+static VOID WINAPI fill_texture_callback(D3DXVECTOR4 *pOut, const D3DXVECTOR2 *pTexCoord, const D3DXVECTOR2 *pTexelSize, LPVOID pData)
+{
+   *pOut = *(D3DXVECTOR4 *) pData;
+}
+void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color)
+{
+    float r = (color & 0xFF) / 255.0f;
+    float g = ((color >> 8) & 0xFF) / 255.0f;
+    float b = ((color >> 16) & 0xFF) / 255.0f;
+    float a = ((color >> 24) & 0xFF) / 255.0f;
+    D3DXVECTOR4 vcolor = (D3DXVECTOR4) { r, g, b, a };
+    D3DXFUNC(D3DXFillTexture)(tex, fill_texture_callback, &vcolor);
+}

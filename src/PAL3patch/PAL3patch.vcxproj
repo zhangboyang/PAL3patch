@@ -39,12 +39,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(IncludePath);C:\DX90SDK\Include</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib</LibraryPath>
+    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype\include</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype\objs\vc2010\Win32</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(IncludePath);C:\DX90SDK\Include</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib</LibraryPath>
+    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype\include</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype\objs\vc2010\Win32</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -92,6 +92,7 @@
     <ClCompile Include="src\d3d9sdk.c" />
     <ClCompile Include="src\effecthook.c" />
     <ClCompile Include="src\framework.c" />
+    <ClCompile Include="src\ftfont.c" />
     <ClCompile Include="src\hook.c" />
     <ClCompile Include="src\locale.c" />
     <ClCompile Include="src\memallocator.c" />
@@ -137,7 +138,6 @@
     <ClCompile Include="src\patch_terminateatexit.c" />
     <ClCompile Include="src\patch_testcombat.c" />
     <ClCompile Include="src\patch_timerresolution.c" />
-    <ClCompile Include="src\patch_traditionalfont.c" />
     <ClCompile Include="src\patch_uireplacefont.c" />
     <ClCompile Include="src\patch_uireplacetexf.c" />
     <ClCompile Include="src\patch_voice.c" />
@@ -155,6 +155,7 @@
     <ClInclude Include="src\d3d9sdk.h" />
     <ClInclude Include="src\effecthook.h" />
     <ClInclude Include="src\framework.h" />
+    <ClInclude Include="src\ftfont.h" />
     <ClInclude Include="src\hook.h" />
     <ClInclude Include="src\locale.h" />
     <ClInclude Include="src\memallocator.h" />

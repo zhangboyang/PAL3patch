@@ -44,13 +44,17 @@ https://lists.nongnu.org/archive/html/freetype/2002-12/msg00061.html
 http://bbs.csdn.net/topics/60300938
 无奈之下我也去读win2000和freetype源码，但是我却没在win2000源码中找到所谓的“TextOut的实现”
 
-后来自己研究解决此问题：
+后来自己研究此问题：
 （1）该问题只在使用宋体（simsun.ttc）时出现，在细明体中（mingliu.ttc）却不出现，推测是字体本身问题
 （2）用fontforge打开宋体，会发现英文部分根本没有内嵌点阵！也就是说，所谓点阵，其实还是根据字形画出来的
 （3）强制让freetype渲染为黑白图片（而不是灰度），则渲染结果与win下有细微的差别（例如小写字母w在字号较小时）
-（4）强制用FT_Property_Set函数将truetype的interpreter-version设为TT_INTERPRETER_VERSION_35后，渲染结果完全一样了！
+（4）强制用FT_Property_Set函数将truetype的interpreter-version设为TT_INTERPRETER_VERSION_35后，渲染结果几乎一样了！
 （5）但是这样设置只在“强制黑白”的模式下有效，因此先使用一个中文字符检测是否正在使用点阵，然后根据需要设置“强制黑白”标志即可。
+（6）注意：这样做之后，仍然有部分字符渲染结果与win渲染结果有微小差异（例如数字4）
+
+最终也没有完美解决这个问题，因为仙剑中只用到了数字，所以决定强行在程序中特判并且内嵌正确的点阵数据。
 
 参考资料：
 https://www.freetype.org/freetype2/docs/reference/ft2-tt_driver.html
+http://bbs.csdn.net/topics/110137892
 
