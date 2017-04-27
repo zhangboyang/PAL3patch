@@ -82,8 +82,8 @@ FIXED: RenderTarget创建的RTT纹理分辨率只有256x256，是否可以改大
 FIXED: 如果配置文件中有效行总大小超过4KB，则fail和warning时可能显示不全
 FIXED: 配置文件应使用UTF8，增强繁体系统的用户体验（需要时，在程序内部由UTF8转为UNICODE）
 FIXED: 若双开，某些系统下，第二个示例检测到双开，在WinMain返回后某处崩溃（未打任何补丁时也会崩溃）（通过直接TerminateProcess避免崩溃）
-繁体字默认加粗可能不好看
-Win9x系统下，ID3DXFont可能显示有问题
+FIXED: 繁体字默认加粗可能不好看（freetype可以控制加粗的粗细，另外繁体点阵字不加粗）
+FIXED: Win9x系统下，ID3DXFont可能显示有问题（用freetype即可避免此问题）
 FIXED: 更新Win10 1703（创意者更新）后，宋体的某些字号下，字体渲染太细（轻、淡），导致不易阅读（解决方案：在说明文件中提示用户尝试不同字体输出质量）
 FIXED: 添加游戏自带字体会与系统已经安装的字体冲突，导致游戏中显示的字体实际上是系统字体而不是游戏自带字体（解决方案：对游戏自带字体改名）
 
@@ -139,4 +139,4 @@ ABANDONED: 用AlphaBlend代替AlphaTest获得更好的透明效果（这几乎�
 在 linux 系统下用 wine 2.5 或更低版本运行时，会在读取配置文件时发生错误（见notes20170408.txt）
 用新版 mingw-gcc 编译时，若不开启内联函数优化，则会在编译时弹出警告而导致编译终止（见notes20170408.txt）
 用 mingw-gcc 编译时，有可能因为缺少 iconv 而导致编译失败（见notes20170408.txt）
-
+用 gcc 编译时，因为 freetype 头文件中有非 ascii 字符，有可能因为 -finput-charset=cp936 选项而导致编译失败（见notes20170423.txt）

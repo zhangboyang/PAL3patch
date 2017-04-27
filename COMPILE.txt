@@ -31,6 +31,7 @@
     （1）安装 VC++ 2013 或更高版本（VC++ 2013, 2015, 2017 均已测试，可以正常编译）
          注意需要安装“对 C++ 的 Windows XP 支持”、“MFC 和 ATL 支持”（如果有必要的话）
     （2）解压缩 SDK 安装包 dx90updatesdk.exe 到 C:\DX90SDK 目录下（注意只需解压缩，无需安装）
+    （3）解压缩并编译 FreeType 库（具体步骤见后）
    编译方法：
     （1）将 extra\PAL3patch\PAL3patch_asm\PAL3patch_asm.lib 复制到 src\PAL3patch 目录下
     （2）打开 src\PAL3patch.sln 直接编译即可
@@ -64,6 +65,11 @@
          在“选项”对话框中左侧选择“项目和解决方案——生成并运行”，
          在右侧取消选择“在运行时仅生成启动项目和依赖项”，
          然后点击“确定”关闭对话框即可
+   附：用 VC++ 2013 编译 FreeType 库的方法
+    （1）下载 FreeType 源代码，以 2.7.1 版本为例，源码包为 freetype-2.7.1.tar.bz2
+    （2）解压缩到 C:\ 下，然后将带版本的目录名（freetype-2.7.1）改为不带版本的目录名，即 freetype
+    （3）打开 C:\freetype\builds\windows\vc2010\freetype.sln
+    （4）选择“生成”菜单中的“批生成”，在弹出的对话框中点击“全选”再点击“重新生成”
 
 
 编译方式二：使用 GCC & VC++ 6.0 编译
@@ -78,11 +84,11 @@
     （2）安装 VC++ 6.0，需要打 SP6 补丁
     （3）安装 Dev-C++ 4.9.9.2
     （4）安装 MSYS 1.0.11（安装时需配置好路径，让其使用 Dev-C++ 带有的 GCC 3.4.2，即在 msys 命令行中能够执行 gcc）
+    （5）安装 DirectX 9.0b SDK（具体步骤见后）
+    （6）解压缩并编译 FreeType 库（具体步骤见后）
    编译方法：
-    （1）解压缩 SDK 安装包 dx90updatesdk.exe 到 C:\DX90SDK 目录下（注意只需解压缩，无需安装）
-    （2）在 VC++ 6.0 中配置好 VC++ 目录（添加 C:\DX90SDK\Include 到引用目录末尾，添加 C:\DX90SDK\Lib 到库目录末尾）
-    （3）运行 MSYS，在命令行中切换目录到 src 目录下，执行 make 命令即可编译
-    （4）编译好的程序位于：
+    （1）运行 MSYS，在命令行中切换目录到 src 目录下，执行 make 命令即可编译
+    （2）编译好的程序位于：
          src\PAL3patch\PAL3patch.dll
          src\PAL3voice\Release\PAL3voice.dll
          src\PatchConfig\Release\PatchConfig.exe
@@ -91,4 +97,15 @@
    注意：
     （1）如果使用 Dev-C++ 4.9.9.2 随附的 GCC 3.4.2 编译，请不要打开编译优化，否则可能生成错误的代码
     （2）如果编译补丁时不想静态链接 D3DX9，可以将 src\PAL3patch\Makefile 中的“LINK_D3DX9 := 1”改为“LINK_D3DX9 := 0”
+   附：为 VC++ 6.0 安装 DirectX 9.0b SDK 的方法 
+    （1）解压缩 SDK 安装包 dx90updatesdk.exe 到 C:\DX90SDK 目录下（注意只需解压缩，无需安装）
+    （2）在 VC++ 6.0 中配置好 VC++ 目录（添加 C:\DX90SDK\Include 到引用目录末尾，添加 C:\DX90SDK\Lib 到库目录末尾）
+   附：为 VC++ 6.0 安装 FreeType 库的方法
+    （1）下载 FreeType 源代码，以 2.7.1 版本为例，源码包为 freetype-2.7.1.tar.bz2
+    （2）解压缩到 C:\ 下，然后将带版本的目录名（freetype-2.7.1）改为不带版本的目录名，即 freetype
+    （3）在 C:\freetype\include\freetype\freetype.h 中的第 3126 行可能存在一个乱码字符，需要删掉
+    （4）打开 C:\freetype\builds\windows\visualc\freetype.dsw
+    （5）选择“Build”菜单中“Batch Build”，然后在对话框左侧选择所有配置项，在点击“Rebuild All”
+    （6）将 C:\freetype\objs 目录下带版本号的库文件（freetype271.lib）重命名为不带版本号的文件 freetype.lib
+    （7）在 VC++ 6.0 中配置好 VC++ 目录（添加 C:\freetype\include 到引用目录末尾，添加 C:\freetype\objs 到库目录末尾）
 
