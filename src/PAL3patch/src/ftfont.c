@@ -123,8 +123,8 @@ struct ftfont *ftfont_create(const char *filename, int face_index, int req_size,
     if (e) goto fail;
     
     // calc texture size and set layout to full
-    for (ret->texsize = 64; ret->texsize < ret->size; ret->texsize *= 2);
-    ftfont_clear_layout(&ret->texlayout, ret->texsize, ret->texsize, 1);
+    ret->texw = ret->texh = FTFONT_MIN_TEXTURE_SIZE;
+    ftfont_clear_layout(&ret->texlayout, 0, 0, 1);
     
     // set shift data
     ret->yshift = ret->size * face->descender / face->units_per_EM;
@@ -441,13 +441,15 @@ static void ftfont_assign_texture(struct ftfont *font, wchar_t c)
     
     // layout char
     r = ftfont_do_layout(&font->texlayout, ch->w, ch->h, &u, &v);
-    if (r < 0) return;
-    if (r == 0) {
+    if (r <= 0) {
+        while (ch->w > font->texw) font->texw *= 2;
+        while (ch->h > font->texh) font->texh *= 2;
+
         new_node = malloc(sizeof(struct fttexture));
         if (!new_node) goto fail;
         memset(new_node, 0, sizeof(struct fttexture));
         
-        if (FAILED(IDirect3DDevice9_CreateTexture(pd3dDevice, font->texsize, font->texsize, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &new_tex, NULL))) {
+        if (FAILED(IDirect3DDevice9_CreateTexture(pd3dDevice, font->texw, font->texh, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &new_tex, NULL))) {
             new_tex = NULL;
             goto fail;
         }
@@ -455,7 +457,7 @@ static void ftfont_assign_texture(struct ftfont *font, wchar_t c)
         new_node->tex = new_tex;
         new_node->next = font->texhead;
         font->texhead = new_node;
-        ftfont_clear_layout(&font->texlayout, font->texsize, font->texsize, 0);
+        ftfont_clear_layout(&font->texlayout, font->texw, font->texh, 0);
         r = ftfont_do_layout(&font->texlayout, ch->w, ch->h, &u, &v);
         assert(r > 0);
     }
