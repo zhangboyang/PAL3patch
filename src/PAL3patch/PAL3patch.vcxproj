@@ -92,6 +92,7 @@
     <ClCompile Include="src\d3d9sdk.c" />
     <ClCompile Include="src\effecthook.c" />
     <ClCompile Include="src\framework.c" />
+    <ClCompile Include="src\ftcharhack.c" />
     <ClCompile Include="src\ftfont.c" />
     <ClCompile Include="src\hook.c" />
     <ClCompile Include="src\locale.c" />
@@ -155,6 +156,7 @@
     <ClInclude Include="src\d3d9sdk.h" />
     <ClInclude Include="src\effecthook.h" />
     <ClInclude Include="src\framework.h" />
+    <ClInclude Include="src\ftcharhack.h" />
     <ClInclude Include="src\ftfont.h" />
     <ClInclude Include="src\hook.h" />
     <ClInclude Include="src\locale.h" />

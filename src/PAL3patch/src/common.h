@@ -136,6 +136,7 @@ typedef unsigned char bool;
 #include "effecthook.h"
 #include "texturehook.h"
 #include "ftfont.h"
+#include "ftcharhack.h"
 
 
 // patch oldnames
