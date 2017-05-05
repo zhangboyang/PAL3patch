@@ -27,6 +27,8 @@ static char *clamp_list[] = {
     "ui\\GameMainUI\\Communal\\Scroll\\scrollbar0.tga",
     "ui\\GameMainUI\\Communal\\Scroll\\scrollbar1.tga",
     "ui\\GameMainUI\\Communal\\Scroll\\scrollbar2.tga",
+    
+    "ui\\Menu\\yun16.tga",
 };
 static int in_clamp_list(const char *filename)
 {

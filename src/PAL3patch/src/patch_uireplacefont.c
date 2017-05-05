@@ -331,8 +331,9 @@ static void d3dxfont_onresetdevice()
 struct d3dxfont_strnode {
     int fontid;
     wchar_t *wstr;
-    int left;
-    int top;
+    double oleft, otop; // original (before transform) coord
+    double tleft, ttop; // transformed coord
+    double fleft, ftop; // final coord (for displaying)
     D3DCOLOR color;
     struct d3dxfont_strnode *next;
 };
@@ -353,10 +354,13 @@ static MAKE_THISCALL(void, gbPrintFont_UNICODE_PrintString, struct gbPrintFont_U
     fRECT frect;
     int fontheight = d3dxfont_sizelist_orig[d3dxfont_getfontid_orig(this->fontsize)];
     set_frect_ltwh(&frect, gbx2x(x), gby2y(y) - fontheight, 0, fontheight);
+    node->oleft = frect.left;
+    node->otop = frect.top;
     fixui_adjust_fRECT(&frect, &frect);
-    node->left = round(frect.left + eps);
-    node->top = round(frect.top + eps);
-    
+    node->tleft = frect.left;
+    node->ttop = frect.top;
+    node->fleft = round(frect.left + eps);
+    node->ftop = round(frect.top + eps);
 
     // append to linked-list
     node->next = NULL;
@@ -372,6 +376,25 @@ static MAKE_THISCALL(void, gbPrintFont_UNICODE_Flush, struct gbPrintFont_UNICODE
 {
     struct d3dxfont_strnode *node, *nextnode;
     
+    // optimize coord of continous text
+    for (node = d3dxfont_strlist_head; node && node->next; node = node->next) {
+        if (wcslen(node->wstr) != 1) continue; 
+        double ot, od, td;
+        ot = node->otop;
+        od = td = inf;
+        while (node->next && wcslen(node->next->wstr) == 1 && fcmp(node->next->otop, ot) == 0) {
+            if (fabs((node->next->oleft - node->oleft) - od) > 1.0f) {
+                od = node->next->oleft - node->oleft;
+                td = round(node->next->tleft - node->tleft + eps);
+                //node->color = 0xFFFF0000;
+            }
+            //if (node->wstr[0] == L' ') node->wstr[0] = L'_';
+            //node->next->color = 0xFF00FF00;
+            node->next->fleft = node->fleft + td;
+            node = node->next;
+        }
+    }
+    
     // save device state
     IDirect3DStateBlock9_Capture(d3dxfont_stateblock);
     
@@ -386,9 +409,11 @@ static MAKE_THISCALL(void, gbPrintFont_UNICODE_Flush, struct gbPrintFont_UNICODE
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ALPHATESTENABLE, FALSE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_MULTISAMPLEANTIALIAS, FALSE);
     
     for (node = d3dxfont_strlist_head; node; node = node->next) {
-        d3dxfont_printwstr(d3dxfont_sprite, node->fontid, node->wstr, node->left, node->top, node->color);
+        d3dxfont_printwstr(d3dxfont_sprite, node->fontid, node->wstr, node->fleft, node->ftop, node->color);
     }
     ID3DXSprite_End(d3dxfont_sprite);
     

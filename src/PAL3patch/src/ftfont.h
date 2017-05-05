@@ -22,7 +22,8 @@
 #define FTFONT_MAXCHARS 0x10000
 #define FTFONT_BITMAP_BOLD_LIMIT 48
 #define FTFONT_BITMAP_TEST_CHAR L'\x6587'
-#define FTFONT_MIN_TEXTURE_SIZE 64
+#define FTFONT_TEXTURE_MINSIZE 64
+#define FTFONT_TEXTURE_MARGIN 4
 
 enum ftquality {
     FTFONT_NOAA,
@@ -32,6 +33,7 @@ enum ftquality {
 struct ftlayout {
     int w, h;
     int u, v, vnext;
+    int m;
 };
 
 struct fttexture {

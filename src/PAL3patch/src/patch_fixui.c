@@ -182,7 +182,9 @@ static MAKE_THISCALL(void, gbDynVertBuf_RenderUIQuad_wrapper, struct gbDynVertBu
     for (i = 0; i < count; i++) {
         fixui_adjust_gbUIQuad(&tmp_uiquad[i], &uiquad[i]);
     }
+    if (!fs->no_align) IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_MULTISAMPLEANTIALIAS, FALSE);
     gbDynVertBuf_RenderUIQuad(this, tmp_uiquad, count, render_effect, tex_array);
+    if (!fs->no_align) IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_MULTISAMPLEANTIALIAS, TRUE);
     free(tmp_uiquad);
 }
 static void hook_gbDynVertBuf_RenderUIQuad()

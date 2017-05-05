@@ -13,6 +13,9 @@ static void self_check()
         fail("wrong D3DX_SDK_VERSION.");
     }
     
+    // check basic types
+    assert(((wchar_t) -1) > 0); // ftfont request wchar_t is unsigned
+    
     // check struct sizes
     assert(sizeof(struct uiwnd_ptag) == 4);
     assert(sizeof(struct CCBUI) == 0xA48);

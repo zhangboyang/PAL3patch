@@ -81,6 +81,7 @@
 #define MAXLINEFMT "%4095s"
 
 #define eps (1e-5)
+#define inf (1e100)
 
 
 // bool

@@ -14,32 +14,41 @@ void init_ftfont()
 
 
 
-static void ftfont_clear_layout(struct ftlayout *l, int w, int h, int full)
+static void ftlayout_clear(struct ftlayout *l, int w, int h, int m)
 {
     *l = (struct ftlayout) {
         .w = w,
         .h = h,
-        .u = full ? w : 0,
-        .v = full ? h : 0,
-        .vnext = full ? h : 0,
+        .m = m,
+        .u = m,
+        .v = m,
+        .vnext = m,
     };
 }
 
-static int ftfont_do_layout(struct ftlayout *l, int w, int h, int *u, int *v)
+static void ftlayout_setfull(struct ftlayout *l)
+{
+    ftlayout_clear(l, 0, 0, 1);
+}
+
+static int ftlayout_addrect(struct ftlayout *l, int w, int h, int *u, int *v)
 {
     // return value:
     //  <0 --- impossible, even create a new layout with same width and height
     //  0  --- no space left, need create a new layout
     //  >0 --- successful, coord saved in *u and *v
     
-    if (w > l->w || h > l->h) {
+    w += l->m;
+    h += l->m;
+    
+    if (w > l->w - l->m || h > l->h - l->m) {
         // not possible
         return -1;
     }
     if (w > l->w - l->u) {
         // no space left in current line
         // switch to new line
-        l->u = 0;
+        l->u = l->m;
         l->v = l->vnext;
     }
     if (h > l->h - l->v) {
@@ -123,8 +132,8 @@ struct ftfont *ftfont_create(const char *filename, int face_index, int req_size,
     if (e) goto fail;
     
     // calc texture size and set layout to full
-    ret->texw = ret->texh = FTFONT_MIN_TEXTURE_SIZE;
-    ftfont_clear_layout(&ret->texlayout, 0, 0, 1);
+    ret->texw = ret->texh = FTFONT_TEXTURE_MINSIZE;
+    ftlayout_setfull(&ret->texlayout);
     
     // set shift data
     ret->yshift = ret->size * face->descender / face->units_per_EM;
@@ -327,10 +336,10 @@ static void ftfont_assign_texture(struct ftfont *font, wchar_t c)
     if (ch->tex) return;
     
     // layout char
-    r = ftfont_do_layout(&font->texlayout, ch->w, ch->h, &u, &v);
+    r = ftlayout_addrect(&font->texlayout, ch->w, ch->h, &u, &v);
     if (r <= 0) {
-        while (ch->w > font->texw) font->texw *= 2;
-        while (ch->h > font->texh) font->texh *= 2;
+        while (ch->w + 2 * FTFONT_TEXTURE_MARGIN > font->texw) font->texw *= 2;
+        while (ch->h + 2 * FTFONT_TEXTURE_MARGIN > font->texh) font->texh *= 2;
 
         new_node = malloc(sizeof(struct fttexture));
         if (!new_node) goto fail;
@@ -340,12 +349,12 @@ static void ftfont_assign_texture(struct ftfont *font, wchar_t c)
             new_tex = NULL;
             goto fail;
         }
-        fill_texture(new_tex, 0x00000000);
+        fill_texture(new_tex, 0x00FFFFFF);
         new_node->tex = new_tex;
         new_node->next = font->texhead;
         font->texhead = new_node;
-        ftfont_clear_layout(&font->texlayout, font->texw, font->texh, 0);
-        r = ftfont_do_layout(&font->texlayout, ch->w, ch->h, &u, &v);
+        ftlayout_clear(&font->texlayout, font->texw, font->texh, FTFONT_TEXTURE_MARGIN);
+        r = ftlayout_addrect(&font->texlayout, ch->w, ch->h, &u, &v);
         assert(r > 0);
     }
     ch->tex = font->texhead;
