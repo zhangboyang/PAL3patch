@@ -50,4 +50,5 @@ UIButtonEx
 UIButtonEXA
 UIParticle
 GrayScale
+CCBAttackSequen/tagAttackSequen（已修正）
 

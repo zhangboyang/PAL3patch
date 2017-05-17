@@ -18,6 +18,8 @@ extern int str2int(const char *valstr);
 extern double str2double(const char *valstr);
 extern int str_iendwith(const char *a, const char *b);
 extern int iabs(int x);
+extern int imax(int a, int b);
+extern int imin(int a, int b);
 extern double fbound(double x, double low, double high);
 extern int fcmp(double a, double b);
 extern HMODULE GetModuleHandle_check(LPCSTR lpModuleName);

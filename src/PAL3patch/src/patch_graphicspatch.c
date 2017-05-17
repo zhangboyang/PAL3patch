@@ -709,7 +709,7 @@ static void init_resolution_and_window_patch()
     } else {
         if (window_cfg == WINDOW_NOBORDER) resolution_cfg = "current";
     }
-    if (strcmp(resolution_cfg, "current") == 0 && window_cfg == WINDOW_NORMAL) window_cfg = WINDOW_NOBORDER;
+    if (strcmp(resolution_cfg, "current") == 0 && window_cfg == WINDOW_NORMAL) resolution_cfg = "800x600";
     
     // init patches
     init_window_patch(window_cfg);

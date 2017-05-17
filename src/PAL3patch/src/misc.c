@@ -39,6 +39,16 @@ int iabs(int x)
     return x >= 0 ? x : -x;
 }
 
+int imax(int a, int b)
+{
+    return a > b ? a : b;
+}
+
+int imin(int a, int b)
+{
+    return a < b ? a : b;
+}
+
 double fbound(double x, double low, double high)
 {
     return fmin(fmax(x, low), high);

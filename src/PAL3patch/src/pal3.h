@@ -1616,6 +1616,31 @@ struct UnderWater {
     float m_fTime;
 };
 
+struct tagAttackSequen {
+    float fDeltaTime;
+    float fLastTime;
+    int nIndex;
+    unsigned int dwID;
+    struct UIStatic *pPic;
+    int nSlot1;
+    int nSlot2;
+    int nRound;
+    BYTE bySpeed1;
+    BYTE bySpeed2;
+    BYTE bSlot2Running;
+    BYTE bPaused;
+    BYTE bValid;
+};
+struct CCBAttackSequen {
+    struct CCBSystem *m_pCBSystem;
+    struct CCBUI *m_pUI;
+    struct CCBRoleState *m_pRole;
+    struct tagAttackSequen m_Sequen[11];
+    BYTE m_bEnable;
+    BYTE m_bPause;
+    BYTE m_bVisible;
+    BYTE m_bLocked;
+};
 
 // GBENGINE functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
@@ -1722,6 +1747,7 @@ struct UnderWater {
 #define UnderWater_Inst ((struct UnderWater *(*)(void)) TOPTR(0x004BFD20))
 #define ui_tex_color_gbf (*(struct gbRenderEffect **) TOPTR(0x01895058))
 #define RenderTarget_Inst ((struct RenderTarget *(*)(void)) TOPTR(0x004BDB10))
+#define CCBRoleState_IsAlive(this, nIndex) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004ED010, bool, struct CCBRoleState *, int), this, nIndex)
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) TOPTR(0x00BFDA60))

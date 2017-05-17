@@ -55,6 +55,8 @@ static void self_check()
     assert(sizeof(struct UICursor) == 0x20);
     assert(sizeof(struct UnderWater) == 0x18);
     assert(sizeof(struct RenderTarget) == 0xC8);
+    assert(sizeof(struct tagAttackSequen) == 0x28);
+    assert(sizeof(struct CCBAttackSequen) == 0x1C8);
 }
 
 static void fix_unpacker_bug()
@@ -128,6 +130,7 @@ static void init_stage2()
     INIT_PATCHSET(relativetimer);
     INIT_PATCHSET(kahantimer);
     INIT_PATCHSET(fixlongkuiattack);
+    INIT_PATCHSET(fixattacksequen);
     INIT_PATCHSET(kfspeed);
     INIT_PATCHSET(fixacquire);
     INIT_PATCHSET(preciseresmgr);

@@ -109,6 +109,7 @@
     <ClCompile Include="src\patch_dpiawareness.c" />
     <ClCompile Include="src\patch_fix3dctrl.c" />
     <ClCompile Include="src\patch_fixacquire.c" />
+    <ClCompile Include="src\patch_fixattacksequen.c" />
     <ClCompile Include="src\patch_fixcombatui.c" />
     <ClCompile Include="src\patch_fixeffect.c" />
     <ClCompile Include="src\patch_fixfov.c" />
