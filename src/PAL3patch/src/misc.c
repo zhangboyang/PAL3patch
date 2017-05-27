@@ -111,6 +111,20 @@ void NORETURN die(int status)
 
 static wchar_t *msgbox_buf = NULL;
 
+static void write_logfile_header(FILE *fp)
+{
+    fputs("\xEF\xBB\xBF", fp);
+    
+    fputs("build information:\n", fp);
+    fputs(build_info, fp);
+    
+    fputs("library information:\n", fp);
+    fputs(lib_info, fp);
+    
+    fputs("patch configuration:\n", fp);
+    dump_all_config(fp);
+}
+
 void NORETURN __fail(const char *file, int line, const char *func, const char *fmt, ...)
 {
     va_list ap;
@@ -124,13 +138,7 @@ void NORETURN __fail(const char *file, int line, const char *func, const char *f
     OutputDebugString(msgbuf); OutputDebugString("\n");
     FILE *fp = fopen(ERROR_FILE, "w");
     if (fp) {
-        fputs("\xEF\xBB\xBF", fp);
-        
-        fputs("build information:\n", fp);
-        fputs(build_info, fp);
-        
-        fputs("patch configuration:\n", fp);
-        dump_all_config(fp);
+        write_logfile_header(fp);
         
         SYSTEMTIME SystemTime;
         GetLocalTime(&SystemTime);
@@ -167,13 +175,8 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
         FILE *fp = fopen(WARNING_FILE, plog_lines > 1 ? "a" : "w");
         if (fp) {
             if (plog_lines == 1) {
-                fputs("\xEF\xBB\xBF", fp);
+                write_logfile_header(fp);
                 
-                fputs("build information:\n", fp);
-                fputs(build_info, fp);
-                
-                fputs("patch configuration:\n", fp);
-                dump_all_config(fp);
                 fputs("========== start ==========\n\n", fp);
             }
             

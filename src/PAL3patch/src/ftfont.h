@@ -9,11 +9,18 @@
 #include FT_BITMAP_H
 
 
-#if defined(_MSC_VER) && !defined(DYNLINK_D3DX9_AT_RUNTIME)
-#ifdef _DEBUG
-#pragma comment(lib, "freetype" TOSTR(FREETYPE_MAJOR) TOSTR(FREETYPE_MINOR) TOSTR(FREETYPE_PATCH) "d.lib")
+#if FREETYPE_PATCH != 0
+#define FTFONT_VERSTR TOSTR(FREETYPE_MAJOR) TOSTR(FREETYPE_MINOR) TOSTR(FREETYPE_PATCH)
 #else
-#pragma comment(lib, "freetype" TOSTR(FREETYPE_MAJOR) TOSTR(FREETYPE_MINOR) TOSTR(FREETYPE_PATCH) ".lib")
+#define FTFONT_VERSTR TOSTR(FREETYPE_MAJOR) TOSTR(FREETYPE_MINOR)
+#endif
+
+
+#if defined(_MSC_VER)
+#ifdef _DEBUG
+#pragma comment(lib, "freetype" FTFONT_VERSTR "d.lib")
+#else
+#pragma comment(lib, "freetype" FTFONT_VERSTR ".lib")
 #endif
 #endif
 

@@ -33,6 +33,12 @@ const char build_info[] =
 #endif
     "\n";
 
+const char lib_info[] =
+    "  d3d9: " TOSTR(D3D_SDK_VERSION) "\n"
+    "  d3dx9: " TOSTR(D3DX_SDK_VERSION) "\n"
+    "  freetype: " FTFONT_VERSTR "\n"
+;
+
 void show_about()
 {
     int flag = get_int_from_configfile("showabout");
