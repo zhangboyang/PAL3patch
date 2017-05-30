@@ -36,6 +36,7 @@ MAKE_PATCHSET(relativetimer);
 MAKE_PATCHSET(kahantimer);
 MAKE_PATCHSET(fixlongkuiattack);
 MAKE_PATCHSET(fixattacksequen);
+MAKE_PATCHSET(fixhockshopbuy);
 MAKE_PATCHSET(kfspeed);
 MAKE_PATCHSET(fixacquire);
 MAKE_PATCHSET(preciseresmgr);

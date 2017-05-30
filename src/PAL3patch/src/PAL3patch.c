@@ -131,6 +131,7 @@ static void init_stage2()
     INIT_PATCHSET(kahantimer);
     INIT_PATCHSET(fixlongkuiattack);
     INIT_PATCHSET(fixattacksequen);
+    INIT_PATCHSET(fixhockshopbuy);
     INIT_PATCHSET(kfspeed);
     INIT_PATCHSET(fixacquire);
     INIT_PATCHSET(preciseresmgr);

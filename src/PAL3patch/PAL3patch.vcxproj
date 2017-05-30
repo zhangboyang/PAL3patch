@@ -113,6 +113,7 @@
     <ClCompile Include="src\patch_fixcombatui.c" />
     <ClCompile Include="src\patch_fixeffect.c" />
     <ClCompile Include="src\patch_fixfov.c" />
+    <ClCompile Include="src\patch_fixhockshopbuy.c" />
     <ClCompile Include="src\patch_fixlineupui.c" />
     <ClCompile Include="src\patch_fixlongkuiattack.c" />
     <ClCompile Include="src\patch_fixmemfree.c" />
