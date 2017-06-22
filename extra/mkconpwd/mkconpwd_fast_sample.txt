@@ -1,0 +1,148 @@
+WARNING: target defaulted to d5e4c8f8
+WARNING: sigma defaulted to '0123456789'
+WARNING: maxlen defaulted to 10
+WARNING: workerlen defaulted to 8
+WARNING: workers defaulted to 8
+INFO: MkConPwd::MAXLEN = 50
+INFO: MkConPwd::MAXSIGMA = 50
+INFO: MkConPwd::LOGFILE = conpwd.txt
+INFO: target=d5e4c8f8, sigma='0123456789'.
+INFO: maxlen=10, workerlen=8, workers=8
+INFO: search started ...
+INFO: worker 0 initialized.
+INFO: worker 1 initialized.
+INFO: worker 2 initialized.
+INFO: worker 3 initialized.
+INFO: worker 4 initialized.
+INFO: worker 5 initialized.
+INFO: worker 6 initialized.
+INFO: worker 7 initialized.
+INFO: worker 7 got job (len=8, base='')
+INFO: worker 1 got job (len=2, base='')
+INFO: worker 1 got job (len=8, base='0')
+INFO: worker 6 got job (len=4, base='')
+INFO: worker 6 got job (len=8, base='1')
+INFO: worker 3 got job (len=6, base='')
+INFO: worker 2 got job (len=5, base='')
+INFO: worker 2 got job (len=8, base='2')
+INFO: worker 3 got job (len=8, base='3')
+INFO: worker 0 got job (len=1, base='')
+INFO: worker 5 got job (len=3, base='')
+INFO: worker 4 got job (len=7, base='')
+INFO: worker 0 got job (len=8, base='4')
+INFO: worker 5 got job (len=8, base='5')
+INFO: worker 4 got job (len=8, base='6')
+INFO: worker 6 got job (len=8, base='7')
+INFO: worker 2 got job (len=8, base='8')
+INFO: worker 7 got job (len=8, base='9')
+INFO: worker 5 got job (len=8, base='00')
+INFO: worker 0 got job (len=8, base='01')
+INFO: worker 3 got job (len=8, base='02')
+INFO: worker 1 got job (len=8, base='03')
+INFO: worker 4 got job (len=8, base='04')
+INFO: worker 6 got job (len=8, base='05')
+INFO: worker 2 got job (len=8, base='06')
+INFO: worker 7 got job (len=8, base='07')
+INFO: worker 5 got job (len=8, base='08')
+INFO: worker 3 got job (len=8, base='09')
+INFO: worker 0 got job (len=8, base='10')
+INFO: worker 1 got job (len=8, base='11')
+INFO: worker 4 got job (len=8, base='12')
+INFO: worker 6 got job (len=8, base='13')
+INFO: worker 2 got job (len=8, base='14')
+INFO: worker 7 got job (len=8, base='15')
+INFO: worker 5 got job (len=8, base='16')
+INFO: worker 3 got job (len=8, base='17')
+INFO: worker 0 got job (len=8, base='18')
+INFO: worker 1 got job (len=8, base='19')
+INFO: worker 4 got job (len=8, base='20')
+INFO: worker 6 got job (len=8, base='21')
+INFO: worker 2 got job (len=8, base='22')
+INFO: worker 7 got job (len=8, base='23')
+INFO: worker 5 got job (len=8, base='24')
+INFO: worker 3 got job (len=8, base='25')
+INFO: worker 0 got job (len=8, base='26')
+INFO: worker 1 got job (len=8, base='27')
+INFO: worker 4 got job (len=8, base='28')
+INFO: worker 6 got job (len=8, base='29')
+INFO: worker 2 got job (len=8, base='30')
+INFO: worker 7 got job (len=8, base='31')
+INFO: worker 5 got job (len=8, base='32')
+INFO: worker 3 got job (len=8, base='33')
+INFO: worker 0 got job (len=8, base='34')
+INFO: worker 1 got job (len=8, base='35')
+INFO: worker 4 got job (len=8, base='36')
+FOUND: worker 7 found 3132206615
+INFO: worker 6 got job (len=8, base='37')
+INFO: worker 2 got job (len=8, base='38')
+INFO: worker 5 got job (len=8, base='39')
+INFO: worker 7 got job (len=8, base='40')
+INFO: worker 3 got job (len=8, base='41')
+INFO: worker 0 got job (len=8, base='42')
+INFO: worker 1 got job (len=8, base='43')
+INFO: worker 4 got job (len=8, base='44')
+INFO: worker 6 got job (len=8, base='45')
+INFO: worker 2 got job (len=8, base='46')
+INFO: worker 5 got job (len=8, base='47')
+INFO: worker 7 got job (len=8, base='48')
+INFO: worker 3 got job (len=8, base='49')
+INFO: worker 0 got job (len=8, base='50')
+INFO: worker 1 got job (len=8, base='51')
+INFO: worker 4 got job (len=8, base='52')
+INFO: worker 6 got job (len=8, base='53')
+INFO: worker 2 got job (len=8, base='54')
+INFO: worker 5 got job (len=8, base='55')
+INFO: worker 7 got job (len=8, base='56')
+INFO: worker 3 got job (len=8, base='57')
+INFO: worker 0 got job (len=8, base='58')
+INFO: worker 1 got job (len=8, base='59')
+INFO: worker 4 got job (len=8, base='60')
+FOUND: worker 0 found 5838672524
+INFO: worker 6 got job (len=8, base='61')
+INFO: worker 2 got job (len=8, base='62')
+INFO: worker 5 got job (len=8, base='63')
+INFO: worker 7 got job (len=8, base='64')
+INFO: worker 3 got job (len=8, base='65')
+INFO: worker 0 got job (len=8, base='66')
+INFO: worker 1 got job (len=8, base='67')
+INFO: worker 4 got job (len=8, base='68')
+INFO: worker 6 got job (len=8, base='69')
+INFO: worker 2 got job (len=8, base='70')
+INFO: worker 5 got job (len=8, base='71')
+INFO: worker 7 got job (len=8, base='72')
+INFO: worker 3 got job (len=8, base='73')
+INFO: worker 0 got job (len=8, base='74')
+INFO: worker 1 got job (len=8, base='75')
+INFO: worker 4 got job (len=8, base='76')
+INFO: worker 6 got job (len=8, base='77')
+INFO: worker 2 got job (len=8, base='78')
+INFO: worker 5 got job (len=8, base='79')
+INFO: worker 7 got job (len=8, base='80')
+INFO: worker 3 got job (len=8, base='81')
+INFO: worker 0 got job (len=8, base='82')
+INFO: worker 1 got job (len=8, base='83')
+INFO: worker 4 got job (len=8, base='84')
+INFO: worker 6 got job (len=8, base='85')
+INFO: worker 2 got job (len=8, base='86')
+INFO: worker 5 got job (len=8, base='87')
+INFO: worker 7 got job (len=8, base='88')
+INFO: worker 3 got job (len=8, base='89')
+INFO: worker 0 got job (len=8, base='90')
+INFO: worker 1 got job (len=8, base='91')
+INFO: worker 4 got job (len=8, base='92')
+INFO: worker 6 got job (len=8, base='93')
+INFO: worker 2 got job (len=8, base='94')
+INFO: worker 5 got job (len=8, base='95')
+INFO: worker 7 got job (len=8, base='96')
+INFO: worker 3 got job (len=8, base='97')
+INFO: worker 0 got job (len=8, base='98')
+INFO: worker 1 got job (len=8, base='99')
+INFO: worker 4 exited.
+INFO: worker 6 exited.
+INFO: worker 2 exited.
+INFO: worker 1 exited.
+INFO: worker 5 exited.
+INFO: worker 7 exited.
+INFO: worker 3 exited.
+INFO: worker 0 exited.
+INFO: search exhausted, time = 8.217s

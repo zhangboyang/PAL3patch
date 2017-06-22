@@ -51,4 +51,9 @@ UIButtonEXA
 UIParticle
 GrayScale
 CCBAttackSequen/tagAttackSequen（已修正）
-
+ARC_PAL_GDB
+ARC_OutFile
+ARC_RoleAtt
+ARC_FightSkill
+ARC_FightItem
+ARC_ComboAttack

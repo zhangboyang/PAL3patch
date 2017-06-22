@@ -1,0 +1,46 @@
+【gbCrc32的计算：extra/gbCrc32/gbCrc32.cpp】
+GBENGNE.DLL中提供了三个与CRC32相关的函数：
+  void __cdecl gbCrc32Init(void)   // 初始化 CRC32 表
+  unsigned int __cdecl gbCrc32Compute(char const *)   // 计算字符串（以0字节结尾）的 CRC32
+  unsigned int __cdecl gbCrc32Compute(char const *,int) // 计算一块内存的 CRC32
+但它们都不是标准的CRC32，因此我逆向并实现了一个与GBENGINE里面功能一致的CRC32类。
+在gbCrc32.cpp中，有gbCrc32类的定义和实现，主程序是一段自检程序，确保实现没有错误。
+
+
+【用来寻找仙剑3控制台密码的程序】
+仙剑3有一个内嵌的控制台，输入密码“sOFTsTAR_pAL3_2003”后才能打开
+程序中是这样判定输入的密码是否正确的：在函数_Console::RunCommand的末尾有这样一句
+    this->m_bEnable = gbCrc32Compute(this->m_inputbuf) == 0xD5E4C8F8;
+通过对输入字符串计算gbCrc32哈希值，与0xD5E4C8F8比较，若一致则表明输入正确的密码了
+但是这样通过哈希值来比对密码会碰到哈希碰撞的问题（暂且不论CRC32不是密码学哈希函数）
+也就是说，假设哈希结果分布均匀，平均每搜索42亿个字符串，就会有一个会产生相同的哈希（即能打开控制台的字符串）
+于是我写了一个暴力搜索程序（深度优先搜索），可以用来找能够开启控制台的字符串
+extra/mkconpwd目录下有这些文件：
+    conpwd_sample.txt          // 找到的一些字符串（纯数字）
+    mkconpwd_fast.cpp          // 多线程的暴力搜索程序
+    mkconpwd_fast_sample.txt   // 多线程暴搜程序的样例输出
+    mkconpwd_slow.c            // 简单朴素的暴力搜索程序
+    mkconpwd_slow_sample.txt   // 简单朴素暴搜程序的样例输出
+有两个版本，简单朴素版本运行速度慢，但程序简单；多线程版本运行速度快，程序复杂。
+对于纯数字组成的字符串来说，最短的字符串是3132206615，这样在游戏中，输入"~"符号后输入该字符串就可以打开控制台了
+此外，如果说不知道密码，光靠暴力搜索，是不可能搜索到“sOFTsTAR_pAL3_2003”这个字符串的
+这就侧面证明了，这个密码一定是官方放出的，印证了“这个密码来自官方攻略”的说法
+多线程版本的一些实现细节：
+（1）使用C++11的std::threads实现多线程，可移植性高
+    在 Windows 7 / VC++2017 和 Ubuntu 14.04 / GCC 4.8.4 环境下测试通过
+    （GCC编译命令为：g++ -O2 -g -pthread -std=c++11 mkconpwd_fast.cpp；注意pthread要放在前面）
+（2）具体思路是，固定每个线程要搜索的长度，主线程为此派发任务给工作线程
+    例如搜索字符集是ab，当前搜索长度为8，线程搜索长度是6，那么主程序会派发
+      (6,aa) (6,ab) (6,ba) (6,bb) 给工作线程（前者表示要继续搜索的深度，后者表示字符串前缀）
+    这样，如果线程搜索长度设置合理（例如工作线程可在数秒左右完成任务），多线程的效率就很高
+（3）使用一个阻塞的生产者-消费者队列（使用条件变量std::condition_variable）来管理任务的派发
+（4）朴素暴力是先枚举字符串，然后枚举出来之后在调用函数进行CRC32的计算，有很多冗余计算
+    多线程函数在此处进行了优化，将CRC32计算和暴力枚举结合起来，每次入栈是就计算当前的CRC哈希，省掉了冗余计算
+（5）命令行参数的具体含义
+      mkconpwd_fast.exe [target] [sigma] [maxlen] [workerlen] [workers]
+        target     - 目标哈希值（控制台密码的CRC32哈希）
+        sigma      - 搜索字符集
+        maxlen     - 枚举的字符串的最大长度
+        workerlen  - 最后多少位字符的枚举会交给工作线程（见前述）
+        workers    - 线程数目
+
