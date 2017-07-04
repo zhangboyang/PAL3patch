@@ -46,7 +46,7 @@
 (3) LIBRARY:
     尚未完成
 
-【PAL3unpack】
+【PAL3memunpack】
 与破解补丁相同功能的程序，读入PAL3fixdump和PAL3dump和PAL3analyse的结果，在内存中进行脱壳的程序
 目前的功能是：
 读入dump.summary.txt（由PAL3dump生成）读取段基址信息

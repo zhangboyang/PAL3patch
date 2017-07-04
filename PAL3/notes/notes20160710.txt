@@ -107,7 +107,7 @@ PAL3.EXE中有一个.brick节。里面看起来都是合法的指令，不知道
 而且我在brick节下断点，还没有遇到断下来的情况（只是初步测试）
 
 【vc6的编译特点】
-地址从低到高分别为 .text .data .rdata .rsrc
+地址从低到高分别为 .text .rdata .data .rsrc
 .text: 存放代码，函数均按0x10对齐
 .rdata: 存放只读数据(rodata)，也存放导入表、IAT
 .data: 存放初始化过的数据，也是未初始化数据(bss)存放的位置

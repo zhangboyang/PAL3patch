@@ -1,0 +1,7 @@
+.text	00401000
+.rdata	00558000
+.data	00570000
+.rsrc	02294000
+.exttext	0229A000
+.extrdata	0229B000
+.extdata	0229F000
