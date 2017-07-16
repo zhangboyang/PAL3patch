@@ -312,7 +312,7 @@ int main(int argc, char *argv[])
     dynlink();
 
     if (argc != 3) {
-        fail("usage: PAL3cpkunpack CPK_NAME DIR_PREFIX");
+        fail("usage: uncpk CPK_NAME DIR_PREFIX");
     }
     
     cpkfile = argv[1];
