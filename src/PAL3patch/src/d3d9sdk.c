@@ -17,6 +17,7 @@ void d3dx9_dynlink()
 {
     hD3DX9 = LoadLibrary_check(D3DX9_DLL);
     
+    IMPORT_D3DX9_FUNCPTR(D3DXCheckVersion);
     IMPORT_D3DX9_FUNCPTR(D3DXCreateFontW);
     IMPORT_D3DX9_FUNCPTR(D3DXCreateSprite);
     IMPORT_D3DX9_FUNCPTR(D3DXGetImageInfoFromFileInMemory);

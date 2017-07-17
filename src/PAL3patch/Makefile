@@ -11,7 +11,7 @@ CCLD := $(CC)
 AR := ar
 STRIP := strip
 
-CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing -I $(FREETYPE_INCLUDE_PATH)
+CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing -mfpmath=387 -I $(FREETYPE_INCLUDE_PATH)
 SFLAGS :=
 CCLDFLAGS := -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lgdi32 -lcomctl32 -lwinmm
 CCLDFLAGS_MSVC :=

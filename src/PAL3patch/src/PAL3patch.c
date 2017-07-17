@@ -12,6 +12,9 @@ static void self_check()
     if (D3DX_SDK_VERSION != 21) {
         fail("wrong D3DX_SDK_VERSION.");
     }
+    if (!D3DXCheckVersion(D3D_SDK_VERSION, D3DX_SDK_VERSION)) {
+        fail("mismatched header and library.");
+    }
     
     // check basic types
     assert(((wchar_t) -1) > 0); // ftfont request wchar_t is unsigned

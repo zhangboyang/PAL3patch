@@ -1,0 +1,280 @@
+【声音系统采样率与音效播放问题】
+在提高声音系统的采样率到44100hz后，会发现音效（22050hz）变为单声道的了
+如果用GoldWave对声音进行内录的话，会发现左声道是在右声道波形的基础上多了许多锯齿
+这实际上是由于mss32的升采样代码有bug造成的
+
+一旦确定了声音系统的输出采样率后，如果声音文件的采样率与系统的采样率不同时，必须进行重采样
+仙剑三用到的音效文件在snd目录下，可以发现它们是采样率为22050hz的wav文件，因此音效需要升采样
+通过阅读、比对代码可以发现，在升采样的混音代码中，有一个寄存器写错了
+.text:2111CFD2                 mov     ecx, dword_2114B42C
+.text:2111CFD8                 mov     dword_2114B42C, eax
+.text:2111CFDD                 mov     ecx, dword_2114B430 // 此处应为eax寄存器
+.text:2111CFE3                 mov     dword_2114B430, ebx
+.text:2111CFE9                 mov     dword_2114B434, ecx // 此处应为eax寄存器
+                      （实际上后面循环中还有段相同的代码，此处略去）
+可以明显看出，第三行覆盖了第一行的执行结果，明显这里有问题
+通过对比6.6h版本的代码，可以发现这里应是eax寄存器，另外第五行也应是eax寄存器
+虽然问题的原因清除了，但是要想在汇编层面上修复很不容易
+因为mss32为了效率，分很多种情况写了汇编代码，这个错误出现在好几个函数中。
+
+通过翻阅mss32的changelog可以发现：
+Changes from version 6.1b to 6.1c (10-15-2001)
+  - Fixed a subtle bug in the PC downsampling mixers, where the audio could be quite noisy and crackly when downsampling by very small factors. 
+哈哈，这不就是说的这个问题嘛
+考虑到仙剑三使用的mss版本为6.1a，与修复了问题的6.1c差距很小（版本号都没变，只是a变成了c）
+因此最终决定直接用6.1c的文件替换掉仙三自带的6.1a的文件（具体见下节）
+初步测试下来效果很好，声音问题已经修复了，此外也没有什么不兼容的地方。
+
+
+其实另外一个bug可能也会对升采样造成影响：
+Changes from version 6.6f to 6.6g (12-07-2004)
+  - Fixed a bug in the upsampling filter (on PC and Mac) that caused clipping. This would also affect the Miles Fast 2D providers as well. 
+我猜想这个BUG是与采样循环中的移位的位数有关，旧版本是：
+.text:2111CFF0                 mov     ebp, edx
+.text:2111CFF2                 mov     eax, dword_2114B42C
+.text:2111CFF7                 mov     ebx, dword_2114B430
+.text:2111CFFD                 shr     ebp, 10h
+.text:2111D000                 sub     eax, ecx
+.text:2111D002                 sub     ebx, dword_2114B434
+.text:2111D008                 imul    eax, ebp
+.text:2111D00B                 imul    ebx, ebp
+.text:2111D00E                 sar     eax, 10h
+.text:2111D011                 sar     ebx, 10h
+.text:2111D014                 add     eax, ecx
+.text:2111D016                 add     ebx, dword_2114B434
+新版本是：
+  mov   ebp, edx
+  mov   eax, [cur_l]
+  mov   ebx, [cur_r]
+  shr   ebp, 17          // 这里右移的位数不同
+  sub   eax, ecx
+  sub   ebx, [cur_r2]
+  imul  eax, ebp
+  imul  ebx, ebp
+  sar   eax, 15          // 这里右移的位数不同
+  sar   ebx, 15          // 这里右移的位数不同
+  add   eax, ecx
+  add   ebx, [cur_r2]
+但是这个问题好像不太严重，也不容易修复，就不修复了（在乎音质的人直接使用高音质补丁就好了）
+
+
+发现原因的过程：通过阅读6.6h版本的mss32的SDK附带的源代码：
+（1）有一个这样的选项：DIG_ENABLE_RESAMPLE_FILTER，可以控制是否启用重采样
+    通过全文搜索发现，wavefile.cpp有个get_operation()函数在最后使用了它
+    并且发现这个选项与M_FILTER这个常数密切相关
+（2）通过全文搜索发现，AIL_API_process_digital_audio()调用了get_operation()函数
+    另一方面SS_merge()函数中也使用了M_FILTER这个常数
+（3）通过阅读SS_merge()函数，发现它最终调用了MSS_mixer_merge
+    这个函数是通过动态绑定调用的，其实它是在mssa32.asm文件中用汇编语言写成的
+（4）MSS_mixer_merge这个函数会根据nOperation这个参数，直接调用vector_table[nOperation]
+    nOperation是一些标志位的集合，它会直接根据标志位集合的数值，调用相应的函数
+（5）vector_table和其内的函数指针定义在mssmixer.inc中
+    在这个文件里，我们可以看到mss32的程序员把标志位的每一种组合都写了对应的汇编程序
+    （这就是问题很难修复的原因，有源码的情况下都很难维护，更不用说没有源码直接改动汇编了）
+    文件末尾就是vector_table的指针数组了，类似：
+            1           8           2       16          32/4        编号
+  dd Merge	DestMono	SrcMono		Src8	NoVolume	NoResample	0
+  dd Merge	DestStereo	SrcMono		Src8	NoVolume	NoResample	1
+  dd Merge	DestMono	SrcMono		Src16	NoVolume	NoResample	2
+  dd Merge	DestStereo	SrcMono		Src16	NoVolume	NoResample	3
+  dd Merge	DestMono	SrcMono		Src8	NoVolume	NoResample	4
+  dd Merge	DestStereo	SrcMono		Src8	NoVolume	NoResample	5
+   　　　　　　　　　　（略）
+（6）相对来说，我们感兴趣的是第47和第63项，以第47项为例：
+    Merge_DestStereo_SrcStereo_Src16_NoVolume_DownFiltered PROC ; 47
+
+      ; check to see if we have to call the upsampling version
+      cmp   [playback_ratio], 10000h
+      jle   Merge_DestStereo_SrcStereo_Src16_NoVolume_UpFiltered
+      （略）
+    可以看到，如果判断是升采样，则转到另一个程序处执行
+    Merge_DestStereo_SrcStereo_Src16_NoVolume_UpFiltered
+    这就是最终执行的混音+升采样的处理代码
+（7）通过阅读混音代码可以发现，它最终是把16位采样数据混（做加法）到32位采样数据上
+    而且左右声道的数据是混合在一起的
+       LRLRLRLRLRLRLRLR                   （16位双声道数据）
+       L-R-L-R-L-R-L-R-L-R-L-R-L-R-L-R-   （32位双声道数据）
+    仔细阅读代码，就可以发现之前的升采样bug了
+
+
+
+
+【找到并确定原版6.1c的mss32文件的过程和方法】
+对于采样率与音效问题的最终解决方案就是，用6.1c版的mss32文件替换掉仙三自带的6.1a版的文件
+那么如何找到6.1c版的文件？通过一番搜索可以发现：
+http://www.vogons.org/viewtopic.php?t=11330
+这里提供了很多旧版的bink和miles的文件，其中就含有6.1c的mss32文件
+那么如何确保这些文件是真正的原版文件呢？
+上传到virustotal是一种方法，如果它被很多游戏引用，最近一次扫描时间也离现在比较近，那么它就很可能是原版文件
+如果它只被少量压缩包引用，最近扫描也离得比较久远，那么它很可能不是原版文件
+通过上传virustotal发现这个压缩包里的某些文件有可能真的不是原版
+实际上，virustotal上有一条数据引起了我的注意：virustotal会显示这个文件在NSRL中的信息
+NSRL是指National Software Reference Library，它是NIST（美国国家标准与技术研究院）发布的一套哈希值
+其内含有过去发布的很多软件中所含文件的MD5哈希值
+虽然某个文件在NSRL中出现，并不代表它就是安全的，但是我想如果它被很多软件所引用，那么可以相信它是原版的文件
+我本想用nsrllookup这个软件进行在线查找的，但是它所使用的nsrllookup.com貌似已经坏掉了，因此只好把整个数据库全部下载下来
+https://www.nist.gov/itl/ssd/cs/current-rds-hash-sets
+我下载的是Modern RDS (microcomputer applications from 2000 to present) 
+下载下来是一个ISO文件，其内含有一个巨大的ZIP文件，这个ZIP文件里面只有一个巨大的文本文件，含有哈希值等信息
+我把待测的文件计算好MD5哈希值，然后在这个文本文件中查找：
+unzip -p /mnt/NSRLFile.txt.zip | grep -E '(SOMEMD5HASH|SOMEMD5HASH...|SOMEMD5HASH)'
+可以发现，每个文件都至少出现了两次，包括了这些文件的产品有：
+13664,"Tony Hawk's Pro Skater 3","c. 1999-2002","231","33","English","Game"
+26831,"Freedom Force vs. The 3rd Reich","c. 2005","190","2539","English","Game,Game,Videogame"
+因此可以相信，它有很大概率是原版的文件。
+
+
+
+
+【高音质补丁】
+游戏中使用的背景音乐实际上都是128kbps的MP3音乐，现在看来音质较差（虽然我听不出来吧。。）
+iTunes和虾米音乐上都有《仙剑奇侠传三 游戏音乐原声带》这个专辑
+iTunes提供的是256kbps的AAC，虾米音乐提供的是320kbps的MP3
+我在网络上找，没有找到对应的无损音乐
+事实上，在http://isrc.ncl.edu.tw/music_view.aspx?item=12899可以发现这个专辑只有“数字发行”
+（来源：https://forum.gamer.com.tw/Co.php?bsn=02417&sn=250956）
+通过与虾米音乐上这张专辑的上传者沟通，他说这个320kbps的MP3是直接有官方提供给虾米的无损音乐压制而来
+因此我决定用虾米的320kbps的MP3替换原游戏中的128kbps的MP3音乐（此外miles不支持AAC也是重要原因之一）
+需要将这些mp3文件打包成music.cpk（匹配方法和打包方法见后）
+
+此外虽然替换6.1c版本的mss32文件可以解决采样率与音效的问题，但是解决的并不完美
+由于mss32中升采样代码为了速度牺牲了质量，会导致输出中掺杂了一些本不该有的高频分量
+理论上，22050hz的音效升采样后，11025-22050hz的区间内应该没有相应的分量，但是mss32的输出中却有
+因此我想用预处理的办法，先将所有音效WAV文件预先升采样到44100hz，这样就可以避免使用mss32的升采样代码了
+这样音效的音质会保持原版游戏的水平
+（使用goldwave批处理功能，将它们全部进行了升采样）
+
+
+
+
+【音乐匹配工具】
+实际上，在我决定使用320kbps的MP3之前，我是想用官方发行的各种CD中的无损音乐，集出一套原声带的
+这就需要程序自动匹配对应的音乐（要不然人工的工作量太大了，匹配音乐这种体力活当然要交给计算机啦）
+虽然最后没有采用这样的办法（因为直接使用MP3无需改动程序代码，也没有必要追求无损，音乐长度、音量处理起来也比较麻烦）
+但是音乐匹配工具确实可以带来很大的便利
+
+匹配工具包含三个python3程序，运行前需要先安装librosa和fastdtw，具体使用方法：
+（1）将待匹配的音乐（即仙三中的原版音乐）文件列表写到original.txt中
+    将候选音乐（即下载的原声带音乐）文件列表写到candidate.txt中
+（2）运行compare.py，得到距离数据（此步骤耗时较长）
+（3）修改makemap.py（具体调参方法见其内注释）然后运行它，进行人工检查，确保没有错误
+（4）运行copyfile.py，生成最终结果，生成的音乐文件存储在result文件夹下
+程序原理是采用MFCC+DTW，对给定的一小片段（例如10s-15s）两两计算距离，选距离最小者就是结果
+两两计算距离的复杂度理论上为O(n*m)所以待匹配的音乐和候选的音乐不能太多
+（虽然我不太懂MFCC和DTW，但是这样做确实效果很好）
+
+在人工判断程序运行结果的时候发现了几个有趣的事情：
+（1）原声带320kbps MP3里的音乐长度要么精确与原版音乐相等，要么少20ms-30ms左右
+（2）《青玉案》，在游戏里的版本（原声带），和在官方音乐光盘里的版本有少许音调上的不同（分析最初几秒的频谱就能看出来）
+（3）官方音乐光盘、未公开音乐集里的战斗音乐相比在游戏的版本（原声带）音量偏小（用GoldWave的最大化音量功能可以看出来）
+
+
+
+
+【CPK打包工具：mkcpk】
+要想制作高音质补丁，需要替换游戏中的音乐，有两种途径：
+（1）打包cpk覆盖原有的music.cpk
+（2）修改程序代码使之直接使用MP3文件而不是music.cpk中的MP3文件
+经过稳定性、兼容性的考虑，我选择前者，这就要求必须有打包CPK的能力。
+要打包CPK与解包CPK的难度有所不同，前者需要弄清楚CPK文件中每一个字节，后者只要大概了解即可
+
+对于MP3和BIK文件来说，必须以未压缩的方式存储于CPK文件中（这是Bink和Miles直接使用文件句柄的必要条件）
+因此，研究CPK文件格式以music.cpk为主，不考虑文件压缩，也不考虑打过补丁的CPK文件
+通过观察cpk文件实例、研究GBENGINE中相关代码、研究补丁中patcher的相关代码，可以得到以下结论：
+
+CPK文件分为三个区域：
+  文件头   0x00000000 - 0x00000080: 对应着 struct CPKHeader 这个结构体
+  文件索引 0x00000080 - 0x000E0080: 对应这 struct CPKTable 这个结构体的一个数组[0x8000]
+  数据区域 0x000E0080 - 文件尾: 存放这真正的文件数据、以及文件名信息
+
+文件头：
+sizeof(struct CPKHeader) = 0x80
+sizeof(struct CPKTable) = 0x1c
+CPK_MAXTABLENUM = 0x8000 // 即索引表有32768项
+struct CPKHeader {
+    ULONG dwLable         = 0x1A545352, // 魔数
+    ULONG dwVersion       = 1,
+    ULONG dwTableStart    = sizeof(struct CPKHeader),
+    ULONG dwDataStart     = sizeof(struct CPKHeader) + sizeof(struct CPKTable) * CPK_MAXTABLENUM,
+    ULONG dwMaxFileNum    = CPK_MAXTABLENUM,
+    ULONG dwFileNum       = nr_tbl,
+    ULONG dwIsFormatted   = 0,
+    ULONG dwSizeOfHeader  = sizeof(struct CPKHeader),
+    ULONG dwValidTableNum = nr_tbl, // 有效项的数目，二分查找时使用此数作为限界
+    ULONG dwMaxTableNum   = CPK_MAXTABLENUM,
+    ULONG dwFragmentNum   = 0,
+    ULONG dwPackageSize   = ftell(fp),
+    ULONG dwReserved[0x14];
+};
+
+文件索引：
+文件索引以dwCRC升序排序，以便进行二分查找
+struct CPKTable {
+    ULONG dwCRC;           // 完整路径转小写后的CRC，不是文件本身的CRC
+    ULONG dwFlag;          // 0x30表示目录，0x10005表示未压缩文件
+    ULONG dwFatherCRC;     // 如果是根目录下的文件，则为0
+    ULONG dwStartPos;      // 数据开始位置相对于文件头的偏移
+    ULONG dwPackedSize;    // 文件数据压缩后的大小，若是目录则为0
+    ULONG dwOriginSize;    // 文件数据压缩前的大小，若是目录则为0
+    ULONG dwExtraInfoSize; // 额外的数据大小（见后）
+};
+
+数据区域：
+一个文件的数据区域由两部分组成：压缩过的文件数据、额外数据。前者顾名思义，后者则需一番研究
+经过实例研究可以发现，额外数据其实是文件名+00+00+0x38字节神秘数据组成的（总长为文件名长度+0x3A）
+那么神秘数据是什么呢？GBENGINE完全忽略了它们，只好去分析patcher
+通过对patcher中的代码应用minilzo签名，可以迅速找到负责添加文件的函数，我将其命名为AddFile（0x4029c0）
+其中调用了一个函数，专门负责写数据，我将其命名为append_data_to_cpkfile（0x403460）
+其代码如下：
+int __thiscall append_data_to_cpkfile(CPKPatcher *this, int a2, LPCSTR lpString2, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite)
+{
+  CPKPatcher *v5; // esi@1
+  DWORD v6; // edi@1
+  int v7; // eax@5
+  char stackBuffer[56]; // [sp+8h] [bp-38h]@5
+
+  v5 = this;
+  v6 = *(&this->m_CPKHeader.dwLable + 7 * (a2 + 5));
+  sub_403820((HANDLE)this->m_dwCPKHandle, *(&this->m_CPKHeader.dwLable + 7 * (a2 + 5)));
+  if ( v6 >= sub_403850((HANDLE)v5->m_dwCPKHandle) )
+    sub_403870((HANDLE)v5->m_dwCPKHandle);
+  if ( nNumberOfBytesToWrite )
+    WriteFile_with_check((HANDLE)v5->m_dwCPKHandle, lpBuffer, nNumberOfBytesToWrite);
+  get_basename(Buffer, lpString2); // 取得文件名部分
+  v7 = lstrlenA(Buffer); // 测量文件名长度
+  WriteFile_with_check((HANDLE)v5->m_dwCPKHandle, Buffer, v7); // 写文件名（不含0结束符）
+  WriteFile_with_check((HANDLE)v5->m_dwCPKHandle, &unk_431320, 2u); // 写两个0字节
+  WriteFile_with_check((HANDLE)v5->m_dwCPKHandle, stackBuffer, 0x38u); // 写0x38个字节
+  return 1;
+}
+注意到，最后的0x38字节神秘数据，实际上是栈上没有初始化的部分！也就是说，所谓神秘数据，其实是垃圾数据！
+至此，music.cpk中的每一个字节的意义都清楚了。
+
+但是，研究“垃圾数据”可以带来一些有意思的结论：
+由于程序没有初始化栈空间，就把其中的内容写入了CPK文件，从信息安全角度来讲，这是一个“信息泄露漏洞”
+这使得我们可以窥见14年前，游戏开发人员运行打包程序时，打包程序栈上的0x38字节内容。
+0x38字节=14个DWORD，研究CPK实例可以发现其中多次出现了0xBFF77378这个数值，还有多个以BFF开头的数值
+实际上，0xBFF77378是win98se上KERNEL32.lstrcpy函数的地址！其他的BFF开头的地址，是中间调用的返回地址。
+也就是说，我们可以通过研究“垃圾数据”可以知晓music.cpk是在一台win98se计算机上打包出来的！
+打开basedata.cpk，发现它也是在win98se机器上打包的。
+这有点出乎我的意料，我以为上海软星会在win2000或者winxp上运行打包程序的。
+
+打包工具mkcpk的使用方法：
+  mkcpk cpkname.cpk < filelist.txt
+文件列表应列出要打包的文件，应没有任何前导的“./”或是“/”，例如：
+   file1
+   dir1/file2
+   file3
+   dir1/dir2/file5
+   dir3/file4
+文件在文件列表里的顺序将是文件在最终CPK中的排列顺序
+
+
+
+【战斗界面的血量显示文字可能会溢出到屏幕外边】
+这是因为游戏只对血量、状态图标进行了限界处理，修正时没有考虑到这个限界
+血量文字是通过CCBDisplayChain::ShowTxt_nX_nY_dwColor显示的，通过查找引用可以发现只有一处调用了此函数
+调用前就是处理限界的代码
+此外，之后绘制图标的代码也使用了相同的坐标
+
+

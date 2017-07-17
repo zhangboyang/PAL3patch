@@ -260,6 +260,24 @@ static void setcursorpos_ccbcontrol_hookfunc(void *arg)
     CB_POPSTATE();
 }
 
+
+static MAKE_ASMPATCH(role_hp_string_position_limiter)
+{
+    int lr = R_ESI, tb = R_EBX;
+    char *hp_string = TOPTR(0x017AB8B8);
+    
+    int cw = 10 * cb_scalefactor; // calc char width and height
+    int ch = 20 * cb_scalefactor;
+    
+    int sw = cw * strlen(hp_string); // calc string width
+    
+    lr = imax(imin(lr, game_width - sw), 0);
+    tb = imax(imin(tb, game_height), ch);
+    
+    R_ESI = lr;
+    R_EBX = tb;
+}
+
 MAKE_PATCHSET(fixcombatui)
 {
     cb_scalefactor = str2scalefactor(get_string_from_configfile("fixcombatui_scalefactor"));
@@ -287,4 +305,7 @@ MAKE_PATCHSET(fixcombatui)
     // patch CCBLineupWindow
     make_jmp(0x0051B920, CCBLineupWindow_Render);
     make_jmp(0x0051B950, CCBLineupWindow_IsPtOnFace);
+    
+    // patch role HP string position limiter
+    INIT_ASMPATCH(role_hp_string_position_limiter, 0x00509DAA, 0x2A, "\x7D\x04\x33\xF6\xEB\x0D\xA1\xD0\xD6\xBF\x00\x2B\xC7\x3B\xF0\x7E\x02\x8B\xF0\x83\xFB\x14\x7D\x07\xBB\x14\x00\x00\x00\xEB\x0B\xA1\xD4\xD6\xBF\x00\x3B\xD8\x7E\x02\x8B\xD8");
 }

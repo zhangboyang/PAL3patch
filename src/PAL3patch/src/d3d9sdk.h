@@ -318,6 +318,8 @@ extern void d3dx9_dynlink();
 #if defined(DYNLINK_D3DX9_AT_RUNTIME) || !defined(HAVE_D3D9SDK)
 
 // functions for D3DX9
+BOOL DECL_D3DX9FUNC(D3DXCheckVersion)(UINT D3DSdkVersion, UINT D3DXSdkVersion);
+
 HRESULT DECL_D3DX9FUNC(D3DXCreateFontW)(
     LPDIRECT3DDEVICE9       pDevice,  
     UINT                    Height,

@@ -54,7 +54,7 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		}
 	},
 	{
-		1, FALSE,
+		1, TRUE,
 		_T("voice"),
 		_T("配音插件"),
 		_T("是否加载外部配音插件。若要使用语音包则需要启用本选项。"),
