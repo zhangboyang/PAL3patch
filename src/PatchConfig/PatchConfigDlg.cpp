@@ -2,10 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "PatchConfig.h"
-#include "PatchConfigDlg.h"
-#include "ChooseFromListDlg.h"
-#include "ConfigData.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -84,53 +80,93 @@ void CPatchConfigDlg::ToggleAdvMode(bool reset)
 	if (reset) m_IsAdvMode = 0;
 	else m_IsAdvMode ^= 1;
 	m_ToggleAdvBtn.SetWindowText(STRTABLE(m_IsAdvMode ? IDS_HIDEADVOPT : IDS_SHOWADVOPT));
-	LoadConfigDescription();
+	LoadConfigDescription(reset);
 }
 
-void CPatchConfigDlg::LoadConfigDescription()
+void CPatchConfigDlg::LoadConfigDescription(bool reset_expand)
 {
 	HTREEITEM cur;
 	ConfigDescItem *pItem;
-	// save selected item state
-	ConfigDescItem *selitem = m_ItemSelected;
-	if (!selitem) selitem = ConfigDescList;
 	m_ItemSelected = NULL;
 	
+	// record expand state if needed
+	if (!reset_expand) {
+		HTREEITEM curnode, nextnode;
+		std::deque<HTREEITEM> q;
+		nextnode = m_CfgTree.GetRootItem();
+		if (nextnode) q.push_back(nextnode);
+		while (!q.empty()) {
+			for (curnode = q.front(), q.pop_front(); curnode; curnode = m_CfgTree.GetNextSiblingItem(curnode)) {
+				nextnode = m_CfgTree.GetChildItem(curnode);
+				if (nextnode) q.push_back(nextnode);
+				// process curnode
+				pItem = (ConfigDescItem *) m_CfgTree.GetItemData(curnode);
+				pItem->cur_expand = !!(m_CfgTree.GetItemState(curnode, TVIS_EXPANDED) & TVIS_EXPANDED);
+			}
+		}
+	}
+
 	// load into tree
-	LockWindowUpdate();
+	LockWindowUpdate(); m_LockSelUpdate = 1;
 	m_CfgTree.DeleteAllItems();
-	std::vector<HTREEITEM> treestack;
-	treestack.push_back(TVI_ROOT);
-	HTREEITEM selnode = NULL;
+	std::vector<std::pair<HTREEITEM, ConfigDescItem *> > treestack;
+	treestack.push_back(std::make_pair(TVI_ROOT, (ConfigDescItem *) NULL));
+	HTREEITEM selnode = NULL, preferrednode = NULL;
 	for (pItem = ConfigDescList; ; pItem++) {
+		if (reset_expand) {
+			pItem->cur_expand = pItem->def_expand;
+		}
 		if (!m_IsAdvMode && pItem->is_adv) continue;
 		while (pItem->level + 1 < (int) treestack.size()) {
-			m_CfgTree.Expand(treestack.back(), TVE_EXPAND);
+			m_CfgTree.Expand(treestack.back().first, (!treestack.back().second || treestack.back().second->cur_expand) ? TVE_EXPAND : TVE_COLLAPSE);
 			treestack.pop_back();
 		}
 		if (pItem->level < 0) break;
-		cur = m_CfgTree.InsertItem(TVIF_TEXT | TVIF_PARAM, pItem->title, 0, 0, 0, 0, (LPARAM) pItem, treestack.back(), NULL);
-		if (pItem == selitem) {
+		cur = m_CfgTree.InsertItem(TVIF_TEXT | TVIF_PARAM, pItem->title, 0, 0, 0, 0, (LPARAM) pItem, treestack.back().first, NULL);
+
+		if (pItem == m_LastItemSelected[m_IsAdvMode]) {
 			selnode = cur;
 		}
+		
+		if (pItem == m_ModeSwitchPreferredItem) {
+			preferrednode = cur;
+		}
+
 		if (pItem->level + 1 >= (int) treestack.size()) {
-			treestack.push_back(cur);
+			treestack.push_back(std::make_pair(cur, pItem));
 		}
 	}
 
 	m_ItemSelected = NULL; // force reload
+	if (preferrednode) selnode = preferrednode;
 	if (selnode == NULL) selnode = m_CfgTree.GetRootItem();
+	m_CfgTree.EnsureVisible(selnode);
 	m_CfgTree.SelectItem(selnode);
-	UnlockWindowUpdate();
+
+	m_LockSelUpdate = 0;
+	pItem = (ConfigDescItem *) m_CfgTree.GetItemData(selnode);
+	SelectConfigItem(pItem);
+	m_ModeSwitchPreferredItem = NULL;
+
+	GotoDlgCtrl(&m_OKBtn);
+	GotoDlgCtrl(&m_CfgTree);
+	UnlockWindowUpdate(); 
 }
 
 void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 {
+	if (m_LockSelUpdate) return;
+
 	int reload = (m_ItemSelected != pItem); // should we reload data
 	int i;
 	int descflag = 0; // option description updated flag
 	
 	m_ItemSelected = pItem;
+
+	if (m_LastItemSelected[m_IsAdvMode] != pItem) {
+		m_ModeSwitchPreferredItem = pItem;
+	}
+	m_LastItemSelected[m_IsAdvMode] = pItem;
 
 	if (reload) {
 		if (m_IsAdvMode && pItem->key) {
@@ -141,6 +177,9 @@ void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 	}
 	if (reload) {
 		m_CfgDesc = CString(pItem->description);
+	}
+	if (reload) {
+		m_RunfuncBtn.ShowWindow(!!pItem->runfunc);
 	}
 
 	m_RadioVal = -1;
@@ -223,7 +262,12 @@ CPatchConfigDlg::CPatchConfigDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CPatchConfigDlg::IDD, pParent)
 {
 	m_ItemSelected = NULL;
+	memset(m_LastItemSelected, 0, sizeof(m_LastItemSelected));
+	m_ModeSwitchPreferredItem = NULL;
+	m_IsAdvMode = 0;
 	m_OptDescShowing = -1;
+	m_LockSelUpdate = 0;
+	
 
 	//{{AFX_DATA_INIT(CPatchConfigDlg)
 	m_CfgTitle = _T("");
@@ -239,6 +283,9 @@ void CPatchConfigDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CPatchConfigDlg)
+	DDX_Control(pDX, IDCANCEL, m_CancelBtn);
+	DDX_Control(pDX, IDOK, m_OKBtn);
+	DDX_Control(pDX, IDC_RUNFUNC, m_RunfuncBtn);
 	DDX_Control(pDX, IDC_RADIO1, m_RadioBtn1);
 	DDX_Control(pDX, IDC_RADIO2, m_RadioBtn2);
 	DDX_Control(pDX, IDC_RADIO3, m_RadioBtn3);
@@ -265,6 +312,7 @@ BEGIN_MESSAGE_MAP(CPatchConfigDlg, CDialog)
 	ON_WM_MOUSEMOVE()
 	ON_BN_CLICKED(IDC_RADIO2, OnRadioClicked)
 	ON_BN_CLICKED(IDC_RADIO3, OnRadioClicked)
+	ON_BN_CLICKED(IDC_RUNFUNC, OnRunfunc)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -422,4 +470,26 @@ void CPatchConfigDlg::OnOK()
 		}
 		CDialog::OnOK();
 	}
+}
+
+void CPatchConfigDlg::OnRunfunc() 
+{
+	// TODO: Add your control notification handler code here
+	m_ItemSelected->runfunc(this);
+}
+
+void CPatchConfigDlg::RestoreAllConfigToDefault(CPatchConfigDlg *dlg)
+{
+	if (dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_CONFIRM), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_YESNO | MB_ICONQUESTION) == IDNO) {
+		dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_CANCELED), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_ICONINFORMATION);
+		return;
+	}
+
+	while (!(TryRebuildConfigFile() && TryLoadConfigData())) {
+		if (dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_RETRY), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_RETRYCANCEL | MB_ICONWARNING) == IDCANCEL) {
+			return;
+		}
+	}
+
+	dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_SUCCEED), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_ICONINFORMATION);
 }

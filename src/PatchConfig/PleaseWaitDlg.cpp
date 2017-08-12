@@ -2,9 +2,6 @@
 //
 
 #include "stdafx.h"
-#include <assert.h>
-#include "PatchConfig.h"
-#include "PleaseWaitDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -16,28 +13,39 @@ static char THIS_FILE[] = __FILE__;
 // CPleaseWaitDlg dialog
 
 static CPleaseWaitDlg *waitdlg = NULL;
-void ShowPleaseWaitDlg(LPCTSTR msg)
+void ShowPleaseWaitDlg(CWnd* fawnd, LPCTSTR msg)
 {
 	if (!waitdlg) {
 		waitdlg = new CPleaseWaitDlg;
-		waitdlg->Create(IDD_PLEASEWAIT);
+		waitdlg->Create(IDD_PLEASEWAIT, fawnd);
 		waitdlg->m_WaitMessage = CString(msg);
 		waitdlg->UpdateData(FALSE);
 		waitdlg->ShowWindow(SW_SHOW);
-		waitdlg->RedrawWindow();
+		waitdlg->BeginWaitCursor();
 	} else {
 		waitdlg->m_WaitMessage = CString(msg);
 		waitdlg->UpdateData(FALSE);
-		waitdlg->RedrawWindow();
+	}
+
+	waitdlg->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_ALLCHILDREN);
+	if (waitdlg->GetParent()) {
+		waitdlg->GetParent()->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_ALLCHILDREN);
+		waitdlg->GetParent()->BeginModalState();
 	}
 }
-HWND GetWaitDlgHandle()
+CPleaseWaitDlg *GetPleaseWaitDlg()
 {
-	return waitdlg ? waitdlg->m_hWnd : NULL;
+	return waitdlg;
 }
-void DestoryPleaseWaitDlg()
+void DestroyPleaseWaitDlg()
 {
 	if (waitdlg) {
+		waitdlg->EndWaitCursor();
+		if (waitdlg->GetParent()) {
+			waitdlg->GetParent()->EndModalState();
+			waitdlg->GetParent()->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_ALLCHILDREN);
+		}
+		waitdlg->DestroyWindow();
 		delete waitdlg;
 		waitdlg = NULL;
 	}

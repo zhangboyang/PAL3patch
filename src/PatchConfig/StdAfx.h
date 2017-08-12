@@ -29,18 +29,40 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 
+#include <wininet.h>
+#include <wincrypt.h>
+
 #include <vector>
+#include <deque>
 #include <map>
 #include <set>
 #include <functional>
 #include <algorithm>
 
-#include "D3DEnum.h"
+#include "Resource.h"
 #include "ConfigDescData.h"
-#include "wstr.h"
+#include "PatchConfigDlg.h"
+
+#include "CheckForUpdates.h"
+#include "ChooseFromListDlg.h"
+#include "ConfigData.h"
+#include "D3DEnum.h"
+#include "FontEnum.h"
+#include "HASH_SHA1.h"
+#include "MouseMsgButton.h"
+#include "OpenGameFolder.h"
+#include "PatchConfig.h"
+#include "PatchVersionInfo.h"
+#include "PleaseWaitDlg.h"
 #include "UACVirtualization.h"
+#include "wstr.h"
 
 #define stricmp _stricmp
+
+#define MAXLINE 4096
+
+#define _TOSTR(x) #x
+#define TOSTR(x) _TOSTR(x)
 
 // load CString from StringTable
 #define STRTABLE(x) (CString(MAKEINTRESOURCE((x))))

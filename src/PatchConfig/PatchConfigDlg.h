@@ -23,6 +23,9 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CPatchConfigDlg)
 	enum { IDD = IDD_PATCHCONFIG_DIALOG };
+	CButton	m_CancelBtn;
+	CButton	m_OKBtn;
+	CButton	m_RunfuncBtn;
 	CMouseMsgButton	m_RadioBtn1;
 	CMouseMsgButton	m_RadioBtn2;
 	CMouseMsgButton	m_RadioBtn3;
@@ -44,20 +47,26 @@ public:
 	//}}AFX_VIRTUAL
 
 // Implementation
+public:
+	static void RestoreAllConfigToDefault(CPatchConfigDlg *dlg);
+
 protected:
 	HICON m_hIcon;
 
 	CFont m_RadioBtnFont[MAX_CONFIGDESC_OPTIONS];
 	ConfigDescItem *m_ItemSelected;
+	ConfigDescItem *m_LastItemSelected[2]; // subscript is m_IsAdvMode
+	ConfigDescItem *m_ModeSwitchPreferredItem;
 	int m_IsAdvMode;
 	int m_OptDescShowing;
+	int m_LockSelUpdate;
 	std::vector<std::pair<CString, std::pair<CString, CString> > > m_EnumList;
 
 	static void OnMouseMoveCallbackWarpper(void *ptr, int btnid);
 	void SetRadioBtnStyle(int btnid, int bold, int underline);
 	void BtnMouseMove(int btnid);
 	void ToggleAdvMode(bool reset);
-	void LoadConfigDescription();
+	void LoadConfigDescription(bool reset_expand);
 	void SelectConfigItem(ConfigDescItem *pItem);
 	void UpdateConfigItem();
 	
@@ -74,6 +83,7 @@ protected:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	virtual void OnCancel();
 	virtual void OnOK();
+	afx_msg void OnRunfunc();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

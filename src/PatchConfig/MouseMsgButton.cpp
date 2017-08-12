@@ -2,8 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "PatchConfig.h"
-#include "MouseMsgButton.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

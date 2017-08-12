@@ -71,6 +71,10 @@
 #define TOUINT(addr) ((unsigned)(addr))
 #define PTRADD(ptr, add) ((void *)(((char *)(ptr)) + (add)))
 
+// round macros
+#define ROUND_UP(x, y) ((((x) + ((y) - 1)) / (y)) * (y))
+#define ROUND_DOWN(x, y) ((x) - ((x) % (y)))
+
 // common constants
 #define NOP 0x90
 #define INT3 0xCC

@@ -2,12 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "PatchConfig.h"
-#include "PatchConfigDlg.h"
-#include "PleaseWaitDlg.h"
-#include "ConfigData.h"
-#include "HASH_SHA1.h"
-#include "PatchVersionInfo.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,7 +15,7 @@ static char THIS_FILE[] = __FILE__;
 BEGIN_MESSAGE_MAP(CPatchConfigApp, CWinApp)
 	//{{AFX_MSG_MAP(CPatchConfigApp)
 	//}}AFX_MSG
-	ON_COMMAND(ID_HELP, CWinApp::OnHelp)
+	//ON_COMMAND(ID_HELP, CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -45,8 +39,8 @@ static int VerifyFileSHA1(const char *fn, const char *hash)
 	char hashstr[SHA1_STR_SIZE];
 	if (!GetFileSHA1(fn, hashstr) || stricmp(hashstr, hash) != 0) {
 		CString msg;
-		msg.Format(STRTABLE(IDS_CORRUPTFILE), fn);
-		if (MessageBox(GetWaitDlgHandle(), msg, STRTABLE(IDS_CORRUPTFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDNO) {
+		msg.Format(IDS_CORRUPTFILE, fn);
+		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CORRUPTFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDNO) {
 			return 0;
 		}
 	}
@@ -67,7 +61,7 @@ static int VerifyPatchFiles()
 static int LoadConfigData()
 {
 	while (!TryLoadConfigData()) {
-		if (MessageBox(GetWaitDlgHandle(), STRTABLE(IDS_CORRUPTCONFIG), STRTABLE(IDS_CORRUPTCONFIG_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
+		if (GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_CORRUPTCONFIG), STRTABLE(IDS_CORRUPTCONFIG_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
 			TryRebuildConfigFile();
 		} else {
 			return 0;
@@ -76,6 +70,11 @@ static int LoadConfigData()
 	return 1;
 }
 
+static void InitFolders()
+{
+	CreateDirectory(_T("save"), NULL);
+    CreateDirectory(_T("snap"), NULL);
+}
 
 
 
@@ -94,16 +93,17 @@ BOOL CPatchConfigApp::InitInstance()
 
 	if (!CheckDX90SDKVersion()) goto err;
 
-	ShowPleaseWaitDlg(STRTABLE(IDS_WAITINGVERIFY)); //Sleep(1000);
+	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGVERIFY)); //Sleep(1000);
 	if (!VerifyPatchFiles()) goto err;
 
-	ShowPleaseWaitDlg(STRTABLE(IDS_WAITINGLOADCFG)); //Sleep(1000);
+	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGLOADCFG)); //Sleep(1000);
 	if (!LoadConfigData()) goto err;
+	InitFolders();
 
-	ShowPleaseWaitDlg(STRTABLE(IDS_WAITINGENUMD3D)); //Sleep(1000);
+	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGENUMD3D)); //Sleep(1000);
 	InitD3DEnumeration();
 
-	DestoryPleaseWaitDlg();
+	DestroyPleaseWaitDlg();
 
 	// use block to surround dlg
 	{
@@ -120,7 +120,7 @@ BOOL CPatchConfigApp::InitInstance()
 	}
 
 err:
-	DestoryPleaseWaitDlg();
+	DestroyPleaseWaitDlg();
 	CleanupD3DEnumeration();
 	return FALSE;
 }

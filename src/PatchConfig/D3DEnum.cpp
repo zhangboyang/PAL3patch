@@ -1,7 +1,5 @@
 #include "stdafx.h"
-#include "D3DEnum.h"
 #include "dxstdafx.h"
-#include "Resource.h"
 
 static IDirect3D9 *pD3D = NULL;
 static CD3DEnumeration *pD3DEnum = NULL;
@@ -12,10 +10,14 @@ int CheckDX90SDKVersion()
         MessageBox(NULL, _T("wrong D3D_SDK_VERSION."), NULL, MB_ICONERROR);
 		return 0;
     }
-    if (D3DX_SDK_VERSION != 21) {
+    /* // uncomment this if linked with d3dx9.lib
+	if (D3DX_SDK_VERSION != 21) {
         MessageBox(NULL, _T("wrong D3DX_SDK_VERSION."), NULL, MB_ICONERROR);
 		return 0;
     }
+	if (!D3DXCheckVersion(D3D_SDK_VERSION, D3DX_SDK_VERSION)) {
+        return 0;
+    }*/
 	return 1;
 }
 
@@ -135,7 +137,7 @@ void EnumMultisample(std::vector<std::pair<CString, std::pair<CString, CString> 
 				} else {
 					for (q = 0; q < maxq; q++) {
 						CString key, val;
-						key.Format(STRTABLE(IDS_MSAA_FORMAT), mtype, q);
+						key.Format(IDS_MSAA_FORMAT, mtype, q);
 						val.Format(_T("%d,%d"), mtype, q);
 						result.push_back(std::make_pair(val, std::make_pair(key, EMPTYSTR)));
 					}

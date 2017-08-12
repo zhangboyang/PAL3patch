@@ -58,7 +58,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
+# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /subsystem:windows /machine:I386
 
 !ELSEIF  "$(CFG)" == "PatchConfig - Win32 Static Release"
 
@@ -85,7 +85,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
+# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
 
 !ELSEIF  "$(CFG)" == "PatchConfig - Win32 MBCS Release"
 
@@ -111,7 +111,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
+# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /subsystem:windows /machine:I386
 
 !ELSEIF  "$(CFG)" == "PatchConfig - Win32 MBCS Debug"
 
@@ -137,7 +137,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "PatchConfig - Win32 Release"
 
@@ -164,7 +164,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
+# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
 
 !ELSEIF  "$(CFG)" == "PatchConfig - Win32 Debug"
 
@@ -191,21 +191,25 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
 !ENDIF 
 
 # Begin Target
 
+# Name "PatchConfig - Win32 Static MBCS Release"
+# Name "PatchConfig - Win32 Static Release"
 # Name "PatchConfig - Win32 MBCS Release"
 # Name "PatchConfig - Win32 MBCS Debug"
 # Name "PatchConfig - Win32 Release"
 # Name "PatchConfig - Win32 Debug"
-# Name "PatchConfig - Win32 Static MBCS Release"
-# Name "PatchConfig - Win32 Static Release"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Source File
+
+SOURCE=.\CheckForUpdates.cpp
+# End Source File
 # Begin Source File
 
 SOURCE=.\ChooseFromListDlg.cpp
@@ -241,6 +245,10 @@ SOURCE=.\HASH_SHA1.cpp
 # Begin Source File
 
 SOURCE=.\MouseMsgButton.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OpenGameFolder.cpp
 # End Source File
 # Begin Source File
 
@@ -281,6 +289,10 @@ SOURCE=.\wstr.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\CheckForUpdates.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ChooseFromListDlg.h
 # End Source File
 # Begin Source File
@@ -318,6 +330,10 @@ SOURCE=.\HASH_SHA1.h
 # Begin Source File
 
 SOURCE=.\MouseMsgButton.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OpenGameFolder.h
 # End Source File
 # Begin Source File
 

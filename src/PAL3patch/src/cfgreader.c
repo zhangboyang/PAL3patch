@@ -19,6 +19,12 @@ static int is_spacechar(char ch)
 	return !!strchr(" \t\n\v\f\r", ch);
 }
 
+#define badcfg(fmt, ...) \
+    do { \
+        MessageBoxW(NULL, wstr_badcfgfile_text, wstr_badcfgfile_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND); \
+        fail(fmt, ## __VA_ARGS__); \
+    } while (0)
+
 void read_config_file()
 {
     cfglines = 0;
@@ -45,20 +51,20 @@ void read_config_file()
         
         // parse 'key' and 'value'
         ptr = strchr(buf, '=');
-        if (!ptr) fail("can't parse config line:\n  %s", buf);
+        if (!ptr) badcfg("can't parse config line:\n  %s", buf);
         *ptr = '\0';
         char *keystr = buf, *valstr = ptr + 1;
         
         // rtrim 'key'
         if (ptr > buf) ptr--;
         while (ptr >= buf && is_spacechar(*ptr)) *ptr-- = '\0';
-        if (!*ptr) fail("keystr is empty");
+        if (!*ptr) badcfg("keystr is empty");
         
         // ltrim 'value'
         while (*valstr && is_spacechar(*valstr)) valstr++;
         
         // save this config line to array
-        if (cfglines >= MAX_CONFIG_LINES) fail("too many config lines.");
+        if (cfglines >= MAX_CONFIG_LINES) badcfg("too many config lines.");
         cfgdata[cfglines].key = strdup(keystr);
         cfgdata[cfglines].val = strdup(valstr);
         cfglines++;
@@ -72,7 +78,7 @@ void read_config_file()
     int i;
     for (i = 1; i < cfglines; i++) {
         int ret = config_line_cmp(&cfgdata[i - 1], &cfgdata[i]);
-        if (ret == 0) fail("duplicate key '%s'.", cfgdata[i].key);
+        if (ret == 0) badcfg("duplicate key '%s'.", cfgdata[i].key);
     }
     
     cfg_loaded = 1;
@@ -84,7 +90,7 @@ const char *get_string_from_configfile(const char *key)
     tmp.key = (char *) key;
     struct config_line *result;
     result = bsearch(&tmp, cfgdata, cfglines, sizeof(struct config_line), config_line_cmp);
-    if (!result) fail("can't find config line with key '%s'.", key);
+    if (!result) badcfg("can't find config line with key '%s'.", key);
     return result->val;
 }
 

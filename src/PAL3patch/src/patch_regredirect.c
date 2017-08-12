@@ -13,6 +13,17 @@ struct reg_item {
 static struct reg_item reg[MAX_REG_ITEM];
 static int nr_reg;
 
+static struct reg_item reg_default[] = {
+    { "SOFTWARE\\SOFTSTAR\\PAL3_MOVIE" , "MOVIE_A"  },
+    { "SOFTWARE\\SOFTSTAR\\PAL3_MOVIE" , "MOVIE_B"  },
+    { "SOFTWARE\\SOFTSTAR\\PAL3_SAVE"  , "SEEK"     },
+    { "SOFTWARE\\SOFTSTAR\\PAL3_S_GAME", "S_GAME_A" },
+    { "SOFTWARE\\SOFTSTAR\\PAL3_S_GAME", "S_GAME_B" },
+    { "SOFTWARE\\SOFTSTAR\\PAL3_S_GAME", "S_GAME_C" },
+    
+    { NULL, NULL } // EOF
+};
+
 static int reg_cmp(const void *a, const void *b)
 {
     const struct reg_item *pa = a, *pb = b;
@@ -36,7 +47,7 @@ static void load_reg()
     fscanf(fp, "\xEF\xBB\xBF");
     while (1) {
         // skip comment lines
-        char tmp[2];
+        char tmp[3];
         while (fscanf(fp, " %2[;#]%*[^\n] ", tmp) == 1);
         
         // read registry tuple
@@ -197,6 +208,12 @@ MAKE_PATCHSET(regredirect)
     }
     
     load_reg();
+    
+    struct reg_item *pdef;
+    for (pdef = reg_default; pdef->key1 && pdef->key2; pdef++) {
+        DWORD tmp;
+        query_dword(pdef->key1, pdef->key2, &tmp);
+    }
     
     const unsigned char save_dword_func_magic[] = "\x53\x56\x8B\x74\x24\x0C\x57\x85\xF6\x75\x06\x5F\x5E\x32\xC0\x5B";
     const unsigned save_dword_funcs[] = {

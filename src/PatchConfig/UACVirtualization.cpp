@@ -58,3 +58,86 @@ int TrySetUACVirtualization(BOOL enabled)
 		return 0;
 	}
 }
+
+void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz)
+{
+	// if succeed, return buffer always ends with "\"
+	// if failed or no-UAC, return buffer contains empty string
+
+#define BUFLEN MAXLINE
+#define UACTESTFILE _T("uactest.tmp")
+#define UACSTOREROOT _T("%LOCALAPPDATA%\\VirtualStore")
+
+	TCHAR curdir[BUFLEN], storedir[BUFLEN];
+	SYSTEMTIME wdata, rdata;
+	FILE *wfp = NULL, *rfp = NULL;
+	int wflag = 0;
+	DWORD r;
+	size_t l;
+
+	// early test for no-UAC
+	if (InitSetUACVirtualization() < 0) goto fail;
+
+	// construct VirtualStore path
+	r = ExpandEnvironmentStrings(UACSTOREROOT, storedir, BUFLEN);
+	if (r == 0 || r > BUFLEN || _tcscmp(UACSTOREROOT, storedir) == 0) goto fail;
+
+	// get current directory
+	r = GetCurrentDirectory(BUFLEN, curdir);
+	if (r == 0 || r > BUFLEN) goto fail;
+	if (!(_T('A') <= curdir[0] && curdir[0] <= _T('Z')) || (_T('a') <= curdir[0] && curdir[0] <= _T('z'))) goto fail;
+	if (curdir[1] != _T(':') || curdir[2] != _T('\\')) goto fail;
+
+	// append curdir to storedir, without "X:"
+	if (_tcslen(storedir) + _tcslen(curdir + 2) >= BUFLEN) goto fail;
+	_tcscat(storedir, curdir + 2);
+
+	// add slash if needed
+	l = _tcslen(storedir);
+	if (l && storedir[l - 1] != _T('\\')) {
+		if (l + 1 >= BUFLEN) goto fail;
+		storedir[l] = _T('\\');
+		storedir[l + 1] = 0;
+	}
+
+	// construct mapped test file path in curdir
+	_tcscpy(curdir, storedir);
+	if (_tcslen(curdir) + _tcslen(UACTESTFILE) >= BUFLEN) goto fail;
+	_tcscat(curdir, UACTESTFILE);
+
+	// generate test data
+	GetLocalTime(&wdata);
+	wdata.wYear = rand();
+
+	// write test file
+    wfp = _tfopen(UACTESTFILE, _T("wb"));
+	if (!wfp) goto fail;
+	wflag = 1;
+	if (fwrite(&wdata, sizeof(wdata), 1, wfp) != 1) goto fail;
+	fclose(wfp); wfp = NULL;
+
+	// read test file
+	rfp = _tfopen(curdir, _T("rb"));
+	if (!rfp) goto fail;
+	if (fread(&rdata, sizeof(rdata), 1, rfp) != 1) goto fail;
+	fclose(rfp); rfp = NULL;
+
+	// compare test data
+	if (memcmp(&wdata, &rdata, sizeof(wdata)) != 0) goto fail;
+
+	// write to result buffer
+	if (_tcslen(storedir) >= outsz) goto fail;
+	_tcscpy(out, storedir);
+
+done:
+	// free resource
+	if (wfp) fclose(wfp);
+	if (rfp) fclose(rfp);
+	if (wflag) _tunlink(UACTESTFILE);
+	return;
+
+fail:
+	// clear result buffer
+	if (outsz) *out = 0;
+	goto done;
+}

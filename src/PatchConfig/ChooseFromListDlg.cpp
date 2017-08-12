@@ -2,8 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "PatchConfig.h"
-#include "ChooseFromListDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

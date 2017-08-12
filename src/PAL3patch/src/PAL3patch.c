@@ -72,6 +72,12 @@ static void fix_unpacker_bug()
     make_uint(funcaddr + 0x6B, 0x00000014);
 }
 
+static void init_folders()
+{
+    CreateDirectoryA("save", NULL);
+    CreateDirectoryA("snap", NULL);
+}
+
 // init_stage1() should be called before unpacker is executed (if exists)
 static void init_stage1()
 {
@@ -101,6 +107,9 @@ static void init_stage2()
 {
     // fix unpacker bug that would crash game when music is disabled in config.ini
     fix_unpacker_bug();
+    
+    // init folders
+    init_folders();
     
     // init SHA-1
     sha1_init();

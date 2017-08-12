@@ -1,6 +1,4 @@
 #include "stdafx.h"
-#include "Resource.h"
-#include "FontEnum.h"
 
 class helper_arg {
 public:

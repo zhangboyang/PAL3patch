@@ -21,5 +21,7 @@ extern const wchar_t *wstr_cantsavereg_text;
 extern const wchar_t *wstr_cantsavereg_title;
 extern const wchar_t *wstr_nocfgfile_text;
 extern const wchar_t *wstr_nocfgfile_title;
+extern const wchar_t *wstr_badcfgfile_text;
+extern const wchar_t *wstr_badcfgfile_title;
 
 #endif

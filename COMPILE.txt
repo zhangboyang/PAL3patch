@@ -9,6 +9,10 @@
    编译过程中若遇到问题，可以参考 notes/known_issues.txt 中 NOT OUR BUG 部分
 
 
+注意：
+   补丁所用到的 SDK 与库的安装路径是硬编码在工程文件中的，如果安装路径与本说明不同，请适当修改相应的工程文件。
+
+
 编译过程中需要的 DirectX SDK：
    不论使用何种编译方式，都必须得到 DirectX 9.0 SDK Update - (Summer 2003) 这个 SDK。
    这是因为仙剑三开发时使用的 SDK 就是这个版本的 SDK。

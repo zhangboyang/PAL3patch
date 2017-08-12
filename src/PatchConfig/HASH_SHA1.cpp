@@ -1,11 +1,9 @@
 #include "stdafx.h"
-#include <wincrypt.h>
-#include "HASH_SHA1.h"
-
-#define BUFSIZE 4096
 
 int GetFileSHA1(const char *fn, char *buf)
 {
+
+#define BUFSIZE 4096
 	int ret = 0;
 	unsigned char databuf[BUFSIZE];
 	int datalen;

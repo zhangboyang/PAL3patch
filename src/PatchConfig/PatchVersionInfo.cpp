@@ -1,10 +1,12 @@
 #include "stdafx.h"
-#include "PatchVersionInfo.h"
 
 const char pBuildDate[] = __DATE__ ", " __TIME__;
 const char pVersionStr[] = PATCH_VERSION;
+const char pCompiler[] = "Microsoft C " TOSTR(_MSC_VER);
 
 const char *pFileHash[] = {
+#ifndef _DEBUG
+
 	// format: filename, sha1 hash,
 
 	// PAL3 executables
@@ -51,6 +53,7 @@ const char *pFileHash[] = {
 	"miles\\win32\\Sdelay.flt",   "d002f287d0208780d0adadf7e7cff049dccb7af3",
 	"miles\\win32\\Shelfeq.flt",  "4ea2aabdd630e47fdaa804a2a10398f0a3f8c4f8",
 
+#endif
 	// EOF
 	NULL,
 };

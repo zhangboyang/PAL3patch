@@ -48,9 +48,9 @@ protected:
 };
 
 
-extern void ShowPleaseWaitDlg(LPCTSTR msg);
-extern HWND GetWaitDlgHandle();
-extern void DestoryPleaseWaitDlg();
+extern void ShowPleaseWaitDlg(CWnd *fawnd, LPCTSTR msg);
+extern CPleaseWaitDlg *GetPleaseWaitDlg();
+extern void DestroyPleaseWaitDlg();
 
 
 //{{AFX_INSERT_LOCATION}}

@@ -35,6 +35,23 @@
 #define IDS_APPTITLE                    31
 #define IDS_DEFAULTFONT                 32
 #define IDS_DEFAULTFONT_DESC            33
+#define IDS_CANTOPENGAMEFOLDER          34
+#define IDS_CANTOPENGAMEFOLDER_TITLE    35
+#define IDS_OPENGAMEFOLDERINPROGRESS    36
+#define IDS_RESTOREDEFAULT_CONFIRM      38
+#define IDS_RESTOREDEFAULT_TITLE        39
+#define IDS_RESTOREDEFAULT_CANCELED     40
+#define IDS_RESTOREDEFAULT_SUCCEED      41
+#define IDS_RESTOREDEFAULT_RETRY        42
+#define IDS_WAITCHECKFORUPDATES         43
+#define IDS_CHECKFORUPDATES_TITLE       44
+#define IDS_CHECKFORUPDATES_NEWVERSIONFOUND 45
+#define IDS_CHECKFORUPDATES_NONEWVERSION 46
+#define IDS_CHECKFORUPDATES_RETRY       47
+#define IDS_WAITOPENWEBSITE             48
+#define IDS_CANTOPENWEBSITE             49
+#define IDS_CHECKFORUPDATES_ERROR       50
+#define IDS_CHECKFORUPDATES_INFO        51
 #define IDD_PATCHCONFIG_DIALOG          102
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129
@@ -52,6 +69,7 @@
 #define IDC_TOGGLEADVOPTS               1014
 #define IDC_ENUMLIST                    1015
 #define IDC_WAITMESSAGE                 1016
+#define IDC_RUNFUNC                     1018
 
 // Next default values for new objects
 // 
@@ -59,7 +77,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1018
+#define _APS_NEXT_CONTROL_VALUE         1019
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
