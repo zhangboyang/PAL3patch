@@ -14,16 +14,16 @@ void memcpy_to_process(unsigned dest, const void *src, unsigned size)
     // use VirtualProtect instead
     DWORD flOldProtect, tmp;
     BOOL ret;
-    ret = VirtualProtect((void *) dest, size, PAGE_EXECUTE_READWRITE, &flOldProtect);
+    ret = VirtualProtect(TOPTR(dest), size, PAGE_EXECUTE_READWRITE, &flOldProtect);
     if (!ret) fail("VirtualProtect() failed.");
-    memcpy((void *) dest, src, size);
-    ret = VirtualProtect((void *) dest, size, flOldProtect, &tmp);
+    memcpy(TOPTR(dest), src, size);
+    ret = VirtualProtect(TOPTR(dest), size, flOldProtect, &tmp);
     if (!ret) fail("VirtualProtect() failed.");
-    FlushInstructionCache(GetCurrentProcess(), (void *) dest, size);
+    flush_instruction_cache(TOPTR(dest), size);
 }
 void memcpy_from_process(void *dest, unsigned src, unsigned size)
 {
-    memcpy(dest, (void *) src, size);
+    memcpy(dest, TOPTR(src), size);
 }
 
 unsigned get_branch_jtarget(unsigned addr, unsigned char opcode)
@@ -163,4 +163,26 @@ void *hook_import_table(void *image_base, const char *dllname, const char *funcn
         }
     }
     return oldptr;
+}
+
+
+#define DYNCODE_PAGESIZE 4096
+static void *dyncode_page = NULL;
+static unsigned dyncode_ptr;
+void *alloc_dyncode_buffer(unsigned size)
+{
+    if (!size || size > DYNCODE_PAGESIZE) fail("invalid size %08X.", size);
+    if (!dyncode_page || dyncode_ptr + size > DYNCODE_PAGESIZE) {
+        dyncode_page = VirtualAlloc(NULL, DYNCODE_PAGESIZE, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+        if (!dyncode_page) fail("can't alloc memory for dynamic code.");
+        dyncode_ptr = 0;
+    }
+    void *ret = PTRADD(dyncode_page, dyncode_ptr);
+    dyncode_ptr += size;
+    return ret;
+}
+
+void flush_instruction_cache(void *base, unsigned size)
+{
+    FlushInstructionCache(GetCurrentProcess(), base, size);
 }

@@ -1,5 +1,18 @@
 #ifndef PAL3PATCH_PAL3_H
 #define PAL3PATCH_PAL3_H
+// PATCHAPI DEFINITIONS
+
+
+extern PATCHAPI void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height, int *bitcount, struct memory_allocator *mem_allocator);
+extern PATCHAPI void ensure_cooperative_level(int requirefocus);
+extern PATCHAPI void clamp_rect(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom);
+extern PATCHAPI void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, void *src, int src_pitch, int src_x, int src_y, int width, int height, int bitcount);
+extern PATCHAPI void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color);
+extern PATCHAPI void set_d3dxfont_matrices(IDirect3DDevice9 *pd3dDevice);
+
+
+#ifdef PATCHAPI_EXPORTS
+// INTERNAL DEFINITIONS
 
 // types
 
@@ -1653,8 +1666,8 @@ struct CCBAttackSequen {
 #define gbTexture_D3D_Dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001BAA0, void, struct gbTexture_D3D *), this)
 #define gbPrintFontMgr_GetFont(this, fonttype) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10004450, struct gbPrintFont *, struct gbPrintFontMgr *, enum gbFontType), this, fonttype)
 #define gbPrintFont_PrintString(this, str, x, y, endx, endy) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10022BF0, void, struct gbPrintFont *, const char *, float, float, float, float), this, str, x, y, endx, endy)
-#define _gbmalloc ((malloc_funcptr_t) (gboffset + 0x100E4B0D))
-#define _gbfree ((free_funcptr_t) (gboffset + 0x100E4B99))
+#define gbmalloc ((malloc_funcptr_t) (gboffset + 0x100E4B0D))
+#define gbfree ((free_funcptr_t) (gboffset + 0x100E4B99))
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
 #define x2gbx(x) ((x) * 2.0 / PAL3_s_drvinfo.width - 1.0)
@@ -1684,6 +1697,8 @@ struct CCBAttackSequen {
 #define gbVertPoolMgr_GetDynVertBuf(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021680, struct gbDynVertBuf *, struct gbVertPoolMgr *, unsigned int), this, a2)
 
 // PAL3 functions
+#define pal3malloc ((malloc_funcptr_t) TOPTR(0x005536A9))
+#define pal3free ((free_funcptr_t) TOPTR(0x00552F55))
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
 #define gbBinkVideo_Width(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C710, int, struct gbBinkVideo *), this)
 #define gbBinkVideo_Height(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C720, int, struct gbBinkVideo *), this)
@@ -1749,6 +1764,7 @@ struct CCBAttackSequen {
 #define RenderTarget_Inst ((struct RenderTarget *(*)(void)) TOPTR(0x004BDB10))
 #define CCBRoleState_IsAlive(this, nIndex) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004ED010, bool, struct CCBRoleState *, int), this, nIndex)
 
+
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) TOPTR(0x00BFDA60))
 #define g_msgbk (*(struct UIStaticFlex *) TOPTR(0x00BFDAB0))
@@ -1768,12 +1784,9 @@ struct CCBAttackSequen {
 extern enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D *this);
 extern int gbGfxManager_D3D_GetBackBufferBitCount(struct gbGfxManager_D3D *this);
 extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
-extern void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height, int *bitcount, struct memory_allocator *mem_allocator);
 extern void *vfs_readfile(const char *filepath, unsigned *length, struct memory_allocator *mem_allocator);
 extern const char *vfs_cpkname(void);
-extern void clamp_rect(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom);
-extern void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, void *src, int src_pitch, int src_x, int src_y, int width, int height, int bitcount);
-extern void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color);
-extern void set_d3dxfont_matrices(IDirect3DDevice9 *pd3dDevice);
 
+
+#endif
 #endif

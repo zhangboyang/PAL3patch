@@ -137,7 +137,7 @@ static void d3dxfont_insertfont(int fontsize, int boldflag, int preload)
             case FTFONT_AA: fdwQuality = 4; break; // ANTIALIASED_QUALITY
             case FTFONT_AUTO: fdwQuality = 5; break; // CLEARTYPE_QUALITY
         }
-        if (FAILED(D3DXFUNC(D3DXCreateFontW)(GB_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, fdwQuality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
+        if (FAILED(D3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, fdwQuality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
             fail("can't create ID3DXFont for size '%d'.", fontsize);
         }
     }
@@ -283,7 +283,7 @@ static void d3dxfont_init()
     // do preload
     d3dxfont_preload(get_int_from_configfile("uireplacefont_preloadcharset"));
     
-    if (FAILED(D3DXFUNC(D3DXCreateSprite)(GB_GfxMgr->m_pd3dDevice, &d3dxfont_sprite))) {
+    if (FAILED(D3DXCreateSprite(GB_GfxMgr->m_pd3dDevice, &d3dxfont_sprite))) {
         fail("can't create sprite for font replacing.");
     }
     
@@ -435,13 +435,13 @@ static void ui_replacefont_d3dxfont_init()
     // read configurations
     UINT d3dxfont_codepage;
     switch (get_int_from_configfile("uireplacefont_locale")) {
-        case 1:  d3dxfont_codepage = 936; break;
-        case 2:  d3dxfont_codepage = 950; break;
+        case GAME_LOCALE_CHS:  d3dxfont_codepage = CODEPAGE_CHS; break;
+        case GAME_LOCALE_CHT:  d3dxfont_codepage = CODEPAGE_CHT; break;
         default: d3dxfont_codepage = target_codepage; break;
     }
     switch (d3dxfont_codepage) {
-        case 936: d3dxfont_charset = GB2312_CHARSET; break;
-        case 950: d3dxfont_charset = CHINESEBIG5_CHARSET; break;
+        case CODEPAGE_CHS: d3dxfont_charset = GB2312_CHARSET; break;
+        case CODEPAGE_CHT: d3dxfont_charset = CHINESEBIG5_CHARSET; break;
         default:  d3dxfont_charset = DEFAULT_CHARSET; break;
     }
     

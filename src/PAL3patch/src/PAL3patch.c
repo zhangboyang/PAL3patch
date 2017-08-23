@@ -3,6 +3,9 @@
 // current offset of default location of GBENGINE.DLL
 unsigned gboffset;
 
+// self module handle
+HINSTANCE hinstDLL;
+
 static void self_check()
 {
     // check SDK versions
@@ -87,11 +90,6 @@ static void init_stage1()
     // init gboffset
     gboffset = get_module_base("GBENGINE.DLL") - 0x10000000;
     
-#ifdef DYNLINK_D3DX9_AT_RUNTIME
-    // dynlink d3dx9
-    d3dx9_dynlink();
-#endif
-
     // init early locale
     init_locale_early();
     
@@ -110,10 +108,6 @@ static void init_stage2()
     
     // init folders
     init_folders();
-    
-    // init SHA-1
-    sha1_init();
-    add_atexit_hook(sha1_cleanup);
     
     // init memory allocators
     init_memory_allocators();
@@ -178,7 +172,6 @@ static void init_stage2()
         INIT_PATCHSET(fixtrail);
         INIT_PATCHSET(screenshot);
     }
-    INIT_PATCHSET(voice);
     
     // show_about() must called after init_locale()
     show_about();
@@ -253,4 +246,11 @@ unsigned sforce_unpacker_init()
     
     // we should return unpacker entry address to out asm code
     return (unsigned) GetProcAddress(unpacker, (LPCSTR) 1);
+}
+
+BOOL WINAPI DllMain(HINSTANCE _hinstDLL, DWORD fdwReason, LPVOID lpReserved)
+{
+    hinstDLL = _hinstDLL;
+    DisableThreadLibraryCalls(hinstDLL);
+    return TRUE;
 }

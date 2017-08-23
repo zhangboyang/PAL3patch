@@ -1,5 +1,7 @@
 #ifndef PAL3PATCH_FTFONT_H
 #define PAL3PATCH_FTFONT_H
+#ifdef PATCHAPI_EXPORTS
+// INTERNAL DEFINITIONS
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -80,4 +82,5 @@ extern void ftfont_preload_range(struct ftfont *font, wchar_t low, wchar_t high)
 extern void ftfont_preload_string(struct ftfont *font, const wchar_t *wstr);
 extern void ftfont_draw(struct ftfont *font, const wchar_t *wstr, int left, int top, D3DCOLOR color, ID3DXSprite *sprite);
 
+#endif
 #endif

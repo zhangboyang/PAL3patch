@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 const char pBuildDate[] = __DATE__ ", " __TIME__;
-const char pVersionStr[] = PATCH_VERSION;
+const char pVersionStr[] = PATCH_VERSION_CSTR;
 const char pCompiler[] = "Microsoft C " TOSTR(_MSC_VER);
 
 const char *pFileHash[] = {

@@ -54,10 +54,10 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>common.h</PrecompiledHeaderFile>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <AdditionalIncludeDirectories>include\PAL3patch</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>src/PAL3patch.def</ModuleDefinitionFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -72,12 +72,12 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>common.h</PrecompiledHeaderFile>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <AdditionalIncludeDirectories>include\PAL3patch</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>src/PAL3patch.def</ModuleDefinitionFile>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -91,7 +91,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\d3d9sdk.c" />
     <ClCompile Include="src\effecthook.c" />
     <ClCompile Include="src\framework.c" />
     <ClCompile Include="src\ftcharhack.c" />
@@ -145,34 +144,31 @@
     <ClCompile Include="src\patch_timerresolution.c" />
     <ClCompile Include="src\patch_uireplacefont.c" />
     <ClCompile Include="src\patch_uireplacetexf.c" />
-    <ClCompile Include="src\patch_voice.c" />
-    <ClCompile Include="src\sha1.c" />
     <ClCompile Include="src\texturehook.c" />
     <ClCompile Include="src\transform.c" />
     <ClCompile Include="src\wstr.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\about.h" />
-    <ClInclude Include="src\asmpatch.h" />
-    <ClInclude Include="src\cfgreader.h" />
-    <ClInclude Include="src\cjktable.h" />
-    <ClInclude Include="src\common.h" />
-    <ClInclude Include="src\d3d9sdk.h" />
-    <ClInclude Include="src\effecthook.h" />
-    <ClInclude Include="src\framework.h" />
-    <ClInclude Include="src\ftcharhack.h" />
-    <ClInclude Include="src\ftfont.h" />
-    <ClInclude Include="src\hook.h" />
-    <ClInclude Include="src\locale.h" />
-    <ClInclude Include="src\memallocator.h" />
-    <ClInclude Include="src\misc.h" />
-    <ClInclude Include="src\pal3.h" />
-    <ClInclude Include="src\PAL3patch.h" />
-    <ClInclude Include="src\patch_common.h" />
-    <ClInclude Include="src\sha1.h" />
-    <ClInclude Include="src\texturehook.h" />
-    <ClInclude Include="src\transform.h" />
-    <ClInclude Include="src\wstr.h" />
+    <ClInclude Include="include\PAL3patch\about.h" />
+    <ClInclude Include="include\PAL3patch\asmpatch.h" />
+    <ClInclude Include="include\PAL3patch\cfgreader.h" />
+    <ClInclude Include="include\PAL3patch\cjktable.h" />
+    <ClInclude Include="include\PAL3patch\common.h" />
+    <ClInclude Include="include\PAL3patch\effecthook.h" />
+    <ClInclude Include="include\PAL3patch\framework.h" />
+    <ClInclude Include="include\PAL3patch\ftcharhack.h" />
+    <ClInclude Include="include\PAL3patch\ftfont.h" />
+    <ClInclude Include="include\PAL3patch\hook.h" />
+    <ClInclude Include="include\PAL3patch\locale.h" />
+    <ClInclude Include="include\PAL3patch\memallocator.h" />
+    <ClInclude Include="include\PAL3patch\misc.h" />
+    <ClInclude Include="include\PAL3patch\pal3.h" />
+    <ClInclude Include="include\PAL3patch\PAL3patch.h" />
+    <ClInclude Include="include\PAL3patch\patch_common.h" />
+    <ClInclude Include="include\PAL3patch\texturehook.h" />
+    <ClInclude Include="include\PAL3patch\tiny_d3d9sdk.h" />
+    <ClInclude Include="include\PAL3patch\transform.h" />
+    <ClInclude Include="include\PAL3patch\wstr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,21 +1,25 @@
 #ifndef PAL3PATCH_FRAMEWORK_H
 #define PAL3PATCH_FRAMEWORK_H
+// PATCHAPI DEFINITIONS
 
-extern void memcpy_to_process(unsigned dest, const void *src, unsigned size);
-extern void memcpy_from_process(void *dest, unsigned src, unsigned size);
-extern void make_branch(unsigned addr, unsigned char opcode, const void *jtarget, unsigned size);
-extern unsigned get_branch_jtarget(unsigned addr, unsigned char opcode);
-extern void make_jmp(unsigned addr, const void *jtarget);
-extern void make_call(unsigned addr, const void *jtarget);
-extern void make_wrapper_branch(unsigned addr, const void *jtarget);
-extern void make_wrapper_branch_batch(unsigned *addr_list, int count, const void *jtarget);
-extern void make_uint(unsigned addr, unsigned uint);
-extern void make_pointer(unsigned addr, void *ptr);
-extern void check_code(unsigned addr, const void *code, unsigned size);
-extern unsigned get_module_base(const char *modulename);
-extern void *get_func_address(const char *dllname, const char *funcname);
-extern void hook_iat(void *iatbase, void *oldptr, void *newptr);
-extern void *hook_import_table(void *image_base, const char *dllname, const char *funcname, void *newptr);
+extern PATCHAPI void memcpy_to_process(unsigned dest, const void *src, unsigned size);
+extern PATCHAPI void memcpy_from_process(void *dest, unsigned src, unsigned size);
+extern PATCHAPI void make_branch(unsigned addr, unsigned char opcode, const void *jtarget, unsigned size);
+extern PATCHAPI unsigned get_branch_jtarget(unsigned addr, unsigned char opcode);
+extern PATCHAPI void make_jmp(unsigned addr, const void *jtarget);
+extern PATCHAPI void make_call(unsigned addr, const void *jtarget);
+extern PATCHAPI void make_wrapper_branch(unsigned addr, const void *jtarget);
+extern PATCHAPI void make_wrapper_branch_batch(unsigned *addr_list, int count, const void *jtarget);
+extern PATCHAPI void make_uint(unsigned addr, unsigned uint);
+extern PATCHAPI void make_pointer(unsigned addr, void *ptr);
+extern PATCHAPI void check_code(unsigned addr, const void *code, unsigned size);
+extern PATCHAPI unsigned get_module_base(const char *modulename);
+extern PATCHAPI void *get_func_address(const char *dllname, const char *funcname);
+extern PATCHAPI void hook_iat(void *iatbase, void *oldptr, void *newptr);
+extern PATCHAPI void *hook_import_table(void *image_base, const char *dllname, const char *funcname, void *newptr);
+extern PATCHAPI void *alloc_dyncode_buffer(unsigned size);
+extern PATCHAPI void flush_instruction_cache(void *base, unsigned size);
+
 #define SIMPLE_PATCH(addr, oldcode, newcode, size) \
     do { \
         check_code(addr, oldcode, size); \
@@ -27,6 +31,11 @@ extern void *hook_import_table(void *image_base, const char *dllname, const char
         memset(__nop, NOP, size); \
         SIMPLE_PATCH(addr, oldcode, __nop, size); \
     } while (0)
+
+
+
+#ifndef NO_VARIADIC_MACROS
+
 #define INIT_WRAPPER_CALL(wrapper_func, ...) \
     do { \
         unsigned __caller_list[] = __VA_ARGS__; \
@@ -53,5 +62,12 @@ extern void *hook_import_table(void *image_base, const char *dllname, const char
         PATCH_FLOAT_MEMREF_PTR(&__expr_value, __VA_ARGS__); \
     } while (0)
 
+#endif // NO_VARIADIC_MACROS
 
+
+
+#ifdef PATCHAPI_EXPORTS
+// INTERNAL DEFINITIONS
+
+#endif
 #endif

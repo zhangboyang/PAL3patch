@@ -8,7 +8,7 @@
 #define BUILD_COMPILER "unknown C compiler"
 #endif
 
-const char patch_version[] = "v1.5";
+const char patch_version[] = "v1.6";
 const char build_date[] = __DATE__ ", " __TIME__;
 const char build_compiler[] = BUILD_COMPILER;
 
@@ -25,11 +25,6 @@ const char build_info[] =
 " +d3d9sdk"
 #else
 " -d3d9sdk"
-#endif
-#ifdef DYNLINK_D3DX9_AT_RUNTIME
-" +d3dx9dll"
-#else
-" -d3dx9dll"
 #endif
     "\n";
 

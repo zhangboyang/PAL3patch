@@ -90,6 +90,11 @@ void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int 
     try_refresh_clipcursor();
     set_pauseresume(0);
 }
+void ensure_cooperative_level(int requirefocus)
+{
+    gbGfxManager_D3D_EnsureCooperativeLevel(GB_GfxMgr, requirefocus);
+}
+
 
 // load image bits from file in memory, using D3DX
 // will allocate memory from given allocator
@@ -100,7 +105,7 @@ void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height,
     IDirect3DSurface9 *suf = NULL;
     void *bits = NULL;
     
-    if (FAILED(D3DXFUNC(D3DXGetImageInfoFromFileInMemory)(filedata, filelen, &img_info))) goto fail;
+    if (FAILED(D3DXGetImageInfoFromFileInMemory(filedata, filelen, &img_info))) goto fail;
     *width = img_info.Width;
     *height = img_info.Height;
     *bitcount = 32; // FIXME: detect if alpha exists
@@ -114,7 +119,7 @@ void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height,
         suf = NULL;
         goto fail;
     }
-    if (FAILED(D3DXFUNC(D3DXLoadSurfaceFromFileInMemory)(suf, NULL, NULL, filedata, filelen, NULL, D3DX_DEFAULT, 0, NULL))) goto fail;
+    if (FAILED(D3DXLoadSurfaceFromFileInMemory(suf, NULL, NULL, filedata, filelen, NULL, D3DX_DEFAULT, 0, NULL))) goto fail;
     if (FAILED(IDirect3DSurface9_LockRect(suf, &lrc, NULL, 0))) goto fail;
     bits = mem_allocator->malloc(img_info.Width * img_info.Height * (*bitcount / 8));
     int i;
@@ -243,5 +248,5 @@ void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color)
     float b = ((color >> 16) & 0xFF) / 255.0f;
     float a = ((color >> 24) & 0xFF) / 255.0f;
     D3DXVECTOR4 vcolor = (D3DXVECTOR4) { r, g, b, a };
-    D3DXFUNC(D3DXFillTexture)(tex, fill_texture_callback, &vcolor);
+    D3DXFillTexture(tex, fill_texture_callback, &vcolor);
 }

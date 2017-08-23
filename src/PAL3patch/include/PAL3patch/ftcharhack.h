@@ -1,5 +1,7 @@
 #ifndef PAL3PATCH_FTCHARHACK_H
 #define PAL3PATCH_FTCHARHACK_H
+#ifdef PATCHAPI_EXPORTS
+// INTERNAL DEFINITIONS
 
 struct ftcharhack_bitmap {
     int w, h;
@@ -15,4 +17,5 @@ struct ftcharhack {
 
 extern const struct ftcharhack *charhack[];
 
+#endif
 #endif

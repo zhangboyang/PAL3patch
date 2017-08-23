@@ -1,7 +1,6 @@
 #ifndef PAL3PATCH_MEMALLOCATOR_H
 #define PAL3PATCH_MEMALLOCATOR_H
-
-extern void init_memory_allocators(void);
+// PATCHAPI DEFINITIONS
 
 // memory allocator structure
 typedef void *(*malloc_funcptr_t)(size_t);
@@ -17,7 +16,14 @@ struct memory_allocator {
     })
 
 // allocators for different modules
-extern struct memory_allocator gb_mem_allocator; // GBENGINE.DLL
-extern struct memory_allocator def_mem_allocator; // PAL3patch's default allocator
+extern PATCHAPI struct memory_allocator pal3_mem_allocator;  // PAL3.EXE
+extern PATCHAPI struct memory_allocator gb_mem_allocator;    // GBENGINE.DLL
+extern PATCHAPI struct memory_allocator patch_mem_allocator; // PAL3PATCH.DLL
 
+#ifdef PATCHAPI_EXPORTS
+// INTERNAL DEFINITIONS
+
+extern void init_memory_allocators(void);
+
+#endif
 #endif

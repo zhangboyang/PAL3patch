@@ -1,5 +1,26 @@
 #ifndef PAL3PATCH_PATCH_COMMON_H
 #define PAL3PATCH_PATCH_COMMON_H
+// PATCHAPI DEFINITIONS
+
+// NOTE: for tidy, these definitions are copied from INTERNAL DEFINITIONS
+
+extern PATCHAPI int game_width, game_height;
+extern PATCHAPI fRECT game_frect, game_frect_43, game_frect_original;
+extern PATCHAPI double game_scalefactor;
+
+extern PATCHAPI HWND game_hwnd;
+extern PATCHAPI void try_goto_desktop(void);
+extern PATCHAPI void try_refresh_clipcursor(void);
+
+extern PATCHAPI void render_softcursor(void);
+extern PATCHAPI int get_showcursor_state(void);
+extern PATCHAPI void set_showcursor_state(int show);
+extern PATCHAPI int try_screenshot(void);
+
+
+
+#ifdef PATCHAPI_EXPORTS
+// INTERNAL DEFINITIONS
 
 #define MAKE_PATCHSET_NAME(name) CONCAT(patchset_, name)
 #define GET_PATCHSET_FLAG(name) (get_int_from_configfile(TOSTR(name)))
@@ -41,7 +62,6 @@ MAKE_PATCHSET(kfspeed);
 MAKE_PATCHSET(fixacquire);
 MAKE_PATCHSET(preciseresmgr);
 MAKE_PATCHSET(audiofreq);
-MAKE_PATCHSET(voice);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
@@ -213,4 +233,5 @@ MAKE_PATCHSET(graphicspatch);
     MAKE_PATCHSET(screenshot);
         extern int try_screenshot(void);
 
+#endif
 #endif

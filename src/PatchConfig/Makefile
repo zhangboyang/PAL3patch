@@ -1,5 +1,5 @@
 MSDEV := msdev
-MSDEVFLAGS := -make all
+MSDEVFLAGS := -make all -rebuild
 
 TARGET_EXE := PatchConfig.exe
 

@@ -10,23 +10,9 @@ void patchentry(struct trapframe *tf)
     }
 }
 
-static unsigned char *dyncode_page = NULL;
-static unsigned dyncode_ptr;
 
-static unsigned char *alloc_dyncode_buffer(unsigned size)
-{
-    if (!size || size > PAGE_SIZE) fail("invalid size %08X.", size);
-    if (!dyncode_page || dyncode_ptr + size > PAGE_SIZE) {
-        dyncode_page = VirtualAlloc(NULL, PAGE_SIZE, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-        if (!dyncode_page) fail("can't alloc memory for dynamic code.");
-        dyncode_ptr = 0;
-    }
-    unsigned char *ret = dyncode_page + dyncode_ptr;
-    dyncode_ptr += size;
-    return ret;
-}
 
-void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigned size)
+void make_asmpatch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigned size)
 {
     if (size < 5) fail("size is too small.");
     
@@ -36,7 +22,7 @@ void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigned size)
     memcpy(dyncode + 7, &patch_proc, 4); // PUSH patch_id
     jmpimm = TOUINT(asmentry) - (TOUINT(dyncode) + 16);
     dyncode[11] = 0xE9; memcpy(dyncode + 12, &jmpimm, 4); // JMP asmentry
-    FlushInstructionCache(GetCurrentProcess(), dyncode, 16);
+    flush_instruction_cache(dyncode, 16);
     
     unsigned char *buf = malloc(size);
     memset(buf + 5, 0x90, size - 5);

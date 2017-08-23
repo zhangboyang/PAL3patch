@@ -1,5 +1,5 @@
-#ifndef PAL3PATCH_D3D9SDK_H
-#define PAL3PATCH_D3D9SDK_H
+#ifndef PAL3PATCH_TINY_D3D9SDK_H
+#define PAL3PATCH_TINY_D3D9SDK_H
 
 // DirectInput
 
@@ -29,18 +29,6 @@ typedef struct _DIMOUSESTATE2 {
 
 
 // D3DX
-
-
-#if defined(_MSC_VER) && !defined(DYNLINK_D3DX9_AT_RUNTIME)
-#ifdef _DEBUG
-#pragma comment(lib, "d3dx9d.lib")
-#else
-#pragma comment(lib, "d3dx9.lib")
-#endif
-#if _MSC_VER >= 1900
-#pragma comment(lib, "legacy_stdio_definitions.lib")
-#endif
-#endif
 
 
 #ifdef HAVE_D3D9SDK
@@ -304,23 +292,14 @@ typedef VOID (WINAPI *LPD3DXFILL2D)(D3DXVECTOR4 *pOut,
 
 
 
-#ifdef DYNLINK_D3DX9_AT_RUNTIME
-#define DECL_D3DX9FUNC(func) (WINAPI *CONCAT(p, func))
-#define D3DXFUNC(func) CONCAT(p, func)
-extern void d3dx9_dynlink();
-#else
-#define DECL_D3DX9FUNC(func) (WINAPI func)
-#define D3DXFUNC(func) func
-#endif
 
 
-
-#if defined(DYNLINK_D3DX9_AT_RUNTIME) || !defined(HAVE_D3D9SDK)
+#if !defined(HAVE_D3D9SDK)
 
 // functions for D3DX9
-BOOL DECL_D3DX9FUNC(D3DXCheckVersion)(UINT D3DSdkVersion, UINT D3DXSdkVersion);
+BOOL WINAPI D3DXCheckVersion(UINT D3DSdkVersion, UINT D3DXSdkVersion);
 
-HRESULT DECL_D3DX9FUNC(D3DXCreateFontW)(
+HRESULT WINAPI D3DXCreateFontW(
     LPDIRECT3DDEVICE9       pDevice,  
     UINT                    Height,
     UINT                    Width,
@@ -333,17 +312,17 @@ HRESULT DECL_D3DX9FUNC(D3DXCreateFontW)(
     DWORD                   PitchAndFamily,
     LPCWSTR                 pFaceName,
     LPD3DXFONT*             ppFont);
-HRESULT DECL_D3DX9FUNC(D3DXCreateSprite)( 
+HRESULT WINAPI D3DXCreateSprite(
     LPDIRECT3DDEVICE9   pDevice, 
     LPD3DXSPRITE*       ppSprite);
 
 
-HRESULT DECL_D3DX9FUNC(D3DXGetImageInfoFromFileInMemory)(
+HRESULT WINAPI D3DXGetImageInfoFromFileInMemory(
     LPCVOID pSrcData,
     UINT SrcDataSize,
     D3DXIMAGE_INFO *pSrcInfo
 );
-HRESULT DECL_D3DX9FUNC(D3DXLoadSurfaceFromFileInMemory)(
+HRESULT WINAPI D3DXLoadSurfaceFromFileInMemory(
     LPDIRECT3DSURFACE9 pDestSurface,
     CONST PALETTEENTRY *pDestPalette,
     CONST RECT *pDestRect,
@@ -354,12 +333,12 @@ HRESULT DECL_D3DX9FUNC(D3DXLoadSurfaceFromFileInMemory)(
     D3DCOLOR ColorKey,
     D3DXIMAGE_INFO *pSrcInfo
 );
-HRESULT DECL_D3DX9FUNC(D3DXFillTexture)(
+HRESULT WINAPI D3DXFillTexture(
     LPDIRECT3DTEXTURE9 pTexture,
     LPD3DXFILL2D pFunction,
     LPVOID pData
 );
-HRESULT DECL_D3DX9FUNC(D3DXSaveSurfaceToFileA)(
+HRESULT WINAPI D3DXSaveSurfaceToFileA(
     LPCTSTR pDestFile,
     D3DXIMAGE_FILEFORMAT DestFormat,
     LPDIRECT3DSURFACE9 pSrcSurface,

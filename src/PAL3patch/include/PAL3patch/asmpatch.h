@@ -1,5 +1,7 @@
 #ifndef PAL3PATCH_ASMPATCH_H
 #define PAL3PATCH_ASMPATCH_H
+// PATCHAPI DEFINITIONS
+
 
 #define MAKE_ASMPATCH_PROC(funcname) void funcname(struct trapframe *tf)
 #define MAKE_ASMPATCH_NAME(name) CONCAT(asmpatch_, name)
@@ -7,7 +9,7 @@
 #define INIT_ASMPATCH(name, addr, size, oldcode) \
     do { \
         check_code((addr), (oldcode), (size)); \
-        make_patch_proc_call((addr), MAKE_ASMPATCH_NAME(name), (size)); \
+        make_asmpatch_proc_call((addr), MAKE_ASMPATCH_NAME(name), (size)); \
     } while (0)
 
 struct trapframe;
@@ -27,8 +29,7 @@ struct trapframe {
     patch_proc_t patch_proc;
 };
 
-extern void patchentry(struct trapframe *tf);
-extern void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigned size);
+extern PATCHAPI void make_asmpatch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigned size);
 #define PUSH_DWORD(data) do { unsigned __data = (data); *--(tf)->p_esp = __data; } while (0)
 #define POP_DWORD() (*(tf)->p_esp++)
 #define M_FLOAT(addr) (*(float *)(addr))
@@ -50,8 +51,15 @@ extern void make_patch_proc_call(unsigned addr, patch_proc_t patch_proc, unsigne
 #define LINK_JMP(addr) do { RETNADDR = (addr); } while (0)
 #define LINK_RETN(arg_bytes) do { unsigned __arg_bytes = (arg_bytes); RETNADDR = POP_DWORD(); R_ESP += __arg_bytes; } while (0)
 
+
+#ifdef PATCHAPI_EXPORTS
+// INTERNAL DEFINITIONS
+
+extern void patchentry(struct trapframe *tf);
+
 // asmentry.S
 extern unsigned max_push_dwords;
 extern void __stdcall asmentry(unsigned patch_id);
 
+#endif
 #endif

@@ -1,4 +1,0 @@
-LIBRARY PAL3patch.dll
-EXPORTS
-	sforce_unpacker_entry @1
-	launcher_entry @2

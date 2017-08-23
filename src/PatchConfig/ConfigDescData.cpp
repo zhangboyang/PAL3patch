@@ -13,7 +13,7 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		0, FALSE, TRUE,
 		NULL,
 		_T("欢迎"),
-		_T("欢迎使用《仙剑奇侠传三》分辨率补丁 ") PATCH_VERSION_TSTR _T("\r\n")
+		_T("欢迎使用《仙剑奇侠传三》分辨率补丁 ") PATCH_VERSION _T("\r\n")
 			_T("本补丁可以扩大游戏的分辨率，\r\n")
 			_T("同时修复一些游戏程序的小问题，\r\n")
 			_T("并且添加了一些实用的小功能。"),
@@ -439,7 +439,7 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		NULL,
 		_T("检查新版本"),
 		_T("此功能可以联网检查本补丁的新版本。"),
-		_T("将访问补丁网站并检查是否有新版本的补丁，如有新版补丁则会弹出提示，但仍需手动下载和安装。\r\n补丁网站：") PATCH_WEBSITE,
+		_T("将访问补丁网站并检查是否有新版本的补丁，如有新版补丁则会弹出提示，但仍需手动下载和安装。\r\n补丁网站：") PATCH_WEBSITE_BASE,
 		CheckForUpdates,
 	},
 	{ -1 } // EOF

@@ -1,2 +1,0 @@
-_sforce_unpacker_entry
-_launcher_entry

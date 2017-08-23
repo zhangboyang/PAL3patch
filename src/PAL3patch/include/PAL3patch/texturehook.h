@@ -1,7 +1,7 @@
 #ifndef PAL3PATCH_TEXTUREHOOK_H
 #define PAL3PATCH_TEXTUREHOOK_H
+// PATCHAPI DEFINITIONS
 
-#define MAX_TEXTURE_HOOKS 20
 
 enum texture_hook_type {
     TH_PRE_IMAGELOAD,
@@ -54,16 +54,23 @@ struct texture_hook_info {
 */
 
 // magic related functions
-extern int test_texture_hook_magic(struct texture_hook_info *thinfo);
-extern char *extract_texture_hook_magic(struct texture_hook_info *thinfo, const char *magic);
-extern const char *make_texture_hook_magic(const char *magic);
+extern PATCHAPI int test_texture_hook_magic(struct texture_hook_info *thinfo);
+extern PATCHAPI char *extract_texture_hook_magic(struct texture_hook_info *thinfo, const char *magic);
+extern PATCHAPI const char *make_texture_hook_magic(const char *magic);
 
 // autoload related functions
-extern int test_texture_hook_noautoload(struct texture_hook_info *thinfo);
-extern void mark_texture_hook_noautoload(struct texture_hook_info *thinfo);
+extern PATCHAPI int test_texture_hook_noautoload(struct texture_hook_info *thinfo);
+extern PATCHAPI void mark_texture_hook_noautoload(struct texture_hook_info *thinfo);
 
 // hook management functions
-extern void add_texture_hook(void (*funcptr)(struct texture_hook_info *));
+extern PATCHAPI void add_texture_hook(void (*funcptr)(struct texture_hook_info *));
+
+
+#ifdef PATCHAPI_EXPORTS
+// INTERNAL DEFINITIONS
+
+#define MAX_TEXTURE_HOOKS 100
 extern void init_texture_hooks(void);
 
+#endif
 #endif

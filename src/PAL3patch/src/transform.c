@@ -1,5 +1,13 @@
 #include "common.h"
 
+void set_rect(RECT *rect, int left, int top, int right, int bottom)
+{
+    rect->left = left;
+    rect->top = top;
+    rect->right = right;
+    rect->bottom = bottom;
+}
+
 void set_rect_ltwh(RECT *rect, int left, int top, int width, int height)
 {
     set_rect(rect, left, top, left + width, top + height);

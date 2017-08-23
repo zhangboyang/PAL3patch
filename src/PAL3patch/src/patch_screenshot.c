@@ -18,7 +18,7 @@ static void screenshot_hook()
     // save image
     IDirect3DSurface9 *suf = NULL;
     if (SUCCEEDED(IDirect3DDevice9_GetBackBuffer(GB_GfxMgr->m_pd3dDevice, 0, 0, D3DBACKBUFFER_TYPE_MONO, &suf))) {
-        if (FAILED(D3DXFUNC(D3DXSaveSurfaceToFileA)(buf, D3DXIFF_BMP, suf, NULL, NULL))) {
+        if (FAILED(D3DXSaveSurfaceToFileA(buf, D3DXIFF_BMP, suf, NULL, NULL))) {
             warning("screenshot failed.");
         }
         IDirect3DSurface9_Release(suf);

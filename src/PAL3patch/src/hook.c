@@ -11,34 +11,34 @@ static void add_hook(int hookid, void *funcptr)
     hookfunc[hookid][nr_hooks[hookid]++] = funcptr;
 }
 
-static INLINE void run_hooks_witharg(int hookid, void *arg)
+static void run_hooks_witharg(int hookid, void *arg)
 {
     int i;
     for (i = 0; i < nr_hooks[hookid]; i++) {
         ((void (*)(void *)) hookfunc[hookid][i])(arg);
     }
 }
-static INLINE void run_hooks(int hookid)
+static void run_hooks(int hookid)
 {
     int i;
     for (i = 0; i < nr_hooks[hookid]; i++) {
         ((void (*)(void)) hookfunc[hookid][i])();
     }
 }
-static INLINE void run_hooks_reverse_witharg(int hookid, void *arg)
+static void run_hooks_reverse_witharg(int hookid, void *arg)
 {
     int i;
     for (i = nr_hooks[hookid] - 1; i >= 0; i--) {
         ((void (*)(void *)) hookfunc[hookid][i])(arg);
     }
 }
-static INLINE void run_hooks_reverse(int hookid)
+/*static void run_hooks_reverse(int hookid)
 {
     int i;
     for (i = nr_hooks[hookid] - 1; i >= 0; i--) {
         ((void (*)(void)) hookfunc[hookid][i])();
     }
-}
+}*/
 
 
 

@@ -1,7 +1,3 @@
-# use msvc linker to link d3dx9.lib
-# MUST run 'make clean' after modifying this option
-LINK_D3DX9 := 1
-
 # freetype headers
 FREETYPE_INCLUDE_PATH := C:\freetype\include
 
@@ -10,24 +6,21 @@ CCAS := $(CC)
 CCLD := $(CC)
 AR := ar
 STRIP := strip
-
-CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing -mfpmath=387 -I $(FREETYPE_INCLUDE_PATH)
-SFLAGS :=
-CCLDFLAGS := -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lgdi32 -lcomctl32 -lwinmm
-CCLDFLAGS_MSVC :=
-
+DLLTOOL := dlltool
 MSDEV := msdev
-MSDEVFLAGS := -make all -rebuild
-
-ifeq ($(LINK_D3DX9), 0)
-	CFLAGS += -DDYNLINK_D3DX9_AT_RUNTIME
-endif
 
 TARGET_DLL := PAL3patch.dll
 TARGET_DLL_SRCPATH := src
+TARGET_DLL_INCPATH := include/PAL3patch
 
-TARGET_DLL_HFILES := $(wildcard $(TARGET_DLL_SRCPATH)/*.h)
-TARGET_DLL_COMMONHEADER := $(TARGET_DLL_SRCPATH)/common.h
+CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing -falign-functions -mfpmath=387 -isystem $(FREETYPE_INCLUDE_PATH) -I $(TARGET_DLL_INCPATH)
+SFLAGS :=
+CCLDFLAGS := -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lgdi32 -lcomctl32 -lwinmm
+CCLDFLAGS_MSVC :=
+MSDEVFLAGS := -make all -rebuild
+
+TARGET_DLL_HFILES := $(wildcard $(TARGET_DLL_INCPATH)/*.h)
+TARGET_DLL_COMMONHEADER := $(TARGET_DLL_INCPATH)/common.h
 TARGET_DLL_GCH := $(TARGET_DLL_COMMONHEADER).gch
 
 TARGET_DLL_CFILES := $(wildcard $(TARGET_DLL_SRCPATH)/*.c)
@@ -35,28 +28,29 @@ TARGET_DLL_CFILES_ABOUT := $(TARGET_DLL_SRCPATH)/about.c
 TARGET_DLL_COBJS := $(TARGET_DLL_CFILES:.c=.o)
 
 TARGET_DLL_SFILES := $(wildcard $(TARGET_DLL_SRCPATH)/*.S)
+TARGET_DLL_SFILES_DRECTVE := $(TARGET_DLL_SRCPATH)/drectve.S
 TARGET_DLL_SOBJS := $(TARGET_DLL_SFILES:.S=.o)
+TARGET_DLL_ENTRY_SOBJS := $(filter-out $(TARGET_DLL_SFILES_DRECTVE:.S=.o), $(TARGET_DLL_SOBJS))
 
 TARGET_DLL_OBJS := $(TARGET_DLL_COBJS) $(TARGET_DLL_SOBJS)
 
 
 TARGET_DLL_MSVC_DSP := $(TARGET_DLL:.dll=.dsp)
 TARGET_DLL_MSVC_OBJ := $(TARGET_DLL:.dll=.obj)
-TARGET_DLL_MSVC_SYMBOLS := $(TARGET_DLL_SRCPATH)/msvc_symbols.txt
-TARGET_DLL_MSVC_TMPFILES := $(TARGET_DLL_MSVC_OBJ) $(TARGET_DLL:.dll=.exp) $(TARGET_DLL:.dll=.lib) $(TARGET_DLL:.dll=.plg) $(TARGET_DLL:.dll=.dsw) $(TARGET_DLL:.dll=.ncb) $(TARGET_DLL:.dll=.opt)
+TARGET_DLL_MSVC_TMPFILES := $(TARGET_DLL_MSVC_OBJ) $(TARGET_DLL:.dll=.exp) $(TARGET_DLL:.dll=.lib) $(TARGET_DLL:.dll=.plg) $(TARGET_DLL:.dll=.dsw) $(TARGET_DLL:.dll=.ncb) $(TARGET_DLL:.dll=.opt) $(TARGET_DLL:.dll=.def)
 
-MSVC_ASM_LIB := $(TARGET_DLL:.dll=_asm.lib)
+MSVC_ENTRY_LIB := $(TARGET_DLL:.dll=_entry.lib)
 
 .PHONY: clean $(TARGET_DLL_CFILES_ABOUT)
 
 dll: $(TARGET_DLL)
 
-all: $(TARGET_DLL) $(MSVC_ASM_LIB)
+all: $(TARGET_DLL) $(MSVC_ENTRY_LIB)
 
 clean:
-	rm -f $(TARGET_DLL) $(TARGET_DLL_OBJS) $(MSVC_ASM_LIB) $(TARGET_DLL_GCH) $(TARGET_DLL_MSVC_TMPFILES)
+	rm -f $(TARGET_DLL) $(TARGET_DLL_OBJS) $(MSVC_ENTRY_LIB) $(TARGET_DLL_GCH) $(TARGET_DLL_MSVC_TMPFILES)
 
-msvcasm: $(MSVC_ASM_LIB)
+entrylib: $(MSVC_ENTRY_LIB)
 
 $(TARGET_DLL_GCH): $(TARGET_DLL_HFILES)
 	$(CC) $(CFLAGS) $(TARGET_DLL_COMMONHEADER)
@@ -70,13 +64,10 @@ $(TARGET_DLL_SRCPATH)/%.o: $(TARGET_DLL_SRCPATH)/%.S
 	$(CCAS) $(SFLAGS) -c -o $@ $<
 
 $(TARGET_DLL): $(TARGET_DLL_OBJS)
-ifeq ($(LINK_D3DX9), 0)
-	$(CCLD) -shared -o $@ $(TARGET_DLL_OBJS) $(TARGET_DLL_SRCPATH)/$(@:.dll=.def) $(CCLDFLAGS)
-	$(STRIP) $@
-else
-	$(CCLD) $(CCLDFLAGS_MSVC) -o $(TARGET_DLL_MSVC_OBJ) -r -Wl,--retain-symbols-file $(TARGET_DLL_MSVC_SYMBOLS) -nostdlib $(TARGET_DLL_OBJS) -lmingwex -lgcc
+	$(CCLD) $(CCLDFLAGS_MSVC) -o $(TARGET_DLL_MSVC_OBJ) -r -Wl,--unique=.drectve -nostdlib $(TARGET_DLL_OBJS) -lmingwex -lgcc
+	$(DLLTOOL) -z $(TARGET_DLL:.dll=.def) $(TARGET_DLL_MSVC_OBJ)
+	$(STRIP) --strip-unneeded --remove-section=.drectve $(TARGET_DLL_MSVC_OBJ)
 	$(MSDEV) $(TARGET_DLL_MSVC_DSP) $(MSDEVFLAGS)
-endif
 
-$(MSVC_ASM_LIB): $(TARGET_DLL_SOBJS)
-	$(AR) rcs $(MSVC_ASM_LIB) $(TARGET_DLL_SOBJS)
+$(MSVC_ENTRY_LIB): $(TARGET_DLL_ENTRY_SOBJS)
+	$(AR) rcs $@ $(TARGET_DLL_ENTRY_SOBJS)

@@ -32,7 +32,7 @@ retry:
 
 	// format url and open it
 	url.Format(_T("%s?version=%hs&builton=%hs&compiler=%hs"), PATCH_UPDATEURL, pVersionStr, pBuildDate, pCompiler);
-	hFile = InternetOpenUrl(hInternet, url, NULL, 0, INTERNET_FLAG_RELOAD, 0);
+	hFile = InternetOpenUrl(hInternet, url, NULL, 0, INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_UI | INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_RELOAD, 0);
 	if (!hFile) goto fail;
 
 	// query http status code
