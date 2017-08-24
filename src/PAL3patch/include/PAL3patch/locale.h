@@ -44,6 +44,11 @@ extern const wchar_t *wstr_nocfgfile_text;
 extern const wchar_t *wstr_nocfgfile_title;
 extern const wchar_t *wstr_badcfgfile_text;
 extern const wchar_t *wstr_badcfgfile_title;
+extern const wchar_t *wstr_pluginerr_notfound_text;
+extern const wchar_t *wstr_pluginerr_loadfailed_text;
+extern const wchar_t *wstr_pluginerr_noentry_text;
+extern const wchar_t *wstr_pluginerr_initfailed_text;
+extern const wchar_t *wstr_pluginerr_title;
 
 #endif
 #endif

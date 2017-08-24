@@ -33,6 +33,7 @@ static const wchar_t wstr_confirmquit_title_CHS[] = L"退出";
 
 static const char ftfont_filename_CHS[] = "simsun.ttc";
 static const int ftfont_index_CHS = 0;
+static const DWORD defaultfont_charset_CHS = GB2312_CHARSET;
 static const int defaultfont_bold_CHS = 48;
 
 static const wchar_t wstr_defaultfont_CHS[] = L"宋体";
@@ -44,14 +45,21 @@ static const wchar_t wstr_cantsavereg_title_CHS[] = L"注册表重定向";
 static const wchar_t wstr_nocfgfile_text_CHS[] = L"无法读取补丁配置文件。请运行“补丁配置工具”来生成默认配置文件。";
 static const wchar_t wstr_nocfgfile_title_CHS[] = L"无法加载配置";
 
-static const wchar_t wstr_badcfgfile_text_CHS[] = L"补丁配置文件损坏。请运行“补丁配置工具”，使用“恢复默认设置”功能来重写配置文件。";
+static const wchar_t wstr_badcfgfile_text_CHS[] = L"补丁配置文件损坏。请运行“补丁配置工具”，使用“实用工具——恢复默认设置”功能来重写配置文件。";
 static const wchar_t wstr_badcfgfile_title_CHS[] = L"无法加载配置";
 
+
+static const wchar_t wstr_pluginerr_notfound_text_CHS[] = L"找不到指定的插件模块“%s”。";
+static const wchar_t wstr_pluginerr_loadfailed_text_CHS[] = L"无法加载插件模块“%s”。";
+static const wchar_t wstr_pluginerr_noentry_text_CHS[] = L"无法在“%s”中找到插件模块入口点“%hs”，请确认它是否为合法的插件模块。";
+static const wchar_t wstr_pluginerr_initfailed_text_CHS[] = L"无法初始化插件模块“%s”，返回值为 %d。";
+static const wchar_t wstr_pluginerr_title_CHS[] = L"无法加载插件";
 
 
 // CHT
 static const char ftfont_filename_CHT[] = "mingliu.ttc";
 static const int ftfont_index_CHT = 0;
+static const DWORD defaultfont_charset_CHT = CHINESEBIG5_CHARSET;
 static const int defaultfont_bold_CHT = 32;
 
 static const wchar_t wstr_defaultfont_CHT[] = L"細明體";
@@ -61,7 +69,7 @@ static const wchar_t wstr_defaultfont_CHT[] = L"細明體";
 
 
 
-// string pointers
+// string pointers and default values
 
 const wchar_t *wstr_about_title;
 const wchar_t *wstr_about_text;
@@ -79,6 +87,78 @@ const wchar_t *wstr_nocfgfile_text;
 const wchar_t *wstr_nocfgfile_title;
 const wchar_t *wstr_badcfgfile_text;
 const wchar_t *wstr_badcfgfile_title;
+const wchar_t *wstr_pluginerr_notfound_text;
+const wchar_t *wstr_pluginerr_loadfailed_text;
+const wchar_t *wstr_pluginerr_noentry_text;
+const wchar_t *wstr_pluginerr_initfailed_text;
+const wchar_t *wstr_pluginerr_title;
+
+
+
+
+
+
+
+static int detect_game_locale();
+
+#define IMPORT_LOCALE_ITEM(lang, symbol) ((symbol) = (CONCAT3(symbol, _, lang)))
+
+void init_locale_early()
+{
+    // init codepage
+    // PATCHSET 'setlocale' may overwrite target_codepage
+    target_codepage = system_codepage = GetACP();
+
+    // detect game locale
+    game_locale = detect_game_locale();
+    
+    
+    // init early strings
+    IMPORT_LOCALE_ITEM(CHS, wstr_nocfgfile_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_nocfgfile_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badcfgfile_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badcfgfile_title);
+    
+    if (target_codepage == CODEPAGE_CHT) { // CHT
+        // FIXME
+    }
+}
+
+void init_locale()
+{
+    // no translations yet
+    IMPORT_LOCALE_ITEM(CHS, wstr_about_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_about_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_confirmquit_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_confirmquit_title);
+    IMPORT_LOCALE_ITEM(CHS, ftfont_filename);
+    IMPORT_LOCALE_ITEM(CHS, ftfont_index);
+    IMPORT_LOCALE_ITEM(CHS, wstr_defaultfont);
+    IMPORT_LOCALE_ITEM(CHS, defaultfont_charset);
+    IMPORT_LOCALE_ITEM(CHS, defaultfont_bold);
+    IMPORT_LOCALE_ITEM(CHS, wstr_gameloading);
+    IMPORT_LOCALE_ITEM(CHS, wstr_cantsavereg_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_cantsavereg_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_notfound_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_loadfailed_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_noentry_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_initfailed_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_title);
+
+    if (target_codepage == CODEPAGE_CHT) { // CHT
+        IMPORT_LOCALE_ITEM(CHT, ftfont_filename);
+        IMPORT_LOCALE_ITEM(CHT, ftfont_index);
+        IMPORT_LOCALE_ITEM(CHT, wstr_defaultfont);
+        IMPORT_LOCALE_ITEM(CHT, defaultfont_charset);
+        IMPORT_LOCALE_ITEM(CHT, defaultfont_bold);
+        // FIXME
+    }
+}
+
+
+
+
+
 
 
 
@@ -181,52 +261,4 @@ done:
     if (hFile != INVALID_HANDLE_VALUE) CloseHandle(hFile);
     
     return result;
-}
-
-
-void init_locale_early()
-{
-    // init codepage
-    // PATCHSET 'setlocale' may overwrite target_codepage
-    target_codepage = system_codepage = GetACP();
-
-    // detect game locale
-    game_locale = detect_game_locale();
-    
-    
-    // init early strings
-    wstr_nocfgfile_text = wstr_nocfgfile_text_CHS;
-    wstr_nocfgfile_title = wstr_nocfgfile_title_CHS;
-    wstr_badcfgfile_text = wstr_badcfgfile_text_CHS;
-    wstr_badcfgfile_title = wstr_badcfgfile_title_CHS;
-    
-    if (target_codepage == CODEPAGE_CHT) { // CHT
-        // FIXME
-    }
-}
-
-void init_locale()
-{
-    // no translations yet
-    wstr_about_title = wstr_about_title_CHS;
-    wstr_about_text = wstr_about_text_CHS;
-    wstr_confirmquit_text = wstr_confirmquit_text_CHS;
-    wstr_confirmquit_title = wstr_confirmquit_title_CHS;
-    ftfont_filename = ftfont_filename_CHS;
-    ftfont_index = ftfont_index_CHS;
-    wstr_defaultfont = wstr_defaultfont_CHS;
-    defaultfont_charset = GB2312_CHARSET;
-    defaultfont_bold = defaultfont_bold_CHS;
-    wstr_gameloading = wstr_gameloading_CHS;
-    wstr_cantsavereg_text = wstr_cantsavereg_text_CHS;
-    wstr_cantsavereg_title = wstr_cantsavereg_title_CHS;
-
-    if (target_codepage == CODEPAGE_CHT) { // CHT
-        ftfont_filename = ftfont_filename_CHT;
-        ftfont_index = ftfont_index_CHT;
-        wstr_defaultfont = wstr_defaultfont_CHT;
-        defaultfont_charset = CHINESEBIG5_CHARSET;
-        defaultfont_bold = defaultfont_bold_CHT;
-        // FIXME
-    }
 }

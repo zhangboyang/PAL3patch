@@ -13,9 +13,28 @@
 //
 
 
+// OPTION MACROS:
+//
+//    PLUGIN_NAME                :   name of current compiling plugin
+//
+//    NO_VARIADIC_MACROS         :   no C99 variadic macros
+//    NO_PAL3_DEFINITIONS        :   no PAL3 types and definitions
+//
+
+// USEFUL MACROS:
+//
+//    MAKE_PLUGINENTRY()         :   declare plugin entry
+//    PAL3_STRUCT_SELFCHECK()    :   run self check on struct definitions
+//
+
+
 // check compiler versions
 #if defined(_MSC_VER) && _MSC_VER < 1400
 #define NO_VARIADIC_MACROS
+#endif
+
+#ifdef NO_VARIADIC_MACROS
+#define NO_PAL3_DEFINITIONS
 #endif
 
 

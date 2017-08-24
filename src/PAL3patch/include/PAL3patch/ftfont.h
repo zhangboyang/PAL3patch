@@ -76,7 +76,7 @@ struct ftfont {
     struct ftchar *ch[FTFONT_MAXCHARS];
 };
 
-extern void init_ftfont();
+extern void init_ftfont(void);
 extern struct ftfont *ftfont_create(const char *filename, int face_index, int req_size, int req_bold, int req_quality);
 extern void ftfont_preload_range(struct ftfont *font, wchar_t low, wchar_t high);
 extern void ftfont_preload_string(struct ftfont *font, const wchar_t *wstr);

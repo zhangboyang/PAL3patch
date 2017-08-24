@@ -202,7 +202,7 @@
 #define _WIN32_WINNT 0x0400
 
 
-// system headers
+// C headers
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -227,19 +227,23 @@
 #define wcsdup _wcsdup
 
 // make sure '\0' is added when using snprintf family functions
-#define snprintf(s, n, format, ...) ((n) > 0 ? ((s)[(n) - 1] = 0, _snprintf((s), (n) - 1, format, ##__VA_ARGS__)) : -1)
-#define snwprintf(s, n, format, ...) ((n) > 0 ? ((s)[(n) - 1] = 0, _snwprintf((s), (n) - 1, format, ##__VA_ARGS__)) : -1)
-#define vsnprintf(s, n, format, ...) ((n) > 0 ? ((s)[(n) - 1] = 0, _vsnprintf((s), (n) - 1, format, ##__VA_ARGS__)) : -1)
+#define safe_snprintf_helper(func, s, n, format, ...) ((n) > 0 ? ((s)[(n) - 1] = 0, func((s), (n) - 1, format, ##__VA_ARGS__)) : -1)
+#define snprintf(s, n, format, ...) safe_snprintf_helper(_snprintf, s, n, format, ##__VA_ARGS__)
+#define snwprintf(s, n, format, ...) safe_snprintf_helper(_snwprintf, s, n, format, ##__VA_ARGS__)
+#define vsnprintf(s, n, format, ...) safe_snprintf_helper(_vsnprintf, s, n, format, ##__VA_ARGS__)
+#define vsnwprintf(s, n, format, ...) safe_snprintf_helper(_vsnwprintf, s, n, format, ##__VA_ARGS__)
 
-// bool
-typedef unsigned char bool;
-#define true 1
-#define false 0
 
 #endif // PATCHAPI_EXPORTS
 
 
 #ifdef PATCHAPI_IMPORTS
+
+#ifdef __cplusplus
+#include <cassert>
+#else
+#include <assert.h>
+#endif
 
 #include <windows.h>
 #include "tiny_d3d9sdk.h"
@@ -247,7 +251,12 @@ typedef unsigned char bool;
 #endif
 
 
-
+#if !defined(NO_PAL3_DEFINITIONS) && !defined(__cplusplus)
+// bool
+typedef unsigned char bool;
+#define true 1
+#define false 0
+#endif
 
 
 
@@ -279,6 +288,8 @@ extern "C" {
 #include "texturehook.h"
 #include "ftfont.h"
 #include "ftcharhack.h"
+#include "plugin.h"
+
 
 #ifdef __cplusplus
 }

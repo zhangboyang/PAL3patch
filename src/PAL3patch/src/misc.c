@@ -34,6 +34,45 @@ int str_iendwith(const char *a, const char *b)
     return lena >= lenb && stricmp(a + lena - lenb, b) == 0;
 }
 
+char *strtrim(char *str, char *charlist)
+{
+    char *begin, *end;
+    char *dst;
+    
+    for (begin = str; *begin && strchr(charlist, *begin); begin++);
+    for (end = begin; *end; end++);
+    while (begin < end && strchr(charlist, end[-1])) end--;
+    
+    if (begin != str) {
+        for (dst = str; begin < end; *dst++ = *begin++);
+        *dst = 0;
+    } else {
+        *end = 0;
+    }
+    
+    return str;
+}
+
+wchar_t *wcstrim(wchar_t *str, wchar_t *charlist)
+{
+    wchar_t *begin, *end;
+    wchar_t *dst;
+    
+    for (begin = str; *begin && wcschr(charlist, *begin); begin++);
+    for (end = begin; *end; end++);
+    while (begin < end && wcschr(charlist, end[-1])) end--;
+    
+    if (begin != str) {
+        for (dst = str; begin < end; *dst++ = *begin++);
+        *dst = 0;
+    } else {
+        *end = 0;
+    }
+    
+    return str;
+}
+
+
 int iabs(int x)
 {
     return x >= 0 ? x : -x;
@@ -103,6 +142,18 @@ FARPROC GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName)
     return ret;
 }
 
+int MessageBoxW_format(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType, ...)
+{
+    va_list ap;
+    va_start(ap, uType);
+    int ret;
+    wchar_t buf[MAXLINE];
+    vsnwprintf(buf, MAXLINE, lpText, ap);
+    ret = MessageBoxW(hWnd, buf, lpCaption, uType);
+    va_end(ap);
+    return ret;
+}
+
 void NORETURN die(int status)
 {
     TerminateProcess(GetCurrentProcess(), status);
@@ -125,13 +176,14 @@ static void write_logfile_header(FILE *fp)
     dump_all_config(fp);
 }
 
-void NORETURN __fail(const char *file, int line, const char *func, const char *fmt, ...)
+void NORETURN __fail(const char *file, int line, const char *func, const wchar_t *extra_msg, const wchar_t *extra_msg_title, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
     char buf[MAXLINE];
     char msgbuf[MAXLINE];
     int len;
+    
     snprintf(msgbuf, sizeof(msgbuf), "  file: %s\n  line: %d\n  func: %s\nmessage:\n  ", file, line, func);
     len = strlen(msgbuf);
     vsnprintf(msgbuf + len, sizeof(msgbuf) - len, fmt, ap);
@@ -152,7 +204,12 @@ void NORETURN __fail(const char *file, int line, const char *func, const char *f
         fclose(fp);
     }
     try_goto_desktop();
+    
     MessageBoxW(NULL, cs2wcs_managed(msgbuf + len, CP_UTF8, &msgbox_buf), L"PAL3patch", MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+    if (extra_msg) {
+        MessageBoxW(NULL, extra_msg, extra_msg_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+    }
+    
     die(1);
     va_end(ap);
 }
@@ -172,7 +229,7 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
     OutputDebugString(msgbuf); OutputDebugString("\n");
     plog_lines++;
     if (plog_lines <= MAXLOGLINES) {
-        FILE *fp = fopen(WARNING_FILE, plog_lines > 1 ? "a" : "w");
+        FILE *fp = fopen(LOG_FILE, plog_lines > 1 ? "a" : "w");
         if (fp) {
             if (plog_lines == 1) {
                 write_logfile_header(fp);

@@ -8,6 +8,7 @@ AR := ar
 STRIP := strip
 DLLTOOL := dlltool
 MSDEV := msdev
+SED := sed
 
 TARGET_DLL := PAL3patch.dll
 TARGET_DLL_SRCPATH := src
@@ -37,7 +38,7 @@ TARGET_DLL_OBJS := $(TARGET_DLL_COBJS) $(TARGET_DLL_SOBJS)
 
 TARGET_DLL_MSVC_DSP := $(TARGET_DLL:.dll=.dsp)
 TARGET_DLL_MSVC_OBJ := $(TARGET_DLL:.dll=.obj)
-TARGET_DLL_MSVC_TMPFILES := $(TARGET_DLL_MSVC_OBJ) $(TARGET_DLL:.dll=.exp) $(TARGET_DLL:.dll=.lib) $(TARGET_DLL:.dll=.plg) $(TARGET_DLL:.dll=.dsw) $(TARGET_DLL:.dll=.ncb) $(TARGET_DLL:.dll=.opt) $(TARGET_DLL:.dll=.def)
+TARGET_DLL_MSVC_TMPFILES := $(TARGET_DLL_MSVC_OBJ) $(TARGET_DLL:.dll=.exp) $(TARGET_DLL:.dll=.lib) $(TARGET_DLL:.dll=.plg) $(TARGET_DLL:.dll=.dsw) $(TARGET_DLL:.dll=.ncb) $(TARGET_DLL:.dll=.opt) $(TARGET_DLL:.dll=.def) $(TARGET_DLL:.dll=.ord.def)
 
 MSVC_ENTRY_LIB := $(TARGET_DLL:.dll=_entry.lib)
 
@@ -65,7 +66,8 @@ $(TARGET_DLL_SRCPATH)/%.o: $(TARGET_DLL_SRCPATH)/%.S
 
 $(TARGET_DLL): $(TARGET_DLL_OBJS)
 	$(CCLD) $(CCLDFLAGS_MSVC) -o $(TARGET_DLL_MSVC_OBJ) -r -Wl,--unique=.drectve -nostdlib $(TARGET_DLL_OBJS) -lmingwex -lgcc
-	$(DLLTOOL) -z $(TARGET_DLL:.dll=.def) $(TARGET_DLL_MSVC_OBJ)
+	$(DLLTOOL) -z $(TARGET_DLL:.dll=.ord.def) $(TARGET_DLL_MSVC_OBJ)
+	$(SED) -e 's/ @ [0-9][0-9]*//' $(TARGET_DLL:.dll=.ord.def) > $(TARGET_DLL:.dll=.def)
 	$(STRIP) --strip-unneeded --remove-section=.drectve $(TARGET_DLL_MSVC_OBJ)
 	$(MSDEV) $(TARGET_DLL_MSVC_DSP) $(MSDEVFLAGS)
 

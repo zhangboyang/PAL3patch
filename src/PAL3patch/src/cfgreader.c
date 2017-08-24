@@ -19,25 +19,23 @@ static int is_spacechar(char ch)
 	return !!strchr(" \t\n\v\f\r", ch);
 }
 
-#define badcfg(fmt, ...) \
-    do { \
-        MessageBoxW(NULL, wstr_badcfgfile_text, wstr_badcfgfile_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND); \
-        fail(fmt, ## __VA_ARGS__); \
-    } while (0)
+#define badcfg(fmt, ...) fail_with_extra_msg(wstr_badcfgfile_text, wstr_badcfgfile_title, fmt, ## __VA_ARGS__)
 
 void read_config_file()
 {
     cfglines = 0;
     FILE *fp = fopen(CONFIG_FILE, "r");
     if (!fp) {
-        MessageBoxW(NULL, wstr_nocfgfile_text, wstr_nocfgfile_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
-        die(1);
+        fail_with_extra_msg(wstr_nocfgfile_text, wstr_nocfgfile_title, "config file '%s' not found.", CONFIG_FILE);
     }
     
     char buf[MAXLINE];
     char *ptr;
     fscanf(fp, "\xEF\xBB\xBF");
+    int linenum = 0;
     while (fgets(buf, sizeof(buf), fp)) {
+        linenum++;
+        
         // ltrim the line
         for (ptr = buf; *ptr && is_spacechar(*ptr); ptr++);
         memmove(buf, ptr, strlen(ptr) + 1);
@@ -51,14 +49,13 @@ void read_config_file()
         
         // parse 'key' and 'value'
         ptr = strchr(buf, '=');
-        if (!ptr) badcfg("can't parse config line:\n  %s", buf);
+        if (!ptr) badcfg("invalid config data at line %d", linenum);
         *ptr = '\0';
         char *keystr = buf, *valstr = ptr + 1;
         
         // rtrim 'key'
-        if (ptr > buf) ptr--;
-        while (ptr >= buf && is_spacechar(*ptr)) *ptr-- = '\0';
-        if (!*ptr) badcfg("keystr is empty");
+        while (ptr > buf && is_spacechar(ptr[-1])) ptr[-1] = '\0', ptr--;
+        if (!buf[0]) badcfg("key is empty at line %d", linenum);
         
         // ltrim 'value'
         while (*valstr && is_spacechar(*valstr)) valstr++;

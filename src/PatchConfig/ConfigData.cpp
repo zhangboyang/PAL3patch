@@ -62,9 +62,8 @@ static int TryReadConfigFile()
 		char *keystr = buf, *valstr = ptr + 1;
     
 		// rtrim 'key'
-		if (ptr > buf) ptr--;
-		while (ptr >= buf && is_spacechar(*ptr)) *ptr-- = '\0';
-		if (!*ptr) goto done;
+		while (ptr > buf && is_spacechar(ptr[-1])) ptr[-1] = '\0', ptr--;
+        if (!buf[0]) goto done;
     
 		// ltrim 'value'
 		while (*valstr && is_spacechar(*valstr)) valstr++;
