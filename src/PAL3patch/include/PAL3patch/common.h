@@ -178,7 +178,10 @@
 #define eps (1e-5)
 #define inf (1e100)
 
+#define UTF8_BOM_STR "\xEF\xBB\xBF"
+#define UTF8_BOM_LEN 3
 
+#define SPACECHAR_LIST " \t\n\v\f\r"
 
 
 
@@ -225,6 +228,7 @@
 #define strnicmp _strnicmp
 #define strdup _strdup
 #define wcsdup _wcsdup
+#define wcsicmp _wcsicmp
 
 // make sure '\0' is added when using snprintf family functions
 #define safe_snprintf_helper(func, s, n, format, ...) ((n) > 0 ? ((s)[(n) - 1] = 0, func((s), (n) - 1, format, ##__VA_ARGS__)) : -1)

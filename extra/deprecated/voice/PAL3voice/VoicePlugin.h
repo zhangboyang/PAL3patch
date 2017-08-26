@@ -143,38 +143,38 @@ enum {
 };
 
 
-#define DLLEXPORT __declspec(dllexport)
+#define VOICEAPI
 
 // plugin management functions
-DLLEXPORT int WINAPI VoiceDLLAttached(void);
-DLLEXPORT void WINAPI VoiceInit(struct VoiceToolkit *toolkit);
-DLLEXPORT void WINAPI VoiceCleanup(void);
-DLLEXPORT void WINAPI GamePause(void);
-DLLEXPORT void WINAPI GameResume(void);
+VOICEAPI int WINAPI VoiceDLLAttached(void);
+VOICEAPI void WINAPI VoiceInit(struct VoiceToolkit *toolkit);
+VOICEAPI void WINAPI VoiceCleanup(void);
+VOICEAPI void WINAPI GamePause(void);
+VOICEAPI void WINAPI GameResume(void);
 
 // dialog text functions
-DLLEXPORT void WINAPI TextIdle(int state);
-DLLEXPORT void WINAPI TextPrepare(const char *text, int mode);
-DLLEXPORT void WINAPI TextStart(void);
-DLLEXPORT void WINAPI TextStop(void);
+VOICEAPI void WINAPI TextIdle(int state);
+VOICEAPI void WINAPI TextPrepare(const char *text, int mode);
+VOICEAPI void WINAPI TextStart(void);
+VOICEAPI void WINAPI TextStop(void);
 
 // caption functions
-DLLEXPORT void WINAPI CaptionIdle(int state);
-DLLEXPORT void WINAPI CaptionPrepare(const char *tex);
-DLLEXPORT void WINAPI CaptionStart(void);
-DLLEXPORT void WINAPI CaptionStop(void);
+VOICEAPI void WINAPI CaptionIdle(int state);
+VOICEAPI void WINAPI CaptionPrepare(const char *tex);
+VOICEAPI void WINAPI CaptionStart(void);
+VOICEAPI void WINAPI CaptionStop(void);
 
 // movie functions
-DLLEXPORT void WINAPI MovieIdle(int state);
-DLLEXPORT void WINAPI MoviePrepare(const char *movie);
-DLLEXPORT void WINAPI MovieStart(void);
-DLLEXPORT void WINAPI MovieStop(void);
+VOICEAPI void WINAPI MovieIdle(int state);
+VOICEAPI void WINAPI MoviePrepare(const char *movie);
+VOICEAPI void WINAPI MovieStart(void);
+VOICEAPI void WINAPI MovieStop(void);
 
 // combat dialog functions
-DLLEXPORT void WINAPI CBDialogIdle(int state);
-DLLEXPORT void WINAPI CBDialogPrepare(const char *text);
-DLLEXPORT void WINAPI CBDialogStart(void);
-DLLEXPORT void WINAPI CBDialogStop(void);
+VOICEAPI void WINAPI CBDialogIdle(int state);
+VOICEAPI void WINAPI CBDialogPrepare(const char *text);
+VOICEAPI void WINAPI CBDialogStart(void);
+VOICEAPI void WINAPI CBDialogStop(void);
 
 
 

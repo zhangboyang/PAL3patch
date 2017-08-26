@@ -402,9 +402,13 @@ static int ftfont_draw_char(struct ftfont *font, wchar_t c, int left, int top, D
 
 void ftfont_draw(struct ftfont *font, const wchar_t *wstr, int left, int top, D3DCOLOR color, ID3DXSprite *sprite)
 {
-    while (*wstr) {
-        int adv = ftfont_draw_char(font, *wstr, left, top, color, sprite);
-        wstr++;
-        left += adv;
+    int nleft;
+    for (nleft = left; *wstr; wstr++) {
+        if (*wstr == '\n') {
+            nleft = left;
+            top += font->size * font->face->height / font->face->units_per_EM;
+        } else if (*wstr != '\r') {
+            nleft += ftfont_draw_char(font, *wstr, nleft, top, color, sprite);
+        }
     }
 }

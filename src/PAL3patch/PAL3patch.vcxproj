@@ -144,6 +144,7 @@
     <ClCompile Include="src\patch_timerresolution.c" />
     <ClCompile Include="src\patch_uireplacefont.c" />
     <ClCompile Include="src\patch_uireplacetexf.c" />
+    <ClCompile Include="src\plugin.c" />
     <ClCompile Include="src\texturehook.c" />
     <ClCompile Include="src\transform.c" />
     <ClCompile Include="src\wstr.c" />
@@ -165,6 +166,7 @@
     <ClInclude Include="include\PAL3patch\pal3.h" />
     <ClInclude Include="include\PAL3patch\PAL3patch.h" />
     <ClInclude Include="include\PAL3patch\patch_common.h" />
+    <ClInclude Include="include\PAL3patch\plugin.h" />
     <ClInclude Include="include\PAL3patch\texturehook.h" />
     <ClInclude Include="include\PAL3patch\tiny_d3d9sdk.h" />
     <ClInclude Include="include\PAL3patch\transform.h" />

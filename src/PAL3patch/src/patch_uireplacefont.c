@@ -1,22 +1,15 @@
 #include "common.h"
 
-
 // replace font using D3DXFont
-enum {
-    D3DXFONT_U12, // UNICODE 12
-    D3DXFONT_U16, // the real size of U16 might be 14px
-    D3DXFONT_U20,
+#define PRINTWSTR_MAXFONTS (PRINTWSTR_COUNT * (SCALEFACTOR_COUNT + 1))
 
-    D3DXFONT_COUNT // EOF
-};
-#define D3DXFONT_MAXFONTS (D3DXFONT_COUNT * (SCALEFACTOR_COUNT + 1))
-
+static int d3dxfont_initflag = 0;
 static DWORD d3dxfont_charset;
 static int d3dxfont_quality;
 static LPCWSTR d3dxfont_facename;
-static int d3dxfont_sizelist_orig[D3DXFONT_COUNT] = {12, 16, 20};
-static int d3dxfont_sizelist[D3DXFONT_COUNT];
-static int d3dxfont_boldflag[D3DXFONT_COUNT];
+static int d3dxfont_sizelist_orig[PRINTWSTR_COUNT] = {12, 16, 20};
+static int d3dxfont_sizelist[PRINTWSTR_COUNT];
+static int d3dxfont_boldflag[PRINTWSTR_COUNT];
 
 enum { // preload type, higher value means more preload chars
     FONTPRELOAD_NONE,
@@ -36,7 +29,7 @@ struct d3dxfont_desc {
     ID3DXFont *pfont;
     struct ftfont *pftfont;
 };
-static struct d3dxfont_desc d3dxfont_fontlist[D3DXFONT_MAXFONTS];
+static struct d3dxfont_desc d3dxfont_fontlist[PRINTWSTR_MAXFONTS];
 static int d3dxfont_fontcnt = 0;
 
 static ID3DXSprite *d3dxfont_sprite = NULL;
@@ -59,10 +52,10 @@ static int d3dxfont_desc_cmp(const void *a, const void *b)
 static int d3dxfont_getfontid_orig(int fontsize_orig)
 {
     int i;
-    for (i = 0; i < D3DXFONT_COUNT; i++) {
+    for (i = 0; i < PRINTWSTR_COUNT; i++) {
         if (d3dxfont_sizelist_orig[i] == fontsize_orig) return i;
     }
-    return D3DXFONT_U16;
+    return PRINTWSTR_U16;
 }
 static int d3dxfont_selectbysize(int fontsize_orig)
 {
@@ -143,7 +136,7 @@ static void d3dxfont_insertfont(int fontsize, int boldflag, int preload)
     }
     
     // insert to list
-    if (d3dxfont_fontcnt >= D3DXFONT_MAXFONTS) fail("too many d3dx fonts.");
+    if (d3dxfont_fontcnt >= PRINTWSTR_MAXFONTS) fail("too many d3dx fonts.");
     d3dxfont_fontlist[d3dxfont_fontcnt++] = key;
     qsort(d3dxfont_fontlist, d3dxfont_fontcnt, sizeof(struct d3dxfont_desc), d3dxfont_desc_cmp);
 }
@@ -240,12 +233,12 @@ static void d3dxfont_init()
     
     // create fonts, O(n^2*log(n))
     int i, j; 
-    for (i = 0; i < D3DXFONT_COUNT; i++) {
+    for (i = 0; i < PRINTWSTR_COUNT; i++) {
         // original sizes
         d3dxfont_insertfont(d3dxfont_sizelist[i], d3dxfont_boldflag[i], FONTPRELOAD_NONE);
     }
     for (i = 0; i < SCALEFACTOR_COUNT; i++) {
-        for (j = 0; j < D3DXFONT_COUNT; j++) {
+        for (j = 0; j < PRINTWSTR_COUNT; j++) {
             d3dxfont_insertfont(floor(scalefactor_table[i] * d3dxfont_sizelist[j] + eps), d3dxfont_boldflag[j], FONTPRELOAD_NONE);
         }
     }
@@ -258,17 +251,17 @@ static void d3dxfont_init()
         int preload;
     } *preloadtblptr, preloadtbl[] = {
         // role dialog
-        { 1, scenetext_scalefactor, D3DXFONT_U20, FONTPRELOAD_FULLCJK },
+        { 1, scenetext_scalefactor, PRINTWSTR_U20, FONTPRELOAD_FULLCJK },
         
         // ui
-        { 2, ui_scalefactor, D3DXFONT_U16, FONTPRELOAD_FULLCJK },
-        { 3, ui_scalefactor, D3DXFONT_U20, FONTPRELOAD_FULLCJK },
-        { 4, cb_scalefactor, D3DXFONT_U12, FONTPRELOAD_FREQUENTLYUSED },
+        { 2, ui_scalefactor, PRINTWSTR_U16, FONTPRELOAD_FULLCJK },
+        { 3, ui_scalefactor, PRINTWSTR_U20, FONTPRELOAD_FULLCJK },
+        { 4, cb_scalefactor, PRINTWSTR_U12, FONTPRELOAD_FREQUENTLYUSED },
 
         // combat ui
-        { 2, cb_scalefactor, D3DXFONT_U16, FONTPRELOAD_FULLCJK },
-        { 3, cb_scalefactor, D3DXFONT_U20, FONTPRELOAD_FULLCJK },
-        { 4, cb_scalefactor, D3DXFONT_U12, FONTPRELOAD_FREQUENTLYUSED },
+        { 2, cb_scalefactor, PRINTWSTR_U16, FONTPRELOAD_FULLCJK },
+        { 3, cb_scalefactor, PRINTWSTR_U20, FONTPRELOAD_FULLCJK },
+        { 4, cb_scalefactor, PRINTWSTR_U12, FONTPRELOAD_FREQUENTLYUSED },
         
         { -1 } // EOF
     };
@@ -290,9 +283,40 @@ static void d3dxfont_init()
     if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &d3dxfont_stateblock))) {
         fail("can't create state block for font replacing.");
     }
+    
+    d3dxfont_initflag = 1;
 }
-static void d3dxfont_printwstr(ID3DXSprite *sprite, int fontid, LPWSTR wstr, int left, int top, D3DCOLOR color)
+
+
+
+// NOTE: print_wstring...() may be called outside of this module
+//       must check init flag first!
+void print_wstring_begin()
 {
+    if (!d3dxfont_initflag) return;
+    
+    // save device state
+    IDirect3DStateBlock9_Capture(d3dxfont_stateblock);
+    
+    // make text in front of other pixels
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
+    
+    // setup matrices manually
+    set_d3dxfont_matrices(GB_GfxMgr->m_pd3dDevice);
+
+    // prepare for drawing strings
+    ID3DXSprite_Begin(d3dxfont_sprite, D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ALPHATESTENABLE, FALSE);
+    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+}
+void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color)
+{
+    if (!d3dxfont_initflag) return;
+    
+    ID3DXSprite *sprite = d3dxfont_sprite;
     struct d3dxfont_desc *font = &d3dxfont_fontlist[fontid];
     if (font->use_ftfont) {
         ftfont_draw(font->pftfont, wstr, left, top, color, sprite);
@@ -302,11 +326,26 @@ static void d3dxfont_printwstr(ID3DXSprite *sprite, int fontid, LPWSTR wstr, int
         ID3DXFont_DrawTextW(font->pfont, sprite, wstr, -1, &rc, DT_NOCLIP, color);
     }
 }
+void print_wstring_end()
+{
+    if (!d3dxfont_initflag) return;
+    
+    // end drawing strings
+    ID3DXSprite_End(d3dxfont_sprite);
+    
+    // restore device state
+    IDirect3DStateBlock9_Apply(d3dxfont_stateblock);
+}
+
+
+
+
+
 
 static void d3dxfont_onlostdevice()
 {
     int i;
-    for (i = 0; i < D3DXFONT_COUNT; i++) {
+    for (i = 0; i < PRINTWSTR_COUNT; i++) {
         if (!d3dxfont_fontlist[i].use_ftfont) {
             ID3DXFont_OnLostDevice(d3dxfont_fontlist[i].pfont);
         }
@@ -317,7 +356,7 @@ static void d3dxfont_onlostdevice()
 static void d3dxfont_onresetdevice()
 {
     int i;
-    for (i = 0; i < D3DXFONT_COUNT; i++) {
+    for (i = 0; i < PRINTWSTR_COUNT; i++) {
         if (!d3dxfont_fontlist[i].use_ftfont) {
             ID3DXFont_OnResetDevice(d3dxfont_fontlist[i].pfont);
         }
@@ -395,31 +434,12 @@ static MAKE_THISCALL(void, gbPrintFont_UNICODE_Flush, struct gbPrintFont_UNICODE
         }
     }
     
-    // save device state
-    IDirect3DStateBlock9_Capture(d3dxfont_stateblock);
-    
-    // make text in front of other pixels
-    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ZFUNC, D3DCMP_ALWAYS);
-    
-    // setup matrices manually
-    set_d3dxfont_matrices(GB_GfxMgr->m_pd3dDevice);
-
-    // draw strings in linked-list
-    ID3DXSprite_Begin(d3dxfont_sprite, D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
-    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-    IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
-    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ALPHATESTENABLE, FALSE);
-    IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-    
+    // do print string
+    print_wstring_begin();
     for (node = d3dxfont_strlist_head; node; node = node->next) {
-        d3dxfont_printwstr(d3dxfont_sprite, node->fontid, node->wstr, node->fleft, node->ftop, node->color);
+        print_wstring(node->fontid, node->wstr, node->fleft, node->ftop, node->color);
     }
-    ID3DXSprite_End(d3dxfont_sprite);
-    
-    // restore device state
-    IDirect3DStateBlock9_Apply(d3dxfont_stateblock);
-    
+    print_wstring_end();
     
     // clear the linked-list and free memory
     for (node = d3dxfont_strlist_head; node; node = nextnode) {
@@ -453,7 +473,7 @@ static void ui_replacefont_d3dxfont_init()
     } else {
         d3dxfont_facename = cs2wcs_alloc(facename, CP_UTF8); // let it leak
     }
-    if (sscanf(get_string_from_configfile("uireplacefont_size"), "%d,%d,%d", &d3dxfont_sizelist[D3DXFONT_U12], &d3dxfont_sizelist[D3DXFONT_U16], &d3dxfont_sizelist[D3DXFONT_U20]) != 3) {
+    if (sscanf(get_string_from_configfile("uireplacefont_size"), "%d,%d,%d", &d3dxfont_sizelist[PRINTWSTR_U12], &d3dxfont_sizelist[PRINTWSTR_U16], &d3dxfont_sizelist[PRINTWSTR_U20]) != 3) {
         fail("can't parse font size string.");
     }
     
@@ -462,9 +482,9 @@ static void ui_replacefont_d3dxfont_init()
         fail("can't parse font bold flag string.");
     }
     
-    d3dxfont_boldflag[D3DXFONT_U12] = round(boldfactor_u12 * defaultfont_bold + eps);
-    d3dxfont_boldflag[D3DXFONT_U16] = round(boldfactor_u16 * defaultfont_bold + eps);
-    d3dxfont_boldflag[D3DXFONT_U20] = round(boldfactor_u20 * defaultfont_bold + eps);
+    d3dxfont_boldflag[PRINTWSTR_U12] = round(boldfactor_u12 * defaultfont_bold + eps);
+    d3dxfont_boldflag[PRINTWSTR_U16] = round(boldfactor_u16 * defaultfont_bold + eps);
+    d3dxfont_boldflag[PRINTWSTR_U20] = round(boldfactor_u20 * defaultfont_bold + eps);
 
     
     // add hooks

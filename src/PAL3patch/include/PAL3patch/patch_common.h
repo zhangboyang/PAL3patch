@@ -2,7 +2,18 @@
 #define PAL3PATCH_PATCH_COMMON_H
 // PATCHAPI DEFINITIONS
 
-// NOTE: for tidy, these definitions are copied from INTERNAL DEFINITIONS
+
+enum {
+    PRINTWSTR_U12, // UNICODE 12
+    PRINTWSTR_U16, // the real size of U16 might be 14px
+    PRINTWSTR_U20,
+
+    PRINTWSTR_COUNT // EOF
+};
+
+
+
+// NOTE: for tidy, these function definitions are copied from INTERNAL DEFINITIONS
 
 extern PATCHAPI int game_width, game_height;
 extern PATCHAPI fRECT game_frect, game_frect_43, game_frect_original;
@@ -16,6 +27,11 @@ extern PATCHAPI void render_softcursor(void);
 extern PATCHAPI int get_showcursor_state(void);
 extern PATCHAPI void set_showcursor_state(int show);
 extern PATCHAPI int try_screenshot(void);
+
+extern PATCHAPI void print_wstring_begin(void);
+extern PATCHAPI void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color);
+extern PATCHAPI void print_wstring_end(void);
+
 
 
 
@@ -212,6 +228,11 @@ MAKE_PATCHSET(graphicspatch);
         extern void set_showcursor_state(int show);
         
         MAKE_PATCHSET(uireplacefont);
+            // enum PRINTWSTR_Uxx is in the PATCHAPI part of this file
+            extern void print_wstring_begin(void);
+            extern void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color);
+            extern void print_wstring_end(void);
+            
         MAKE_PATCHSET(fixcombatui);
             #define cb_scalefactor (scalefactor_table[SF_COMBAT])
         MAKE_PATCHSET(fix3dctrl);

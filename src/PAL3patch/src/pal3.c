@@ -159,7 +159,7 @@ const char *vfs_cpkname()
 {
     static char cpknamebuf[MAXLINE];
     const char *cpkname = g_pVFileSys->rtDirectory;
-    if (cpkname && (str_iendwith(cpkname, "\\") || str_iendwith(cpkname, "/"))) {
+    if (cpkname && (str_endswith(cpkname, "\\") || str_endswith(cpkname, "/"))) {
         // cpkname is illegal, possiblly nocpk is enabled
         // try convert to legal cpkname
         snprintf(cpknamebuf, sizeof(cpknamebuf), "%.*s.cpk", strlen(cpkname) - 1, cpkname);

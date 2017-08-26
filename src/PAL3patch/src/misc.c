@@ -28,49 +28,54 @@ double str2double(const char *valstr)
     return result;
 }
 
-int str_iendwith(const char *a, const char *b)
+int str_endswith(const char *a, const char *b)
 {
-    int lena = strlen(a), lenb = strlen(b);
+    size_t lena = strlen(a), lenb = strlen(b);
+    return lena >= lenb && strcmp(a + lena - lenb, b) == 0;
+}
+int str_iendswith(const char *a, const char *b)
+{
+    size_t lena = strlen(a), lenb = strlen(b);
     return lena >= lenb && stricmp(a + lena - lenb, b) == 0;
 }
 
-char *strtrim(char *str, char *charlist)
+
+char *str_rtrim(char *str, const char *charlist)
 {
-    char *begin, *end;
-    char *dst;
-    
-    for (begin = str; *begin && strchr(charlist, *begin); begin++);
-    for (end = begin; *end; end++);
-    while (begin < end && strchr(charlist, end[-1])) end--;
-    
-    if (begin != str) {
-        for (dst = str; begin < end; *dst++ = *begin++);
-        *dst = 0;
-    } else {
-        *end = 0;
+    char *end = str + strlen(str);
+    while (end > str && strchr(charlist, end[-1])) end--;
+    *end = 0;
+    return str;
+}
+char *str_ltrim(char *str, const char *charlist)
+{
+    char *dst = str;
+    char *src = str + strspn(str, charlist);
+    if (dst != src) {
+        while ((*dst++ = *src++));
     }
-    
+    return str;
+}
+char *str_trim(char *str, const char *charlist)
+{
+    return str_ltrim(str_rtrim(str, charlist), charlist);
+}
+
+
+char *strtok_r(char *str, const char *delim, char **saveptr)
+{
+    if (!(str = str ? str : *saveptr)) {
+        return NULL;
+    }
+    if (!*(str += strspn(str, delim))) {
+        return *saveptr = NULL;
+    }
+    if ((*saveptr = strpbrk(str, delim))) {
+        *(*saveptr)++ = '\0';
+    }
     return str;
 }
 
-wchar_t *wcstrim(wchar_t *str, wchar_t *charlist)
-{
-    wchar_t *begin, *end;
-    wchar_t *dst;
-    
-    for (begin = str; *begin && wcschr(charlist, *begin); begin++);
-    for (end = begin; *end; end++);
-    while (begin < end && wcschr(charlist, end[-1])) end--;
-    
-    if (begin != str) {
-        for (dst = str; begin < end; *dst++ = *begin++);
-        *dst = 0;
-    } else {
-        *end = 0;
-    }
-    
-    return str;
-}
 
 
 int iabs(int x)
@@ -114,22 +119,6 @@ HMODULE LoadLibrary_check(LPCSTR lpFileName)
     return ret;
 }
 
-HMODULE LoadLibraryW_check(LPCWSTR lpFileName)
-{
-    if (is_win9x()) {
-        // fallback to ANSI version
-        char *path = wcs2cs_alloc(lpFileName, CP_ACP);
-        HMODULE ret = LoadLibrary_check(path);
-        free(path);
-        return ret;
-    }
-    HMODULE (WINAPI *MyLoadLibraryW)(LPCWSTR lpFileName);
-    MyLoadLibraryW = get_func_address("KERNEL32.DLL", "LoadLibraryW");
-    HMODULE ret = MyLoadLibraryW(lpFileName);
-    if (!ret) fail("can't load library '%s'.", wcs2cs_alloc(lpFileName, CP_UTF8)); // string leak
-    return ret;
-}
-
 FARPROC GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName)
 {
     FARPROC ret = GetProcAddress(hModule, lpProcName);
@@ -164,7 +153,7 @@ static wchar_t *msgbox_buf = NULL;
 
 static void write_logfile_header(FILE *fp)
 {
-    fputs("\xEF\xBB\xBF", fp);
+    fputs(UTF8_BOM_STR, fp);
     
     fputs("build information:\n", fp);
     fputs(build_info, fp);

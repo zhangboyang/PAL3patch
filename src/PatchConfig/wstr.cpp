@@ -2,6 +2,7 @@
 
 #define SAFE_CS2WCS L"cs2wcs() failed."
 #define SAFE_WCS2CS "wcs2cs() failed."
+#define NO_GLOBAL_MANAGED_FUNCTIONS
 
 // convert a mbcs-string to an unicode-string with given codepage
 // will alloc memory, don't forget to free()
@@ -99,6 +100,8 @@ char *cs2cs_managed(const char *cstr, UINT src_cp, UINT dst_cp, char **pptr)
 }
 
 
+#ifndef NO_GLOBAL_MANAGED_FUNCTIONS
+
 // return pointer to globally managed memory (vaild until next call)
 wchar_t *cs2wcs(const char *cstr, UINT src_cp)
 {
@@ -115,3 +118,5 @@ char *cs2cs(const char *cstr, UINT src_cp, UINT dst_cp)
     static char *ptr = NULL;
     return cs2cs_managed(cstr, src_cp, dst_cp, &ptr);
 }
+
+#endif

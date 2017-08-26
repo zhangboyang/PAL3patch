@@ -16,7 +16,7 @@ static int config_line_cmp(const void *a, const void *b)
 
 static int is_spacechar(char ch)
 {
-	return !!strchr(" \t\n\v\f\r", ch);
+	return !!strchr(SPACECHAR_LIST, ch);
 }
 
 #define badcfg(fmt, ...) fail_with_extra_msg(wstr_badcfgfile_text, wstr_badcfgfile_title, fmt, ## __VA_ARGS__)
@@ -31,7 +31,7 @@ void read_config_file()
     
     char buf[MAXLINE];
     char *ptr;
-    fscanf(fp, "\xEF\xBB\xBF");
+    fscanf(fp, UTF8_BOM_STR);
     int linenum = 0;
     while (fgets(buf, sizeof(buf), fp)) {
         linenum++;
@@ -81,14 +81,21 @@ void read_config_file()
     cfg_loaded = 1;
 }
 
-const char *get_string_from_configfile(const char *key)
+const char *get_string_from_configfile_unsafe(const char *key)
 {
     struct config_line tmp;
     tmp.key = (char *) key;
     struct config_line *result;
     result = bsearch(&tmp, cfgdata, cfglines, sizeof(struct config_line), config_line_cmp);
-    if (!result) badcfg("can't find config line with key '%s'.", key);
+    if (!result) return NULL;
     return result->val;
+}
+
+const char *get_string_from_configfile(const char *key)
+{
+    const char *ret = get_string_from_configfile_unsafe(key);
+    if (!ret) badcfg("can't find config line with key '%s'.", key);
+    return ret;
 }
 
 int get_int_from_configfile(const char *key)
