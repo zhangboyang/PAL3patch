@@ -151,7 +151,7 @@ struct ftfont *ftfont_create(const char *filename, int face_index, int req_size,
     return ret;
 fail:
     if (face) FT_Done_Face(face);
-    if (ret) free(ret);
+    free(ret);
     return NULL;
 }
 
@@ -208,7 +208,7 @@ static struct ftchar *ftfont_charhack(struct ftfont *font, wchar_t c)
     
     return ret;
 fail:
-    if (ret) free(ret);
+    free(ret);
     return NULL;
 }
 
@@ -300,7 +300,7 @@ static void ftfont_loadchar(struct ftfont *font, wchar_t c)
 bmpfail:
     FT_Bitmap_Done(library, &bmp);
 fail:
-    if (ch) free(ch);
+    free(ch);
 }
 
 void ftfont_preload_range(struct ftfont *font, wchar_t low, wchar_t high)
@@ -377,7 +377,7 @@ static void ftfont_assign_texture(struct ftfont *font, wchar_t c)
     
     return;
 fail:
-    if (new_node) free(new_node);
+    free(new_node);
     if (new_tex) IDirect3DTexture9_Release(new_tex);
 }
 

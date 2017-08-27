@@ -12,7 +12,7 @@ struct texture_hook_info {
     // read only information
     char cpkname[MAXLINE]; // current CPK name, may be empty string if not using CPK
     char texpath[MAXLINE]; // original texture path, if texpath starts with ":some_special_magic:some_extra_info", other hooks should ignore it
-    struct memory_allocator *mem_allocator; // any memory allocation associated with this thinfo should use this allocator
+    const struct memory_allocator *mem_allocator; // any memory allocation associated with this thinfo should use this allocator
     enum texture_hook_type type; // current callback type
 
     // pre-imageload hook only

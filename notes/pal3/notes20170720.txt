@@ -1,0 +1,44 @@
+【仙剑三的源代码】
+
+用7-zip打开仙剑三的basedata.cpk即可看到这份代码
+经检查，这份代码实际上存于basedata\cbdata\flexeff.data这个文件中
+这个文件按理来说应该全部为数据才对（从代码来看，应该是两个结构体数组）
+但是不知道为何这里面有一堆ZIP数据
+（开发人员故意？还是没有初始化内存导致的数据泄露？我比较倾向于后者）
+
+能用7-zip直接打开的原因是，CPK对过大的文件没有进行压缩
+
+检查3外的同一文件，发现里面并没有代码信息（唉）
+把3外的文件翻了个底朝天，例如grep -ri "\.cpp"并没有什么结果
+
+
+从ZIP的里为文件时间信息来看，这是一份2003年6月29日的代码
+其内的版本号为Alpha0.97
+这看起来并不像是最终的版本，运行起来也有些问题（有时战斗会崩溃退出）
+
+不过可以用它来参考，制作库签名
+以后没准可以移植手机版之类的
+我怎么没早点发现这份代码呢唉。。。
+
+
+【BinkSDK】
+未找到与开发人员使用的版本一致的BinkSDK，只好使用网上的版本，还好差别不大
+BinkVideo.cpp中有几个BinkSetVolume函数需要添加参数
+
+
+【为IDA分析，修改编译选项】
+编译器版本经rich signature确定是VC6 SP0
+（最后的rich signature指示的大概就是编译程序的编译器版本了）
+
+以Win32 Release版为基础
+gbengine和PAL3都要进行的修改：
+  生成PDB:
+     C/C++ -> Category: General -> Debug info: Program Database
+     Link -> Category: Debug -> 勾选 Debug info
+PAL3要进行的修改
+  修改stdafx.h使其引用Release版的gbengine.lib
+  修改gamebase/pal3.h第25行让其#define CD_RELEASE
+
+用新编译的EXE和PDB建立IDB，重新建立脱壳后的IDB，用BinDiff进行比较并导入符号
+这样就可以看到比较准确的符号了
+

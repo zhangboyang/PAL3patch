@@ -280,6 +280,7 @@ extern "C" {
 #include "asmpatch.h"
 #include "about.h"
 #include "misc.h"
+#include "logger.h"
 #include "wstr.h"
 #include "cfgreader.h"
 #include "locale.h"
@@ -293,6 +294,7 @@ extern "C" {
 #include "ftfont.h"
 #include "ftcharhack.h"
 #include "plugin.h"
+#include "fsutil.h"
 
 
 #ifdef __cplusplus

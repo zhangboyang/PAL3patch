@@ -1,5 +1,6 @@
 #include "common.h"
 
+
 // replace font using D3DXFont
 #define PRINTWSTR_MAXFONTS (PRINTWSTR_COUNT * (SCALEFACTOR_COUNT + 1))
 
@@ -10,6 +11,8 @@ static LPCWSTR d3dxfont_facename;
 static int d3dxfont_sizelist_orig[PRINTWSTR_COUNT] = {12, 16, 20};
 static int d3dxfont_sizelist[PRINTWSTR_COUNT];
 static int d3dxfont_boldflag[PRINTWSTR_COUNT];
+
+#define MAKE_INT_FONTSIZE(origfontid, scalefactor) ((int) floor((scalefactor) * d3dxfont_sizelist[(origfontid)] + eps))
 
 enum { // preload type, higher value means more preload chars
     FONTPRELOAD_NONE,
@@ -57,12 +60,13 @@ static int d3dxfont_getfontid_orig(int fontsize_orig)
     }
     return PRINTWSTR_U16;
 }
-static int d3dxfont_selectbysize(int fontsize_orig)
+
+int print_wstring_getfontid(int fontid_orig, double scalefactor)
 {
-    int fontid_orig = d3dxfont_getfontid_orig(fontsize_orig);
+    if (!d3dxfont_initflag) return -1;
     
     struct d3dxfont_desc key = {
-        .fontsize = floor(fs->len_factor * d3dxfont_sizelist[fontid_orig] + eps),
+        .fontsize = MAKE_INT_FONTSIZE(fontid_orig, scalefactor),
         .boldflag = d3dxfont_boldflag[fontid_orig],
         .preload = 0,
         .use_ftfont = 0,
@@ -71,21 +75,21 @@ static int d3dxfont_selectbysize(int fontsize_orig)
     };
     
     struct d3dxfont_desc *ptr = bsearch(&key, d3dxfont_fontlist, d3dxfont_fontcnt, sizeof(struct d3dxfont_desc), d3dxfont_desc_cmp);
-    if (!ptr) {
+    return ptr ? (ptr - d3dxfont_fontlist) : -1;
+}
+static int d3dxfont_selectbysize(int fontsize_orig)
+{
+    int fontid_orig = d3dxfont_getfontid_orig(fontsize_orig);
+    int fontid = print_wstring_getfontid(fontid_orig, fs->len_factor);
+    
+    if (fontid < 0) {
         // font not found, this should not happen, fallback to original size
-        warning("font not found for size %d, bold %d.", key.fontsize, key.boldflag);
-        key = (struct d3dxfont_desc) {
-            .fontsize = d3dxfont_sizelist[fontid_orig],
-            .boldflag = d3dxfont_boldflag[fontid_orig],
-            .preload = 0,
-            .use_ftfont = 0,
-            .pfont = NULL,
-            .pftfont = NULL,
-        };
-        ptr = bsearch(&key, d3dxfont_fontlist, d3dxfont_fontcnt, sizeof(struct d3dxfont_desc), d3dxfont_desc_cmp);
-        if (!ptr) fail("d3dx font not found.");
+        warning("font not found for original fontid %d, scale factor %f.", fontid_orig, fs->len_factor);
+        fontid = print_wstring_getfontid(fontid_orig, 1.0);
+        if (fontid < 0) fail("d3dx font not found.");
     }
-    return ptr - d3dxfont_fontlist;
+    
+    return fontid;
 }
 
 static void d3dxfont_insertfont(int fontsize, int boldflag, int preload)
@@ -239,7 +243,7 @@ static void d3dxfont_init()
     }
     for (i = 0; i < SCALEFACTOR_COUNT; i++) {
         for (j = 0; j < PRINTWSTR_COUNT; j++) {
-            d3dxfont_insertfont(floor(scalefactor_table[i] * d3dxfont_sizelist[j] + eps), d3dxfont_boldflag[j], FONTPRELOAD_NONE);
+            d3dxfont_insertfont(MAKE_INT_FONTSIZE(j, scalefactor_table[i]), d3dxfont_boldflag[j], FONTPRELOAD_NONE);
         }
     }
     
@@ -269,7 +273,7 @@ static void d3dxfont_init()
     int fontset_level = get_int_from_configfile("uireplacefont_preloadfontset");
     for (preloadtblptr = preloadtbl; preloadtblptr->level >= 0; preloadtblptr++) {
         if (preloadtblptr->level <= fontset_level) {
-            d3dxfont_insertfont(floor(preloadtblptr->scalefactor * d3dxfont_sizelist[preloadtblptr->fontsize] + eps), d3dxfont_boldflag[preloadtblptr->fontsize], preloadtblptr->preload);
+            d3dxfont_insertfont(MAKE_INT_FONTSIZE(preloadtblptr->fontsize, preloadtblptr->scalefactor), d3dxfont_boldflag[preloadtblptr->fontsize], preloadtblptr->preload);
         }
     }
     
@@ -314,7 +318,7 @@ void print_wstring_begin()
 }
 void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color)
 {
-    if (!d3dxfont_initflag) return;
+    if (!d3dxfont_initflag || fontid < 0) return;
     
     ID3DXSprite *sprite = d3dxfont_sprite;
     struct d3dxfont_desc *font = &d3dxfont_fontlist[fontid];

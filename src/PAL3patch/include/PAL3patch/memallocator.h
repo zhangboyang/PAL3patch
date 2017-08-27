@@ -23,6 +23,8 @@ extern PATCHAPI struct memory_allocator patch_mem_allocator; // PAL3PATCH.DLL
 #ifdef PATCHAPI_EXPORTS
 // INTERNAL DEFINITIONS
 
+#define cur_mem_allocator patch_mem_allocator
+
 extern void init_memory_allocators(void);
 
 #endif

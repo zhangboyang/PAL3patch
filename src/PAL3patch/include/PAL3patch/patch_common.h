@@ -3,16 +3,6 @@
 // PATCHAPI DEFINITIONS
 
 
-enum {
-    PRINTWSTR_U12, // UNICODE 12
-    PRINTWSTR_U16, // the real size of U16 might be 14px
-    PRINTWSTR_U20,
-
-    PRINTWSTR_COUNT // EOF
-};
-
-
-
 // NOTE: for tidy, these function definitions are copied from INTERNAL DEFINITIONS
 
 extern PATCHAPI int game_width, game_height;
@@ -28,7 +18,22 @@ extern PATCHAPI int get_showcursor_state(void);
 extern PATCHAPI void set_showcursor_state(int show);
 extern PATCHAPI int try_screenshot(void);
 
+
+enum { // fontid_orig
+    PRINTWSTR_U12, // UNICODE 12
+    PRINTWSTR_U16, // the real size of U16 might be 14px
+    PRINTWSTR_U20,
+
+    PRINTWSTR_COUNT // EOF
+};
+extern PATCHAPI int print_wstring_getfontid(int fontid_orig, double scalefactor);
 extern PATCHAPI void print_wstring_begin(void);
+#define FONTID_U12 (print_wstring_getfontid(PRINTWSTR_U12, 1.0))
+#define FONTID_U16 (print_wstring_getfontid(PRINTWSTR_U16, 1.0))
+#define FONTID_U20 (print_wstring_getfontid(PRINTWSTR_U20, 1.0))
+#define FONTID_U12_SCALED (print_wstring_getfontid(PRINTWSTR_U12, game_scalefactor))
+#define FONTID_U16_SCALED (print_wstring_getfontid(PRINTWSTR_U16, game_scalefactor))
+#define FONTID_U20_SCALED (print_wstring_getfontid(PRINTWSTR_U20, game_scalefactor))
 extern PATCHAPI void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color);
 extern PATCHAPI void print_wstring_end(void);
 
@@ -78,6 +83,7 @@ MAKE_PATCHSET(kfspeed);
 MAKE_PATCHSET(fixacquire);
 MAKE_PATCHSET(preciseresmgr);
 MAKE_PATCHSET(audiofreq);
+MAKE_PATCHSET(reginstalldir);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;

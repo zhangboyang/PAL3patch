@@ -13,8 +13,11 @@ extern PATCHAPI void plugin_fail(const char *module, int indent, const char *fmt
 #define DECL_PLUGINENTRY(name) int (name)(void)
 
 
+
 extern PATCHAPI void load_plugin_dll(const char *filename);
 extern PATCHAPI void load_plugin_dll_and_dependents(const char *filename);
+extern PATCHAPI void load_plugin_library(const char *filename);
+extern PATCHAPI void load_plugin_library_and_dependents(const char *filename);
 extern PATCHAPI void load_plugin_list(const char *filename);
 extern PATCHAPI void search_plugins(const char *dirpath);
 

@@ -1,0 +1,47 @@
+【插件框架】
+新的插件框架可以让外部插件灵活地扩充分辨率补丁的功能
+另外还计划编写TCC插件，能够利用TCC编译器，实现C语言插件的脚本化
+为此，插件框架导出了非常多的内部函数和变量
+因此对原有的代码进行了大规模重构：
+头文件移到include目录下，并且为了兼顾库自己编译和库使用者编译进行了大幅修改
+
+启用插件框架后，补丁会从plugins目录下搜索插件
+外部插件以.dll形式存在，分辨率补丁加载dll后，会调用其中的初始化函数
+此外还有.plugin形式的控制脚本，格式如下：
+每行一个指令，根据具体的指令，指令后可以跟一个文件/目录路径
+指令可以有多种简写形式（用|符号分隔）
+[END|EXIT|QUIT] —— 结束脚本执行
+[DLL|LOAD_DLL 文件] —— 加载插件并初始化
+[DLL2|LOAD_DLL_AND_DEPENDENTS 文件] —— 加载插件并初始化（从DLL目录加载依赖）
+[LIB|LOAD_LIBRARY 文件] —— 仅加载DLL
+[LIB2|LOAD_LIBRARY_AND_DEPENDENTS] 文件 —— 仅加载DLL（从DLL目录加载依赖）
+[LIST|LOAD_PLUGIN 文件] —— 调用另一个控制脚本
+[DIR|SEARCH_DIR 目录] —— 从指定目录搜索插件（*.dll和*.plugin）
+
+插件脚本日志系统：
+log_enter() 进入日志块，缩进增加
+log_leave() 离开日志块，缩进减少
+plog() 只记入日志文件
+warning() 记入日志文件、弹出对话框
+fail() 记入日志文件、弹出对话框、退出程序（慎用）
+
+
+
+【TCC 的 fastcall 调用约定实际上是的调用者弹参】
+经实践测试表明，TCC 的 fastcall 调用约定是调用者将参数从栈上弹出而不是被调用者弹参
+已经将该bug和patch提交给了tcc
+http://lists.nongnu.org/archive/html/tinycc-devel/2017-08/msg00001.html
+http://repo.or.cz/tinycc.git/commit/b8fe8fc2105455eb5004be89fa8575aa928a18f3
+
+
+【向注册表中写入仙剑三的安装路径】
+经过一定的逆向表明，仙三外传是通过读取注册表来确定仙三安装目录，从而继承仙三存档的。
+[HKEY_LOCAL_MACHINE\SOFTWARE\SOFTSTAR\PAL3\CH]
+"Install"="C:\\Program Files\\SOFTSTAR\\PAL3"
+其中，键CH表示是简体版，TW表示繁体版。（该信息来自basedata.cpk\assislang.lang中的Lang420）
+
+
+【从现在开始，在win9x下运行补丁需要KernelEx】
+由于补丁框架大量使用了unicode版本的windows api，因此无法直接在win9x系统上运行。
+一种解决办法是通过MSLU，另一种办法是通过KernelEx
+考虑到几乎没有人使用win9x，所以采用比较消极的办法，即要求用户安装KernelEx

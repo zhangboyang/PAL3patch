@@ -83,6 +83,7 @@ static void write_plugin_log(const char *module, int indent, const char *message
 }
 
 static wchar_t *msgbox_buf = NULL;
+#define free_msgbox_buf() do { free(msgbox_buf); msgbox_buf = NULL; } while (0)
 
 void plugin_plog(const char *module, int indent, const char *fmt, ...)
 {
@@ -103,6 +104,7 @@ void plugin_warning(const char *module, int indent, const char *fmt, ...)
     write_plugin_log(module, indent, msgbuf);    
     try_goto_desktop();
     MessageBoxW(NULL, cs2wcs_managed(msgbuf, CP_UTF8, &msgbox_buf), L"PAL3patch Plugin Host", MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
+    free_msgbox_buf();
     va_end(ap);
 }
 
@@ -115,9 +117,12 @@ void plugin_fail(const char *module, int indent, const char *fmt, ...)
     write_plugin_log(module, indent, msgbuf);
     try_goto_desktop();
     MessageBoxW(NULL, cs2wcs_managed(msgbuf, CP_UTF8, &msgbox_buf), L"PAL3patch Plugin Host", MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+    free_msgbox_buf();
     die(2);
     va_end(ap);
 }
+
+
 
 
 
@@ -132,7 +137,9 @@ void plugin_fail(const char *module, int indent, const char *fmt, ...)
 
 struct plugin_desc {
     HMODULE handle;
-    DECL_PLUGINENTRY(*entry);
+    int mode;
+    int type;
+    DECL_PLUGINENTRY(*entry); // may be NULL if plain DLL
     
     struct plugin_desc *next;
 };
@@ -140,28 +147,35 @@ struct plugin_desc {
 static int total_plugins = 0;
 static struct plugin_desc *plugin_list_head = NULL;
 
-
+// check if plugin already loaded, O(n)
 static int check_register_plugin(struct plugin_desc *newplugin)
 {
     struct plugin_desc *ptr;
     for (ptr = plugin_list_head; ptr; ptr = ptr->next) {
-        if (ptr->handle == newplugin->handle || ptr->entry == newplugin->entry) {
+        if (ptr->handle == newplugin->handle) {
             return 0;
         }
     }
     return 1;
 }
-static void do_register_plugin(struct plugin_desc *newplugin)
+
+static void commit_register_plugin(struct plugin_desc *newplugin)
 {
     newplugin->next = plugin_list_head;
     plugin_list_head = newplugin;
-    total_plugins++;
+    if (newplugin->type == 0) {
+        total_plugins++;
+    }
 }
 
-static void load_plugin_dll_with_mode(const char *filename, int mode)
+static void load_plugin_dll_with_mode(const char *filename, int mode, int type)
 {
     // mode == 0: normal LoadLibrary
-    // mode == 1: call LoadLibraryEx with parameter LOAD_WITH_ALTERED_SEARCH_PATH
+    // mode != 0: call LoadLibraryEx with parameter LOAD_WITH_ALTERED_SEARCH_PATH
+    
+    // type == 0: LoadLibary and call plugin entry (plugin DLL)
+    // type != 0: call LoadLibrary only (plain DLL)
+    
     DWORD dwFlags;
     wchar_t *wfilename_managed = NULL;
     struct plugin_desc *newplugin = NULL;
@@ -169,14 +183,12 @@ static void load_plugin_dll_with_mode(const char *filename, int mode)
     DECL_PLUGINENTRY(*entry);
     int r;
     
-
-    switch (mode) {
-        case 0: dwFlags = 0; break;
-        case 1: dwFlags = LOAD_WITH_ALTERED_SEARCH_PATH; break;
-        default: pplog("error: unknown dll load mode %d.", mode); goto fail;
-    }
+    dwFlags = mode ? LOAD_WITH_ALTERED_SEARCH_PATH : 0;
     
     newplugin = malloc(sizeof(struct plugin_desc));
+    memset(newplugin, 0, sizeof(struct plugin_desc));
+    newplugin->mode = mode;
+    newplugin->type = type;
     
     cs2wcs_managed(filename, CP_UTF8, &wfilename_managed);
     newplugin->handle = hModule = LoadLibraryExW(wfilename_managed, NULL, dwFlags);
@@ -185,38 +197,40 @@ static void load_plugin_dll_with_mode(const char *filename, int mode)
         MessageBoxW_format(NULL, wstr_pluginerr_loadfailed_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed);
         goto fail;
     }
-    
-    newplugin->entry = entry = TOPTR(GetProcAddress(hModule, TOSTR(PLUGIN_ENTRY_NAME)));
-    if (!entry) {
-        pplog("error: GetProcAddress() failed.");
-        MessageBoxW_format(NULL, wstr_pluginerr_noentry_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed, TOSTR(PLUGIN_ENTRY_NAME));
-        goto fail;
-    }
-    
+
     if (!check_register_plugin(newplugin)) {
-        pplog("plugin already loaded.");
+        pplog("dll already loaded.");
         goto skip;
     }
     
-    pplog("executing plugin initialization procedure ...");
-    pplog_enter();
-    r = entry();
-    pplog_leave();
-    if (r != 0) {
-        pplog("error: initialization procedure returns %d.", r);
-        MessageBoxW_format(NULL, wstr_pluginerr_initfailed_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed, r);
-        goto fail;
+    if (type == 0) { // is plugin DLL
+        newplugin->entry = entry = TOPTR(GetProcAddress(hModule, TOSTR(PLUGIN_ENTRY_NAME)));
+        if (!entry) {
+            pplog("error: GetProcAddress() failed.");
+            MessageBoxW_format(NULL, wstr_pluginerr_noentry_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed, TOSTR(PLUGIN_ENTRY_NAME));
+            goto fail;
+        }
+
+        pplog("executing plugin initialization procedure ...");
+        pplog_enter();
+        r = entry();
+        pplog_leave();
+        if (r != 0) {
+            pplog("error: initialization procedure returns %d.", r);
+            MessageBoxW_format(NULL, wstr_pluginerr_initfailed_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed, r);
+            goto fail;
+        }
     }
     
-    do_register_plugin(newplugin);
-    pplog("plugin loaded successfully.");
+    commit_register_plugin(newplugin); newplugin = NULL;
+    pplog("dll loaded successfully.");
     
 done:
-    if (wfilename_managed) free(wfilename_managed);
+    free(newplugin);
+    free(wfilename_managed);
     return;
 fail:
 skip:
-    if (newplugin) free(newplugin);
     if (hModule) FreeLibrary(hModule);
     goto done;
 }
@@ -225,28 +239,39 @@ void load_plugin_dll(const char *filename)
 {
     pplog("loading plugin dll '%s' ...", filename);
     pplog_enter();
-    load_plugin_dll_with_mode(filename, 0);
+    load_plugin_dll_with_mode(filename, 0, 0);
     pplog_leave();
 }
 void load_plugin_dll_and_dependents(const char *filename)
 {
     pplog("loading plugin dll '%s' and its dependents ...", filename);
     pplog_enter();
-    load_plugin_dll_with_mode(filename, 1);
+    load_plugin_dll_with_mode(filename, 1, 0);
+    pplog_leave();
+}
+void load_plugin_library(const char *filename)
+{
+    pplog("loading dll library '%s' ...", filename);
+    pplog_enter();
+    load_plugin_dll_with_mode(filename, 0, 1);
+    pplog_leave();
+}
+void load_plugin_library_and_dependents(const char *filename)
+{
+    pplog("loading dll library '%s' and its dependents ...", filename);
+    pplog_enter();
+    load_plugin_dll_with_mode(filename, 1, 1);
     pplog_leave();
 }
 
 void load_plugin_list(const char *filename)
 {
-    char *filedata = NULL;
+    char *filestr = NULL;
     char *cstr_managed = NULL;
     wchar_t *wstr_managed = NULL;
-    HANDLE hFile = INVALID_HANDLE_VALUE;
     wchar_t wbuf[MAXLINE];
     wchar_t fullpath[MAXLINE];
     wchar_t *fullpath_filepart;
-    DWORD dwSize, dwRead;
-    char *filestr;
     char *line;
     const char *line_delim = "\r\n";
     char *line_saveptr;
@@ -257,29 +282,16 @@ void load_plugin_list(const char *filename)
     pplog_enter();
     
     // convert utf8 filename to unicode full path name
-    cs2wcs_managed(filename, CP_UTF8, &wstr_managed);
-    GetFullPathNameW(wstr_managed, MAXLINE, fullpath, &fullpath_filepart);
+    if (!utf8_filepath_to_wstr_fullpath(filename, fullpath, MAXLINE, &fullpath_filepart)) goto fail;
+    if (!fullpath_filepart) goto fail;
     
     // read whole file as a string
-    hFile = CreateFileW(fullpath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hFile == INVALID_HANDLE_VALUE) {
-        pplog("error: can't open plugin file.");
-        goto fail;
-    }
-    dwSize = GetFileSize(hFile, NULL);
-    if (dwSize == INVALID_FILE_SIZE) goto fail;
-    filedata = malloc(dwSize + 1);
-    if (!ReadFile(hFile, filedata, dwSize, &dwRead, NULL) || dwSize != dwRead) goto fail;
-    filedata[dwSize] = 0;
-    filestr = filedata;
-    
-    // skip utf8 bom if needed
-    if (strncmp(filestr, UTF8_BOM_STR, UTF8_BOM_LEN) == 0) filestr += UTF8_BOM_LEN;
+    filestr = read_file_as_cstring(wcs2cs_managed(fullpath, CP_UTF8, &cstr_managed), &cur_mem_allocator);
+    if (!filestr) goto fail;
     
     // parse the file
     for (line = strtok_r(filestr, line_delim, &line_saveptr); line; line = strtok_r(NULL, line_delim, &line_saveptr)) {
-        //pplog("line = [%s]", line);
-        
+
         directive = strtok_r(line, SPACECHAR_LIST, &token_saveptr);
         if (!directive || *directive == '#' || *directive == ';' || (directive[0] == '/' && directive[1] == '/')) continue;
         
@@ -293,26 +305,28 @@ void load_plugin_list(const char *filename)
             goto fail;
         }
         str_trim(parameter, SPACECHAR_LIST);
+        
+        // resolve relative path if needed
+        if (is_relpath(parameter)) {
 
-        // construct dirname in buffer
-        wcscpy(wbuf, fullpath);
-        wbuf[fullpath_filepart - fullpath] = 0;
-        
-        // convert parameter to fullpath and append to buffer
-        cs2wcs_managed(parameter, CP_UTF8, &wstr_managed);
-        if (wcslen(wbuf) + wcslen(wstr_managed) >= MAXLINE) goto fail;
-        wcscat(wbuf, wstr_managed);
-        
-        // convert buffer to utf8 string
-        wcs2cs_managed(wbuf, CP_UTF8, &cstr_managed);
-        parameter = cstr_managed;
-        
-        //pplog("parameter = [%s]", parameter);
+            // resolve relative path
+            cs2wcs_managed(parameter, CP_UTF8, &wstr_managed);
+            if (!replace_filepart_with_relpath(fullpath, wstr_managed, wbuf, MAXLINE, NULL)) goto fail;
+            
+            // convert buffer to utf8 string
+            wcs2cs_managed(wbuf, CP_UTF8, &cstr_managed);
+            parameter = cstr_managed;
+            
+        }
 
         if (stricmp(directive, "DLL") == 0 || stricmp(directive, "LOAD_DLL") == 0) {
             load_plugin_dll(parameter);
         } else if (stricmp(directive, "DLL2") == 0 || stricmp(directive, "LOAD_DLL_AND_DEPENDENTS") == 0) {
             load_plugin_dll_and_dependents(parameter);
+        } else if (stricmp(directive, "LIB") == 0 || stricmp(directive, "LOAD_LIBRARY") == 0) {
+            load_plugin_library(parameter);
+        } else if (stricmp(directive, "LIB2") == 0 || stricmp(directive, "LOAD_LIBRARY_AND_DEPENDENTS") == 0) {
+            load_plugin_library_and_dependents(parameter);
         } else if (stricmp(directive, "LIST") == 0 || stricmp(directive, "LOAD_PLUGIN") == 0) {
             load_plugin_list(parameter);
         } else if (stricmp(directive, "DIR") == 0 || stricmp(directive, "SEARCH_DIR") == 0) {
@@ -324,10 +338,9 @@ void load_plugin_list(const char *filename)
     }
     
 done:
-    if (filedata) free(filedata);
-    if (cstr_managed) free(cstr_managed);
-    if (wstr_managed) free(wstr_managed);
-    if (hFile) CloseHandle(hFile);
+    cur_mem_allocator.free(filestr);
+    free(cstr_managed);
+    free(wstr_managed);
     pplog("execution finished.");
     pplog_leave();
     return;
@@ -336,93 +349,28 @@ fail:
     goto done;
 }
 
-static int wfilename_cmp(const void *a, const void *b)
-{
-    const wchar_t * const *pa = a;
-    const wchar_t * const *pb = b;
-    return wcsicmp(*pa, *pb);
-}
 
-static void enum_files(const char *dirpath, const char *pattern, void (*func)(const char *filepath))
+
+static void enum_plugin_files_funchelper(const char *filename, void *arg)
 {
-    char *cstr_managed = NULL;
-    wchar_t *wstr_managed = NULL;
-    char buf[MAXLINE];
-    wchar_t wbuf[MAXLINE];
-    wchar_t searchpatt[MAXLINE];
-    wchar_t *searchpatt_filepart;
-    wchar_t *filelist[MAXLINE];
-    int nr_filelist = 0;
-    int i;
-    DWORD r;
-    WIN32_FIND_DATAW FindFileData;
-    HANDLE hFind = INVALID_HANDLE_VALUE;
-    
-    // construct utf8 search pattern
-    snprintf(buf, sizeof(buf), "%s\\%s", dirpath, pattern);
-    if (strlen(buf) >= MAXLINE - 1) goto fail;
-    
-    // convert to unicode-string
-    cs2wcs_managed(buf, CP_UTF8, &wstr_managed);
-    
-    // convert to fullpath
-    r = GetFullPathNameW(wstr_managed, MAXLINE, searchpatt, &searchpatt_filepart);
-    if (r == 0 || r >= MAXLINE || !searchpatt_filepart) goto fail;
-    
-    
-    // do enum
-    hFind = FindFirstFileW(searchpatt, &FindFileData);
-    if (hFind == INVALID_HANDLE_VALUE) {
-        // no such file found
+    ((void (*)(const char *)) arg)(filename);
+}
+static void enum_plugin_files(const char *dirpath, const char *pattern, void (*func)(const char *filepath))
+{
+    int r = enum_files(dirpath, pattern, enum_plugin_files_funchelper, func);
+    if (r == 0) {
         pplog("no file found in directory '%s' with pattern '%s'.", dirpath, pattern);
-        goto done;
+    } else if (r < 0) {
+        pplog("error occurred while enumerating files.");
     }
-    do {
-        // skip dirs
-        if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) continue;
-        
-        // construct dirname
-        wcscpy(wbuf, searchpatt);
-        wbuf[searchpatt_filepart - searchpatt] = 0;
-        
-        // append filename
-        if (wcslen(wbuf) + wcslen(FindFileData.cFileName) >= MAXLINE) goto fail;
-        wcscat(wbuf, FindFileData.cFileName);
-        
-        // add to file list
-        if (nr_filelist >= MAXLINE) goto fail;
-        filelist[nr_filelist++] = wcsdup(wbuf);
-        
-    } while (FindNextFileW(hFind, &FindFileData));
-    
-    // sort files
-    qsort(filelist, nr_filelist, sizeof(wchar_t *), wfilename_cmp);
-    
-    for (i = 0; i < nr_filelist; i++) {
-        // convert to utf8 and invoke function
-        wcs2cs_managed(filelist[i], CP_UTF8, &cstr_managed);
-        func(cstr_managed);
-    }
-    
-done:
-    for (i = 0; i < nr_filelist; i++) {
-        free(filelist[i]);
-    }
-    if (cstr_managed) free(cstr_managed);
-    if (wstr_managed) free(wstr_managed);
-    if (hFind != INVALID_HANDLE_VALUE) FindClose(hFind);
-    return;
-fail:
-    pplog("error occurred while enumerating files.");
-    goto done;
 }
 
 void search_plugins(const char *dirpath)
 {
     pplog("searching plugins in directory '%s' ...", dirpath);
     pplog_enter();
-    enum_files(dirpath, "*.plugin", load_plugin_list);
-    enum_files(dirpath, "*.dll", load_plugin_dll);
+    enum_plugin_files(dirpath, "*.plugin", load_plugin_list);
+    enum_plugin_files(dirpath, "*.dll", load_plugin_dll);
     pplog("search finished.");
     pplog_leave();
 }
@@ -432,6 +380,6 @@ void init_plugins()
     int flag = get_int_from_configfile("loadplugins");
     if (flag) {
         search_plugins("plugins");
-        pplog("total %d plugin%s loaded at game startup time.\n\n\n", total_plugins, total_plugins > 1 ? "s" : "");
+        pplog("total %d plugin%s loaded at game startup time.", total_plugins, total_plugins > 1 ? "s" : "");
     }
 }

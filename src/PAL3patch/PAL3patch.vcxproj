@@ -93,10 +93,12 @@
     </ClCompile>
     <ClCompile Include="src\effecthook.c" />
     <ClCompile Include="src\framework.c" />
+    <ClCompile Include="src\fsutil.c" />
     <ClCompile Include="src\ftcharhack.c" />
     <ClCompile Include="src\ftfont.c" />
     <ClCompile Include="src\hook.c" />
     <ClCompile Include="src\locale.c" />
+    <ClCompile Include="src\logger.c" />
     <ClCompile Include="src\memallocator.c" />
     <ClCompile Include="src\misc.c" />
     <ClCompile Include="src\pal3.c" />
@@ -134,6 +136,7 @@
     <ClCompile Include="src\patch_nolockablebackbuffer.c" />
     <ClCompile Include="src\patch_preciseresmgr.c" />
     <ClCompile Include="src\patch_reduceinputlatency.c" />
+    <ClCompile Include="src\patch_reginstalldir.c" />
     <ClCompile Include="src\patch_regredirect.c" />
     <ClCompile Include="src\patch_relativetimer.c" />
     <ClCompile Include="src\patch_screenshot.c" />
@@ -157,10 +160,12 @@
     <ClInclude Include="include\PAL3patch\common.h" />
     <ClInclude Include="include\PAL3patch\effecthook.h" />
     <ClInclude Include="include\PAL3patch\framework.h" />
+    <ClInclude Include="include\PAL3patch\fsutil.h" />
     <ClInclude Include="include\PAL3patch\ftcharhack.h" />
     <ClInclude Include="include\PAL3patch\ftfont.h" />
     <ClInclude Include="include\PAL3patch\hook.h" />
     <ClInclude Include="include\PAL3patch\locale.h" />
+    <ClInclude Include="include\PAL3patch\logger.h" />
     <ClInclude Include="include\PAL3patch\memallocator.h" />
     <ClInclude Include="include\PAL3patch\misc.h" />
     <ClInclude Include="include\PAL3patch\pal3.h" />

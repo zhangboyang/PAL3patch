@@ -98,7 +98,7 @@ void ensure_cooperative_level(int requirefocus)
 
 // load image bits from file in memory, using D3DX
 // will allocate memory from given allocator
-void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height, int *bitcount, struct memory_allocator *mem_allocator)
+void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height, int *bitcount, const struct memory_allocator *mem_allocator)
 {
     D3DXIMAGE_INFO img_info;
     D3DLOCKED_RECT lrc;
@@ -142,7 +142,7 @@ fail:
 
 // load a file from current gbVFileSystem
 // will allocate memory from given allocator
-void *vfs_readfile(const char *filepath, unsigned *length, struct memory_allocator *mem_allocator)
+void *vfs_readfile(const char *filepath, unsigned *length, const struct memory_allocator *mem_allocator)
 {
     struct gbVFile *fp = gbVFileSystem_OpenFile(g_pVFileSys, filepath, 0x201u);
     if (!fp) return NULL;
