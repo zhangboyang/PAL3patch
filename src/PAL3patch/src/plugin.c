@@ -95,6 +95,7 @@ void plugin_plog(const char *module, int indent, const char *fmt, ...)
     va_end(ap);
 }
 
+static int plugin_warning_msgboxes = 0;
 void plugin_warning(const char *module, int indent, const char *fmt, ...)
 {
     va_list ap;
@@ -102,8 +103,15 @@ void plugin_warning(const char *module, int indent, const char *fmt, ...)
     char msgbuf[MAXLINE];
     vsnprintf(msgbuf, sizeof(msgbuf), fmt, ap);
     write_plugin_log(module, indent, msgbuf);    
-    try_goto_desktop();
-    MessageBoxW(NULL, cs2wcs_managed(msgbuf, CP_UTF8, &msgbox_buf), L"PAL3patch Plugin Host", MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
+    if (plugin_warning_msgboxes + 1 <= MAXWARNMSGBOXES) {
+        plugin_warning_msgboxes++;
+        if (plugin_warning_msgboxes >= MAXWARNMSGBOXES) {
+            strncat(msgbuf, "\n\nmax messagebox limit reached.", sizeof(msgbuf) - strlen(msgbuf));
+            msgbuf[sizeof(msgbuf) - 1] = '\0';
+        }
+        try_goto_desktop();
+        MessageBoxW(NULL, cs2wcs_managed(msgbuf, CP_UTF8, &msgbox_buf), L"PAL3patch Plugin Host", MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
+    }
     free_msgbox_buf();
     va_end(ap);
 }

@@ -96,8 +96,8 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
             fclose(fp);
         }
         if (is_warning) {
-            plog_msgboxes++;
-            if (plog_msgboxes <= MAXWARNMSGBOXES) {
+            if (plog_msgboxes + 1 <= MAXWARNMSGBOXES) {
+                plog_msgboxes++;
                 if (plog_msgboxes >= MAXWARNMSGBOXES) {
                     strncat(msgbuf, "\n\nmax messagebox limit reached.", sizeof(msgbuf) - strlen(msgbuf));
                     msgbuf[sizeof(msgbuf) - 1] = '\0';

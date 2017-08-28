@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClCompile Include="src\about.c" />
     <ClCompile Include="src\asmpatch.c" />
+    <ClCompile Include="src\bytevector.c" />
     <ClCompile Include="src\cfgreader.c" />
     <ClCompile Include="src\cjktable.c" />
     <ClCompile Include="src\common.c">
@@ -155,6 +156,7 @@
   <ItemGroup>
     <ClInclude Include="include\PAL3patch\about.h" />
     <ClInclude Include="include\PAL3patch\asmpatch.h" />
+    <ClInclude Include="include\PAL3patch\bytevector.h" />
     <ClInclude Include="include\PAL3patch\cfgreader.h" />
     <ClInclude Include="include\PAL3patch\cjktable.h" />
     <ClInclude Include="include\PAL3patch\common.h" />

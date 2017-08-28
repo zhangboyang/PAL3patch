@@ -163,6 +163,7 @@
 #define TOPTR(addr) ((void *)(addr))
 #define TOUINT(addr) ((unsigned)(addr))
 #define PTRADD(ptr, add) ((void *)(((char *)(ptr)) + (add)))
+#define PTRSUB(a, b) (((char *)(a)) - ((char *)(b)))
 
 // round macros
 #define ROUND_UP(x, y) ((((x) + ((y) - 1)) / (y)) * (y))
@@ -295,6 +296,7 @@ extern "C" {
 #include "ftcharhack.h"
 #include "plugin.h"
 #include "fsutil.h"
+#include "bytevector.h"
 
 
 #ifdef __cplusplus
