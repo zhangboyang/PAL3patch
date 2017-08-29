@@ -3,6 +3,7 @@
 // PATCHAPI DEFINITIONS
 
 #define BVECAPI PATCHAPI
+//#define BVEC_DEBUG
 
 #define bvec_typeof(type) type // FIXME
 
@@ -26,6 +27,8 @@ struct bvec {
 // basic interface
 
 extern BVECAPI void bvec_ctor(struct bvec *v); // constructor
+extern BVECAPI void bvec_bctor(struct bvec *v, const void *data, size_t size); // copy constructor
+extern BVECAPI void bvec_vctor(struct bvec *v, const struct bvec *src); // copy constructor
 extern BVECAPI void bvec_dtor(struct bvec *v); // destructor
 extern BVECAPI void bvec_clear(struct bvec *v);
 extern BVECAPI void bvec_fclear(struct bvec *v);
@@ -47,6 +50,7 @@ extern BVECAPI void bvec_bpop(struct bvec *dst, size_t size);
 
 // typed helper
 
+#define bvec_tctor(v, base, nmemb, type) bvec_bctor((v), (base), (nmemb) * sizeof(type))
 #define bvec_tdata(v, type) ((bvec_typeof(type) *) bvec_bdata(v))
 #define bvec_tbegin(v, type) ((bvec_typeof(type) *) bvec_bbegin(v))
 #define bvec_tend(v, type) ((bvec_typeof(type) *) bvec_bend(v))
@@ -57,6 +61,7 @@ extern BVECAPI void bvec_bpop(struct bvec *dst, size_t size);
 #define bvec_treserve(v, size, type) bvec_breserve((v), (size) * sizeof(type))
 #define bvec_tresize(v, size, type) bvec_bresize((v), (size) * sizeof(type))
 #define bvec_tpush(v, base, nmemb, type) bvec_bpush((v), (base), (nmemb) * sizeof(type))
+#define bvec_tpushback(v, ptr, type) bvec_tpush((v), (ptr), 1, type)
 #define bvec_tpop(v, nmemb, type) bvec_bpop((v), (nmemb) * sizeof(type))
 #define bvec_tpopback(v, type) bvec_tpop((v), 1, type)
 
@@ -72,19 +77,27 @@ extern BVECAPI void bvec_push_ptr(struct bvec *v, void *val);
 
 // high-level interface (strings)
 
+extern BVECAPI void bvec_strctor(struct bvec *v, const char *str);
 extern BVECAPI char *bvec_getstr(struct bvec *v);
 extern BVECAPI void bvec_strshrink(struct bvec *v);
 extern BVECAPI void bvec_strcat(struct bvec *v, const char *str);
-extern BVECAPI wchar_t *bvec_getwstr(struct bvec *v);
-extern BVECAPI void bvec_wstrshrink(struct bvec *v);
+extern BVECAPI void bvec_strncat(struct bvec *v, const char *str, size_t n);
+extern BVECAPI void bvec_strpushback(struct bvec *v, char c);
+
+extern BVECAPI void bvec_wcsctor(struct bvec *v, const wchar_t *wstr);
+extern BVECAPI wchar_t *bvec_getwcs(struct bvec *v);
+extern BVECAPI void bvec_wcsshrink(struct bvec *v);
 extern BVECAPI void bvec_wcscat(struct bvec *v, const wchar_t *wstr);
+extern BVECAPI void bvec_wcsncat(struct bvec *v, const wchar_t *wstr, size_t n);
+extern BVECAPI void bvec_wcspushback(struct bvec *v, wchar_t c);
 
 
 // high-level interface (printf)
 
-extern BVECAPI struct bvec bvec_printf(const char *fmt, ...);
+extern BVECAPI void bvec_printf(struct bvec *v, const char *fmt, ...);
 extern BVECAPI void bvec_strcat_printf(struct bvec *v, const char *fmt, ...);
-extern BVECAPI struct bvec bvec_wprintf(const wchar_t *fmt, ...);
+
+extern BVECAPI void bvec_wprintf(struct bvec *v, const wchar_t *fmt, ...);
 extern BVECAPI void bvec_wcscat_wprintf(struct bvec *v, const wchar_t *fmt, ...);
 
 
@@ -94,8 +107,13 @@ extern BVECAPI void bvec_wcscat_wprintf(struct bvec *v, const wchar_t *fmt, ...)
 #ifdef PATCHAPI_EXPORTS
 // INTERNAL DEFINITIONS
 
+#ifdef BVEC_DEBUG
+#define BVEC_DEFAULT_CAPACITY 1
+#define BVEC_DEFAULT_PRINTF_BUFSIZE 1
+#else
 #define BVEC_DEFAULT_CAPACITY 32
 #define BVEC_DEFAULT_PRINTF_BUFSIZE 256
+#endif
 
 #endif
 #endif

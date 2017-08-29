@@ -106,7 +106,7 @@ void plugin_warning(const char *module, int indent, const char *fmt, ...)
     if (plugin_warning_msgboxes + 1 <= MAXWARNMSGBOXES) {
         plugin_warning_msgboxes++;
         if (plugin_warning_msgboxes >= MAXWARNMSGBOXES) {
-            strncat(msgbuf, "\n\nmax messagebox limit reached.", sizeof(msgbuf) - strlen(msgbuf));
+            strncat(msgbuf, "\n\nmax messagebox limit reached.", sizeof(msgbuf) - strlen(msgbuf) - 1);
             msgbuf[sizeof(msgbuf) - 1] = '\0';
         }
         try_goto_desktop();
