@@ -53,8 +53,8 @@ int is_relpath(const char *filepath)
 }
 
 // read file as a string, will skip utf8 bom, return NULL if failed
-// will allocate memory from given mem_allocator, don't forget to free
-char *read_file_as_cstring(const char *filepath, const struct memory_allocator *mem_allocator)
+// will allocate memory, don't forget to free
+char *read_file_as_cstring(const char *filepath)
 {
     char *filedata = NULL;
     HANDLE hFile = INVALID_HANDLE_VALUE;
@@ -73,20 +73,15 @@ char *read_file_as_cstring(const char *filepath, const struct memory_allocator *
     if (dwSize == INVALID_FILE_SIZE) goto fail;
     
     // allocate memory and read file
-    filedata = mem_allocator->malloc(dwSize + 1);
+    filedata = malloc(dwSize + 1);
     if (!ReadFile(hFile, filedata, dwSize, &dwRead, NULL) || dwSize != dwRead) goto fail;
     filedata[dwSize] = 0;
     
-    // skip utf8 bom if needed
-    if (strncmp(filedata, UTF8_BOM_STR, UTF8_BOM_LEN) == 0) {
-        memmove(filedata, filedata + UTF8_BOM_LEN, dwSize + 1 - UTF8_BOM_LEN);
-    }
-
 done:
     if (hFile) CloseHandle(hFile);
     return filedata;
 fail:
-    mem_allocator->free(filedata); filedata = NULL;
+    free(filedata); filedata = NULL;
     goto done;
 }
 
@@ -147,7 +142,7 @@ int enum_files(const char *dirpath, const char *pattern, void (*func)(const char
     for (i = 0; i < nr_filelist; i++) {
         // convert to utf8 and invoke function
         wcs2cs_managed(filelist[i], CP_UTF8, &cstr_managed);
-        func(cstr_managed, arg);
+        if (func) func(cstr_managed, arg);
     }
     sum = nr_filelist;
     

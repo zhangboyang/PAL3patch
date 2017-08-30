@@ -2,6 +2,8 @@
 #define PAL3PATCH_PLUGIN_H
 // PATCHAPI DEFINITIONS
 
+extern PATCHAPI void *patch_malloc(size_t size);
+extern PATCHAPI void patch_free(void *ptr);
 extern PATCHAPI int version_string_compare(const char *a, const char *b);
 
 extern PATCHAPI int plugin_log_indent;

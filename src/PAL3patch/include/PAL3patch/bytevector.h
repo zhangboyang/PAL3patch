@@ -28,7 +28,7 @@ struct bvec {
 
 extern BVECAPI void bvec_ctor(struct bvec *v); // constructor
 extern BVECAPI void bvec_bctor(struct bvec *v, const void *data, size_t size); // copy constructor
-extern BVECAPI void bvec_vctor(struct bvec *v, const struct bvec *src); // copy constructor
+extern BVECAPI void bvec_cctor(struct bvec *v, const struct bvec *src); // copy constructor
 extern BVECAPI void bvec_dtor(struct bvec *v); // destructor
 extern BVECAPI void bvec_clear(struct bvec *v);
 extern BVECAPI void bvec_fclear(struct bvec *v);
@@ -75,31 +75,53 @@ extern BVECAPI void bvec_push_unsigned(struct bvec *v, unsigned val);
 extern BVECAPI void bvec_push_ptr(struct bvec *v, void *val);
 
 
-// high-level interface (strings)
-
-extern BVECAPI void bvec_strctor(struct bvec *v, const char *str);
-extern BVECAPI char *bvec_getstr(struct bvec *v);
-extern BVECAPI void bvec_strshrink(struct bvec *v);
-extern BVECAPI void bvec_strcat(struct bvec *v, const char *str);
-extern BVECAPI void bvec_strncat(struct bvec *v, const char *str, size_t n);
-extern BVECAPI void bvec_strpushback(struct bvec *v, char c);
-
-extern BVECAPI void bvec_wcsctor(struct bvec *v, const wchar_t *wstr);
-extern BVECAPI wchar_t *bvec_getwcs(struct bvec *v);
-extern BVECAPI void bvec_wcsshrink(struct bvec *v);
-extern BVECAPI void bvec_wcscat(struct bvec *v, const wchar_t *wstr);
-extern BVECAPI void bvec_wcsncat(struct bvec *v, const wchar_t *wstr, size_t n);
-extern BVECAPI void bvec_wcspushback(struct bvec *v, wchar_t c);
 
 
-// high-level interface (printf)
+// high-level interface (string template)
 
-extern BVECAPI void bvec_printf(struct bvec *v, const char *fmt, ...);
-extern BVECAPI void bvec_strcat_printf(struct bvec *v, const char *fmt, ...);
 
-extern BVECAPI void bvec_wprintf(struct bvec *v, const wchar_t *fmt, ...);
-extern BVECAPI void bvec_wcscat_wprintf(struct bvec *v, const wchar_t *fmt, ...);
+#define BVEC_STRING_DECL(clsname, tchar, tname) \
+    struct clsname { \
+        struct bvec v; \
+    }; \
+    extern BVECAPI void CONCAT3(clsname, _, ctor)(struct clsname *s); \
+    extern BVECAPI void CONCAT3(clsname, _, cctor)(struct clsname *s, const struct clsname *src); \
+    extern BVECAPI void CONCAT3(clsname, _, sctor)(struct clsname *s, const tchar *str); \
+    extern BVECAPI void CONCAT3(clsname, _, dtor)(struct clsname *s); \
+    extern BVECAPI void CONCAT3(clsname, _, clear)(struct clsname *s); \
+    extern BVECAPI void CONCAT3(clsname, _, fclear)(struct clsname *s); \
+    extern BVECAPI void CONCAT3(clsname, _, copy)(struct clsname *dst, const struct clsname *src); \
+    extern BVECAPI void CONCAT3(clsname, _, move)(struct clsname *dst, struct clsname *src); \
+    extern BVECAPI void CONCAT3(clsname, _, swap)(struct clsname *a, struct clsname *b); \
+    extern BVECAPI const tchar *CONCAT4(clsname, _, get, tname)(const struct clsname *s); \
+    extern BVECAPI tchar *CONCAT3(clsname, _, data)(const struct clsname *s); \
+    extern BVECAPI tchar *CONCAT3(clsname, _, begin)(const struct clsname *s); \
+    extern BVECAPI tchar *CONCAT3(clsname, _, end)(const struct clsname *s); \
+    extern BVECAPI int CONCAT3(clsname, _, empty)(const struct clsname *s); \
+    extern BVECAPI size_t CONCAT3(clsname, _, size)(const struct clsname *s); \
+    extern BVECAPI void CONCAT3(clsname, _, shrink)(struct clsname *s); \
+    extern BVECAPI size_t CONCAT4(clsname, _, tname, len)(const struct clsname *s); \
+    extern BVECAPI void CONCAT4(clsname, _, tname, cpy)(struct clsname *s, const tchar *str); \
+    extern BVECAPI void CONCAT4(clsname, _, tname, cat)(struct clsname *s, const tchar *str); \
+    extern BVECAPI void CONCAT4(clsname, _, tname, ncat)(struct clsname *s, const tchar *str, size_t n); \
+    extern BVECAPI void CONCAT3(clsname, _, pushback)(struct clsname *s, tchar c); \
+    extern BVECAPI void CONCAT3(clsname, _, popback)(struct clsname *s); \
+    extern BVECAPI tchar *CONCAT3(clsname, _, getbuffer)(struct clsname *s, size_t size); \
+    extern BVECAPI void CONCAT3(clsname, _, commitbuffer)(struct clsname *s); \
+    extern BVECAPI void CONCAT3(clsname, _, discardbuffer)(struct clsname *s); \
+    extern BVECAPI int CONCAT3(clsname, _, format)(struct clsname *s, const tchar *fmt, ...); \
+// TEMPLATE END
 
+BVEC_STRING_DECL(wstr, wchar_t, wcs)
+BVEC_STRING_DECL(cstr, char, str)
+
+#define wstr_at(s, n) (*(wstr_data(s) + (n)))
+#define wstr_front(s) (*wstr_begin(s))
+#define wstr_back(s) (*(wstr_end(s) - 1))
+
+#define cstr_at(s, n) (*(cstr_data(s) + (n)))
+#define cstr_front(s) (*cstr_begin(s))
+#define cstr_back(s) (*(cstr_end(s) - 1))
 
 
 
@@ -109,10 +131,10 @@ extern BVECAPI void bvec_wcscat_wprintf(struct bvec *v, const wchar_t *fmt, ...)
 
 #ifdef BVEC_DEBUG
 #define BVEC_DEFAULT_CAPACITY 1
-#define BVEC_DEFAULT_PRINTF_BUFSIZE 1
+#define BVEC_STRING_DEFAULT_FORMATBUFFER 1
 #else
 #define BVEC_DEFAULT_CAPACITY 32
-#define BVEC_DEFAULT_PRINTF_BUFSIZE 256
+#define BVEC_STRING_DEFAULT_FORMATBUFFER 256
 #endif
 
 #endif

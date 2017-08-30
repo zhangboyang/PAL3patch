@@ -7,8 +7,9 @@ extern PATCHAPI void NORETURN die(int status);
 
 extern PATCHAPI int str2int(const char *valstr);
 extern PATCHAPI double str2double(const char *valstr);
-extern PATCHAPI int str_iendswith(const char *a, const char *b);
 extern PATCHAPI int str_endswith(const char *a, const char *b);
+extern PATCHAPI int str_iendswith(const char *a, const char *b);
+extern PATCHAPI int str_remove_utf8_bom(char *str);
 extern PATCHAPI char *str_rtrim(char *str, const char *charlist);
 extern PATCHAPI char *str_ltrim(char *str, const char *charlist);
 extern PATCHAPI char *str_trim(char *str, const char *charlist);

@@ -3,16 +3,29 @@
 
 // misc
 
+
+// patch memory allocator wrapper
+// user should use these function when dealing with memory blocks
+//   that was allocated in PAL3patch
+//    e.g. cs2wcs_alloc() cs2wcs_managed()
+void *patch_malloc(size_t size)
+{
+    return malloc(size);
+}
+void patch_free(void *ptr)
+{
+    free(ptr);
+}
+
+// compare two version strings, only compare numbers
+//   for example:
+//     v1.0 == x1.0
+//     v1 == v1.0.0
+//     v1.0 < v1.0.1
+//     v1.2 < v1.10
+//     v2.0 > v1.99
 int version_string_compare(const char *a, const char *b)
 {
-    // compare two version strings, only compare numbers
-    //   for example:
-    //     v1.0 == x1.0
-    //     v1 == v1.0.0
-    //     v1.0 < v1.0.1
-    //     v1.2 < v1.10
-    //     v2.0 > v1.99
-    
     unsigned na, nb;
     do {
         while (*a && !('0' <= *a && *a <= '9')) a++;
@@ -294,8 +307,9 @@ void load_plugin_list(const char *filename)
     if (!fullpath_filepart) goto fail;
     
     // read whole file as a string
-    filestr = read_file_as_cstring(wcs2cs_managed(fullpath, CP_UTF8, &cstr_managed), &cur_mem_allocator);
+    filestr = read_file_as_cstring(wcs2cs_managed(fullpath, CP_UTF8, &cstr_managed));
     if (!filestr) goto fail;
+    str_remove_utf8_bom(filestr);
     
     // parse the file
     for (line = strtok_r(filestr, line_delim, &line_saveptr); line; line = strtok_r(NULL, line_delim, &line_saveptr)) {
@@ -346,7 +360,7 @@ void load_plugin_list(const char *filename)
     }
     
 done:
-    cur_mem_allocator.free(filestr);
+    free(filestr);
     free(cstr_managed);
     free(wstr_managed);
     pplog("execution finished.");

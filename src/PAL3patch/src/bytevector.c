@@ -38,7 +38,7 @@ void bvec_bctor(struct bvec *v, const void *data, size_t size)
     bvec_ctor(v);
     bvec_bpush(v, data, size);
 }
-void bvec_vctor(struct bvec *v, const struct bvec *src)
+void bvec_cctor(struct bvec *v, const struct bvec *src)
 {
     bvec_ctor(v);
     bvec_vpush(v, src);
@@ -67,7 +67,7 @@ void bvec_copy(struct bvec *dst, const struct bvec *src)
 {
     if (dst != src) {
         bvec_dtor(dst);
-        bvec_vctor(dst, src);
+        bvec_cctor(dst, src);
     }
 }
 void bvec_move(struct bvec *dst, struct bvec *src)
@@ -212,358 +212,158 @@ void bvec_push_ptr(struct bvec *v, void *val)
 }
 
 
-// high-level interface (strings)
-
-void bvec_strctor(struct bvec *v, const char *str)
-{
-    bvec_tctor(v, str, strlen(str) + 1, char);
-}
-char *bvec_getstr(struct bvec *v)
-{
-    if (bvec_empty(v) || bvec_tback(v, char) != '\0') bvec_push_char(v, '\0');
-    return bvec_tdata(v, char);
-}
-void bvec_strshrink(struct bvec *v)
-{
-    bvec_tresize(v, strlen(bvec_tdata(v, char)) + 1, char);
-    bvec_shrink(v);
-}
-void bvec_strcat(struct bvec *v, const char *str)
-{
-    if (!bvec_empty(v) && bvec_tback(v, char) == '\0') bvec_tpopback(v, char);
-    bvec_tpush(v, str, strlen(str) + 1, char);
-}
-void bvec_strncat(struct bvec *v, const char *str, size_t n)
-{
-    if (!bvec_empty(v) && bvec_tback(v, char) == '\0') bvec_tpopback(v, char);
-    size_t l;
-    for (l = 0; l < n && str[l]; l++);
-    bvec_tpush(v, str, l, char);
-    bvec_push_char(v, '\0');
-}
-void bvec_strpushback(struct bvec *v, char c)
-{
-    char s[] = {c, '\0'};
-    bvec_strcat(v, s);
-}
-
-void bvec_wcsctor(struct bvec *v, const wchar_t *wstr)
-{
-    bvec_tctor(v, wstr, wcslen(wstr) + 1, wchar_t);
-}
-wchar_t *bvec_getwcs(struct bvec *v)
-{
-    if (bvec_empty(v) || bvec_tback(v, wchar_t) != L'\0') bvec_push_wchar(v, L'\0');
-    return bvec_tdata(v, wchar_t);
-}
-void bvec_wcsshrink(struct bvec *v)
-{
-    bvec_tresize(v, wcslen(bvec_tdata(v, wchar_t)) + 1, wchar_t);
-    bvec_shrink(v);
-}
-void bvec_wcscat(struct bvec *v, const wchar_t *wstr)
-{
-    if (!bvec_empty(v) && bvec_tback(v, wchar_t) == L'\0') bvec_tpopback(v, wchar_t);
-    bvec_tpush(v, wstr, wcslen(wstr) + 1, wchar_t);
-}
-void bvec_wcsncat(struct bvec *v, const wchar_t *wstr, size_t n)
-{
-    if (!bvec_empty(v) && bvec_tback(v, wchar_t) == L'\0') bvec_tpopback(v, wchar_t);
-    size_t l;
-    for (l = 0; l < n && wstr[l]; l++);
-    bvec_tpush(v, wstr, l, wchar_t);
-    bvec_push_wchar(v, L'\0');
-}
-void bvec_wcspushback(struct bvec *v, wchar_t c)
-{
-    wchar_t s[] = {c, L'\0'};
-    bvec_wcscat(v, s);
-}
 
 
-// high-level interface (printf)
+// string template
 
-static struct bvec bvec_vprintf(const char *fmt, va_list ap)
-{
-    // vprintf to byte vector, internal use only
-    
-    // alloc buffer
-    struct bvec r;
-    bvec_ctor(&r);
-    bvec_tresize(&r, BVEC_DEFAULT_PRINTF_BUFSIZE, char);
+#define BVEC_STRING_IMPL(clsname, tchar, tname, printf) \
+\
+void CONCAT3(clsname, _, ctor)(struct clsname *s) \
+{ \
+    tchar t = 0; \
+    bvec_tctor(&s->v, &t, 1, tchar); \
+} \
+void CONCAT3(clsname, _, cctor)(struct clsname *s, const struct clsname *src) \
+{ \
+    bvec_cctor(&s->v, &src->v); \
+} \
+void CONCAT3(clsname, _, sctor)(struct clsname *s, const tchar *str) \
+{ \
+    bvec_tctor(&s->v, str, CONCAT(tname, len)(str) + 1, tchar); \
+} \
+void CONCAT3(clsname, _, dtor)(struct clsname *s) \
+{ \
+    bvec_dtor(&s->v); \
+} \
+void CONCAT3(clsname, _, clear)(struct clsname *s) \
+{ \
+    tchar t = 0; \
+    bvec_clear(&s->v); \
+    bvec_tpush(&s->v, &t, 1, tchar); \
+} \
+void CONCAT3(clsname, _, fclear)(struct clsname *s) \
+{ \
+    CONCAT3(clsname, _, dtor)(s); \
+    CONCAT3(clsname, _, ctor)(s); \
+} \
+void CONCAT3(clsname, _, copy)(struct clsname *dst, const struct clsname *src) \
+{ \
+    bvec_copy(&dst->v, &src->v); \
+} \
+void CONCAT3(clsname, _, move)(struct clsname *dst, struct clsname *src) \
+{ \
+    bvec_move(&dst->v, &src->v); \
+} \
+void CONCAT3(clsname, _, swap)(struct clsname *a, struct clsname *b) \
+{ \
+    bvec_swap(&a->v, &b->v); \
+} \
+const tchar *CONCAT4(clsname, _, get, tname)(const struct clsname *s) \
+{ \
+    return bvec_tdata(&s->v, tchar); \
+} \
+tchar *CONCAT3(clsname, _, data)(const struct clsname *s) \
+{ \
+    return bvec_tdata(&s->v, tchar); \
+} \
+tchar *CONCAT3(clsname, _, begin)(const struct clsname *s) \
+{ \
+    return bvec_tbegin(&s->v, tchar); \
+} \
+tchar *CONCAT3(clsname, _, end)(const struct clsname *s) \
+{ \
+    return bvec_tend(&s->v, tchar) - 1; \
+} \
+int CONCAT3(clsname, _, empty)(const struct clsname *s) \
+{ \
+    return !CONCAT3(clsname, _, size)(s); \
+} \
+size_t CONCAT3(clsname, _, size)(const struct clsname *s) \
+{ \
+    return bvec_tsize(&s->v, tchar) - 1; \
+} \
+void CONCAT3(clsname, _, shrink)(struct clsname *s) \
+{ \
+    bvec_shrink(&s->v); \
+} \
+size_t CONCAT4(clsname, _, tname, len)(const struct clsname *s) \
+{ \
+    return CONCAT3(clsname, _, size)(s); \
+} \
+void CONCAT4(clsname, _, tname, cpy)(struct clsname *s, const tchar *str) \
+{ \
+    bvec_clear(&s->v); \
+    bvec_tpush(&s->v, str, CONCAT(tname, len)(str) + 1, tchar); \
+} \
+void CONCAT4(clsname, _, tname, cat)(struct clsname *s, const tchar *str) \
+{ \
+    bvec_tpopback(&s->v, tchar); \
+    bvec_tpush(&s->v, str, CONCAT(tname, len)(str) + 1, tchar); \
+} \
+void CONCAT4(clsname, _, tname, ncat)(struct clsname *s, const tchar *str, size_t n) \
+{ \
+    tchar t = 0; \
+    size_t l; \
+    bvec_tpopback(&s->v, tchar); \
+    for (l = 0; l < n && str[l]; l++); \
+    bvec_tpush(&s->v, str, l, tchar); \
+    bvec_tpush(&s->v, &t, 1, tchar); \
+} \
+void CONCAT3(clsname, _, pushback)(struct clsname *s, tchar c) \
+{ \
+    tchar t = 0; \
+    *CONCAT3(clsname, _, end)(s) = c; \
+    bvec_tpush(&s->v, &t, 1, tchar); \
+} \
+void CONCAT3(clsname, _, popback)(struct clsname *s) \
+{ \
+    CONCAT3(clsname, _, end)(s)[-1] = 0; \
+    bvec_tpopback(&s->v, tchar); \
+} \
+tchar *CONCAT3(clsname, _, getbuffer)(struct clsname *s, size_t size) \
+{ \
+    /* it's only vaild to call:    */ \
+    /*   commitbuffer()            */ \
+    /*   discardbuffer()           */ \
+    /*   dtor()                    */ \
+    /* after calling this function */ \
+    bvec_tresize(&s->v, size, tchar); \
+    return bvec_tdata(&s->v, tchar); \
+} \
+void CONCAT3(clsname, _, commitbuffer)(struct clsname *s) \
+{ \
+    bvec_tresize(&s->v, CONCAT(tname, len)(CONCAT3(clsname, _, data)(s)) + 1, tchar); \
+} \
+void CONCAT3(clsname, _, discardbuffer)(struct clsname *s) \
+{ \
+    CONCAT3(clsname, _, clear)(s); \
+} \
+int CONCAT3(clsname, _, format)(struct clsname *s, const tchar *fmt, ...) \
+{ \
+    int ret; \
+    size_t size = BVEC_STRING_DEFAULT_FORMATBUFFER; \
+    va_list ap; \
+    va_start(ap, fmt); \
+     \
+    while (1) { \
+        tchar *buf = CONCAT3(clsname, _, getbuffer)(s, size); \
+        va_list aq; \
+        va_copy(aq, ap); \
+        ret = CONCAT(vsn, printf)(buf, size, fmt, aq); \
+        va_end(aq); \
+         \
+        buf[size - 1] = 0; \
+        if (CONCAT(tname, len)(buf) < size - 1) break; \
+         \
+        bvec_assert(size * 2 > size, "integer overflow"); \
+        CONCAT3(clsname, _, discardbuffer)(s); \
+    } \
+    CONCAT3(clsname, _, commitbuffer)(s); \
+     \
+    va_end(ap); \
+    return ret; \
+} \
+// TEMPLATE END
 
-    while (1) {
-        char *buf = bvec_tdata(&r, char); 
-        size_t bufsize = bvec_tsize(&r, char);
-        
-        // do snprintf
-        va_list aq;
-        va_copy(aq, ap);
-        vsnprintf(buf, bufsize, fmt, aq);
-        va_end(aq);
-        
-        // work around buggy snprintf implementations
-        buf[bufsize - 1] = 0;
-        if (strlen(buf) < bufsize - 1) break;
-        
-        // buffer might not enough, double it and retry
-        bvec_assert(bufsize * 2 > bufsize, "integer overflow");
-        bvec_tresize(&r, bufsize * 2, char);
-    }
-    
-    bvec_strshrink(&r);
-    
-    return r;
-}
-void bvec_printf(struct bvec *v, const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    struct bvec r = bvec_vprintf(fmt, ap);
-    bvec_move(v, &r);
-    bvec_dtor(&r);
-    va_end(ap);
-}
-void bvec_strcat_printf(struct bvec *v, const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    struct bvec t = bvec_vprintf(fmt, ap);
-    va_end(ap);
-    bvec_strcat(v, bvec_getstr(&t));
-    bvec_dtor(&t);
-}
-
-static struct bvec bvec_vwprintf(const wchar_t *fmt, va_list ap)
-{
-    // vwprintf to byte vector, internal use only
-    
-    // alloc buffer
-    struct bvec r;
-    bvec_ctor(&r);
-    bvec_tresize(&r, BVEC_DEFAULT_PRINTF_BUFSIZE, wchar_t);
-
-    while (1) {
-        wchar_t *buf = bvec_tdata(&r, wchar_t); 
-        size_t bufsize = bvec_tsize(&r, wchar_t);
-        
-        // do snprintf
-        va_list aq;
-        va_copy(aq, ap);
-        vsnwprintf(buf, bufsize, fmt, aq);
-        va_end(aq);
-        
-        // work around buggy snprintf implementations
-        buf[bufsize - 1] = 0;
-        if (wcslen(buf) < bufsize - 1) break;
-        
-        // buffer might not enough, double it and retry
-        bvec_assert(bufsize * 2 > bufsize, "integer overflow");
-        bvec_tresize(&r, bufsize * 2, wchar_t);
-    }
-    
-    bvec_wcsshrink(&r);
-    
-    return r;
-}
-void bvec_wprintf(struct bvec *v, const wchar_t *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    struct bvec r = bvec_vwprintf(fmt, ap);
-    bvec_move(v, &r);
-    bvec_dtor(&r);
-    va_end(ap);
-}
-void bvec_wcscat_wprintf(struct bvec *v, const wchar_t *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    struct bvec t = bvec_vwprintf(fmt, ap);
-    va_end(ap);
-    bvec_wcscat(v, bvec_getwcs(&t));
-    bvec_dtor(&t);
-}
-
-#if 0
-void bvec_selftest()
-{
-    // NOTE: please set these values to 1 if you want to test realloc
-    //   BVEC_DEFAULT_CAPACITY
-    //   BVEC_DEFAULT_PRINTF_BUFSIZE
-
-    struct bvec v, v2, v3, v4;
-    
-    bvec_ctor(&v);
-    bvec_ctor(&v2);
-    bvec_ctor(&v3);
-    bvec_ctor(&v4);
-    bvec_clear(&v);
-    bvec_clear(&v);
-    bvec_clear(&v);
-    bvec_strcat(&v, "abc");
-    bvec_clear(&v);
-    bvec_shrink(&v);
-    bvec_strcat(&v, "a");
-    bvec_strcat(&v, "bb");
-    bvec_strcat_printf(&v, "%c%s%d", 'c', "cc", 12345);
-    bvec_strcat(&v, "ddd");
-    bvec_strpushback(&v, 'd');
-    bvec_strcat(&v, "eeeee");
-    assert(bvec_tsize(&v, char) == 16 + 5);
-    assert(strcmp(bvec_getstr(&v), "abbccc12345ddddeeeee") == 0);
-    bvec_copy(&v2, &v);
-    assert(bvec_tsize(&v2, char) == 16 + 5);
-    assert(strcmp(bvec_getstr(&v2), "abbccc12345ddddeeeee") == 0);
-    bvec_clear(&v);
-    assert(bvec_bsize(&v) == 0);
-    bvec_wcscat(&v, L"a");
-    bvec_wcscat(&v, L"bb");
-    bvec_wcscat_wprintf(&v, L"%c%s%d", L'c', L"cc", 12345);
-    bvec_wcscat(&v, L"ddd");
-    bvec_wcspushback(&v, L'd');
-    bvec_wcscat(&v, L"eeeee");
-    assert(bvec_tsize(&v, wchar_t) == 16 + 5);
-    assert(wcscmp(bvec_getwcs(&v), L"abbccc12345ddddeeeee") == 0);
-    bvec_copy(&v3, &v);
-    assert(bvec_tsize(&v3, wchar_t) == 16 + 5);
-    assert(wcscmp(bvec_getwcs(&v3), L"abbccc12345ddddeeeee") == 0);
-    bvec_fclear(&v);
-    assert(bvec_empty(&v));
-    bvec_move(&v4, &v2);
-    assert(bvec_empty(&v2));
-    assert(bvec_tsize(&v4, char) == 16 + 5);
-    assert(strcmp(bvec_getstr(&v4), "abbccc12345ddddeeeee") == 0);
-    bvec_swap(&v3, &v4);
-    assert(bvec_tsize(&v3, char) == 16 + 5);
-    assert(strcmp(bvec_getstr(&v3), "abbccc12345ddddeeeee") == 0);
-    assert(bvec_tsize(&v4, wchar_t) == 16 + 5);
-    assert(wcscmp(bvec_getwcs(&v4), L"abbccc12345ddddeeeee") == 0);
-    bvec_tresize(&v3, 7, char);
-    assert(bvec_tsize(&v3, char) == 7);
-    assert(strncmp(bvec_getstr(&v3), "abbccc1", 7) == 0);
-    bvec_tat(&v3, 3, char) = 0;
-    bvec_strshrink(&v3);
-    assert(bvec_tsize(&v3, char) == 4);
-    assert(strcmp(bvec_getstr(&v3), "abb") == 0);
-    bvec_tresize(&v4, 7, wchar_t);
-    assert(bvec_tsize(&v4, wchar_t) == 7);
-    assert(wcsncmp(bvec_getwcs(&v4), L"abbccc1", 7) == 0);
-    bvec_tat(&v4, 3, wchar_t) = 0;
-    bvec_wcsshrink(&v4);
-    assert(bvec_tsize(&v4, wchar_t) == 4);
-    assert(wcscmp(bvec_getwcs(&v4), L"abb") == 0);
-    bvec_clear(&v);
-    bvec_strcat(&v, "abcdef");
-    bvec_copy(&v2, &v);
-    bvec_vpush(&v, &v2);
-    assert(bvec_bsize(&v) == (6 + 1) * 2);
-    assert(memcmp(bvec_bdata(&v), "abcdef\0abcdef\0", bvec_bsize(&v)) == 0);
-    bvec_copy(&v, &v);
-    assert(bvec_bsize(&v) == (6 + 1) * 2);
-    assert(memcmp(bvec_bdata(&v), "abcdef\0abcdef\0", bvec_bsize(&v)) == 0);
-    bvec_move(&v, &v);
-    assert(bvec_bsize(&v) == (6 + 1) * 2);
-    assert(memcmp(bvec_bdata(&v), "abcdef\0abcdef\0", bvec_bsize(&v)) == 0);
-    bvec_swap(&v, &v);
-    assert(bvec_bsize(&v) == (6 + 1) * 2);
-    assert(memcmp(bvec_bdata(&v), "abcdef\0abcdef\0", bvec_bsize(&v)) == 0);
-    bvec_fclear(&v);
-    assert(bvec_bsize(&v) == 0);
-    assert(strcmp(bvec_getstr(&v), "") == 0);
-    assert(bvec_bsize(&v) == 1);
-    bvec_fclear(&v);
-    assert(bvec_bsize(&v) == 0);
-    assert(wcscmp(bvec_getwcs(&v), L"") == 0);
-    assert(bvec_tsize(&v, wchar_t) == 1);
-    bvec_fclear(&v);
-    bvec_push_char(&v, 'a');
-    assert(strcmp(bvec_getstr(&v), "a") == 0);
-    assert(bvec_bsize(&v) == 2);
-    bvec_fclear(&v);
-    bvec_push_wchar(&v, L'a');
-    assert(wcscmp(bvec_getwcs(&v), L"a") == 0);
-    assert(bvec_tsize(&v, wchar_t) == 2);
-    bvec_dtor(&v);
-    bvec_strctor(&v, "helloworld");
-    assert(bvec_tsize(&v, char) == 10 + 1);
-    assert(strcmp(bvec_getstr(&v), "helloworld") == 0);
-    assert(bvec_tsize(&v, char) == 10 + 1);
-    bvec_dtor(&v);
-    bvec_wcsctor(&v, L"helloworld");
-    assert(bvec_tsize(&v, wchar_t) == 10 + 1);
-    assert(wcscmp(bvec_getwcs(&v), L"helloworld") == 0);
-    assert(bvec_tsize(&v, wchar_t) == 10 + 1);
-    bvec_dtor(&v2);
-    bvec_vctor(&v2, &v);
-    assert(bvec_tsize(&v2, wchar_t) == 10 + 1);
-    assert(wcscmp(bvec_getwcs(&v2), L"helloworld") == 0);
-    assert(bvec_tsize(&v2, wchar_t) == 10 + 1);
-    bvec_clear(&v);
-    bvec_strncat(&v, "xxx", 0);
-    bvec_strncat(&v, "abcde", 1);
-    bvec_strncat(&v, "", 0);
-    bvec_strncat(&v, "abcde", 2);
-    bvec_strncat(&v, "abcde", 5);
-    bvec_strncat(&v, "", 100);
-    bvec_strncat(&v, "1", 100);
-    bvec_strncat(&v, "12", 100);
-    assert(bvec_tsize(&v, char) == 11 + 1);
-    assert(strcmp(bvec_getstr(&v), "aababcde112") == 0);
-    bvec_clear(&v);
-    bvec_wcsncat(&v, L"xxx", 0);
-    bvec_wcsncat(&v, L"abcde", 1);
-    bvec_wcsncat(&v, L"", 0);
-    bvec_wcsncat(&v, L"abcde", 2);
-    bvec_wcsncat(&v, L"abcde", 5);
-    bvec_wcsncat(&v, L"", 100);
-    bvec_wcsncat(&v, L"1", 100);
-    bvec_wcsncat(&v, L"12", 100);
-    assert(bvec_tsize(&v, wchar_t) == 11 + 1);
-    assert(wcscmp(bvec_getwcs(&v), L"aababcde112") == 0);
-    bvec_clear(&v);
-    bvec_strcat(&v, "hahaha");
-    bvec_printf(&v, "%d%s%d", 12345, "abcde", 67890);
-    assert(bvec_tsize(&v, char) == 15 + 1);
-    assert(strcmp(bvec_getstr(&v), "12345abcde67890") == 0);
-    bvec_strcat_printf(&v, "%d%s%d", 54321, "EDCBA", 98765);
-    assert(bvec_tsize(&v, char) == 30 + 1);
-    assert(strcmp(bvec_getstr(&v), "12345abcde6789054321EDCBA98765") == 0);
-    assert(bvec_bsize(&v) != 0);
-    bvec_wprintf(&v, L"%d%s%d", 12345, L"abcde", 67890);
-    assert(bvec_tsize(&v, wchar_t) == 15 + 1);
-    assert(wcscmp(bvec_getwcs(&v), L"12345abcde67890") == 0);
-    bvec_wcscat_wprintf(&v, L"%d%s%d", 54321, L"EDCBA", 98765);
-    assert(bvec_tsize(&v, wchar_t) == 30 + 1);
-    assert(wcscmp(bvec_getwcs(&v), L"12345abcde6789054321EDCBA98765") == 0);
-    
-    // NOTE: assume little endian, and pointer is 4 byte
-    bvec_clear(&v);
-    bvec_push_char(&v, '\x11');
-    bvec_push_wchar(&v, L'\x2233');
-    bvec_push_ptr(&v, NULL);
-    bvec_push_int(&v, 0x44556677);
-    bvec_push_unsigned(&v, 0x8899AABB);
-    assert(bvec_bsize(&v) == 1 + 2 + 4 + 4 + 4);
-    assert(memcmp(bvec_bdata(&v), "\x11\x33\x22\x00\x00\x00\x00\x77\x66\x55\x44\xBB\xAA\x99\x88", bvec_bsize(&v)) == 0);
-    bvec_clear(&v);
-    int a = 0x44556677;
-    unsigned b = 0x8899AABB;
-    bvec_tpushback(&v, &a, int);
-    bvec_tpushback(&v, &b, unsigned);
-    assert(bvec_bsize(&v) == 4 + 4);
-    assert(memcmp(bvec_bdata(&v), "\x77\x66\x55\x44\xBB\xAA\x99\x88", bvec_bsize(&v)) == 0);
-    assert(bvec_tback(&v, unsigned) == 0x8899AABB);
-    bvec_tpopback(&v, unsigned);
-    assert(bvec_bsize(&v) == 4);
-    assert(memcmp(bvec_bdata(&v), "\x77\x66\x55\x44", bvec_bsize(&v)) == 0);
-    assert(bvec_tback(&v, int) == 0x44556677);
-    bvec_tpopback(&v, int);
-    assert(bvec_bsize(&v) == 0);
-
-    bvec_dtor(&v);
-    bvec_dtor(&v2);
-    bvec_dtor(&v3);
-    bvec_dtor(&v4);
-}
-#endif
+BVEC_STRING_IMPL(wstr, wchar_t, wcs, wprintf)
+BVEC_STRING_IMPL(cstr, char, str, printf)

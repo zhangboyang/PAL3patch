@@ -39,6 +39,15 @@ int str_iendswith(const char *a, const char *b)
     return lena >= lenb && stricmp(a + lena - lenb, b) == 0;
 }
 
+int str_remove_utf8_bom(char *str)
+{
+    int ret = 0;
+    if (strncmp(str, UTF8_BOM_STR, UTF8_BOM_LEN) == 0) {
+        memmove(str, str + UTF8_BOM_LEN, strlen(str + UTF8_BOM_LEN) + 1);
+        ret = 1;
+    }
+    return ret;
+}
 
 char *str_rtrim(char *str, const char *charlist)
 {
