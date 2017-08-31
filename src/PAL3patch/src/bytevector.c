@@ -80,10 +80,12 @@ void bvec_move(struct bvec *dst, struct bvec *src)
 }
 void bvec_swap(struct bvec *a, struct bvec *b)
 {
-    struct bvec t;
-    t = *a;
-    *a = *b;
-    *b = t;
+    if (a != b) {
+        struct bvec t;
+        t = *a;
+        *a = *b;
+        *b = t;
+    }
 }
 void *bvec_bdata(const struct bvec *v)
 {
@@ -248,15 +250,23 @@ void CONCAT3(clsname, _, fclear)(struct clsname *s) \
 } \
 void CONCAT3(clsname, _, copy)(struct clsname *dst, const struct clsname *src) \
 { \
-    bvec_copy(&dst->v, &src->v); \
+    if (dst != src) { \
+        bvec_copy(&dst->v, &src->v); \
+    } \
 } \
 void CONCAT3(clsname, _, move)(struct clsname *dst, struct clsname *src) \
 { \
-    bvec_move(&dst->v, &src->v); \
+    if (dst != src) { \
+        tchar t = 0; \
+        bvec_move(&dst->v, &src->v); \
+        bvec_tpush(&src->v, &t, 1, tchar); \
+    } \
 } \
 void CONCAT3(clsname, _, swap)(struct clsname *a, struct clsname *b) \
 { \
-    bvec_swap(&a->v, &b->v); \
+    if (a != b) { \
+        bvec_swap(&a->v, &b->v); \
+    } \
 } \
 const tchar *CONCAT4(clsname, _, get, tname)(const struct clsname *s) \
 { \
@@ -302,11 +312,34 @@ void CONCAT4(clsname, _, tname, cat)(struct clsname *s, const tchar *str) \
 } \
 void CONCAT4(clsname, _, tname, ncat)(struct clsname *s, const tchar *str, size_t n) \
 { \
+    if (n) { \
+        size_t l; \
+        for (l = 0; l < n && str[l]; l++); \
+        CONCAT3(clsname, _, push)(s, str, l); \
+    } \
+} \
+void CONCAT3(clsname, _, push)(struct clsname *s, const tchar *str, size_t n) \
+{ \
+    if (n) { \
+        tchar t = 0; \
+        bvec_tpopback(&s->v, tchar); \
+        bvec_tpush(&s->v, str, n, tchar); \
+        bvec_tpush(&s->v, &t, 1, tchar); \
+    } \
+} \
+void CONCAT3(clsname, _, pop)(struct clsname *s, size_t n) \
+{ \
+    if (n) { \
+        size_t old_size = CONCAT3(clsname, _, size)(s); \
+        size_t new_size = old_size - n; \
+        bvec_assert(new_size < old_size, "interger underflow"); \
+        CONCAT3(clsname, _, trunc)(s, new_size); \
+    } \
+} \
+void CONCAT3(clsname, _, trunc)(struct clsname *s, size_t n) \
+{ \
     tchar t = 0; \
-    size_t l; \
-    bvec_tpopback(&s->v, tchar); \
-    for (l = 0; l < n && str[l]; l++); \
-    bvec_tpush(&s->v, str, l, tchar); \
+    bvec_tresize(&s->v, n, tchar); \
     bvec_tpush(&s->v, &t, 1, tchar); \
 } \
 void CONCAT3(clsname, _, pushback)(struct clsname *s, tchar c) \
@@ -367,3 +400,164 @@ int CONCAT3(clsname, _, format)(struct clsname *s, const tchar *fmt, ...) \
 
 BVEC_STRING_IMPL(wstr, wchar_t, wcs, wprintf)
 BVEC_STRING_IMPL(cstr, char, str, printf)
+
+
+
+// unit test
+
+#if 0
+void bvec_cstr_selftest()
+{
+    struct cstr v1, v2, v3, v4;
+    cstr_ctor(&v1);
+    cstr_sctor(&v2, "helloworld");
+    cstr_cctor(&v3, &v2);
+    cstr_ctor(&v4);
+    assert(cstr_size(&v1) == 0);
+    assert(cstr_strlen(&v1) == 0);
+    assert(cstr_empty(&v1));
+    assert(strlen(cstr_getstr(&v1)) == 0);
+    assert(cstr_size(&v2) == 10);
+    assert(cstr_strlen(&v2) == 10);
+    assert(!cstr_empty(&v2));
+    assert(strlen(cstr_getstr(&v2)) == 10);
+    assert(strcmp(cstr_getstr(&v2), "helloworld") == 0);
+    assert(strlen(cstr_getstr(&v3)) == 10);
+    assert(strcmp(cstr_getstr(&v3), "helloworld") == 0);
+    cstr_copy(&v4, &v2);
+    assert(strlen(cstr_getstr(&v2)) == 10);
+    assert(strcmp(cstr_getstr(&v2), "helloworld") == 0);
+    assert(strlen(cstr_getstr(&v4)) == 10);
+    assert(strcmp(cstr_getstr(&v4), "helloworld") == 0);
+    cstr_strcpy(&v1, "abcdefg");
+    assert(strlen(cstr_getstr(&v1)) == 7);
+    assert(strcmp(cstr_getstr(&v1), "abcdefg") == 0);
+    cstr_move(&v1, &v2);
+    assert(strlen(cstr_getstr(&v1)) == 10);
+    assert(strcmp(cstr_getstr(&v1), "helloworld") == 0);
+    assert(cstr_size(&v2) == 0);
+    assert(cstr_strlen(&v2) == 0);
+    assert(cstr_empty(&v2));
+    cstr_clear(&v1);
+    assert(cstr_size(&v1) == 0);
+    assert(cstr_strlen(&v1) == 0);
+    assert(cstr_empty(&v1));
+    cstr_strcpy(&v1, "123456");
+    cstr_swap(&v1, &v3);
+    assert(strlen(cstr_getstr(&v1)) == 10);
+    assert(strcmp(cstr_getstr(&v1), "helloworld") == 0);
+    assert(strlen(cstr_getstr(&v3)) == 6);
+    assert(strcmp(cstr_getstr(&v3), "123456") == 0);
+    cstr_strcat(&v1, "ABCDE");
+    assert(strlen(cstr_getstr(&v1)) == 15);
+    assert(strcmp(cstr_getstr(&v1), "helloworldABCDE") == 0);
+    cstr_clear(&v1);
+    cstr_strcpy(&v1, "abc");
+    cstr_strncat(&v1, "ABCD", 0);
+    cstr_strncat(&v1, "ABCD", 1);
+    cstr_strncat(&v1, "ABCD", 2);
+    cstr_strncat(&v1, "ABCD", 3);
+    cstr_strncat(&v1, "ABCD", 4);
+    cstr_strncat(&v1, "ABCD", 5);
+    cstr_strncat(&v1, "ABCD", 6);
+    assert(strcmp(cstr_getstr(&v1), "abcAABABCABCDABCDABCD") == 0);
+    cstr_pushback(&v1, 'x');
+    assert(strcmp(cstr_getstr(&v1), "abcAABABCABCDABCDABCDx") == 0);
+    assert(cstr_front(&v1) == 'a');
+    assert(cstr_back(&v1) == 'x');
+    assert(cstr_at(&v1, 3) == 'A');
+    cstr_popback(&v1);
+    assert(strcmp(cstr_getstr(&v1), "abcAABABCABCDABCDABCD") == 0);
+    cstr_shrink(&v1);
+    assert(strcmp(cstr_getstr(&v1), "abcAABABCABCDABCDABCD") == 0);
+    cstr_format(&v1, "%d%s%d", 123456, "AbCdEfGhIjKl", 789012);
+    assert(strcmp(cstr_getstr(&v1), "123456AbCdEfGhIjKl789012") == 0);
+    cstr_pop(&v1, 10);
+    assert(strcmp(cstr_getstr(&v1), "123456AbCdEfGh") == 0);
+    cstr_push(&v1, "aaa", 3);
+    assert(strcmp(cstr_getstr(&v1), "123456AbCdEfGhaaa") == 0);
+    cstr_trunc(&v1, 3);
+    assert(strcmp(cstr_getstr(&v1), "123") == 0);
+    cstr_dtor(&v1);
+    cstr_dtor(&v2);
+    cstr_dtor(&v3);
+    cstr_dtor(&v4);
+}
+void bvec_wstr_selftest()
+{
+    struct wstr v1, v2, v3, v4;
+    wstr_ctor(&v1);
+    wstr_sctor(&v2, L"helloworld");
+    wstr_cctor(&v3, &v2);
+    wstr_ctor(&v4);
+    assert(wstr_size(&v1) == 0);
+    assert(wstr_wcslen(&v1) == 0);
+    assert(wstr_empty(&v1));
+    assert(wcslen(wstr_getwcs(&v1)) == 0);
+    assert(wstr_size(&v2) == 10);
+    assert(wstr_wcslen(&v2) == 10);
+    assert(!wstr_empty(&v2));
+    assert(wcslen(wstr_getwcs(&v2)) == 10);
+    assert(wcscmp(wstr_getwcs(&v2), L"helloworld") == 0);
+    assert(wcslen(wstr_getwcs(&v3)) == 10);
+    assert(wcscmp(wstr_getwcs(&v3), L"helloworld") == 0);
+    wstr_copy(&v4, &v2);
+    assert(wcslen(wstr_getwcs(&v2)) == 10);
+    assert(wcscmp(wstr_getwcs(&v2), L"helloworld") == 0);
+    assert(wcslen(wstr_getwcs(&v4)) == 10);
+    assert(wcscmp(wstr_getwcs(&v4), L"helloworld") == 0);
+    wstr_wcscpy(&v1, L"abcdefg");
+    assert(wcslen(wstr_getwcs(&v1)) == 7);
+    assert(wcscmp(wstr_getwcs(&v1), L"abcdefg") == 0);
+    wstr_move(&v1, &v2);
+    assert(wcslen(wstr_getwcs(&v1)) == 10);
+    assert(wcscmp(wstr_getwcs(&v1), L"helloworld") == 0);
+    assert(wstr_size(&v2) == 0);
+    assert(wstr_wcslen(&v2) == 0);
+    assert(wstr_empty(&v2));
+    wstr_clear(&v1);
+    assert(wstr_size(&v1) == 0);
+    assert(wstr_wcslen(&v1) == 0);
+    assert(wstr_empty(&v1));
+    wstr_wcscpy(&v1, L"123456");
+    wstr_swap(&v1, &v3);
+    assert(wcslen(wstr_getwcs(&v1)) == 10);
+    assert(wcscmp(wstr_getwcs(&v1), L"helloworld") == 0);
+    assert(wcslen(wstr_getwcs(&v3)) == 6);
+    assert(wcscmp(wstr_getwcs(&v3), L"123456") == 0);
+    wstr_wcscat(&v1, L"ABCDE");
+    assert(wcslen(wstr_getwcs(&v1)) == 15);
+    assert(wcscmp(wstr_getwcs(&v1), L"helloworldABCDE") == 0);
+    wstr_clear(&v1);
+    wstr_wcscpy(&v1, L"abc");
+    wstr_wcsncat(&v1, L"ABCD", 0);
+    wstr_wcsncat(&v1, L"ABCD", 1);
+    wstr_wcsncat(&v1, L"ABCD", 2);
+    wstr_wcsncat(&v1, L"ABCD", 3);
+    wstr_wcsncat(&v1, L"ABCD", 4);
+    wstr_wcsncat(&v1, L"ABCD", 5);
+    wstr_wcsncat(&v1, L"ABCD", 6);
+    assert(wcscmp(wstr_getwcs(&v1), L"abcAABABCABCDABCDABCD") == 0);
+    wstr_pushback(&v1, L'x');
+    assert(wcscmp(wstr_getwcs(&v1), L"abcAABABCABCDABCDABCDx") == 0);
+    assert(wstr_front(&v1) == L'a');
+    assert(wstr_back(&v1) == L'x');
+    assert(wstr_at(&v1, 3) == L'A');
+    wstr_popback(&v1);
+    assert(wcscmp(wstr_getwcs(&v1), L"abcAABABCABCDABCDABCD") == 0);
+    wstr_shrink(&v1);
+    assert(wcscmp(wstr_getwcs(&v1), L"abcAABABCABCDABCDABCD") == 0);
+    wstr_format(&v1, L"%d%s%d", 123456, L"AbCdEfGhIjKl", 789012);
+    assert(wcscmp(wstr_getwcs(&v1), L"123456AbCdEfGhIjKl789012") == 0);
+    wstr_pop(&v1, 10);
+    assert(wcscmp(wstr_getwcs(&v1), L"123456AbCdEfGh") == 0);
+    wstr_push(&v1, L"aaa", 3);
+    assert(wcscmp(wstr_getwcs(&v1), L"123456AbCdEfGhaaa") == 0);
+    wstr_trunc(&v1, 3);
+    assert(wcscmp(wstr_getwcs(&v1), L"123") == 0);
+    wstr_dtor(&v1);
+    wstr_dtor(&v2);
+    wstr_dtor(&v3);
+    wstr_dtor(&v4);
+}
+#endif

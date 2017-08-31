@@ -14,7 +14,7 @@ TARGET_DLL := PAL3patch.dll
 TARGET_DLL_SRCPATH := src
 TARGET_DLL_INCPATH := include/PAL3patch
 
-CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing -falign-functions -mfpmath=387 -isystem $(FREETYPE_INCLUDE_PATH) -I $(TARGET_DLL_INCPATH)
+CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -mms-bitfields -fno-strict-aliasing -falign-functions -mfpmath=387 -isystem $(FREETYPE_INCLUDE_PATH) -I $(TARGET_DLL_INCPATH)
 SFLAGS :=
 CCLDFLAGS := -Wl,--disable-stdcall-fixup -Wl,--subsystem,windows -lgdi32 -lcomctl32 -lwinmm
 CCLDFLAGS_MSVC :=
@@ -67,7 +67,8 @@ $(TARGET_DLL_SRCPATH)/%.o: $(TARGET_DLL_SRCPATH)/%.S
 $(TARGET_DLL): $(TARGET_DLL_OBJS)
 	$(CCLD) $(CCLDFLAGS_MSVC) -o $(TARGET_DLL_MSVC_OBJ) -r -Wl,--unique=.drectve -nostdlib $(TARGET_DLL_OBJS) -lmingwex -lgcc
 	$(DLLTOOL) -z $(TARGET_DLL:.dll=.ord.def) $(TARGET_DLL_MSVC_OBJ)
-	$(SED) -e 's/ @ [0-9][0-9]*//' $(TARGET_DLL:.dll=.ord.def) > $(TARGET_DLL:.dll=.def)
+	echo "LIBRARY $(TARGET_DLL)" > $(TARGET_DLL:.dll=.def)
+	$(SED) -e '/^;/d' -e 's/ @ [0-9][0-9]*//' $(TARGET_DLL:.dll=.ord.def) >> $(TARGET_DLL:.dll=.def)
 	$(STRIP) --strip-unneeded --remove-section=.drectve $(TARGET_DLL_MSVC_OBJ)
 	$(MSDEV) $(TARGET_DLL_MSVC_DSP) $(MSDEVFLAGS)
 

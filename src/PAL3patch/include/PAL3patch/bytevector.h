@@ -104,6 +104,9 @@ extern BVECAPI void bvec_push_ptr(struct bvec *v, void *val);
     extern BVECAPI void CONCAT4(clsname, _, tname, cpy)(struct clsname *s, const tchar *str); \
     extern BVECAPI void CONCAT4(clsname, _, tname, cat)(struct clsname *s, const tchar *str); \
     extern BVECAPI void CONCAT4(clsname, _, tname, ncat)(struct clsname *s, const tchar *str, size_t n); \
+    extern BVECAPI void CONCAT3(clsname, _, push)(struct clsname *s, const tchar *str, size_t n); \
+    extern BVECAPI void CONCAT3(clsname, _, pop)(struct clsname *s, size_t n); \
+    extern BVECAPI void CONCAT3(clsname, _, trunc)(struct clsname *s, size_t n); \
     extern BVECAPI void CONCAT3(clsname, _, pushback)(struct clsname *s, tchar c); \
     extern BVECAPI void CONCAT3(clsname, _, popback)(struct clsname *s); \
     extern BVECAPI tchar *CONCAT3(clsname, _, getbuffer)(struct clsname *s, size_t size); \

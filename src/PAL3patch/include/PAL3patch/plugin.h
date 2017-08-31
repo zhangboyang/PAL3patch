@@ -6,15 +6,19 @@ extern PATCHAPI void *patch_malloc(size_t size);
 extern PATCHAPI void patch_free(void *ptr);
 extern PATCHAPI int version_string_compare(const char *a, const char *b);
 
+
+
+#define PLUGIN_LOG_FILE "PAL3patch.plugin_log.txt"
+
 extern PATCHAPI int plugin_log_indent;
 extern PATCHAPI void plugin_plog(const char *module, int indent, const char *fmt, ...);
 extern PATCHAPI void plugin_warning(const char *module, int indent, const char *fmt, ...);
 extern PATCHAPI void plugin_fail(const char *module, int indent, const char *fmt, ...);
 
+
+
 #define PLUGIN_ENTRY_NAME pal3patch_plugin_entry
 #define DECL_PLUGINENTRY(name) int (name)(void)
-
-
 
 extern PATCHAPI void load_plugin_dll(const char *filename);
 extern PATCHAPI void load_plugin_dll_and_dependents(const char *filename);

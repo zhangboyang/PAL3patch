@@ -94,6 +94,9 @@ static int wfilename_cmp(const void *a, const void *b)
 }
 
 // enum files in given directory
+//  return value is total file count
+//   if pattern == NULL, dirpath is used as search pattern
+//   if func == NULL, no callback function will be invoked
 int enum_files(const char *dirpath, const char *pattern, void (*func)(const char *filepath, void *arg), void *arg)
 {
     int sum = 0;
@@ -109,8 +112,14 @@ int enum_files(const char *dirpath, const char *pattern, void (*func)(const char
     HANDLE hFind = INVALID_HANDLE_VALUE;
     
     // construct utf8 search pattern
-    snprintf(buf, sizeof(buf), "%s\\%s", dirpath, pattern);
-    if (strlen(buf) >= MAXLINE - 1) goto fail;
+    if (pattern) {
+        snprintf(buf, sizeof(buf), "%s\\%s", dirpath, pattern);
+        if (strlen(buf) >= MAXLINE - 1) goto fail;
+    } else {
+        if (strlen(dirpath) >= MAXLINE) goto fail;
+        strcpy(buf, dirpath);
+    }
+    
     
     // convert to unicode
     if (!utf8_filepath_to_wstr_fullpath(buf, searchpatt, MAXLINE, &searchpatt_filepart)) goto fail;

@@ -41,8 +41,6 @@ int version_string_compare(const char *a, const char *b)
 
 // plugin log system
 
-#define PLUGIN_LOG_FILE "PAL3patch.plugin_log.txt"
-
 int plugin_log_indent = 0;
 
 static void make_plugin_log_header()

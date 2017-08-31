@@ -9,4 +9,6 @@ bytevector是模仿C++中的std::vector而写的字节vector，现已加入补�
     BUG FIXED: 当bvec为空时，直接bvec_getstr()得到的不是合法的字符串（bvec_getwstr类似）
 20170829
     FEATURE: 更多函数（拷贝构造函数、strncat等）
+20170831
+    重构了字符串部分
 
