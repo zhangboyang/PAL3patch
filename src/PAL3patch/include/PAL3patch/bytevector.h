@@ -115,6 +115,10 @@ extern BVECAPI void bvec_push_ptr(struct bvec *v, void *val);
     extern BVECAPI int CONCAT3(clsname, _, format)(struct clsname *s, const tchar *fmt, ...); \
 // TEMPLATE END
 
+#define BVEC_STRING_PRIVATE_DECL(clsname, tchar, tname) \
+    extern int CONCAT3(clsname, _, vformat)(struct clsname *s, const tchar *fmt, va_list ap); \
+// TEMPLATE END
+
 BVEC_STRING_DECL(wstr, wchar_t, wcs)
 BVEC_STRING_DECL(cstr, char, str)
 
@@ -139,6 +143,9 @@ BVEC_STRING_DECL(cstr, char, str)
 #define BVEC_DEFAULT_CAPACITY 32
 #define BVEC_STRING_DEFAULT_FORMATBUFFER 256
 #endif
+
+BVEC_STRING_PRIVATE_DECL(wstr, wchar_t, wcs)
+BVEC_STRING_PRIVATE_DECL(cstr, char, str)
 
 #endif
 #endif

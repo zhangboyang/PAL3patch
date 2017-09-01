@@ -11,32 +11,36 @@ static void add_hook(int hookid, void *funcptr)
     hookfunc[hookid][nr_hooks[hookid]++] = funcptr;
 }
 
-static void run_hooks_witharg(int hookid, void *arg)
+static void run_hooks_witharg(int hookid, void *arg, int (*brkcond)(void *arg))
 {
     int i;
     for (i = 0; i < nr_hooks[hookid]; i++) {
         ((void (*)(void *)) hookfunc[hookid][i])(arg);
+        if (brkcond && brkcond(arg)) break;
     }
 }
-static void run_hooks(int hookid)
+static void run_hooks(int hookid, int (*brkcond)(void))
 {
     int i;
     for (i = 0; i < nr_hooks[hookid]; i++) {
         ((void (*)(void)) hookfunc[hookid][i])();
+        if (brkcond && brkcond()) break;
     }
 }
-static void run_hooks_reverse_witharg(int hookid, void *arg)
+static void run_hooks_reverse_witharg(int hookid, void *arg, int (*brkcond)(void *arg))
 {
     int i;
     for (i = nr_hooks[hookid] - 1; i >= 0; i--) {
         ((void (*)(void *)) hookfunc[hookid][i])(arg);
+        if (brkcond && brkcond(arg)) break;
     }
 }
-/*static void run_hooks_reverse(int hookid)
+/*static void run_hooks_reverse(int hookid, int (*brkcond)(void))
 {
     int i;
     for (i = nr_hooks[hookid] - 1; i >= 0; i--) {
         ((void (*)(void)) hookfunc[hookid][i])();
+        if (brkcond && brkcond()) break;
     }
 }*/
 
@@ -53,11 +57,11 @@ void add_postpresent_hook(void (*funcptr)(void))
 }
 void call_preendscene_hooks()
 {
-    run_hooks(HOOKID_PREENDSCENE);
+    run_hooks(HOOKID_PREENDSCENE, NULL);
 }
 void call_postpresent_hooks()
 {
-    run_hooks(HOOKID_POSTPRESENT);
+    run_hooks(HOOKID_POSTPRESENT, NULL);
 }
 static MAKE_THISCALL(void, gbGfxManager_D3D_EndScene_wrapper, struct gbGfxManager_D3D *this)
 {
@@ -79,7 +83,7 @@ void add_onlostdevice_hook(void (*funcptr)(void))
 }
 void call_onlostdevice_hooks()
 {
-    run_hooks(HOOKID_ONLOSTDEVICE);
+    run_hooks(HOOKID_ONLOSTDEVICE, NULL);
 }
 void add_onresetdevice_hook(void (*funcptr)(void))
 {
@@ -87,7 +91,7 @@ void add_onresetdevice_hook(void (*funcptr)(void))
 }
 void call_onresetdevice_hooks()
 {
-    run_hooks(HOOKID_ONRESETDEVICE);
+    run_hooks(HOOKID_ONRESETDEVICE, NULL);
 }
 
 
@@ -99,7 +103,7 @@ void add_postd3dcreate_hook(void (*funcptr)(void))
 static void PAL3_InitGFX_wrapper()
 {
     PAL3_InitGFX();
-    run_hooks(HOOKID_POSTD3DCREATE);
+    run_hooks(HOOKID_POSTD3DCREATE, NULL);
 }
 static void init_postd3dcreate_hook()
 {
@@ -125,18 +129,18 @@ static void PAL3_Create_wrapper(HINSTANCE hinst)
 {
     PAL3_Create(hinst);
     pal3_created = 1;
-    run_hooks(HOOKID_POSTPAL3CREATE);
+    run_hooks(HOOKID_POSTPAL3CREATE, NULL);
 }
 static MAKE_ASMPATCH(post_gamecreate)
 {
     // this asmpatch shall run just before outputing 'Game Create OK ...' log message
-    run_hooks(HOOKID_POSTGAMECREATE);
+    run_hooks(HOOKID_POSTGAMECREATE, NULL);
     PUSH_DWORD(0x005837E4);
 }
 static void PAL3_Destroy_wrapper()
 {
     if (pal3_created) {
-        run_hooks(HOOKID_PREPAL3DESTROY);
+        run_hooks(HOOKID_PREPAL3DESTROY, NULL);
         pal3_created = 0;
     }
     PAL3_Destroy();
@@ -164,7 +168,7 @@ void set_pauseresume(int state)
     state = !!state;
     if (pause_state != state) {
         pause_state = state;
-        run_hooks_witharg(HOOKID_GAMEPAUSERESUME, &pause_state);
+        run_hooks_witharg(HOOKID_GAMEPAUSERESUME, &pause_state, NULL);
     }
 }
 static void PAL3_Update_wrapper(float deltaTime)
@@ -182,7 +186,7 @@ static void init_pauseresume_hook()
 // atexit hook
 void call_atexit_hooks()
 {
-    run_hooks(HOOKID_ATEXIT);
+    run_hooks(HOOKID_ATEXIT, NULL);
 }
 static MAKE_ASMPATCH(atexit_normal)
 {
@@ -210,7 +214,7 @@ void add_gameloop_hook(void (*funcptr)(void *))
 void call_gameloop_hooks(int type, void *data)
 {
     struct game_loop_hook_data arg = { .type = type, .data = data };
-    run_hooks_witharg(HOOKID_GAMELOOP, &arg);
+    run_hooks_witharg(HOOKID_GAMELOOP, &arg, NULL);
 }
 static MAKE_ASMPATCH(gameloop_normal)
 {
@@ -274,7 +278,7 @@ static void init_gameloop_hook()
 static BOOL WINAPI GetCursorPos_wrapper(LPPOINT lpPoint)
 {
     BOOL ret = GetCursorPos(lpPoint);
-    if (ret) run_hooks_witharg(HOOKID_GETCURSORPOS, lpPoint);
+    if (ret) run_hooks_witharg(HOOKID_GETCURSORPOS, lpPoint, NULL);
     return ret;
 }
 void add_getcursorpos_hook(void (*funcptr)(void *))
@@ -295,7 +299,7 @@ static void init_getcursorpos_hook()
 static BOOL WINAPI SetCursorPos_wrapper(int X, int Y)
 {
     POINT pt = (POINT) { .x = X, .y = Y };
-    run_hooks_reverse_witharg(HOOKID_SETCURSORPOS, &pt);
+    run_hooks_reverse_witharg(HOOKID_SETCURSORPOS, &pt, NULL);
     return SetCursorPos(pt.x, pt.y);
 }
 void add_setcursorpos_hook(void (*funcptr)(void *))
@@ -305,6 +309,56 @@ void add_setcursorpos_hook(void (*funcptr)(void *))
 static void init_setcursorpos_hook()
 {
     make_jmp(0x00402290, SetCursorPos_wrapper);
+}
+
+
+// WndProc hooks
+
+static int wndproc_brkcond(void *arg)
+{
+    struct wndproc_hook_data *data = arg;
+    return data->processed;
+}
+static int call_wndproc_hook(int hookid, HWND *hWnd, UINT *Msg, WPARAM *wParam, LPARAM *lParam, LRESULT *retvalue)
+{
+    struct wndproc_hook_data data = {
+        .hWnd = *hWnd,
+        .Msg = *Msg,
+        .wParam = *wParam,
+        .lParam = *lParam,
+        .retvalue = *retvalue,
+        .processed = 0,
+    };
+    
+    run_hooks_witharg(hookid, &data, wndproc_brkcond);
+    
+    if (data.processed) {
+        *hWnd = data.hWnd;
+        *Msg = data.Msg;
+        *wParam = data.wParam;
+        *lParam = data.lParam;
+        *retvalue = data.retvalue;
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+void add_prewndproc_hook(void (*funcptr)(void *))
+{
+    add_hook(HOOKID_PREWNDPROC, funcptr);
+}
+int call_prewndproc_hook(HWND *hWnd, UINT *Msg, WPARAM *wParam, LPARAM *lParam, LRESULT *retvalue)
+{
+    return call_wndproc_hook(HOOKID_PREWNDPROC, hWnd, Msg, wParam, lParam, retvalue);
+}
+void add_postwndproc_hook(void (*funcptr)(void *))
+{
+    add_hook(HOOKID_POSTWNDPROC, funcptr);
+}
+int call_postwndproc_hook(HWND *hWnd, UINT *Msg, WPARAM *wParam, LPARAM *lParam, LRESULT *retvalue)
+{
+    return call_wndproc_hook(HOOKID_POSTWNDPROC, hWnd, Msg, wParam, lParam, retvalue);
 }
 
 

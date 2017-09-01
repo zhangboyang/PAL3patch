@@ -213,6 +213,7 @@ static void load_plugin_dll_with_mode(const char *filename, int mode, int type)
     newplugin->handle = hModule = LoadLibraryExW(wfilename_managed, NULL, dwFlags);
     if (!hModule) {
         pplog("error: LoadLibraryEx() failed.");
+        try_goto_desktop();
         MessageBoxW_format(NULL, wstr_pluginerr_loadfailed_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed);
         goto fail;
     }
@@ -226,6 +227,7 @@ static void load_plugin_dll_with_mode(const char *filename, int mode, int type)
         newplugin->entry = entry = TOPTR(GetProcAddress(hModule, TOSTR(PLUGIN_ENTRY_NAME)));
         if (!entry) {
             pplog("error: GetProcAddress() failed.");
+            try_goto_desktop();
             MessageBoxW_format(NULL, wstr_pluginerr_noentry_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed, TOSTR(PLUGIN_ENTRY_NAME));
             goto fail;
         }
@@ -236,6 +238,7 @@ static void load_plugin_dll_with_mode(const char *filename, int mode, int type)
         pplog_leave();
         if (r != 0) {
             pplog("error: initialization procedure returns %d.", r);
+            try_goto_desktop();
             MessageBoxW_format(NULL, wstr_pluginerr_initfailed_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed, r);
             goto fail;
         }

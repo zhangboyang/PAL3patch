@@ -20,6 +20,7 @@ extern PATCHAPI int imin(int a, int b);
 extern PATCHAPI double fbound(double x, double low, double high);
 extern PATCHAPI int fcmp(double a, double b);
 extern PATCHAPI int MessageBoxW_format(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType, ...); 
+extern PATCHAPI int MessageBoxW_utf8format(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, ...);
 extern PATCHAPI HMODULE GetModuleHandle_check(LPCSTR lpModuleName);
 extern PATCHAPI HMODULE LoadLibrary_check(LPCSTR lpFileName);
 extern PATCHAPI FARPROC GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName);

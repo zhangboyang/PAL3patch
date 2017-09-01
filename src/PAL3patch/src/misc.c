@@ -152,6 +152,23 @@ int MessageBoxW_format(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType,
     return ret;
 }
 
+int MessageBoxW_utf8format(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, ...)
+{
+    va_list ap;
+    va_start(ap, uType);
+    wchar_t *text = NULL, *caption = NULL;
+    int ret;
+    char buf[MAXLINE];
+    vsnprintf(buf, MAXLINE, lpText, ap);
+    cs2wcs_managed(buf, CP_UTF8, &text);
+    cs2wcs_managed(lpCaption, CP_UTF8, &caption);
+    ret = MessageBoxW(hWnd, text, caption, uType);
+    free(text);
+    free(caption);
+    va_end(ap);
+    return ret;
+}
+
 void NORETURN die(int status)
 {
     TerminateProcess(GetCurrentProcess(), status);

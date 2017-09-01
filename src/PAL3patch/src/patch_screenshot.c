@@ -30,8 +30,7 @@ static void screenshot_hook()
 
 
 static int screenshot_enabled = 0;
-
-// wndproc in patch_graphicspatch.c will call this function
+// this function may be called by outside functions
 int try_screenshot()
 {
     if (!screenshot_enabled) return 0;
@@ -39,8 +38,21 @@ int try_screenshot()
     return 1;
 }
 
+static void screenshot_wndproc_hook(void *arg)
+{
+    struct wndproc_hook_data *data = arg;
+    
+    if (data->Msg == WM_KEYUP && data->wParam == VK_F8) {
+        if (try_screenshot()) {
+            data->retvalue = 0;
+            data->processed = 1;
+        }
+    }
+}
+
 MAKE_PATCHSET(screenshot)
 {
     screenshot_enabled = 1;
     add_preendscene_hook(screenshot_hook);
+    add_postwndproc_hook(screenshot_wndproc_hook);
 }

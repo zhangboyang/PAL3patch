@@ -2,25 +2,6 @@
 #define PAL3PATCH_HOOK_H
 // PATCHAPI DEFINITIONS
 
-// hook framework
-#define MAX_HOOKS 100
-enum hook_type {
-    HOOKID_ATEXIT,
-    HOOKID_GAMELOOP,
-    HOOKID_GETCURSORPOS,
-    HOOKID_SETCURSORPOS,
-    HOOKID_POSTD3DCREATE,
-    HOOKID_ONLOSTDEVICE,
-    HOOKID_ONRESETDEVICE,
-    HOOKID_PREENDSCENE,
-    HOOKID_POSTPRESENT,
-    HOOKID_POSTPAL3CREATE,
-    HOOKID_POSTGAMECREATE,
-    HOOKID_PREPAL3DESTROY,
-    HOOKID_GAMEPAUSERESUME,
-    
-    MAX_HOOK_TYPES // EOF
-};
 
 // pre-EndScene and post-Present hooks
 extern PATCHAPI void add_preendscene_hook(void (*funcptr)(void));
@@ -81,8 +62,48 @@ extern PATCHAPI void add_getcursorpos_hook(void (*funcptr)(void *));
 extern PATCHAPI void add_setcursorpos_hook(void (*funcptr)(void *));
 
 
+// WndProc hook
+struct wndproc_hook_data {
+    HWND hWnd;
+    UINT Msg;
+    WPARAM wParam;
+    LPARAM lParam;
+    LRESULT retvalue;
+    int processed;
+};
+
+extern PATCHAPI void add_prewndproc_hook(void (*funcptr)(void *));
+extern PATCHAPI void add_postwndproc_hook(void (*funcptr)(void *));
+
+
 #ifdef PATCHAPI_EXPORTS
 // INTERNAL DEFINITIONS
+
+// hook framework
+#define MAX_HOOKS 100
+enum hook_type {
+    HOOKID_ATEXIT,
+    HOOKID_GAMELOOP,
+    HOOKID_GETCURSORPOS,
+    HOOKID_SETCURSORPOS,
+    HOOKID_POSTD3DCREATE,
+    HOOKID_ONLOSTDEVICE,
+    HOOKID_ONRESETDEVICE,
+    HOOKID_PREENDSCENE,
+    HOOKID_POSTPRESENT,
+    HOOKID_POSTPAL3CREATE,
+    HOOKID_POSTGAMECREATE,
+    HOOKID_PREPAL3DESTROY,
+    HOOKID_GAMEPAUSERESUME,
+    HOOKID_PREWNDPROC,
+    HOOKID_POSTWNDPROC,
+    
+    MAX_HOOK_TYPES // EOF
+};
+
+// internal uses only
+extern int call_prewndproc_hook(HWND *hWnd, UINT *Msg, WPARAM *wParam, LPARAM *lParam, LRESULT *retvalue);
+extern int call_postwndproc_hook(HWND *hWnd, UINT *Msg, WPARAM *wParam, LPARAM *lParam, LRESULT *retvalue);
 
 // init all hooks
 extern void init_hooks(void);

@@ -11,4 +11,6 @@ bytevector是模仿C++中的std::vector而写的字节vector，现已加入补�
     FEATURE: 更多函数（拷贝构造函数、strncat等）
 20170831
     重构了字符串部分
+20170901
+    修正了format()中一个由于重构导致的错误
 

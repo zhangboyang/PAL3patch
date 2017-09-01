@@ -371,12 +371,10 @@ void CONCAT3(clsname, _, discardbuffer)(struct clsname *s) \
 { \
     CONCAT3(clsname, _, clear)(s); \
 } \
-int CONCAT3(clsname, _, format)(struct clsname *s, const tchar *fmt, ...) \
+int CONCAT3(clsname, _, vformat)(struct clsname *s, const tchar *fmt, va_list ap) \
 { \
     int ret; \
     size_t size = BVEC_STRING_DEFAULT_FORMATBUFFER; \
-    va_list ap; \
-    va_start(ap, fmt); \
      \
     while (1) { \
         tchar *buf = CONCAT3(clsname, _, getbuffer)(s, size); \
@@ -390,9 +388,18 @@ int CONCAT3(clsname, _, format)(struct clsname *s, const tchar *fmt, ...) \
          \
         bvec_assert(size * 2 > size, "integer overflow"); \
         CONCAT3(clsname, _, discardbuffer)(s); \
+        size = size * 2; \
     } \
     CONCAT3(clsname, _, commitbuffer)(s); \
      \
+    return ret; \
+} \
+int CONCAT3(clsname, _, format)(struct clsname *s, const tchar *fmt, ...) \
+{ \
+    int ret; \
+    va_list ap; \
+    va_start(ap, fmt); \
+    ret = CONCAT3(clsname, _, vformat)(s, fmt, ap); \
     va_end(ap); \
     return ret; \
 } \

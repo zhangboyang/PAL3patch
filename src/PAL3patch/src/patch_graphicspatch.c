@@ -475,20 +475,22 @@ static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam,
         UnderWater_Inst()->m_bEnable ^= 1;
     }*/
 
-    // normal procdure
     if (Msg == WM_CLOSE) {
         if (!confirm_quit()) return 0;
     }
-    if (Msg == WM_KEYUP && wParam == VK_F8) {
-        if (try_screenshot()) {
-            return 0;
-        }
-    }
+
     if (Msg == WM_KEYUP && wParam == VK_F12) {
         clipcursor_enabled = !clipcursor_enabled;
         try_refresh_clipcursor();
         return 0;
     }
+    
+    // allow hooks
+    LRESULT retvalue;
+    if (call_postwndproc_hook(&hWnd, &Msg, &wParam, &lParam, &retvalue)) {
+        return retvalue;
+    }
+    
     return DefWindowProcA(hWnd, Msg, wParam, lParam);
 }
 
@@ -542,6 +544,13 @@ static LRESULT CALLBACK WndProc_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
             set_pauseresume(0);
             break;
     }
+    
+    // allow hooks
+    LRESULT retvalue;
+    if (call_prewndproc_hook(&hWnd, &Msg, &wParam, &lParam, &retvalue)) {
+        return retvalue;
+    }
+    
 
 usepal3:
     return WndProc(hWnd, Msg, wParam, lParam);
