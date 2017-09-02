@@ -41,7 +41,7 @@ void bvec_bctor(struct bvec *v, const void *data, size_t size)
 void bvec_cctor(struct bvec *v, const struct bvec *src)
 {
     bvec_ctor(v);
-    bvec_vpush(v, src);
+    bvec_cpush(v, src);
 }
 void bvec_dtor(struct bvec *v)
 {
@@ -170,7 +170,7 @@ void bvec_bpush(struct bvec *v, const void *data, size_t size)
         memcpy(PTRADD(v->begin, old_size), data, size);
     }
 }
-void bvec_vpush(struct bvec *dst, const struct bvec *src)
+void bvec_cpush(struct bvec *dst, const struct bvec *src)
 {
     bvec_dbgassert(dst != src);
     // push (append) another vector
@@ -336,6 +336,10 @@ void CONCAT3(clsname, _, pop)(struct clsname *s, size_t n) \
         CONCAT3(clsname, _, trunc)(s, new_size); \
     } \
 } \
+void CONCAT3(clsname, _, cpush)(struct clsname *dst, const struct clsname *src) \
+{ \
+    CONCAT3(clsname, _, push)(dst, CONCAT3(clsname, _, data)(src), CONCAT3(clsname, _, size)(src)); \
+} \
 void CONCAT3(clsname, _, trunc)(struct clsname *s, size_t n) \
 { \
     tchar t = 0; \
@@ -355,12 +359,17 @@ void CONCAT3(clsname, _, popback)(struct clsname *s) \
 } \
 tchar *CONCAT3(clsname, _, getbuffer)(struct clsname *s, size_t size) \
 { \
-    /* it's only vaild to call:    */ \
-    /*   commitbuffer()            */ \
-    /*   discardbuffer()           */ \
-    /*   dtor()                    */ \
-    /* after calling this function */ \
-    bvec_tresize(&s->v, size, tchar); \
+    /* get a buffer of @size tchars       */ \
+    /*   including NULL tchar             */ \
+    /* if @size == 0, size is not changed */ \
+    /*   and content is preserved         */ \
+    /* it's only vaild to call:           */ \
+    /*   commitbuffer()                   */ \
+    /*   discardbuffer()                  */ \
+    /*   dtor()                           */ \
+    /* after calling this function        */ \
+     \
+    if (size) bvec_tresize(&s->v, size, tchar); \
     return bvec_tdata(&s->v, tchar); \
 } \
 void CONCAT3(clsname, _, commitbuffer)(struct clsname *s) \
@@ -407,6 +416,29 @@ int CONCAT3(clsname, _, format)(struct clsname *s, const tchar *fmt, ...) \
 
 BVEC_STRING_IMPL(wstr, wchar_t, wcs, wprintf)
 BVEC_STRING_IMPL(cstr, char, str, printf)
+
+
+// wstr wrapper
+
+
+void wstr_cs2wcs(struct wstr *s, const char *cstr, UINT src_cp)
+{
+    wchar_t *t = cs2wcs_alloc(cstr, src_cp);
+    wstr_wcscpy(s, t);
+    free(t);
+}
+void cstr_wcs2cs(struct cstr *s, const wchar_t *wstr, UINT dst_cp)
+{
+    char *t = wcs2cs_alloc(wstr, dst_cp);
+    cstr_strcpy(s, t);
+    free(t);
+}
+void cstr_cs2cs(struct cstr *s, const char *cstr, UINT src_cp, UINT dst_cp)
+{
+    char *t = cs2cs_alloc(cstr, src_cp, dst_cp);
+    cstr_strcpy(s, t);
+    free(t);
+} 
 
 
 
@@ -485,6 +517,20 @@ void bvec_cstr_selftest()
     assert(strcmp(cstr_getstr(&v1), "123456AbCdEfGhaaa") == 0);
     cstr_trunc(&v1, 3);
     assert(strcmp(cstr_getstr(&v1), "123") == 0);
+    cstr_fclear(&v2);
+    cstr_strcpy(&v1, "abc");
+    cstr_strcpy(&v2, "");
+    cstr_strcpy(&v3, "def");
+    cstr_cpush(&v1, &v2);
+    assert(strcmp(cstr_getstr(&v1), "abc") == 0);
+    cstr_cpush(&v1, &v3);
+    assert(strcmp(cstr_getstr(&v1), "abcdef") == 0);
+    strcpy(cstr_getbuffer(&v1, 0), "123");
+    cstr_commitbuffer(&v1);
+    assert(strcmp(cstr_getstr(&v1), "123") == 0);
+    strcpy(cstr_getbuffer(&v2, 100), "123456789012345678901234567890");
+    cstr_discardbuffer(&v2);
+    assert(strcmp(cstr_getstr(&v2), "") == 0);
     cstr_dtor(&v1);
     cstr_dtor(&v2);
     cstr_dtor(&v3);
@@ -562,6 +608,20 @@ void bvec_wstr_selftest()
     assert(wcscmp(wstr_getwcs(&v1), L"123456AbCdEfGhaaa") == 0);
     wstr_trunc(&v1, 3);
     assert(wcscmp(wstr_getwcs(&v1), L"123") == 0);
+    wstr_fclear(&v2);
+    wstr_wcscpy(&v1, L"abc");
+    wstr_wcscpy(&v2, L"");
+    wstr_wcscpy(&v3, L"def");
+    wstr_cpush(&v1, &v2);
+    assert(wcscmp(wstr_getwcs(&v1), L"abc") == 0);
+    wstr_cpush(&v1, &v3);
+    assert(wcscmp(wstr_getwcs(&v1), L"abcdef") == 0);
+    wcscpy(wstr_getbuffer(&v1, 0), L"123");
+    wstr_commitbuffer(&v1);
+    assert(wcscmp(wstr_getwcs(&v1), L"123") == 0);
+    wcscpy(wstr_getbuffer(&v2, 100), L"123456789012345678901234567890");
+    wstr_discardbuffer(&v2);
+    assert(wcscmp(wstr_getwcs(&v2), L"") == 0);
     wstr_dtor(&v1);
     wstr_dtor(&v2);
     wstr_dtor(&v3);

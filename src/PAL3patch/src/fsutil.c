@@ -47,6 +47,19 @@ done:
     return ret;
 }
 
+char *get_filepart(const char *filepath)
+{
+    char *t;
+    char *filepart = (char *) filepath;
+    
+    t = strrchr(filepart, '\\');
+    if (t) filepart = t + 1;
+    t = strrchr(filepart, '/');
+    if (t) filepart = t + 1;
+    
+    return filepart;
+}
+
 int is_relpath(const char *filepath)
 {
     return !(*filepath == '\\' || (filepath[0] && filepath[1] == ':'));

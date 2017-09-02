@@ -1,0 +1,41 @@
+编译说明：
+
+  (1) 确保已经安装 tcc，也已编译 PAL3patch
+  (2) 修改 tccplugin\Makefile 将其中的
+         PAL3PATCH_HEADER_PATH
+         PAL3PATCH_LIB_PATH
+         LIBTCC_HEADER_PATH
+         LIBTCC_LIB_PATH
+      指向正确的目录
+  (3) 在 MSYS 中进入 tccplugin 目录，并运行 make
+      此后应有 tccplugin\tccplugin.dll 生成
+
+
+安装说明：
+
+  假设游戏安装在 C:\PAL3 目录下
+  则应有以下目录/文件：
+
+    C:\PAL3\plugins\tcc.plugin                // TCC 插件描述文件；来自 files\tcc.plugin
+    C:\PAL3\plugins\tcc\tccplugin.dll         // TCC 插件 DLL；来自刚编译好的 tccplugin\tccplugin.dll
+    C:\PAL3\plugins\tcc\init.c                // TCC 初始化源码；来自 files\init.c
+    C:\PAL3\plugins\tcc\compile.bat           // 编译工具；来自 files\compile.bat
+    C:\PAL3\plugins\tcc\to_utf8.c             // UTF-8 转码工具；来自 files\to_utf8.c
+    C:\PAL3\plugins\tcc\*                     // TCC 安装目录下的其他文件
+    C:\PAL3\plugins\tcc\lib\libtcc.def        // libtcc 库文件；来自 TCC 安装目录\libtcc\libtcc.def
+    C:\PAL3\plugins\tcc\include\PAL3patch.h   // PAL3patch 头文件
+    C:\PAL3\plugins\tcc\include\PAL3patch\*   // PAL3patch 头文件
+    C:\PAL3\plugins\tcc\lib\PAL3patch.def     // PAL3patch 库文件
+    C:\PAL3\plugins\tcc\include\tccplugin.h   // tccplugin 头文件；来自 tccplugin\tccplugin.h
+    C:\PAL3\plugins\tcc\lib\tccplugin.def     // tccplugin 库文件；来自生成的 tccplugin\tccplugin.def
+
+
+使用说明：
+
+  将 C 源代码形式的插件放入 plugins 下即可，TCC 插件会自动寻找并加载。
+  若想将 C 源代码形式的插件编译为 DLL 形式，将 C 源代码文件拖放到 compile.bat 上即可。
+
+
+注意：
+
+  TCC 须采用修复 fastcall 和支持 UTF-8 的版本，否则会出现问题。

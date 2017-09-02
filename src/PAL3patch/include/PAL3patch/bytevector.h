@@ -45,8 +45,8 @@ extern BVECAPI void bvec_shrink(struct bvec *v);
 extern BVECAPI void bvec_breserve(struct bvec *v, size_t size);
 extern BVECAPI void bvec_bresize(struct bvec *v, size_t size);
 extern BVECAPI void bvec_bpush(struct bvec *v, const void *data, size_t size);
-extern BVECAPI void bvec_vpush(struct bvec *dst, const struct bvec *src);
-extern BVECAPI void bvec_bpop(struct bvec *dst, size_t size);
+extern BVECAPI void bvec_cpush(struct bvec *dst, const struct bvec *src);
+extern BVECAPI void bvec_bpop(struct bvec *v, size_t size);
 
 // typed helper
 
@@ -106,6 +106,7 @@ extern BVECAPI void bvec_push_ptr(struct bvec *v, void *val);
     extern BVECAPI void CONCAT4(clsname, _, tname, ncat)(struct clsname *s, const tchar *str, size_t n); \
     extern BVECAPI void CONCAT3(clsname, _, push)(struct clsname *s, const tchar *str, size_t n); \
     extern BVECAPI void CONCAT3(clsname, _, pop)(struct clsname *s, size_t n); \
+    extern BVECAPI void CONCAT3(clsname, _, cpush)(struct clsname *dst, const struct clsname *src); \
     extern BVECAPI void CONCAT3(clsname, _, trunc)(struct clsname *s, size_t n); \
     extern BVECAPI void CONCAT3(clsname, _, pushback)(struct clsname *s, tchar c); \
     extern BVECAPI void CONCAT3(clsname, _, popback)(struct clsname *s); \
@@ -131,6 +132,11 @@ BVEC_STRING_DECL(cstr, char, str)
 #define cstr_back(s) (*(cstr_end(s) - 1))
 
 
+// wstr wrapper
+
+extern BVECAPI void wstr_cs2wcs(struct wstr *s, const char *cstr, UINT src_cp);
+extern BVECAPI void cstr_wcs2cs(struct cstr *s, const wchar_t *wstr, UINT src_cp);
+extern BVECAPI void cstr_cs2cs(struct cstr *s, const char *cstr, UINT src_cp, UINT dst_cp);
 
 
 #ifdef PATCHAPI_EXPORTS
