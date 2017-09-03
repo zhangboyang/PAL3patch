@@ -1,17 +1,15 @@
 #include "common.h"
 
 static DWORD timeOffset;
-static DWORD (WINAPI *Real_timeGetTime)(VOID);
 static DWORD WINAPI My_timeGetTime(VOID)
 {
-    return Real_timeGetTime() - timeOffset;
+    return timeGetTime() - timeOffset;
 }
 
 static LARGE_INTEGER countOffset;
-static BOOL (WINAPI *Real_QueryPerformanceCounter)(LARGE_INTEGER *lpPerformanceCount);
 static BOOL WINAPI My_QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 {
-    BOOL ret = Real_QueryPerformanceCounter(lpPerformanceCount);
+    BOOL ret = QueryPerformanceCounter(lpPerformanceCount);
     if (ret) {
         lpPerformanceCount->QuadPart -= countOffset.QuadPart;
     }
@@ -27,9 +25,9 @@ MAKE_PATCHSET(relativetimer)
     }
     
     // hook timeGetTime
-    Real_timeGetTime = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "WINMM.DLL", "timeGetTime", My_timeGetTime);
-    hook_import_table(GetModuleHandle(NULL), "WINMM.DLL", "timeGetTime", My_timeGetTime);
+    make_pointer(0x0056A1C0, My_timeGetTime);
+    make_pointer(gboffset + 0x100F5228, My_timeGetTime);
     
     // hook QueryPerformanceCounter
-    Real_QueryPerformanceCounter = hook_import_table(GetModuleHandle("GBENGINE.DLL"), "KERNEL32.DLL", "QueryPerformanceCounter", My_QueryPerformanceCounter);
+    make_pointer(gboffset + 0x100F507C, My_QueryPerformanceCounter);
 }
