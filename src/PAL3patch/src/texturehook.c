@@ -86,7 +86,7 @@ static void (*texhooks[MAX_TEXTURE_HOOKS])(struct texture_hook_info *);
 
 void add_texture_hook(void (*funcptr)(struct texture_hook_info *))
 {
-    if (nr_texhooks > MAX_TEXTURE_HOOKS) fail("too many texture hooks.");
+    if (nr_texhooks >= MAX_TEXTURE_HOOKS) fail("too many texture hooks.");
     texhooks[nr_texhooks++] = funcptr;
 }
 static void run_texture_hooks(struct texture_hook_info *thinfo)

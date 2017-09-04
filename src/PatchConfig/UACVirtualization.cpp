@@ -14,8 +14,8 @@ static int SetUACVirtualization(BOOL enabled)
 	DWORD dwVal = enabled ? 1 : 0;
 	int ret = 0;
 
-	if (SUCCEEDED(MyOpenProcessToken(GetCurrentProcess(), MAXIMUM_ALLOWED, &token))) {
-		if (SUCCEEDED(MySetTokenInformation(token, MyTokenVirtualizationEnabled, &dwVal, sizeof(dwVal)))) {
+	if (MyOpenProcessToken(GetCurrentProcess(), MAXIMUM_ALLOWED, &token)) {
+		if (MySetTokenInformation(token, MyTokenVirtualizationEnabled, &dwVal, sizeof(dwVal))) {
 			ret = 1;
 		}
 		CloseHandle(token);
