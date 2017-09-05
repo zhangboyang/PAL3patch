@@ -11,7 +11,7 @@ extern PATCHAPI void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color);
 extern PATCHAPI void set_d3dxfont_matrices(IDirect3DDevice9 *pd3dDevice);
 
 
-#ifndef NO_PAL3_DEFINITIONS
+#ifdef USE_PAL3_DEFINITIONS
 
 // types
 

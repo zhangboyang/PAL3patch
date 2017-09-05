@@ -32,10 +32,6 @@ extern PATCHAPI void search_plugins(const char *dirpath);
 #ifdef PATCHAPI_IMPORTS
 // DEFINITIONS FOR PLUGINS
 
-#ifndef PLUGIN_NAME
-#define PLUGIN_NAME __FILE__
-#endif
-
 #define PLUGINAPI __declspec(dllexport)
 #define MAKE_PLUGINENTRY() PLUGINAPI DECL_PLUGINENTRY(PLUGIN_ENTRY_NAME)
 extern MAKE_PLUGINENTRY();
@@ -48,6 +44,29 @@ extern MAKE_PLUGINENTRY();
 #define fail(fmt, ...) plugin_fail(PLUGIN_NAME, LOG_INDENT_VAR, fmt, ##__VA_ARGS__)
 #define warning(fmt, ...) plugin_warning(PLUGIN_NAME, LOG_INDENT_VAR, fmt, ##__VA_ARGS__)
 #define plog(fmt, ...) plugin_plog(PLUGIN_NAME, LOG_INDENT_VAR, fmt, ##__VA_ARGS__)
+#else
+#if defined(_MSC_VER)
+
+#define MAKE_PLUGINLOG_ASM_WRAPPER(newname, oldname) \
+__declspec(naked) static void newname(const char *fmt, ...) \
+{ \
+    static unsigned retaddr; \
+    static const char *plugin_name = PLUGIN_NAME; \
+    __asm { \
+        __asm POP retaddr \
+        __asm MOV EAX, DWORD PTR [LOG_INDENT_VAR] \
+        __asm PUSH DWORD PTR [EAX] \
+        __asm PUSH plugin_name \
+        __asm CALL DWORD PTR [oldname] \
+        __asm ADD ESP, 8 \
+        __asm JMP retaddr \
+    } \
+}
+MAKE_PLUGINLOG_ASM_WRAPPER(fail, plugin_fail)
+MAKE_PLUGINLOG_ASM_WRAPPER(warning, plugin_warning)
+MAKE_PLUGINLOG_ASM_WRAPPER(plog, plugin_plog)
+
+#endif
 #endif
 
 #endif

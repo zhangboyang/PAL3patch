@@ -13,18 +13,19 @@
 //
 
 
-// OPTION MACROS:
+// OPTIONAL MACROS:
 //
 //    PLUGIN_NAME                :   name of current compiling plugin
 //
 //    NO_VARIADIC_MACROS         :   no C99 variadic macros
-//    NO_PAL3_DEFINITIONS        :   no PAL3 types and definitions
+//    USE_PAL3_DEFINITIONS       :   use patch's PAL3 types and definitions
 //
 
 // USEFUL MACROS:
 //
 //    MAKE_PLUGINENTRY()         :   declare plugin entry
 //    PAL3_STRUCT_SELFCHECK()    :   run self check on struct definitions
+//                                   (must define USE_PAL3_DEFINITIONS first)
 //
 
 
@@ -33,13 +34,19 @@
 #define NO_VARIADIC_MACROS
 #endif
 
-#ifdef NO_VARIADIC_MACROS
-#define NO_PAL3_DEFINITIONS
-#endif
-
 
 // mark we are 'importing' symbols
 #define PATCHAPI_IMPORTS
+
+
+// define PLUGIN_NAME if needed
+#ifndef PLUGIN_NAME
+#ifdef TCCPLUGIN_FILE
+#define PLUGIN_NAME TCCPLUGIN_FILE
+#else
+#define PLUGIN_NAME __FILE__
+#endif
+#endif
 
 
 // finally, include "common.h"

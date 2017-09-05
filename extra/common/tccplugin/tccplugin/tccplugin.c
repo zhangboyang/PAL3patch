@@ -1,4 +1,5 @@
 #define PLUGIN_NAME "TCC"
+#define USE_PAL3_DEFINITIONS
 #include "PAL3patch.h"
 #define TCCPLUGINAPI_EXPORTS
 #include "tccplugin.h"
@@ -204,6 +205,8 @@ int cpi_run(struct cpi *self, const char *entryname)
     self->entry = tcc_get_symbol(self->tcc, entryname);
     if (!self->entry) {
         plog("no such symbol: %s", entryname);
+        try_goto_desktop();
+        MessageBoxW_utf8format(NULL, "已编译和链接：\n\n%s\n但未找到入口函数 %s()。", TCCPLUGIN_MSGBOX_TITLE, MB_ICONWARNING, cstr_getstr(&self->srclist), entryname);
         goto fail;
     }
     
@@ -229,7 +232,9 @@ fail:
 
 void cpi_make_persist(struct cpi *self)
 {
-    self->runmem = NULL;
+    if (!self->err_flag) {
+        self->runmem = NULL;
+    }
 }
 
 void cpi_try_dump_tccmsg(struct cpi *self)
@@ -260,6 +265,11 @@ int run_c_program(const char *filepath, const char *entrysymbol, int persist)
     log_enter();
     int ret;
     struct cpi s; cpi_ctor(&s);
+    struct cstr filepart_string; cstr_ctor(&filepart_string);
+    
+    cstr_format(&filepart_string, "\"%s\"", get_filepart(filepath));
+    tcc_define_symbol(s.tcc, "TCCPLUGIN_FILE", cstr_getstr(&filepart_string));
+    
     cpi_add_c_source(&s, filepath);
     cpi_link(&s);
     cpi_run(&s, entrysymbol);
@@ -272,6 +282,7 @@ int run_c_program(const char *filepath, const char *entrysymbol, int persist)
     }
     if (persist) cpi_make_persist(&s);
     cpi_dtor(&s);
+    cstr_dtor(&filepart_string);
     log_leave();
     return ret;
 }
@@ -282,6 +293,7 @@ static void load_cplugin(const char *filepath, void *filelist)
     if (run_c_program(filepath, TOSTR(PLUGIN_ENTRY_NAME), 1)) {
         if (filelist) {
             cstr_strcat(filelist, strrchr(filepath, '\\') ? strrchr(filepath, '\\') + 1 : filepath);
+            cstr_strcat(filelist, "\n");
         }
     }
 }

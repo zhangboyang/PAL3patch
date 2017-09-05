@@ -12,6 +12,9 @@
 //
 
 
+// patch version
+#define PATCH_VERSION          10600
+#define PATCH_VERSION_STRING "v1.6"
 
 
 
@@ -98,7 +101,11 @@
 
 #ifdef PATCHAPI_EXPORTS
 
+// internal macros
+#define USE_PAL3_DEFINITIONS
 
+
+// linker configuration
 #if defined(_MSC_VER)
 #if _MSC_VER < 1800
 #error require MSVC++ 2013 or higher
@@ -256,7 +263,7 @@
 #endif
 
 
-#if !defined(NO_PAL3_DEFINITIONS) && !defined(__cplusplus)
+#if defined(USE_PAL3_DEFINITIONS) && !defined(__cplusplus)
 // bool
 typedef unsigned char bool;
 #define true 1

@@ -1,4 +1,5 @@
 #define PLUGIN_NAME "TCC"
+#define USE_PAL3_DEFINITIONS
 #include "PAL3patch.h"
 #define USE_TCCPLUGIN_DEFINITIONS
 #include "tccplugin.h"

@@ -8,7 +8,7 @@
 #define BUILD_COMPILER "unknown C compiler"
 #endif
 
-const char patch_version[] = "v1.6";
+const char patch_version[] = PATCH_VERSION_STRING;
 const char build_date[] = __DATE__ ", " __TIME__;
 const char build_compiler[] = BUILD_COMPILER;
 
