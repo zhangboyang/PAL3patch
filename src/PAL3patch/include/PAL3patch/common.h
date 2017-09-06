@@ -222,6 +222,7 @@
 #include <time.h>
 #include <limits.h>
 #include <assert.h>
+#include <io.h>
 
 // windows headers
 #include <windows.h>

@@ -14,6 +14,9 @@ const char *pFileHash[] = {
 	"GBENGINE.DLL",      "ead9bba8ce18fb68f111c1cb1edbf30ddb78b367",
 	"PAL3UNPACK.DLL",    "7b04cded42cd388f7e4493fa8588c885dc6e3d4b",
 
+	// PAL3patch files
+	// ADD_SHA1_HERE
+
 	// MSS32 version 6.1c
 	"Mss32.dll",                  "2ee3fffdb4a5c4b9c7da106f07506d0d1685b395",
 	"miles\\win32\\Autopan.flt",  "c30199ee9a8ca918c19afbd440ce8370d1295523",
@@ -54,6 +57,5 @@ const char *pFileHash[] = {
 	"miles\\win32\\Shelfeq.flt",  "4ea2aabdd630e47fdaa804a2a10398f0a3f8c4f8",
 
 #endif
-	// EOF
-	NULL,
+	NULL // EOF
 };

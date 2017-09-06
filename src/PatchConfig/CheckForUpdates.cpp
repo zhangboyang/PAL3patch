@@ -2,7 +2,7 @@
 
 void CheckForUpdates(CPatchConfigDlg *dlg)
 {
-#define MAXRESPONSE 32768
+#define MAXRESPONSE (256 * 1024)
 
 #if defined(_MBCS)
 	static char *msg_a = NULL;
