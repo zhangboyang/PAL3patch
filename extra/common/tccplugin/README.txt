@@ -22,12 +22,15 @@
     C:\PAL3\plugins\tcc\compile.bat           // 编译工具；来自 files\compile.bat
     C:\PAL3\plugins\tcc\to_utf8.c             // UTF-8 转码工具；来自 files\to_utf8.c
     C:\PAL3\plugins\tcc\*                     // TCC 安装目录下的其他文件
-    C:\PAL3\plugins\tcc\lib\libtcc.def        // libtcc 库文件；来自 TCC 安装目录\libtcc\libtcc.def
+    C:\PAL3\plugins\tcc\include\libtcc.def    // libtcc 头文件；来自 TCC 安装目录下 libtcc\libtcc.h
+    C:\PAL3\plugins\tcc\lib\libtcc.def        // libtcc 库文件；来自 TCC 安装目录下 libtcc\libtcc.def
     C:\PAL3\plugins\tcc\include\PAL3patch.h   // PAL3patch 头文件
     C:\PAL3\plugins\tcc\include\PAL3patch\*   // PAL3patch 头文件
     C:\PAL3\plugins\tcc\lib\PAL3patch.def     // PAL3patch 库文件
     C:\PAL3\plugins\tcc\include\tccplugin.h   // tccplugin 头文件；来自 tccplugin\tccplugin.h
     C:\PAL3\plugins\tcc\lib\tccplugin.def     // tccplugin 库文件；来自生成的 tccplugin\tccplugin.def
+
+  另外还需按照 tcc 的说明，将适当的 winapi 头文件安装到 include/winapi 目录下。
 
 
 使用说明：

@@ -156,5 +156,7 @@ ABANDONED: 用AlphaBlend代替AlphaTest获得更好的透明效果（这几乎�
 用 mingw-gcc 编译时，有可能因为缺少 iconv 而导致编译失败（见notes20170408.txt）
 用 gcc 编译时，因为 freetype 头文件中有非 ascii 字符，有可能因为 -finput-charset=cp936 选项而导致编译失败（见notes20170423.txt）
 全屏幕模式运行的游戏可能会导致 Windows 10 的夜灯模式失效（应该是夜灯模式本身的问题）
-TCC 的 fastcall 调用约定是调用者将参数从栈上弹出而不是被调用者弹参（见notes20170827.txt）
+TCC 编译器的 fastcall 调用约定是调用者将参数从栈上弹出而不是被调用者弹参（见notes20170827.txt）
+TCC 编译器在遇到宽字符串字面值中有宽字符时，会直接按字节转换为wchar_t（见notes20170904.txt）
+TCC 编译器当编译 DLL 时，在遇到直接将数字常量转换为函数指针的时候，生成的调用指令不正确。
 

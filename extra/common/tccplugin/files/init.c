@@ -1,4 +1,4 @@
-#define PLUGIN_NAME "TCC"
+О╩©#define PLUGIN_NAME "TCC"
 #define USE_PAL3_DEFINITIONS
 #include "PAL3patch.h"
 #define USE_TCCPLUGIN_DEFINITIONS
@@ -7,6 +7,7 @@
 int tccplugin_main()
 {
     PAL3_STRUCT_SELFCHECK();
+    
     struct cstr filelist;
     cstr_ctor(&filelist);
     
@@ -15,9 +16,9 @@ int tccplugin_main()
     search_cplugins("plugins", &filelist);
     
     if (!cstr_empty(&filelist)) {
-        MessageBoxW_utf8format(NULL, "ря╪стьртоб C сОятнд╪Чё╨\n\n%s", TCCPLUGIN_MSGBOX_TITLE, MB_ICONINFORMATION, cstr_getstr(&filelist));
+        MessageBoxW_utf8format(NULL, "Е╥╡Е┼═Х╫╫Д╩╔Д╦▀ C Х╞╜Х╗─Ф√┤Д╩╤О╪ \n\n%s", TCCPLUGIN_MSGBOX_TITLE, MB_ICONINFORMATION, cstr_getstr(&filelist));
     } else {
-        MessageBoxW_utf8format(NULL, "ц╩сп©и╧╘╪сть╣д C сОятнд╪Ч║ё", TCCPLUGIN_MSGBOX_TITLE, MB_ICONINFORMATION);
+        MessageBoxW_utf8format(NULL, "Ф╡║Ф°┴Е▐╞Д╬⌡Е┼═Х╫╫Г └ C Х╞╜Х╗─Ф√┤Д╩╤Ц─┌", TCCPLUGIN_MSGBOX_TITLE, MB_ICONINFORMATION);
     }
     
     cstr_dtor(&filelist);
