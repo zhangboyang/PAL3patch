@@ -41,4 +41,4 @@
 
 注意：
 
-  TCC 须采用修复 fastcall 和支持 UTF-8 的版本，否则会出现问题。
+  TCC 须采用修复 fastcall、支持 UTF-8、修正常数 call 的版本，否则会出现问题。

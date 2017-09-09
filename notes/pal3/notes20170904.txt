@@ -6,6 +6,7 @@ TCC的相关代码与说明在extra/common/tccplugin目录下
 注意：TCC需要打补丁才能拿来编译tccplugin
 一个补丁是fastcall弹栈补丁——修正fastcall调用约定
 另一个是utf-8补丁——修正宽字符串字面值的处理
+还有一个补丁是修复DLL中常数强转函数指针后调用出错的问题
 目前正在努力把这两个补丁合入TCC主线
 
 
