@@ -1,4 +1,4 @@
-LIBRARY
+LIBRARY d3dx9_9.dll
 
 EXPORTS
 	D3DXAssembleShader

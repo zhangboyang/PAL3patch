@@ -1,8 +1,8 @@
-PAL3PATCH_HEADER_PATH := /c/src/PAL3patch/PAL3patch/include
+PAL3PATCH_INCLUDE_PATH := /c/src/PAL3patch/PAL3patch/include
 
 
 CC := gcc
-CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=cp936 -fexec-charset=cp936 -fms-extensions -fno-strict-aliasing -falign-functions -mfpmath=387 -I $(PAL3PATCH_HEADER_PATH)
+CFLAGS := -O0 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=GB18030 -fexec-charset=UTF-8 -fwide-exec-charset=UTF-16LE -fms-extensions -fno-strict-aliasing -falign-functions -mfpmath=387 -I $(PAL3PATCH_INCLUDE_PATH)
 
 
 MSDEV := msdev

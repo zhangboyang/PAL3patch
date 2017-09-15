@@ -1,3 +1,4 @@
+#define USE_PAL3_DEFINITIONS
 #define PLUGIN_NAME "PAL3VOICE"
 #include "PAL3patch.h"
 
