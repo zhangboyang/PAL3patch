@@ -1,0 +1,48 @@
+【PAL3A的编译器和编译选项】
+经检查 rich signature 可以知道 PAL3A.EXE 及 GBENGINE.DLL 是用 VC6 SP6 编译的。
+因此生成用于bindiff的IDB的 PAL3.EXE 要用相同的编译器和编译选项。
+
+相似度指标： Bindiff 结果中 statistics 页给出的 similarity 值
+
+编译选项的测定：
+  观察到以下现象：
+    非叶节点的函数有明显的 PUSH EBP; MOV EBP, ESP; ....; LEAVE
+    使用函数版本的memset/memcpy...而不是内联的版本
+    函数内容看起来经过了优化
+    选择Global Optimizations 和 Favor Small Code 后相似度大幅增加
+  经过多次实验，得到以下结论：
+    C/C++ -> Category: Optimizations -> Optimization: Minimize Size
+    C/C++ -> Category: Optimizations -> Inline function expansion: Any Suitable
+    最终（高）相似度：0.662899；此时观察流程图可基本确定差异是由“真的差异”造成的（而不是编译选项造成的）
+
+至于为何是 Minimize Size 而不是 Maximize Speed，我认为是程序员手滑造成的，应该不是故意为之的。
+
+Bindiff 导入符号时的参数为 co:0.90 si:0.90
+
+此外我发现，之前为PAL3 Bindiff用而编译的PAL3.EXE 没有设置 inline: Any Suitable
+不过问题不大，因为PAL3的补丁已经做完了
+
+
+
+【PAL3Apatch 代码框架】
+是直接复制PAL3patch的代码然后在上面修改
+现在 src 目录下有一个临时性质的文件夹：CANDIDATE
+ 其中存放的是从PAL3patch拷贝过来的、尚末针对PAL3A修改的代码（它们不参与编译）
+还有一个临时性质的 C 文件：STUB.c
+ 其中有几个桩函数（为了能编译与 CANDIDATE 内代码耦合紧密的部分）
+
+转移代码时一定要注意修改其中的地址！有用的命令：
+ grep -E '0x(10|00)' *.c
+
+
+
+【免CD补丁: cdpatch】
+与PAL3不同的是，CD4的数据是存放在x:\PAL3A目录下的
+光盘内容如下：
+ X:\PAL3A\MOVIE\MOVIE.CPK
+ X:\PAL3A\MUSIC\MUSIC.CPK （貌似废弃了，程序内没有用到）
+通过逆向可以知道，影片路径是通过sprintf("%sPAL3A\\%s", CD_DRIVER, xxx)生成的
+程序内也有其它CPK可以放到光盘内
+
+待测：各个游戏平台的MOVIE.CPK位置
+

@@ -13,7 +13,6 @@ extern PATCHAPI HINSTANCE patch_hinstDLL;
 
 #define EXTERNAL_UNPACKER "PAL3unpack.dll"
 #define EXTERNAL_UNPACKER_FIXED "PAL3unpack_fixed.dll"
-extern const char *unpacker_module_name;
 
 
 #define PAL3_KERNEL32_IATBASE TOPTR(0x0056A024)
