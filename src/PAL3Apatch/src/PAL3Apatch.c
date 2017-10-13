@@ -66,8 +66,8 @@ static void init_stage2()
     init_memory_allocators();
     
     // init hook framework
+    init_hooks();
 // FIXME
-//    init_hooks();
 //    init_effect_hooks();
 //    init_texture_hooks();
     
@@ -85,27 +85,29 @@ static void init_stage2()
     INIT_PATCHSET(console);
     INIT_PATCHSET(relativetimer);
     INIT_PATCHSET(audiofreq);
+    INIT_PATCHSET(showfps);
+    INIT_PATCHSET(timerresolution);
+    INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
+    INIT_PATCHSET(terminateatexit);
+    INIT_PATCHSET(preciseresmgr);
+    INIT_PATCHSET(nocpk);
+    INIT_PATCHSET(testcombat);
+    
+    if (1) { // FIXME: graphicspatch
+        
+        INIT_PATCHSET(screenshot); // should after as many patches as possible
+    }
+    
     
 /* // FIXME
-    INIT_PATCHSET(disablekbdhook);
-    INIT_PATCHSET(terminateatexit);
-    INIT_PATCHSET(timerresolution);
-    INIT_PATCHSET(fixmemfree);
-    INIT_PATCHSET(nocpk);
-    
+
     INIT_PATCHSET(kahantimer);
     INIT_PATCHSET(fixlongkuiattack);
     INIT_PATCHSET(fixattacksequen);
     INIT_PATCHSET(fixhockshopbuy);
     INIT_PATCHSET(kfspeed);
     INIT_PATCHSET(fixacquire);
-    INIT_PATCHSET(preciseresmgr);
-    
-    INIT_PATCHSET(showfps);
-    INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
-    
-    INIT_PATCHSET(testcombat);
-    INIT_PATCHSET(reginstalldir);
+
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch

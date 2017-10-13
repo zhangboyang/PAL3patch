@@ -12,8 +12,8 @@ static void NORETURN do_exit()
 MAKE_PATCHSET(terminateatexit)
 {
     // replace PAL3::Destroy
-    make_jmp(0x00406230, do_exit);
+    make_jmp(0x00407C9D, do_exit);
     
     // terminate after WinMain returns
-    make_call(0x0055514A, do_exit);
+    make_call(0x0054328E, do_exit);
 }

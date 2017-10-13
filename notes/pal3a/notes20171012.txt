@@ -1,0 +1,27 @@
+【PAL3A的GBENGINE的编译器和编译选项】
+对比rich signature可发现是VC6SP6生成的
+之前测定过SDK是dx90bsdk.exe
+
+编译选项有点难测：
+  观察到以下现象：
+    几乎所有函数都有明显的 PUSH EBP; MOV EBP, ESP; ....; MOV ESP, EBP; POP EBP; RET
+      （变化在于 1.不仅是非叶节点了 2. LEAVE变为MOV ESP, EBP; POP EBP）
+      => /Oy-
+    使用内联的版本memset/strlen等，而不是调用函数版本的memset/memcpy
+      => generate intrinsic functions
+    函数内容看起来经过了优化
+      => global optimizations & favour fast code
+    内联既不是disable也不是always
+      => only __inline
+    静态链接的LIBC应该是 single threaded
+
+  经过多次实验，得到以下结论：
+    C/C++ -> Category: Code Generation -> Use runtime-library: Single-Threaded
+    C/C++ -> Category: Optimizations -> Optimization: Maximize Speed
+    C/C++ -> Category: Optimizations -> Inline function expansion: Only __inline
+    C/C++ -> Project Options: 在 /O2 后加 /Oy-
+    
+  此编译参数下，Bindiff 结果中 statistics 页给出的 similarity 值为 0.424908
+    但此时绝大多数函数都完全相同了。看来，similarity也有不靠谱的时候啊
+
+

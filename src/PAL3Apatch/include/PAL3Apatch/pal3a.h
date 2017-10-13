@@ -198,8 +198,22 @@ struct gbDynArray_pgbResource {
     int CurNum;
 };
 
+
+struct gbRefObject {
+    struct gbRefObjectVtbl *vfptr;
+    int RefCount;
+};
+
+struct gbResource {
+    struct gbRefObject;
+    char *pName;
+    unsigned int NameCrc32;
+    int IsLoaded;
+    struct gbResManager *pMgr;
+};
+
 struct gbResManager {
-    struct gbDynArray_pgbResource AllResPt;
+    struct gbDynArray_pgbResource;
 };
 
 struct CD3DSettings {
@@ -331,6 +345,42 @@ struct CPKTable {
     unsigned int dwExtraInfoSize;
 };
 
+
+enum ECPKMode {
+    CPKM_Null = 0x0,
+    CPKM_Normal = 0x1,
+    CPKM_FileMapping = 0x2,
+    CPKM_Overlapped = 0x3,
+    CPKM_End = 0x4,
+};
+
+#define tagCPKHeader CPKHeader
+#define tagCPKTable CPKTable
+
+struct CPK {
+    unsigned int m_dwAllocGranularity;
+    enum ECPKMode m_eMode;
+    struct tagCPKHeader m_CPKHeader;
+    struct tagCPKTable m_CPKTable[32768];
+    struct gbVFile *m_pgbVFile[8];
+    bool m_bLoaded;
+    unsigned int m_dwCPKHandle;
+    unsigned int m_dwCPKMappingHandle;
+    char m_szCPKFileName[260];
+    int m_nOpenedFileNum;
+};
+
+struct gbBinkVideo {
+    struct gbBinkVideoVtbl *vfptr;
+    struct tagPOINT m_pos;
+    struct BINK *m_hBink;
+    struct CPK m_Cpk;
+    struct CPK m_Cpk2;
+};
+
+
+
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -343,16 +393,25 @@ struct CPKTable {
 #define pUIWND(x) ((struct UIWnd *)(x))
 #define gbmalloc ((malloc_funcptr_t) (gboffset + 0x100C5C87))
 #define gbfree ((free_funcptr_t) (gboffset + 0x100C5D39))
+#define gbGfxManager_D3D_EndScene(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100188E0, void, struct gbGfxManager_D3D *), this)
+#define gbCrc32Compute ((unsigned (*)(const char *)) TOPTR(gboffset + 0x10026710))
 
 
 // PAL3A functions
 #define pal3amalloc ((malloc_funcptr_t) TOPTR(0x00541A65))
 #define pal3afree ((free_funcptr_t) TOPTR(0x005404C9))
 #define PrepareDir ((int (*)(void)) TOPTR(0x00523059))
+#define PAL3_InitGFX ((void (*)(void)) TOPTR(0x00406F01))
+#define PAL3_Create ((void (*)(HINSTANCE)) TOPTR(0x0040673A))
+#define PAL3_Destroy ((void (*)(void)) TOPTR(0x00407C9D))
+#define PAL3_Update ((void (*)(double)) TOPTR(0x004073B0))
+#define gbBinkVideo_SFLB_OpenFile(this, szFileName, hWnd, bChangeScreenMode, nOpenFlag) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005254C0, int, struct gbBinkVideo *, const char *, HWND, int, int), this, szFileName, hWnd, bChangeScreenMode, nOpenFlag)
+#define gbBinkVideo_DoModal(this, bCanSkip) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00525382, int, struct gbBinkVideo *, int), this, bCanSkip)
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) TOPTR(0x00C01CD4))
 #define PAL3_s_drvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00C01788))
+#define PAL3_s_flag (*(unsigned *) TOPTR(0x00574D38))
 
 
 
@@ -373,6 +432,8 @@ struct CPKTable {
     assert(sizeof(struct CD3DEnumeration) == 0x2C); \
     assert(sizeof(struct D3DDriverBug) == 0x4); \
     assert(sizeof(struct gbDynArray_pgbResource) == 0xC); \
+    assert(sizeof(struct gbRefObject) == 0x8); \
+    assert(sizeof(struct gbResource) == 0x18); \
     assert(sizeof(struct gbResManager) == 0xC); \
     assert(sizeof(struct CD3DSettings) == 0x6C); \
     assert(sizeof(struct gbGfxDriverInfo) == 0xB8); \
@@ -381,9 +442,9 @@ struct CPKTable {
     assert(sizeof(struct gbUIQuad) == 0x28); \
     assert(sizeof(struct CPKHeader) == 0x80); \
     assert(sizeof(struct CPKTable) == 0x1C); \
+    assert(sizeof(struct CPK) == 0xE01BC); \
+    assert(sizeof(struct gbBinkVideo) == 0x1C0388); \
 } while (0)
-
-
 
 
 #endif

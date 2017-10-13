@@ -1,0 +1,13 @@
+【导入PDB后，一次性导入所有direct3d的结构体的方法】
+用File->Load File->Parse C Header去导入SDK中的d3d9.h
+也许需要对header进行修改
+
+【IDA Pro 导出的 C Header 貌似会搞混 unsigned char 和 char】
+例如BYTE和bool都是unsigned char
+但在导出的结果中都是char
+所以在复制IDA导出的定义时，如果有char的话，尽量与源代码比对复核一下
+
+【PAL3A的scene目录下的scn.cpk和sce.cpk应直接解包到scene目录下】
+nocpk补丁打上后实验说明：
+scn.cpk和sce.cpk应直接解包到scene目录下，不用再建立子目录了
+

@@ -71,7 +71,7 @@ static MAKE_THISCALL(void, gbGfxManager_D3D_EndScene_wrapper, struct gbGfxManage
 }
 static void init_preendscene_postpresent_hook()
 {
-    INIT_WRAPPER_VFPTR(gbGfxManager_D3D_EndScene_wrapper, gboffset + 0x100F56E8);
+    INIT_WRAPPER_VFPTR(gbGfxManager_D3D_EndScene_wrapper, gboffset + 0x100D66F0); 
 }
 
 
@@ -107,9 +107,8 @@ static void PAL3_InitGFX_wrapper()
 }
 static void init_postd3dcreate_hook()
 {
-    INIT_WRAPPER_CALL(PAL3_InitGFX_wrapper, { 0x00404840 });
+    INIT_WRAPPER_CALL(PAL3_InitGFX_wrapper, { 0x0040676C });
 }
-
 
 // post PAL3::Create and pre PAL3::Destroy hooks
 void add_postpal3create_hook(void (*funcptr)(void))
@@ -135,7 +134,7 @@ static MAKE_ASMPATCH(post_gamecreate)
 {
     // this asmpatch shall run just before outputing 'Game Create OK ...' log message
     run_hooks(HOOKID_POSTGAMECREATE, NULL);
-    PUSH_DWORD(0x005837E4);
+    PUSH_DWORD(0x005750A0);
 }
 static void PAL3_Destroy_wrapper()
 {
@@ -147,13 +146,12 @@ static void PAL3_Destroy_wrapper()
 }
 static void init_postpal3create_prepal3destroy_hook()
 {
-    INIT_ASMPATCH(post_gamecreate, 0x004049FC, 5, "\x68\xE4\x37\x58\x00");
-    INIT_WRAPPER_CALL(PAL3_Create_wrapper, { 0x00541AC0 });
-    INIT_WRAPPER_CALL(PAL3_Destroy_wrapper, {
-        0x004047F0,
-        0x00541C0B,
-    });
+    INIT_ASMPATCH(post_gamecreate, 0x00406944, 5, "\x68\xA0\x50\x57\x00");
+    INIT_WRAPPER_CALL(PAL3_Create_wrapper, { 0x0052BA30 });
+    INIT_WRAPPER_CALL(PAL3_Destroy_wrapper, { 0x0052BAF7 });
 }
+
+
 
 
 
@@ -171,14 +169,14 @@ void set_pauseresume(int state)
         run_hooks_witharg(HOOKID_GAMEPAUSERESUME, &pause_state, NULL);
     }
 }
-static void PAL3_Update_wrapper(float deltaTime)
+static void PAL3_Update_wrapper(double deltaTime)
 {
     set_pauseresume(0);
     PAL3_Update(deltaTime);
 }
 static void init_pauseresume_hook()
 {
-    INIT_WRAPPER_CALL(PAL3_Update_wrapper, { 0x00541BC0 });
+    INIT_WRAPPER_CALL(PAL3_Update_wrapper, { 0x0052BAE6 });
 }
 
 
@@ -192,7 +190,9 @@ static MAKE_ASMPATCH(atexit_normal)
 {
     call_atexit_hooks();
     
-    LINK_RETN(0x10);
+    R_EAX = M_DWORD(R_EBP - 0x1C); // old code
+    R_EDI = POP_DWORD();
+    R_ESI = POP_DWORD();
 }
 void add_atexit_hook(void (*funcptr)(void))
 {
@@ -200,9 +200,8 @@ void add_atexit_hook(void (*funcptr)(void))
 }
 static void init_atexit_hook()
 {
-    INIT_ASMPATCH(atexit_normal, 0x00541C35, 5, "\xC2\x10\x00\x90\x90");
+    INIT_ASMPATCH(atexit_normal, 0x0052BB01, 5, "\x8B\x45\xE4\x5F\x5E");
 }
-
 
 
 // gameloop hook
@@ -220,7 +219,7 @@ static MAKE_ASMPATCH(gameloop_normal)
 {
     set_pauseresume(0);
     call_gameloop_hooks(GAMELOOP_NORMAL, NULL);
-    LINK_JMP(0x00541B18);
+    LINK_JMP(0x0052BA5A);
 }
 static MAKE_ASMPATCH(gameloop_sleep)
 {
@@ -228,48 +227,63 @@ static MAKE_ASMPATCH(gameloop_sleep)
     call_gameloop_hooks(GAMELOOP_SLEEP, NULL);
     Sleep(100);
 }
-static int (*gbBinkVideo_SFLB_OpenFile)(struct gbBinkVideo *, const char *, HWND, int, int) = NULL;
 static MAKE_THISCALL(int, gbBinkVideo_OpenFile, struct gbBinkVideo *this, const char *szFileName, HWND hWnd, int bChangeScreenMode, int nOpenFlag)
 {
     int ret = gbBinkVideo_SFLB_OpenFile(this, szFileName, hWnd, bChangeScreenMode, nOpenFlag);
     call_gameloop_hooks(GAMEEVENT_MOVIE_ATOPEN, (void *) szFileName);
     return ret;
 }
-static MAKE_ASMPATCH(gameloop_movie_atenter)
+
+static MAKE_THISCALL(int, gbBinkVideo_DoModal_wrapper, struct gbBinkVideo *this, int bCanSkip)
 {
-    if (g_bink.m_hBink) call_gameloop_hooks(GAMEEVENT_MOVIE_ATBEGIN, NULL);
-    R_EDI = R_ECX;
-    R_EAX = M_DWORD(R_EDI + 0x0C);
+    int ret;
+    if (this->m_hBink) call_gameloop_hooks(GAMEEVENT_MOVIE_ATBEGIN, NULL);
+    ret = gbBinkVideo_DoModal(this, bCanSkip);
+    call_gameloop_hooks(GAMEEVENT_MOVIE_ATEND, NULL);
+    return ret;
 }
-static MAKE_ASMPATCH(gameloop_movie)
+static void gameloop_movie()
 {
     set_pauseresume(0);
     call_gameloop_hooks(GAMELOOP_MOVIE, NULL);
-    LINK_JMP(0x0053C62E);
 }
-static MAKE_ASMPATCH(gameloop_movie_atexit)
+static MAKE_ASMPATCH(gameloop_movie_part1)
 {
-    call_gameloop_hooks(GAMEEVENT_MOVIE_ATEND, NULL);
-    // we use simple patch to do RETN 4 (the old code)
+    if (R_EAX != 0) {
+        gameloop_movie();
+        LINK_JMP(0x0052540C);
+    } else {
+        R_ECX = M_DWORD(R_EBP - 0x4);
+    }
 }
+static MAKE_ASMPATCH(gameloop_movie_part2)
+{
+    if (R_EAX != 0) {
+        LINK_JMP(0x00525473);
+    } else {
+        gameloop_movie();
+        LINK_JMP(0x0052540C);
+    }
+}
+
+
+
 static void init_gameloop_hook()
 {    
     // patch main game loop
-    INIT_ASMPATCH(gameloop_normal, 0x541BCD, 5, "\xE9\x46\xFF\xFF\xFF");
-    INIT_ASMPATCH(gameloop_sleep, 0x541BAF, 8, "\x6A\x64\xFF\x15\x4C\xA0\x56\x00");
+    INIT_ASMPATCH(gameloop_normal, 0x0052BAF2, 5, "\xE9\x63\xFF\xFF\xFF");
+    INIT_ASMPATCH(gameloop_sleep, 0x0052BAD1, 8, "\x6A\x64\xFF\x15\x40\x80\x55\x00");
 
     // patch movie loop
-    gbBinkVideo_SFLB_OpenFile = TOPTR(get_branch_jtarget(0x0053C455, 0xE8));
-    make_jmp(0x0053C440, gbBinkVideo_OpenFile);
-    INIT_ASMPATCH(gameloop_movie_atenter, 0x53C5A7, 5, "\x8B\xF9\x8B\x47\x0C");
-    SIMPLE_PATCH(0x53C67A, "\xB3", "\x67", 1);
-    SIMPLE_PATCH(0x53C687, "\xA6", "\x5A", 1);
-    INIT_ASMPATCH(gameloop_movie, 0x53C6E2, 5, "\x90\x90\x90\x90\x90");
-    // patch movie loop atexit
-    SIMPLE_PATCH(0x53C6B6, "\xC2\x04\x00", "\xEB\x2F\x90", 3); // first RETN 4
-    SIMPLE_PATCH(0x53C6DF, "\xC2\x04\x00", "\xEB\x06\x90", 3); // second RETN 4
-    INIT_ASMPATCH(gameloop_movie_atexit, 0x53C6E7, 5, "\x90\x90\x90\x90\x90");
-    SIMPLE_PATCH(0x53C6EC, "\x90\x90\x90", "\xC2\x04\x00", 3); // place RETN 4 after ASMPATCH
+    make_jmp(0x00525279, gbBinkVideo_OpenFile);
+    INIT_WRAPPER_CALL(gbBinkVideo_DoModal_wrapper, {
+        0x00406C07,
+        0x0043FF8B,
+        0x0045E047,
+        0x004B2C84,
+    });
+    INIT_ASMPATCH(gameloop_movie_part1, 0x00525456, 7, "\x85\xC0\x75\xB2\x8B\x4D\xFC");
+    INIT_ASMPATCH(gameloop_movie_part2, 0x00525462, 6, "\x85\xC0\x75\x0D\xEB\xA4");
 }
 
 
@@ -287,13 +301,18 @@ void add_getcursorpos_hook(void (*funcptr)(void *))
 }
 static void init_getcursorpos_hook()
 {
-    make_jmp(0x004022E0, GetCursorPos_wrapper);
-    make_branch(0x00402497, 0xE8, GetCursorPos_wrapper, 6);
-    make_branch(0x004021C1, 0xE8, GetCursorPos_wrapper, 6);
-    make_branch(0x004D6216, 0xE8, GetCursorPos_wrapper, 6);
+    INIT_WRAPPER_CALL(GetCursorPos_wrapper, {
+        0x00402A0C,
+        0x00402B07,
+        0x00402C72,
+        0x004CA069,
+    });
     // NOTE: No need to hook GetCursorPos() for IDirect3DDevice9::SetCursorPosition()
     //       see documentation for details.
 }
+
+
+
 
 // SetCursorPos hook
 static BOOL WINAPI SetCursorPos_wrapper(int X, int Y)
@@ -308,8 +327,11 @@ void add_setcursorpos_hook(void (*funcptr)(void *))
 }
 static void init_setcursorpos_hook()
 {
-    make_jmp(0x00402290, SetCursorPos_wrapper);
+    make_jmp(0x00402ADA, SetCursorPos_wrapper);
 }
+
+
+
 
 
 // WndProc hooks

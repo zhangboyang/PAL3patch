@@ -50,9 +50,17 @@ static void screenshot_wndproc_hook(void *arg)
     }
 }
 
+static void PAL3_PrintScreen(int width, int height)
+{
+    //try_screenshot();
+    // do NOTHING here since we processed keyboard events in WndProc
+}
+
 MAKE_PATCHSET(screenshot)
 {
     screenshot_enabled = 1;
     add_preendscene_hook(screenshot_hook);
+    
     add_postwndproc_hook(screenshot_wndproc_hook);
+    make_jmp(0x00408699, PAL3_PrintScreen);
 }

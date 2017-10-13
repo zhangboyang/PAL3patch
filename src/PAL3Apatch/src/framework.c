@@ -59,12 +59,35 @@ void make_call(unsigned addr, const void *jtarget)
 }
 void make_wrapper_branch(unsigned addr, const void *jtarget)
 {
-    unsigned char opcode;
-    memcpy_from_process(&opcode, addr, 1);
-    switch (opcode) {
+    unsigned char opcode0, opcode1;
+    
+    // fetch first byte
+    memcpy_from_process(&opcode0, addr, 1);
+    
+    // decode first byte
+    switch (opcode0) {
+        // one-byte instruction
         case 0xE9: make_jmp(addr, jtarget); break;
         case 0xE8: make_call(addr, jtarget); break;
-        default: fail("unknown branch opcode %02X.", opcode);
+        
+        // multi-byte instruction
+        case 0xFF:
+            // fetch second byte
+            memcpy_from_process(&opcode1, addr + 1, 1);
+            
+            // decode second byte
+            switch ((opcode0 << 8) + opcode1) { // constuct as big-endian for readability
+                // two byte instruction
+                case 0xFF15: make_branch(addr, 0xE8, jtarget, 6); break;
+
+                // unknown second byte
+                default: fail("unknown branch opcode %02X %02X.", opcode0, opcode1);
+            }
+            
+            break;
+        
+        // unknown first byte
+        default: fail("unknown branch opcode %02X.", opcode0);
     }
 }
 void make_wrapper_branch_batch(unsigned *addr_list, int count, const void *jtarget)

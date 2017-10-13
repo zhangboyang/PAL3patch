@@ -8,7 +8,7 @@ static MAKE_THISCALL(struct gbResource *, gbResManager_FindResByName, struct gbR
     for (i = 0; i < this->CurNum; i++) {
         struct gbResource *cur = this->pBuffer[i];
         if (cur->NameCrc32 == hash && strcmp(cur->pName, resname) == 0) {
-            cur->baseclass.RefCount++;
+            cur->RefCount++;
             return cur;
         }
     }
@@ -17,5 +17,5 @@ static MAKE_THISCALL(struct gbResource *, gbResManager_FindResByName, struct gbR
 
 MAKE_PATCHSET(preciseresmgr)
 {
-    make_jmp(gboffset + 0x100201B0, gbResManager_FindResByName);
+    make_jmp(gboffset + 0x1001FD00, gbResManager_FindResByName);
 }
