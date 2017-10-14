@@ -378,7 +378,65 @@ struct gbBinkVideo {
     struct CPK m_Cpk2;
 };
 
+enum GAME_STATE {
+    GAME_NONE = 0x0,
+    GAME_UI = 0x1,
+    GAME_SCENE = 0x2,
+    GAME_COMBAT = 0x3,
+    GAME_CATCHGHOST = 0x4,
+    GAME_WOLF = 0x5,
+    GAME_HIDE_FIGHT = 0x6,
+    GAME_COMPDONATE = 0x7,
+    GAME_OVER = 0x8,
+};
 
+struct D3DAdapterInfo {
+    int AdapterOrdinal;
+    D3DADAPTER_IDENTIFIER9 AdapterIdentifier;
+    struct CArrayList *pDisplayModeList;
+    struct CArrayList *pDeviceInfoList;
+};
+
+enum CURSOR_TYPE {
+    CURSOR_NORMAL = 0x0,
+    CURSOR_TALK = 0x1,
+    CURSOR_CHECK = 0x2,
+    CURSOR_NUM = 0x3,
+};
+
+struct UICursor {
+    unsigned int m_dwID[3];
+    enum CURSOR_TYPE m_active;
+    struct gbTexture *m_tex[3];
+    char m_bShow;
+    char m_bSoftMode;
+};
+
+struct gbQuaternion {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+struct gbCamera {
+    float fov;
+    float OrthoSize;
+    float Wscreen;
+    float Hscreen;
+    float zNear;
+    float zFar;
+    struct gbViewPort Viewport;
+    float Plane[6][4];
+    int numPlane;
+    struct gbMatrix4 ViewMatrix;
+    struct gbMatrix4 InvVMatrix;
+    struct gbCamControler *pControl[16];
+    int CurCtrl;
+    struct gbGfxManager *pGfxMgr;
+    struct gbVec3D eyeLoc;
+    struct gbQuaternion eyeDir;
+};
 
 
 // GBENGINE functions
@@ -395,6 +453,8 @@ struct gbBinkVideo {
 #define gbfree ((free_funcptr_t) (gboffset + 0x100C5D39))
 #define gbGfxManager_D3D_EndScene(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100188E0, void, struct gbGfxManager_D3D *), this)
 #define gbCrc32Compute ((unsigned (*)(const char *)) TOPTR(gboffset + 0x10026710))
+#define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10019A70, void, struct gbGfxManager_D3D *), this)
+#define gbCamera_GetViewSizeOnNearPlane(this, hw, hh) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021480, void, struct gbCamera *, float *, float *), this, hw, hh)
 
 
 // PAL3A functions
@@ -407,11 +467,17 @@ struct gbBinkVideo {
 #define PAL3_Update ((void (*)(double)) TOPTR(0x004073B0))
 #define gbBinkVideo_SFLB_OpenFile(this, szFileName, hWnd, bChangeScreenMode, nOpenFlag) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005254C0, int, struct gbBinkVideo *, const char *, HWND, int, int), this, szFileName, hWnd, bChangeScreenMode, nOpenFlag)
 #define gbBinkVideo_DoModal(this, bCanSkip) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00525382, int, struct gbBinkVideo *, int), this, bCanSkip)
+#define WndProc ((LRESULT (CALLBACK *)(HWND, UINT, WPARAM, LPARAM)) TOPTR(0x00406C91))
+#define UICursor_Inst ((struct UICursor *(*)(void)) TOPTR(0x0052B734))
+#define UICursor_Show(this, bShow) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0052B800, void, struct UICursor *, bool), this, bShow)
+
 
 // global variables
 #define GB_GfxMgr (*(struct gbGfxManager_D3D **) TOPTR(0x00C01CD4))
 #define PAL3_s_drvinfo (*(struct gbGfxDriverInfo *) TOPTR(0x00C01788))
 #define PAL3_s_flag (*(unsigned *) TOPTR(0x00574D38))
+#define PAL3_s_gamestate (*(int *) TOPTR(0x00C01CE0))
+#define PAL3_s_bActive (*(int *) TOPTR(0x00574D34))
 
 
 
@@ -444,6 +510,10 @@ struct gbBinkVideo {
     assert(sizeof(struct CPKTable) == 0x1C); \
     assert(sizeof(struct CPK) == 0xE01BC); \
     assert(sizeof(struct gbBinkVideo) == 0x1C0388); \
+    assert(sizeof(struct D3DAdapterInfo) == 0x458); \
+    assert(sizeof(struct UICursor) == 0x20); \
+    assert(sizeof(struct gbCamera) == 0x178); \
+    assert(sizeof(struct gbQuaternion) == 0x10); \
 } while (0)
 
 

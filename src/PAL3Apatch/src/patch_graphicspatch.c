@@ -30,9 +30,15 @@ static void update_fpslimit()
 {
     double fps = default_fps;
     switch (PAL3_s_gamestate) {
-        case GAME_SUBGAME_ENCAMPMENT:
-        case GAME_SUBGAME_SKEE:
-        case GAME_SUBGAME_ROWING:
+        
+        // FIXME: add more state ///////////////////////////////////////
+        ////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////
+        
         case GAME_UI:
             fps = standard_fps; break;
     }
@@ -147,8 +153,8 @@ static void patch_depth_buffer_config(const char *cfgstr)
 {
     zbuf_flag = (stricmp(cfgstr, "max") == 0) ? INT_MAX : str2int(cfgstr);
     if (zbuf_flag) {
-        INIT_ASMPATCH(zbuf, gboffset + 0x10019E13, 7, "\x6A\x00\xE8\x96\xD0\xFF\xFF");
-        INIT_ASMPATCH(zbuf, gboffset + 0x1001A12E, 7, "\x6A\x00\xE8\x7B\xCD\xFF\xFF");
+        INIT_ASMPATCH(zbuf, gboffset + 0x100196BF, 7, "\x6A\x00\xE8\x6A\xD6\xFF\xFF");
+        INIT_ASMPATCH(zbuf, gboffset + 0x100199DE, 7, "\x6A\x00\xE8\x4B\xD3\xFF\xFF");
     }
 }
 
@@ -215,7 +221,7 @@ static void set_multisample_config(struct CArrayList *tl, struct CArrayList *ql,
 }
 static MAKE_ASMPATCH(multisample_windowed)
 {
-    set_multisample_config(TOPTR(M_DWORD(R_EBP + 0x18)), TOPTR(M_DWORD(R_EBP + 0x1C)), TOPTR(R_EDI + 0x694), TOPTR(R_EDI + 0x698));
+    set_multisample_config(TOPTR(M_DWORD(R_EBX + 0x18)), TOPTR(M_DWORD(R_EBX + 0x1C)), TOPTR(R_EDI + 0x694), TOPTR(R_EDI + 0x698));
 }
 static MAKE_ASMPATCH(multisample_fullscreen)
 {
@@ -231,8 +237,8 @@ static void patch_multisample_config(const char *cfgstr)
     ms_tflag = (stricmp(buf, "max") == 0) ? INT_MAX : str2int(buf);
     ms_qflag = (stricmp(ptr, "max") == 0) ? INT_MAX : str2int(ptr);
     if (ms_tflag || ms_qflag) {
-        INIT_ASMPATCH(multisample_windowed, gboffset + 0x10019E2E , 16, "\xC7\x87\x98\x06\x00\x00\x00\x00\x00\x00\x89\x87\x94\x06\x00\x00");
-        INIT_ASMPATCH(multisample_fullscreen, gboffset + 0x1001A15B, 12, "\x89\x86\xCC\x06\x00\x00\x89\xBE\xD0\x06\x00\x00");
+        INIT_ASMPATCH(multisample_windowed, gboffset + 0x100196DA, 16, "\xC7\x87\x98\x06\x00\x00\x00\x00\x00\x00\x89\x8F\x94\x06\x00\x00");
+        INIT_ASMPATCH(multisample_fullscreen, gboffset + 0x10019A07, 12, "\x89\x86\xCC\x06\x00\x00\x89\xBE\xD0\x06\x00\x00");
     }
 }
 
@@ -286,8 +292,8 @@ static void patch_resolution_config(const char *cfgstr)
     }
 
     INIT_WRAPPER_CALL(Readn, {
-        0x00406436,
-        0x00406453,
+        0x00408001,
+        0x0040801C,
     });
 }
 
@@ -320,7 +326,7 @@ static MAKE_ASMPATCH(recalc_fullscreen_refreshrate)
 static void patch_refreshrate_config(const char *cfgstr)
 {
     prefered_refreshrate = str2int(cfgstr);
-    INIT_ASMPATCH(recalc_fullscreen_refreshrate, gboffset + 0x1001A354, 6, "\x8B\x81\xC0\x06\x00\x00");
+    INIT_ASMPATCH(recalc_fullscreen_refreshrate, gboffset + 0x10019C31, 6, "\x8B\x81\xC0\x06\x00\x00");
 }
 
 
@@ -389,6 +395,11 @@ static HWND WINAPI CreateWindowExA_wrapper(DWORD dwExStyle, LPCSTR lpClassName, 
     lpWindowName = winname;
     game_hwnd = CreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
     return game_hwnd;
+}
+static HWND WINAPI FindWindowA_wrapper(LPCSTR lpClassName, LPCSTR lpWindowName)
+{
+    lpWindowName = winname;
+    return FindWindowA(lpClassName, lpWindowName);
 }
 static void getcursorpos_window_hookfunc(void *arg)
 {
@@ -587,7 +598,7 @@ static void init_window_patch(int flag)
 
     // patch PAL3_s_drvinfo
     if (window_patch_cfg != WINDOW_FULLSCREEN) {
-        SIMPLE_PATCH(0x004064DA, "\xC7\x05\xE8\xD6\xBF\x00\x01\x00\x00\x00", "\xC7\x05\xE8\xD6\xBF\x00\x00\x00\x00\x00", 10);
+        SIMPLE_PATCH(0x00408073, "\xC7\x05\xA8\x17\xC0\x00\x01\x00\x00\x00", "\xC7\x05\xA8\x17\xC0\x00\x00\x00\x00\x00", 10);
     }
 
     // change window style
@@ -596,27 +607,25 @@ static void init_window_patch(int flag)
         // the window style for fullscreen is modified by gbengine after window created
         // 0x96000000 = WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS
         newstyle = WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_SYSMENU;
-        memcpy_to_process(gboffset + 0x1011F4B4, &newstyle, 4);
+        memcpy_to_process(gboffset + 0x100FA474, &newstyle, 4);
     }
     if (window_patch_cfg == WINDOW_NORMAL) {
         // modify the code which create the window
         newstyle = WS_OVERLAPPED | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-        SIMPLE_PATCH(0x0040652D, "\x00\x00\x08\x96", &newstyle, 4);
-        SIMPLE_PATCH(0x00406559, "\x00\x00\x08\x96", &newstyle, 4);
+        SIMPLE_PATCH(0x004080D4 + 1, "\x00\x00\x08\x96", &newstyle, 4);
     }
     
 
     // hook CreateWindowEx
-    make_branch(0x004063A7, 0xE8, RegisterClass_wrapper, 6);
-    make_branch(0x00406564, 0xE8, CreateWindowExA_wrapper, 6);
+    INIT_WRAPPER_CALL(RegisterClass_wrapper, { 0x00407F59 });
+    INIT_WRAPPER_CALL(CreateWindowExA_wrapper, { 0x00408105 });
 
     // modify window title
     char *winname_mbcs = cs2cs_alloc(get_string_from_configfile("windowtitle"), CP_UTF8, CP_ACP);
     strncpy(winname, winname_mbcs, sizeof(winname));
     free(winname_mbcs);
     winname[sizeof(winname) - 1] = 0;
-    unsigned titleaddr = TOUINT(winname);
-    SIMPLE_PATCH(0x00541925, "\xC4\x39\x58\x00", &titleaddr, 4);
+    INIT_WRAPPER_CALL(FindWindowA_wrapper, { 0x0052B920 });
     
     // cursor hook
     add_getcursorpos_hook(getcursorpos_window_hookfunc);
@@ -629,24 +638,24 @@ static void init_window_patch(int flag)
     
     // patch gbGfxManager_D3D::m_bClipCursorWhenFullscreen
     // the game will use our clip cursor framework
-    SIMPLE_PATCH(gboffset + 0x10018A1B, "\xC6\x86\x4A\x06\x00\x00\x01", "\xC6\x86\x4A\x06\x00\x00\x00", 7);
+    SIMPLE_PATCH(gboffset + 0x10018439, "\xC6\x86\x4A\x06\x00\x00\x01", "\xC6\x86\x4A\x06\x00\x00\x00", 7);
 
     // hook WndProc
-    make_pointer(0x0040637F + 0x4, WndProc_wrapper);
+    make_pointer(0x00407F40 + 0x3, WndProc_wrapper);
     
     // hook DefWindowProc
-    make_branch(0x00404F8D, 0xE8, DefWindowProcA_wrapper, 6);
+    INIT_WRAPPER_CALL(DefWindowProcA_wrapper, { 0x00406EF6 });
     
     // add early message loop flag resetting function
     add_gameloop_hook(msgloop_gameloop_hook);
 
     // click X to quit game
     if (get_int_from_configfile("xquit")) {
-        SIMPLE_PATCH_NOP(0x00404F57, "\x74\x52", 2);
+        SIMPLE_PATCH_NOP(0x00406EC7, "\x0F\x84\x69\xFE\xFF\xFF", 6);
     }
     
     // hook gbGfxManager_D3D_BuildPresentParamsFromSettings()
-    INIT_WRAPPER_CALL(gbGfxManager_D3D_BuildPresentParamsFromSettings_wrapper, { gboffset + 0x1001A828 });
+    INIT_WRAPPER_CALL(gbGfxManager_D3D_BuildPresentParamsFromSettings_wrapper, { gboffset + 0x1001A0C0 });
 }
 
 

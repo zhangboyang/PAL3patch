@@ -93,7 +93,10 @@ static void init_stage2()
     INIT_PATCHSET(nocpk);
     INIT_PATCHSET(testcombat);
     
-    if (1) { // FIXME: graphicspatch
+    if (INIT_PATCHSET(graphicspatch)) {
+        // these are subpatchs of graphics patch
+        INIT_PATCHSET(fixfov);
+        INIT_PATCHSET(fixortho);
         
         INIT_PATCHSET(screenshot); // should after as many patches as possible
     }
@@ -111,8 +114,8 @@ static void init_stage2()
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch
-        INIT_PATCHSET(fixfov);
-        INIT_PATCHSET(fixortho);
+        
+        
         INIT_PATCHSET(nolockablebackbuffer);
         INIT_PATCHSET(fixreset);
         if (INIT_PATCHSET(fixui)) { 
