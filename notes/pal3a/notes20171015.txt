@@ -1,0 +1,11 @@
+【PAL3好像无须fixlongkuiattack和kahantimer】
+fixlongkuiattack:
+  对比PAL3和PAL3A的CCBStageRole::SetBlend发现官方所做的修改与我所做的修改完全相同
+  即把0.98改成了1.0
+kahantimer:
+  经实验，发现当fps>800，游戏时间>25h的情况下，游戏时间仍然可以正常走动
+  同时考虑到，之前发现三外把游戏时间的变量由float改为了double
+  因此推断，三外无需kahantimer
+虽然fixlongkuiattack和kahantimer在三外中已修复，但是fixattacksequen仍然是需要的
+（可能是因为触发bug的帧率实在太高了吧）
+

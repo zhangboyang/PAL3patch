@@ -85,21 +85,6 @@ static void get_movie_uv(const char *filename, int movie_width, int movie_height
         // opening
         { "Movie\\Pal3op.bik", 0.0, (60.0 / 480.0), 1.0, (420.0 / 480.0), -1.0 },
         
-        /* ending
-                    id     name      top   bottom
-                    ===============================
-                    1     XueJian     *      *
-                    2     LongKui     *      Sub
-                    3     ZiXuan      *      Sub
-                    4     HuaYing     *      Sub
-                    5     Perfact     *      Sub
-        */
-        { "Movie\\END1.bik",   0.0, (76.0 / 600.0), 1.0, (524.0 / 600.0), 16.0 / 9.0 },
-        { "Movie\\END2.bik",   0.0, (76.0 / 600.0), 1.0, (575.0 / 600.0), -1.0 },
-        { "Movie\\END3.bik",   0.0, (76.0 / 600.0), 1.0, (575.0 / 600.0), -1.0 },
-        { "Movie\\END4.bik",   0.0, (75.0 / 600.0), 1.0, (575.0 / 600.0), -1.0 },
-        { "Movie\\END5.bik",   0.0, (75.0 / 600.0), 1.0, (585.0 / 600.0), -1.0 },
-        
         { NULL } // EOF
     };
 
@@ -326,7 +311,7 @@ static void hook_gbBinkVideo()
     BinkPause = TOPTR(GetProcAddress_check(GetModuleHandle_check("BINKW32.DLL"), "_BinkPause@8"));
     
     // hook member funtions    
-    make_jmp(0x0053C470, gbBinkVideo_DrawFrame);
+    make_jmp(0x005252A1, gbBinkVideo_DrawFrame);
     
     // hook open operation
     add_gameloop_hook(movie_playback_atopen);
@@ -338,11 +323,11 @@ static void hook_gbBinkVideo()
     add_pauseresume_hook(movie_checkpause_hook);
     
     // hook BinkDoFrame() and BinkCopyToBuffer()
-    make_branch(0x0053C544, 0xE8, BinkDoFrame_wrapper, 6);
-    make_branch(0x0053C571, 0xE8, BinkCopyToBuffer_wrapper, 6);
+    INIT_WRAPPER_CALL(BinkDoFrame_wrapper, { 0x00525342 });
+    INIT_WRAPPER_CALL(BinkCopyToBuffer_wrapper, { 0x00525363 });
     
     // hook gbBinkVideo::BinkWait() to release CPU while playing movie
-    INIT_WRAPPER_CALL(gbBinkVideo_BinkWait_wrapper, { 0x0053C672 });
+    INIT_WRAPPER_CALL(gbBinkVideo_BinkWait_wrapper, { 0x00525451 });
 }
 
 
@@ -451,8 +436,8 @@ static MAKE_THISCALL(int, LockBackBuffer, struct gbGfxManager_D3D *this, struct 
     // save parameters
     gfxmgr = this;
     switch (TOUINT(func_return_address())) {
-        case 0x004BDB7B: locktype = LT_RENDERTARGET; break;
-        case 0x00406DA2: locktype = LT_SCREENSHOT; break;
+        case 0x004ADD4E: locktype = LT_RENDERTARGET; break;
+        case 0x004087A3: locktype = LT_SCREENSHOT; break;
         default: locktype = LT_UNKNOWN; break;
     }
     
@@ -482,10 +467,10 @@ MAKE_PATCHSET(nolockablebackbuffer)
     mf_tex_clamp = get_int_from_configfile("clampmovie");
     
     // lock/unlock hooks
-    SIMPLE_PATCH(gboffset + 0x1001A20F, "\xC7\x81\x08\x07\x00\x00\x03\x00\x00\x00", "\xC7\x81\x08\x07\x00\x00\x02\x00\x00\x00", 10);
-    SIMPLE_PATCH(gboffset + 0x1001A23F, "\xC7\x81\x08\x07\x00\x00\x01\x00\x00\x00", "\xC7\x81\x08\x07\x00\x00\x00\x00\x00\x00", 10);
-    make_jmp(gboffset + 0x10018F40, LockBackBuffer);
-    make_jmp(gboffset + 0x10019030, UnlockBackBuffer);
+    SIMPLE_PATCH(gboffset + 0x10019AF2, "\xC7\x81\x08\x07\x00\x00\x03\x00\x00\x00", "\xC7\x81\x08\x07\x00\x00\x02\x00\x00\x00", 10);
+    SIMPLE_PATCH(gboffset + 0x10019B22, "\xC7\x81\x08\x07\x00\x00\x01\x00\x00\x00", "\xC7\x81\x08\x07\x00\x00\x00\x00\x00\x00", 10);
+    make_jmp(gboffset + 0x100189A0, LockBackBuffer);
+    make_jmp(gboffset + 0x10018A20, UnlockBackBuffer);
     
     // gbBinkVideo hooks
     hook_gbBinkVideo();

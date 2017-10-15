@@ -1,5 +1,96 @@
 #include "common.h"
 
+// here are some common functions related to GBENGINE.DLL or PAL3.EXE
+
+// this is my own method! not exists in original GBENGINE
+enum gbPixelFmtType gbGfxManager_D3D_GetBackBufferFormat(struct gbGfxManager_D3D *this)
+{
+    enum gbPixelFmtType type;
+    switch (this->m_d3dsdBackBuffer.Format) {
+        case D3DFMT_A8R8G8B8: type = GB_PFT_A8R8G8B8; break;
+        case D3DFMT_R5G6B5:   type = GB_PFT_R5G6B5;   break;
+        case D3DFMT_A1R5G5B5: type = GB_PFT_A1R5G5B5; break;
+        case D3DFMT_A4R4G4B4: type = GB_PFT_A4R4G4B4; break;
+        case D3DFMT_X8R8G8B8: type = GB_PFT_X8R8G8B8; break;
+        case D3DFMT_X1R5G5B5: type = GB_PFT_X1R5G5B5; break;
+        case D3DFMT_X4R4G4B4: type = GB_PFT_X4R4G4B4; break;
+        default:              type = GB_PFT_R8G8B8;   break;
+    }
+    return type;
+}
+
+// this is my own method! not exists in original GBENGINE
+int gbGfxManager_D3D_GetBackBufferBitCount(struct gbGfxManager_D3D *this)
+{
+    switch (this->m_d3dsdBackBuffer.Format) {
+        case D3DFMT_A8R8G8B8:
+        case D3DFMT_X8R8G8B8:
+            return 32;
+        case D3DFMT_A1R5G5B5:
+        case D3DFMT_X1R5G5B5:
+        case D3DFMT_R5G6B5:
+            return 16;
+        default:
+            return 0;
+    }
+}
+
+// make sure cooperative level is D3D_OK
+// this is my own method! not exists in original GBENGINE
+void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus)
+{
+    if (requirefocus && !PAL3_s_bActive) {
+        while (1) {
+            MSG msg;
+            // we must process message queue here
+            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+                if (msg.message == WM_QUIT) {
+                    PostQuitMessage(msg.wParam);
+                    return;
+                }
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+            if (PAL3_s_bActive) {
+                break;
+            }
+            
+            set_pauseresume(1);
+            call_gameloop_hooks(GAMELOOP_SLEEP, NULL);
+            Sleep(100);
+        }
+    }
+    if (IDirect3DDevice9_TestCooperativeLevel(this->m_pd3dDevice) != D3D_OK) {
+        this->m_bDeviceLost = 1;
+        while (1) {
+            MSG msg;
+            // we must process message queue here
+            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+                if (msg.message == WM_QUIT) {
+                    PostQuitMessage(msg.wParam);
+                    return;
+                }
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+            if (IDirect3DDevice9_TestCooperativeLevel(this->m_pd3dDevice) == D3DERR_DEVICENOTRESET) {
+                break;
+            }
+            
+            set_pauseresume(1);
+            call_gameloop_hooks(GAMELOOP_DEVICELOST, NULL);
+            Sleep(100);
+        }
+        if (gbGfxManager_D3D_Reset3DEnvironment(this) < 0) {
+            fail("Reset3DEnvironment error!");
+        }
+        this->m_bDeviceLost = 0;
+    }
+    
+    try_refresh_clipcursor();
+    set_pauseresume(0);
+}
+
 
 void clamp_rect(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom)
 {

@@ -32,5 +32,5 @@ static MAKE_THISCALL(void, CCBAttackSequen_RunOneStep, struct CCBAttackSequen *t
 
 MAKE_PATCHSET(fixattacksequen)
 {
-    make_jmp(0x004DBA60, CCBAttackSequen_RunOneStep);
+    make_jmp(0x004CF221, CCBAttackSequen_RunOneStep);
 }

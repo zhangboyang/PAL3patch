@@ -92,32 +92,34 @@ static void init_stage2()
     INIT_PATCHSET(preciseresmgr);
     INIT_PATCHSET(nocpk);
     INIT_PATCHSET(testcombat);
+    INIT_PATCHSET(fixacquire);
+    INIT_PATCHSET(fixattacksequen);
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch
+        
         INIT_PATCHSET(fixfov);
         INIT_PATCHSET(fixortho);
+        INIT_PATCHSET(nolockablebackbuffer);
+        INIT_PATCHSET(fixreset);
+        
+        //if (INIT_PATCHSET(fixui)) { 
         
         INIT_PATCHSET(screenshot); // should after as many patches as possible
     }
     
     
 /* // FIXME
-
-    INIT_PATCHSET(kahantimer);
-    INIT_PATCHSET(fixlongkuiattack);
-    INIT_PATCHSET(fixattacksequen);
-    INIT_PATCHSET(fixhockshopbuy);
-    INIT_PATCHSET(kfspeed);
-    INIT_PATCHSET(fixacquire);
+    
+    
 
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch
         
         
-        INIT_PATCHSET(nolockablebackbuffer);
-        INIT_PATCHSET(fixreset);
+        
+        
         if (INIT_PATCHSET(fixui)) { 
             // must called after INIT_PATCHSET(graphicspatch)
             // must called after INIT_PATCHSET(setlocale) because of D3DXCreateFont need charset information

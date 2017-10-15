@@ -187,7 +187,7 @@ struct gbGfxDriverInfo {
     int refreshrate;
     char winname[128];
     DWORD hinst;
-    DWORD hgfxwnd;
+    HWND hgfxwnd;
     int newwindow;
     int waitforverticalblank;
 };
@@ -438,6 +438,300 @@ struct gbCamera {
     struct gbQuaternion eyeDir;
 };
 
+struct GRP_KEYREG {
+    int Data;
+    int HoldTime;
+    int CountMode;
+    int PressTime;
+};
+
+struct GRPinput {
+    IDirectInput8A *m_lpDI;
+    IDirectInputDevice8A *m_lpDIDKeyboard;
+    IDirectInputDevice8A *m_lpDIDMouse;
+    float m_mouseSensitivity;
+    int m_mouseMinX;
+    int m_mouseMinY;
+    int m_mouseMaxX;
+    int m_mouseMaxY;
+    int m_joystickMinX;
+    int m_joystickMinY;
+    int m_joystickMaxX;
+    int m_joystickMaxY;
+    POINT m_mousept;
+    int m_mouseX;
+    int m_mouseY;
+    int m_mouseFreeX;
+    int m_mouseFreeY;
+    int m_mouseDeltaX;
+    int m_mouseDeltaY;
+    int m_joystickX;
+    int m_joystickY;
+    int m_joystickFreeX;
+    int m_joystickFreeY;
+    int m_joystickDeltaX;
+    int m_joystickDeltaY;
+    BYTE m_keyStates[270];
+    BYTE m_keyRaw[256];
+    unsigned int m_keyPressTimes[270];
+    unsigned int m_keyDragStartPositions[270][2];
+    BYTE m_shiftedKeyStates[270];
+    unsigned int m_DIKToKEY[256];
+    DIMOUSESTATE2 MouseState;
+    unsigned int charTOscan[256];
+    int KeyTransformation[10];
+    int m_bMouse;
+    int m_bKeyboard;
+    int m_bJoystick;
+    struct GRP_KEYREG KeyInfo[270];
+};
+
+enum ECBStageLockFlag {
+    CBSLF_Null = 0x0,
+    CBSLF_SkillAct = 0x1,
+    CBSLF_MagicWait = 0x2,
+    CBSLF_MagicAct = 0x3,
+    CBSLF_ItemAct = 0x4,
+    CBSLF_FlingAct = 0x5,
+    CBSLF_BFAAct = 0x6,
+    CBSLF_End = 0x7,
+};
+
+struct tagAttackSequen {
+    float fDeltaTime;
+    float fLastTime;
+    int nIndex;
+    unsigned int dwID;
+    struct UIStatic *pPic;
+    int nSlot1;
+    int nSlot2;
+    int nRound;
+    BYTE bySpeed1;
+    BYTE bySpeed2;
+    bool bSlot2Running;
+    bool bPaused;
+    bool bValid;
+};
+
+struct CCBAttackSequen {
+    struct CCBSystem *m_pCBSystem;
+    struct CCBUI *m_pUI;
+    struct CCBRoleState *m_pRole;
+    struct tagAttackSequen m_Sequen[11];
+    bool m_bEnable;
+    bool m_bPause;
+    bool m_bVisible;
+    bool m_bLocked;
+    enum ECBStageLockFlag m_eLockFlag[11];
+};
+
+enum ECBCombatState {
+    CBCS_Null = 0x0,
+    CBCS_Deactive = 0x1,
+    CBCS_Running = 0x2,
+    CBCS_Paused = 0x3,
+    CBCS_Flee = 0x4,
+    CBCS_Counting = 0x5,
+    CBCS_FleeCounting = 0x6,
+    CBCS_LoseCounting = 0x7,
+    CBCS_CombatEnd = 0x8,
+    CBCS_End = 0x9,
+};
+enum ECBCombatResult {
+    CBCR_Null = 0x0,
+    CBCR_NoResult = 0x1,
+    CBCR_Win = 0x2,
+    CBCR_Lose = 0x3,
+    CBCR_FleeOK = 0x4,
+    CBCR_End = 0x5,
+};
+
+struct tagCmdData {
+    unsigned int dwCmdKind;
+    union {
+        unsigned int dwCmdID;
+        unsigned int dwItemID;
+    };
+    int nSrcRole;
+    int nDestRole;
+    bool bMultiSrcRole;
+    bool bMultiDestRole;
+    bool bSrcRole[11];
+    bool bDestRole[11];
+    bool bValid;
+};
+
+struct tagThread {
+    union {
+        struct {
+            void *fp;
+            BYTE gap4[12];
+        };
+        struct {
+            unsigned long long gap0[2]; // force align
+        };
+    };
+    unsigned int dwID;
+    int nTaskIndex;
+    unsigned int dwTaskID;
+    unsigned int dwReturn;
+    int nTemp;
+    bool bValid;
+    bool bExecuted;
+    struct tagCmdData cmd;
+};
+
+struct tagPlayerSet {
+    struct tagCmdData LastRoleCmd;
+    int nMagicDefaultPage;
+    int nItemDefaultPage;
+};
+
+struct CCBSystem {
+    struct CUtil *m_pUtil;
+    struct CCBUI *m_pUI;
+    struct CCBControl *m_pControl;
+    struct CCBAttackSequen *m_pAttackSequen;
+    struct CCBRoleState *m_pRoleState;
+    struct CCBStage *m_pStage;
+    struct CCBAI *m_pAI;
+    struct CCBEditor *m_pEditor;
+    struct CEffectSystem *m_pES;
+    struct CEffectSimple *m_pEffectSimple;
+    struct TxtFile *m_pConfig;
+    struct CEffMgr *m_pEffMgr;
+    struct CEffMgr *m_pATSEffMgr;
+    struct C2DSpark *m_p2DSpark;
+    struct C3DSpark *m_p3DSpark;
+    double m_DeltaTime;
+    double m_dTimeFund;
+    float m_fTimeFund;
+    double m_AbsDeltaTime;
+    double m_dAbsTimeFund;
+    float m_fAbsTimeFund;
+    float m_fTimeScale;
+    struct FightInfo *m_pFightInfo;
+    bool m_bQuitFlag;
+    bool m_bPause;
+    enum ECBCombatState m_eState;
+    enum ECBCombatResult m_eResult;
+    char m_bFiveNimbus;
+    char m_bPXVariance;
+    int m_nTimesOfCombat;
+    bool m_bAuto;
+    bool m_bEditor;
+    bool m_bLockCam;
+    bool m_bFirstRender;
+    unsigned int m_dwIDHolder;
+    int m_nThread;
+    int m_nCurThread;
+    struct tagThread m_Thread[1024];
+    struct tagPlayerSet m_Player[11];
+};
+
+typedef struct BINK BINK, *HBINK;
+
+
+
+struct std_basic_string { // std::basic_string<char,std::char_traits<char>,std::allocator<char> >
+    char allocator;
+    char *_Ptr;
+    unsigned int _Len;
+    unsigned int _Res;
+};
+
+struct std_vector_int {
+    char allocator;
+    int *_First;
+    int *_Last;
+    int *_End;
+};
+
+struct std_vector_SoundItem {
+    char allocator;
+    struct SoundItem *_First;
+    struct SoundItem *_Last;
+    struct SoundItem *_End;
+};
+
+struct TxtFile {
+    char m_token[512];
+    char *m_buf;
+    char *m_sectionstart;
+    char *m_curpos;
+};
+
+struct SoundMgr {
+    struct SoundMgrVtbl *vfptr;
+    char m_bScriptMusic;
+    struct std_basic_string m_szScriptMusic;
+    int m_nScriptLoop;
+    char m_szSceneMusic[256];
+    struct TxtFile m_MusicTable;
+    struct gbAudioManager *m_audiodrv;
+    float DEF3DMasterVol;
+    float DEF2DMasterVol;
+    float DEFMusicMasterVol;
+    char m_bValidDetectSceneMusic;
+    struct std_vector_SoundItem m_cbbuf;
+    int m_cbcursor;
+    struct CPK m_Cpk;
+};
+
+typedef struct _SAMPLE *HSAMPLE;
+typedef struct _STREAM *HSTREAM;
+typedef struct _DIG_DRIVER *HDIGDRIVER;
+typedef struct h3DPOBJECT *H3DPOBJECT;
+
+struct SoundAttachObj {
+    union {
+        struct gbSound3DNode *p3d;
+        struct gbSound2DNode *p2d;
+    };
+    union {
+        H3DPOBJECT h3d;
+        HSAMPLE h2d;
+    };
+    unsigned int time;
+};
+
+struct gbAudioManager {
+    HSTREAM *hStreamArray[3];
+    int StreamStatus[3];
+    HDIGDRIVER *h2DDriver;
+    unsigned int h3DProvider;
+    struct SoundAttachObj Attach3D[10];
+    struct SoundAttachObj Attach2D[4];
+    unsigned int CurTime;
+    float S_3DMasterVol;
+    float S_2DMasterVol;
+    float MusicMasterVol;
+    H3DPOBJECT *hListener;
+    struct gbVec3D ListenerPos;
+    struct gbResManager SndDataMgr;
+};
+
+enum gbPixelFmtType { 
+    GB_PFT_UNKNOWN,
+    GB_PFT_R8G8B8,
+    GB_PFT_A8R8G8B8,
+    GB_PFT_R5G6B5,
+    GB_PFT_A1R5G5B5,
+    GB_PFT_A4R4G4B4,
+    GB_PFT_P8,
+    GB_PFT_A8,
+    GB_PFT_X8R8G8B8,
+    GB_PFT_X1R5G5B5,
+    GB_PFT_X4R4G4B4,
+};
+
+struct gbSurfaceDesc {
+    int width;
+    int height;
+    enum gbPixelFmtType format;
+    int pitch;
+    void *pbits;
+};
 
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
@@ -452,9 +746,11 @@ struct gbCamera {
 #define gbmalloc ((malloc_funcptr_t) (gboffset + 0x100C5C87))
 #define gbfree ((free_funcptr_t) (gboffset + 0x100C5D39))
 #define gbGfxManager_D3D_EndScene(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100188E0, void, struct gbGfxManager_D3D *), this)
-#define gbCrc32Compute ((unsigned (*)(const char *)) TOPTR(gboffset + 0x10026710))
 #define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10019A70, void, struct gbGfxManager_D3D *), this)
+#define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A480, int, struct gbGfxManager_D3D *), this)
+#define gbCrc32Compute ((unsigned (*)(const char *)) TOPTR(gboffset + 0x10026710))
 #define gbCamera_GetViewSizeOnNearPlane(this, hw, hh) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021480, void, struct gbCamera *, float *, float *), this, hw, hh)
+
 
 
 // PAL3A functions
@@ -470,6 +766,21 @@ struct gbCamera {
 #define WndProc ((LRESULT (CALLBACK *)(HWND, UINT, WPARAM, LPARAM)) TOPTR(0x00406C91))
 #define UICursor_Inst ((struct UICursor *(*)(void)) TOPTR(0x0052B734))
 #define UICursor_Show(this, bShow) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0052B800, void, struct UICursor *, bool), this, bShow)
+#define GRPinput_AcquireMouse(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402B25, void, struct GRPinput *this), this)
+#define GRPinput_AcquireKeyboard(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402B78, void, struct GRPinput *this), this)
+#define CCBRoleState_IsAlive(this, nIndex) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004DEFFD, bool, struct CCBRoleState *, int), this, nIndex)
+#define BinkDoFrame (*(int (__stdcall **)(HBINK)) 0x005581DC)
+#define BinkCopyToBuffer (*(int (__stdcall **)(HBINK, void *, int, unsigned, unsigned, unsigned, unsigned)) 0x005581D4)
+#define BinkSetVolume (*(void (__stdcall **)(HBINK, int)) 0x005581D8)
+#define g_bink (*(struct gbBinkVideo *) TOPTR(0x00A3E898))
+#define SoundMgr_Inst() ((struct SoundMgr *) TOPTR(0x021AE020))
+#define SoundMgr_GetAudioMgr(this) ((this)->m_audiodrv)
+#define gbAudioManager_GetMusicMasterVolume(this) ((this)->MusicMasterVol)
+#define gbBinkVideo_Width(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005254A9, int, struct gbBinkVideo *), this)
+#define gbBinkVideo_Height(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005254B4, int, struct gbBinkVideo *), this)
+#define gbBinkVideo_DrawFrameEx(this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0052532F, int, struct gbBinkVideo *, void *, int, int, int, int, int), this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType)
+#define gbBinkVideo_BinkWait(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00525291, int, struct gbBinkVideo *), this)
+
 
 
 // global variables
@@ -478,7 +789,7 @@ struct gbCamera {
 #define PAL3_s_flag (*(unsigned *) TOPTR(0x00574D38))
 #define PAL3_s_gamestate (*(int *) TOPTR(0x00C01CE0))
 #define PAL3_s_bActive (*(int *) TOPTR(0x00574D34))
-
+#define xmusic ((PAL3_s_flag & 4) == 0)
 
 
 // structure selfcheck
@@ -514,6 +825,19 @@ struct gbCamera {
     assert(sizeof(struct UICursor) == 0x20); \
     assert(sizeof(struct gbCamera) == 0x178); \
     assert(sizeof(struct gbQuaternion) == 0x10); \
+    assert(sizeof(struct GRP_KEYREG) == 0x10); \
+    assert(sizeof(struct GRPinput) == 0x2958); \
+    assert(sizeof(struct tagAttackSequen) == 0x28); \
+    assert(sizeof(struct CCBAttackSequen) == 0x1F4); \
+    assert(sizeof(struct tagCmdData) == 0x2C); \
+    assert(sizeof(struct tagThread) == 0x58); \
+    assert(sizeof(struct tagPlayerSet) == 0x34); \
+    assert(sizeof(struct CCBSystem) == 0x162D8); \
+    assert(sizeof(struct SoundMgr) == 0xE050C); \
+    assert(sizeof(struct TxtFile) == 0x20C); \
+    assert(sizeof(struct gbAudioManager) == 0xF4); \
+    assert(sizeof(struct SoundAttachObj) == 0xC); \
+    assert(sizeof(struct gbSurfaceDesc) == 0x14); \
 } while (0)
 
 
