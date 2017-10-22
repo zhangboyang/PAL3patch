@@ -1,5 +1,6 @@
 #include "common.h"
 
+
 static LRESULT WINAPI SendMessageA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     LRESULT ret;

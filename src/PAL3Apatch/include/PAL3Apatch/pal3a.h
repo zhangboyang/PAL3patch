@@ -733,6 +733,49 @@ struct gbSurfaceDesc {
     void *pbits;
 };
 
+struct gbPixelFormat {
+    enum gbPixelFmtType Type;
+    int Bpp;
+    struct gbColorQuad *Pal;
+    unsigned int r_mask;
+    unsigned int g_mask;
+    unsigned int b_mask;
+    unsigned int a_mask;
+    unsigned int r_shift;
+    unsigned int g_shift;
+    unsigned int b_shift;
+    unsigned int a_shift;
+};
+
+struct gbTexture {
+    struct gbResource;
+    int Width;
+    int Height;
+    struct gbImage2D *pTexImage;
+    struct gbPixelFormat InFmt;
+    int nLevels;
+};
+struct gbTexture_D3D {
+    struct gbTexture;
+    IDirect3DBaseTexture9 *pTex;
+    IDirect3DSurface9 *pDS;
+    unsigned int m_ImgFormat;
+};
+
+struct CTrail {
+    float m_fTime;
+    bool m_bSupport;
+    bool m_bEnable;
+    struct gbCamera *m_pCam;
+    struct gbUIQuad m_ScreenQuad;
+    unsigned int m_dwRenderCounter;
+    unsigned int m_dwRT;
+    char m_bReady;
+    struct gbTexture_D3D m_texRT[8];
+    struct gbRenderEffect *m_eft;
+    struct IDirect3DSurface9 *m_OriginSurface;
+};
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -750,6 +793,11 @@ struct gbSurfaceDesc {
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A480, int, struct gbGfxManager_D3D *), this)
 #define gbCrc32Compute ((unsigned (*)(const char *)) TOPTR(gboffset + 0x10026710))
 #define gbCamera_GetViewSizeOnNearPlane(this, hw, hh) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021480, void, struct gbCamera *, float *, float *), this, hw, hh)
+#define gbTexture_D3D_CreateForRenderTarget(this, width, height, format) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001B950, int, struct gbTexture_D3D *, int, int, enum gbPixelFmtType), this, width, height, format)
+#define gbTexture_D3D_Ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001B440, struct gbTexture_D3D *, struct gbTexture_D3D *), this)
+#define gbTexture_D3D_Dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001B490, void, struct gbTexture_D3D *), this)
+#define gbCamera_SetDimention(this, a2, a3) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021680, void, struct gbCamera *, int, int), this, a2, a3)
+
 
 
 
@@ -780,6 +828,7 @@ struct gbSurfaceDesc {
 #define gbBinkVideo_Height(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005254B4, int, struct gbBinkVideo *), this)
 #define gbBinkVideo_DrawFrameEx(this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0052532F, int, struct gbBinkVideo *, void *, int, int, int, int, int), this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType)
 #define gbBinkVideo_BinkWait(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00525291, int, struct gbBinkVideo *), this)
+#define CTrail_Begin(this, pCam) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004B7424, void, struct CTrail *, struct gbCamera *), this, pCam)
 
 
 
@@ -838,6 +887,10 @@ struct gbSurfaceDesc {
     assert(sizeof(struct gbAudioManager) == 0xF4); \
     assert(sizeof(struct SoundAttachObj) == 0xC); \
     assert(sizeof(struct gbSurfaceDesc) == 0x14); \
+    assert(sizeof(struct gbPixelFormat) == 0x2C); \
+    assert(sizeof(struct gbTexture) == 0x54); \
+    assert(sizeof(struct gbTexture_D3D) == 0x60); \
+    assert(sizeof(struct CTrail) == 0x348); \
 } while (0)
 
 

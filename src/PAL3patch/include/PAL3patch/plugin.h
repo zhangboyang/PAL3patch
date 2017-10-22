@@ -53,13 +53,13 @@ __declspec(naked) static void newname(const char *fmt, ...) \
     static unsigned retaddr; \
     static const char *plugin_name = PLUGIN_NAME; \
     __asm { \
-        __asm POP retaddr \
-        __asm MOV EAX, DWORD PTR [LOG_INDENT_VAR] \
-        __asm PUSH DWORD PTR [EAX] \
-        __asm PUSH plugin_name \
-        __asm CALL DWORD PTR [oldname] \
-        __asm ADD ESP, 8 \
-        __asm JMP retaddr \
+        __asm pop retaddr \
+        __asm mov eax, dword ptr [LOG_INDENT_VAR] \
+        __asm push dword ptr [eax] \
+        __asm push plugin_name \
+        __asm call dword ptr [oldname] \
+        __asm add esp, 8 \
+        __asm jmp retaddr \
     } \
 }
 MAKE_PLUGINLOG_ASM_WRAPPER(fail, plugin_fail)

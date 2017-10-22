@@ -105,6 +105,8 @@ static void init_stage2()
         
         //if (INIT_PATCHSET(fixui)) { 
         
+        INIT_PATCHSET(fixtrail);
+        INIT_PATCHSET(forcesettexture);
         INIT_PATCHSET(screenshot); // should after as many patches as possible
     }
     
@@ -136,9 +138,7 @@ static void init_stage2()
             INIT_PATCHSET(fixunderwater);
         }
         INIT_PATCHSET(fixeffect);
-        INIT_PATCHSET(forcesettexture);
-        INIT_PATCHSET(fixtrail);
-        INIT_PATCHSET(screenshot);
+        
     }
 */
     // load external plugins

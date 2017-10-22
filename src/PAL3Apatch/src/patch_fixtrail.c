@@ -1,5 +1,15 @@
 #include "common.h"
 
+// hook gbTexture_D3D::CreateForRenderTarget, clear texture after creation
+static MAKE_THISCALL(int, gbTexture_D3D_CreateForRenderTarget_wrapper, struct gbTexture_D3D *this, int width, int height, enum gbPixelFmtType format)
+{
+    int ret = gbTexture_D3D_CreateForRenderTarget(this, width, height, format);
+    if (ret) {
+        fill_texture((IDirect3DTexture9 *) this->pTex, 0xFF000000);
+    }
+    return ret;
+}
+
 static int tex_flag;
 static int tex_width, tex_height;
 
@@ -24,8 +34,11 @@ static void try_create_rendertarget()
     
 }
 
-static MAKE_ASMPATCH(CTrail_Create_asmpatch)
+static MAKE_ASMPATCH(CTrail_OnResetDevice_asmpatch)
 {
+    R_EAX = M_DWORD(R_ESI); // old code 
+    R_ECX = R_ESI;
+    
     PUSH_DWORD(tex_height);
     PUSH_DWORD(tex_width);
 }
@@ -59,7 +72,10 @@ static MAKE_THISCALL(void, CTrail_Begin_wrapper, struct CTrail *this, struct gbC
 
 MAKE_PATCHSET(fixtrail)
 {
+    // hook gbTexture_D3D::CreateForRenderTarget
+    INIT_WRAPPER_VFPTR(gbTexture_D3D_CreateForRenderTarget_wrapper, gboffset + 0x100D674C);
+    
     add_postd3dcreate_hook(try_create_rendertarget);
-    INIT_ASMPATCH(CTrail_Create_asmpatch, 0x004C652F, 10, "\x68\x00\x01\x00\x00\x68\x00\x01\x00\x00");
-    INIT_WRAPPER_CALL(CTrail_Begin_wrapper, { 0x004FC3E1 });
+    INIT_ASMPATCH(CTrail_OnResetDevice_asmpatch, 0x004B73B9, 6, "\x8B\x06\x8B\xCE\x57\x57");
+    INIT_WRAPPER_CALL(CTrail_Begin_wrapper, { 0x004ED784 });
 }

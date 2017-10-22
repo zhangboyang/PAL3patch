@@ -2,5 +2,5 @@
 
 MAKE_PATCHSET(forcesettexture)
 {
-    SIMPLE_PATCH_NOP(gboffset + 0x1001B43D, "\x74\x23", 2);
+    SIMPLE_PATCH_NOP(gboffset + 0x1001ADC3, "\x74\x24", 2);
 }
