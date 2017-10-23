@@ -2,7 +2,7 @@
 
 // game resolution
 int game_width, game_height;
-fRECT game_frect, game_frect_43, game_frect_original;
+fRECT game_frect, game_frect_43, game_frect_original, game_frect_original_lt;
 fRECT game_frect_custom[MAX_CUSTOM_GAME_FRECT];
 fRECT game_frect_sqrtex; // normalized ratio rect for square texture
 double game_scalefactor;
@@ -268,8 +268,10 @@ static void patch_resolution_config(const char *cfgstr)
     }
     
     /* calc basic game rect */
-    set_frect_ltwh(&game_frect_original, 0, 0, GAME_WIDTH_ORG, GAME_HEIGHT_ORG);
+    set_frect_ltwh(&game_frect_original_lt, 0, 0, GAME_WIDTH_ORG, GAME_HEIGHT_ORG);
     set_frect_ltwh(&game_frect, 0, 0, game_width, game_height);
+    transform_frect(&game_frect_original, &game_frect_original_lt, &game_frect, &game_frect, TR_CENTER, TR_CENTER, 1.0);
+    floor_frect(&game_frect_original, &game_frect_original);
     get_ratio_frect(&game_frect_43, &game_frect, 4.0 / 3.0, TR_CENTER, TR_CENTER);
     game_scalefactor = get_frect_min_scalefactor(&game_frect_43, &game_frect_original);
 

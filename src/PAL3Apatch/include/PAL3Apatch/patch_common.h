@@ -6,7 +6,7 @@
 // NOTE: for tidy, these function definitions are copied from INTERNAL DEFINITIONS
 
 extern PATCHAPI int game_width, game_height;
-extern PATCHAPI fRECT game_frect, game_frect_43, game_frect_original;
+extern PATCHAPI fRECT game_frect, game_frect_43, game_frect_original, game_frect_original_lt;
 extern PATCHAPI double game_scalefactor;
 
 extern PATCHAPI HWND game_hwnd;

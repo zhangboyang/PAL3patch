@@ -53,6 +53,17 @@ struct UIWnd {
     int m_benable;
     int m_bfocus;
 };
+struct UIWndVtbl {
+    MAKE_THISCALL(void, *ShowWindow, struct UIWnd *this, int);
+    MAKE_THISCALL(void, *Render, struct UIWnd *this);
+    MAKE_THISCALL(int, *Update, struct UIWnd *this, float, int);
+    MAKE_THISCALL(void, *Destroy, struct UIWnd *this);
+    MAKE_THISCALL(void, *Create, struct UIWnd *this, unsigned int, RECT *, struct UIWnd *, char);
+    void *scalar_deleting_destructor;
+    MAKE_THISCALL(int, *OnMessage, struct UIWnd *this, unsigned int, unsigned int, unsigned int);
+};
+#define UIWnd_vfptr_Render(this) THISCALL_WRAPPER((this)->vfptr->Render, this)
+#define UIWnd_vfptr_Update(this, deltatime, haveinput) THISCALL_WRAPPER((this)->vfptr->Update, this, deltatime, haveinput)
 
 struct gbMatrix4 {
     float m[4][4];
@@ -315,7 +326,7 @@ struct gbUIQuad {
     float eu;
     float ev;
     float z;
-    DWORD color;
+    struct gbColorQuad color;
 };
 
 
@@ -776,6 +787,60 @@ struct CTrail {
     struct IDirect3DSurface9 *m_OriginSurface;
 };
 
+struct gbTextureArray {
+    struct gbTexture *pTexPt[16];
+    int nTex;
+};
+
+enum gbPoolType {
+    GB_POOL_STATIC = 0x0,
+    GB_POOL_WRITEONLY = 0x1,
+    GB_POOL_READONLY = 0x2,
+};
+
+struct gbDynVertBuf {
+    struct gbDynVertBufVtbl *vfptr;
+    enum gbPoolType Type;
+    int VertNum;
+    unsigned int VertType;
+    int Stride;
+    int BaseIndex;
+    int LockVertNum;
+    float *pXYZ;
+    float *pNormal;
+    struct gbColorQuad *pColor1;
+    struct gbColorQuad *pColor2;
+    float *pUV[4];
+};
+
+struct gbPrintFont {
+    struct gbPrintFontVtbl *vfptr;
+    struct FontPrintInfo *ptInfo;
+    struct FontSortInfoObj *pSortInfo;
+    int maxInfo;
+    int numInfo;
+    struct FontPrint3DInfo *pt3DInfo;
+    int num3DInfo;
+    int max3DInfo;
+    char *strBuffer;
+    int maxStrBuffer;
+    int curStrLoc;
+    struct gbColorQuad curColor;
+    float ScaleX;
+    float ScaleY;
+    float PitchX;
+    float PitchY;
+    float ZValue;
+    struct gbRenderEffect *pEffect[2];
+};
+
+struct RenderTarget {
+    int m_iMode;
+    struct gbTexture_D3D m_Texture;
+    struct gbTexture_D3D m_ScreenPlane;
+    int m_nState;
+};
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -797,6 +862,8 @@ struct CTrail {
 #define gbTexture_D3D_Ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001B440, struct gbTexture_D3D *, struct gbTexture_D3D *), this)
 #define gbTexture_D3D_Dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001B490, void, struct gbTexture_D3D *), this)
 #define gbCamera_SetDimention(this, a2, a3) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021680, void, struct gbCamera *, int, int), this, a2, a3)
+#define gbPrintFont_PrintString(this, str, x, y, endx, endy) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10022510, void, struct gbPrintFont *, const char *, float, float, float, float), this, str, x, y, endx, endy)
+#define gbVertPoolMgr_GetDynVertBuf(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021150, struct gbDynVertBuf *, struct gbVertPoolMgr *, unsigned int), this, a2)
 
 
 
@@ -829,6 +896,8 @@ struct CTrail {
 #define gbBinkVideo_DrawFrameEx(this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0052532F, int, struct gbBinkVideo *, void *, int, int, int, int, int), this, pDestBuf, nDestPitch, nDestHeight, nDestLeft, nDestTop, nDestSurfaceType)
 #define gbBinkVideo_BinkWait(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00525291, int, struct gbBinkVideo *), this)
 #define CTrail_Begin(this, pCam) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004B7424, void, struct CTrail *, struct gbCamera *), this, pCam)
+#define UICursor_IRender(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0052B769, void, struct UICursor *), this)
+#define RenderTarget_Inst ((struct RenderTarget *(*)(void)) TOPTR(0x004ADCF5))
 
 
 
@@ -839,6 +908,9 @@ struct CTrail {
 #define PAL3_s_gamestate (*(int *) TOPTR(0x00C01CE0))
 #define PAL3_s_bActive (*(int *) TOPTR(0x00574D34))
 #define xmusic ((PAL3_s_flag & 4) == 0)
+#define ui_tex_color_gbf (*(struct gbRenderEffect **) TOPTR(0x0228F004))
+#define ui_color_blend_tex_gbf (*(struct gbRenderEffect **) TOPTR(0x0228F01C))
+
 
 
 // structure selfcheck
@@ -891,6 +963,10 @@ struct CTrail {
     assert(sizeof(struct gbTexture) == 0x54); \
     assert(sizeof(struct gbTexture_D3D) == 0x60); \
     assert(sizeof(struct CTrail) == 0x348); \
+    assert(sizeof(struct gbTextureArray) == 0x44); \
+    assert(sizeof(struct gbDynVertBuf) == 0x3C); \
+    assert(sizeof(struct gbPrintFont) == 0x4C); \
+    assert(sizeof(struct RenderTarget) == 0xC8); \
 } while (0)
 
 

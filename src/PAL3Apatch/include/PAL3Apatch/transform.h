@@ -49,6 +49,7 @@ extern PATCHAPI void set_frect_ltrb(fRECT *frect, double left, double top, doubl
 extern PATCHAPI void set_frect_ltwh(fRECT *frect, double left, double top, double width, double height);
 extern PATCHAPI void translate_frect_rel(fRECT *out_frect, const fRECT *frect, double lr, double tb);
 extern PATCHAPI void scale_frect_fixlt(fRECT *out_frect, const fRECT *frect, double wf, double hf);
+extern PATCHAPI void floor_frect(fRECT *out_frect, const fRECT *frect);
 extern PATCHAPI void gbfrect2frect(fRECT *out_frect, const fRECT *frect);
 extern PATCHAPI void frect2gbfrect(fRECT *out_frect, const fRECT *frect);
 extern PATCHAPI void get_ratio_frect(fRECT *out_frect, const fRECT *frect, double ratio, int lr_method, int tb_method);

@@ -205,6 +205,22 @@ void *alloc_dyncode_buffer(unsigned size)
     return ret;
 }
 
+// add code to dyncode buffer
+// there must be at least 5 bytes at patchaddr
+void add_dyncode_with_jmpback(unsigned patchaddr, unsigned jmpback, void *code, unsigned size)
+{
+    if (patchaddr < jmpback && jmpback < patchaddr + 5) {
+        fail("no space for patchaddr.");
+    }
+    
+    void *buf = alloc_dyncode_buffer(size + 5);
+    memcpy(buf, code, size);
+    make_jmp(TOUINT(PTRADD(buf, size)), TOPTR(jmpback));
+    flush_instruction_cache(buf, size + 5);
+
+    make_jmp(patchaddr, buf);
+}
+
 void flush_instruction_cache(void *base, unsigned size)
 {
     FlushInstructionCache(GetCurrentProcess(), base, size);

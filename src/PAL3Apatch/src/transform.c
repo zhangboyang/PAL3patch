@@ -95,6 +95,12 @@ void scale_frect_fixlt(fRECT *out_frect, const fRECT *frect, double wf, double h
     set_frect_ltwh(out_frect, frect->left, frect->top, get_frect_width(frect) * wf, get_frect_height(frect) * hf);
 }
 
+// floor each point
+void floor_frect(fRECT *out_frect, const fRECT *frect)
+{
+    set_frect_ltrb(out_frect, floor(frect->left + eps), floor(frect->top + eps), floor(frect->right + eps), floor(frect->bottom + eps));
+}
+
 // convert between GameBox coord and screen coord
 void gbfrect2frect(fRECT *out_frect, const fRECT *frect)
 {

@@ -189,7 +189,7 @@ static MAKE_THISCALL(void, gbDynVertBuf_RenderUIQuad_wrapper, struct gbDynVertBu
 }
 static void hook_gbDynVertBuf_RenderUIQuad()
 {
-    unsigned func_iat_entry = 0x0056A36C;
+    unsigned func_iat_entry = 0x00558394;
     
     // save original function pointer to gbDynVertBuf_RenderUIQuad_original
     memcpy_from_process(&gbDynVertBuf_RenderUIQuad_original, func_iat_entry, sizeof(void *));
@@ -199,10 +199,10 @@ static void hook_gbDynVertBuf_RenderUIQuad()
     
     // fix calls inside GBENGINE.DLL
     INIT_WRAPPER_CALL(gbDynVertBuf_RenderUIQuad_wrapper, {
-        gboffset + 0x10015476,
-        gboffset + 0x100229A7,
-        // gboffset + 0x10023462, // NOTE: should NOT hook this function in gbPrintFont_NUM::Flush(), see notes20161115.txt for details
-        gboffset + 0x10023A87,
+        gboffset + 0x10015239,
+        gboffset + 0x100222BE,
+        //gboffset + 0x10022CC6, // NOTE: should NOT hook this function in gbPrintFont_NUM::Flush(), see notes20161115.txt for details
+        gboffset + 0x10023347,
     });
 }
 
@@ -230,7 +230,7 @@ static void hook_gbPrintFont_PrintString()
 {
     // we only patch gbPrintFont_NUM here
     // FIXME: should we patch more classes? (e.g. gbPrintFont_ASC)
-    INIT_WRAPPER_VFPTR(gbPrintFont_PrintString_wrapper, gboffset + 0x100F586C); // vfptr for gbPrintFont_NUM
+    INIT_WRAPPER_VFPTR(gbPrintFont_PrintString_wrapper, gboffset + 0x100D6874); // vfptr for gbPrintFont_NUM
 }
 
 
@@ -419,7 +419,7 @@ static void init_softcursor_sizepatch()
 {
     softcursor_sizepatch_inited = 1;
     softcursor_scalefactor = str2scalefactor(get_string_from_configfile("softcursor_scalefactor"));
-    INIT_WRAPPER_CALL(UICursor_IRender_wrapper, { 0x004061D2 });
+    INIT_WRAPPER_CALL(UICursor_IRender_wrapper, { 0x00407C54 });
 }
 
 
@@ -504,6 +504,7 @@ static MAKE_THISCALL(void, UIWnd_Render, struct UIWnd *this)
     int i;
     for (i = 0; i < this->m_childs.m_nSize; i++) {
         struct UIWnd *pwnd = this->m_childs.m_pData[i];
+        if (IsBadReadPtr(pwnd, 4)) continue;
         if (!pwnd->m_bvisible) continue;
         if (!verify_ptag_magic(pwnd) || !verify_ptag_magic(this)) {
             // the magic is broken due to unknown reasons
@@ -525,6 +526,7 @@ static MAKE_THISCALL(int, UIWnd_Update, struct UIWnd *this, float deltatime, int
     int i;
     for (i = this->m_childs.m_nSize - 1; i >= 0; i--) {
         struct UIWnd *pwnd = this->m_childs.m_pData[i];
+        if (IsBadReadPtr(pwnd, 4)) continue;
         int ret;
         if (!verify_ptag_magic(pwnd) || !verify_ptag_magic(this)) {
             // fallback    
@@ -545,18 +547,16 @@ static MAKE_THISCALL(int, UIWnd_Update, struct UIWnd *this, float deltatime, int
 static void init_uiwnd_positiontag_patch()
 {
     // modify UIWnd::Create
-    SIMPLE_PATCH(0x00445BDA, "\x89\x46\x34", "\xEB\x0B\x90", 3);
-    
-    char code_with_magic[] = "\xC7\x46\x34\x00\x00\x00\x00\xEB\xED";
+    char code_with_magic[] = "\xC7\x43\x34\x00\x00\x00\x00" "\x89\x43\x38";
     struct uiwnd_ptag initial_ptag;
     memset(&initial_ptag, 0, sizeof(struct uiwnd_ptag));
     initial_ptag.magic = UIWND_PTAG_MAGIC;
     memcpy(code_with_magic + 3, &initial_ptag, sizeof(struct uiwnd_ptag));
-    SIMPLE_PATCH(0x00445BE7, "\x90\x90\x90\x90\x90\x90\x90\x90\x90", code_with_magic, 9);
+    add_dyncode_with_jmpback(0x0044CF1D, 0x0044CF23, code_with_magic, sizeof(code_with_magic) - 1);
 
     // replace UIWnd::Update and UIWnd::Render
-    make_jmp(0x00445C60, UIWnd_Update);
-    make_jmp(0x00445CD0, UIWnd_Render);
+    make_jmp(0x0044CF8C, UIWnd_Update);
+    make_jmp(0x0044CFE8, UIWnd_Render);
 }
 
 
@@ -601,6 +601,27 @@ static void init_align_uirect()
     // fix 0.5 and -0.5 to 0
     PATCH_FLOAT_MEMREF_EXPR(0.0f, {
         // UIRenderQuad_2Rect_byFVF
+        0x00529926,
+        0x00529962,
+        0x005299FB,
+        0x00529A29,
+        
+        // _Texture_Info::_CalculateUV()
+        0x00447650,
+        
+        // UIStaticFlex::DrawRect()
+        0x0044C3B9,
+        0x0044C3C7,
+        
+        // UIFlexBar::DrawRect()
+        0x00445B18,
+        0x00445B2D,
+    });
+    SIMPLE_PATCH(0x0055F0E0, "\x00\x00\x00\xBF", "\x00\x00\x00\x00", 4); // patch UIRenderQuad functions
+/*
+    // fix 0.5 and -0.5 to 0
+    PATCH_FLOAT_MEMREF_EXPR(0.0f, {
+        // UIRenderQuad_2Rect_byFVF
         0x005402CD,
         0x00540303,
         0x00540315,
@@ -621,12 +642,12 @@ static void init_align_uirect()
         0x0043DBCE,
         0x0043DB52,
     });
-    SIMPLE_PATCH(0x00570A6C, "\x00\x00\x00\xBF", "\x00\x00\x00\x00", 4); // patch UIRenderQuad functions
+    SIMPLE_PATCH(0x00570A6C, "\x00\x00\x00\xBF", "\x00\x00\x00\x00", 4); // patch UIRenderQuad functions*/
 }
 
 
 
-static void __cdecl UIRenderQuad_color(int left, int top, int right, int bottom, float sv, float ev, struct gbColorQuad *color, struct gbTextureArray *atex)
+static void __cdecl UIRenderQuad_color(int left, int top, int right, int bottom, float sv, float ev, struct gbColorQuad *color, struct gbTextureArray *atex, int mode)
 {
     fixui_pushidentity();
     struct gbUIQuad uiquad;
@@ -647,18 +668,14 @@ static void __cdecl UIRenderQuad_color(int left, int top, int right, int bottom,
         uiquad.eu = game_frect_sqrtex.right;
         uiquad.ev = game_frect_sqrtex.top;
     }
-    THISCALL_WRAPPER(gbDynVertBuf_RenderUIQuad_wrapper, gbVertPoolMgr_GetDynVertBuf(GB_GfxMgr->pVertPoolMgr, 0x114u), &uiquad, 1, ui_tex_color_gbf, atex);
+    THISCALL_WRAPPER(gbDynVertBuf_RenderUIQuad_wrapper, gbVertPoolMgr_GetDynVertBuf(GB_GfxMgr->pVertPoolMgr, 0x114u), &uiquad, 1, (mode ? ui_color_blend_tex_gbf : ui_tex_color_gbf), atex);
     fixui_popstate();
 }
 static void hook_UIRenderQuad_color()
 {
     INIT_WRAPPER_CALL(UIRenderQuad_color, {
-        0x0045995D,
-        0x0047C2BD,
-        0x004A487D,
-        0x0052365D,
-        0x00527D2D,
-        0x00529CDB,
+        0x00461F4C,
+        0x0049E987,
     });
 }
 
@@ -671,7 +688,7 @@ static MAKE_THISCALL(void, gbCamera_SetDimention_wrapper_for_RenderTarget_Begin,
 
 static void fix_RenderTarget_ratio()
 {
-    make_branch(0x004BDCCF, 0xE8, gbCamera_SetDimention_wrapper_for_RenderTarget_Begin, 6);
+    INIT_WRAPPER_CALL(gbCamera_SetDimention_wrapper_for_RenderTarget_Begin, { 0x004ADEB2 });
 }
 
 

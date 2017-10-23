@@ -67,8 +67,7 @@ static void init_stage2()
     
     // init hook framework
     init_hooks();
-// FIXME
-//    init_effect_hooks();
+    init_effect_hooks();
 //    init_texture_hooks();
     
     // init freetype
@@ -103,44 +102,32 @@ static void init_stage2()
         INIT_PATCHSET(nolockablebackbuffer);
         INIT_PATCHSET(fixreset);
         
-        //if (INIT_PATCHSET(fixui)) { 
-        
-        INIT_PATCHSET(fixtrail);
-        INIT_PATCHSET(forcesettexture);
-        INIT_PATCHSET(screenshot); // should after as many patches as possible
-    }
-    
-    
-/* // FIXME
-    
-    
-
-    
-    if (INIT_PATCHSET(graphicspatch)) {
-        // these are subpatchs of graphics patch
-        
-        
-        
-        
         if (INIT_PATCHSET(fixui)) { 
             // must called after INIT_PATCHSET(graphicspatch)
             // must called after INIT_PATCHSET(setlocale) because of D3DXCreateFont need charset information
             // ui fixes
-            INIT_PATCHSET(uireplacefont);
-            INIT_PATCHSET(fixcombatui);
-            INIT_PATCHSET(fix3dctrl);
-            INIT_PATCHSET(fixlineupui);
-            INIT_PATCHSET(fixuistaticex);
-            INIT_PATCHSET(fixsceneui);
+
+            //INIT_PATCHSET(uireplacefont);
+            //INIT_PATCHSET(fixcombatui);
+            //INIT_PATCHSET(fix3dctrl);
+            //INIT_PATCHSET(fixlineupui);
+            //INIT_PATCHSET(fixuistaticex);
+            //INIT_PATCHSET(fixsceneui);
             INIT_PATCHSET(uireplacetexf);
-            INIT_PATCHSET(clampuilib);
-            INIT_PATCHSET(fixuibuttonex);
-            INIT_PATCHSET(fixunderwater);
+            //INIT_PATCHSET(clampuilib);
+            //INIT_PATCHSET(fixuibuttonex);
+            //INIT_PATCHSET(fixunderwater);
+
         }
+
+        INIT_PATCHSET(fixtrail);
+        INIT_PATCHSET(forcesettexture);
         INIT_PATCHSET(fixeffect);
-        
+        INIT_PATCHSET(screenshot); // should after as many patches as possible
     }
-*/
+    
+    
+
     // load external plugins
     init_plugins();
     

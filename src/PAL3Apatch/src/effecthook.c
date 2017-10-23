@@ -85,7 +85,7 @@ static char *run_all_effect_hooks(const char *fn, const char *eff)
 
 static MAKE_ASMPATCH(hook_D3DXCreateEffect)
 {
-    char *eff_filename = TOPTR(M_DWORD(R_ESP + 0x50)); // effect filename
+    char *eff_filename = TOPTR(M_DWORD(R_ESP + 0x3C)); // effect filename
     char *eff_filedata = TOPTR(M_DWORD(R_ESP + 0x4)); // effect content
     unsigned int eff_filelen = M_DWORD(R_ESP + 0x8);
     
@@ -107,10 +107,10 @@ static MAKE_ASMPATCH(hook_D3DXCreateEffect)
     
     free(old_eff);
     
-    LINK_CALL(gboffset + 0x1003439A);
+    LINK_CALL(gboffset + 0x10031BA2);
 }
 
 void init_effect_hooks()
 {
-    INIT_ASMPATCH(hook_D3DXCreateEffect, gboffset + 0x1001D771, 5, "\xE8\x24\x6C\x01\x00");
+    INIT_ASMPATCH(hook_D3DXCreateEffect, gboffset + 0x1001D360, 5, "\xE8\x3D\x48\x01\x00");
 }
