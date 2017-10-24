@@ -7,7 +7,7 @@ struct ui3dctrl_origininfo {
     int from_y;
     int flag;
 };
-#define oinfo(this) (*(struct ui3dctrl_origininfo *)(&this->baseclass.m_rect))
+#define oinfo(this) (*(struct ui3dctrl_origininfo *)(&this->m_rect))
 
 struct ui3dctrl_orthoinfo {
     float m_orthosize_sv;
@@ -82,40 +82,58 @@ static MAKE_THISCALL(void, UI3DCtrl_SetOriginPt_XYFromY_wrapper, struct UI3DCtrl
 MAKE_PATCHSET(fix3dctrl)
 {
     INIT_WRAPPER_CALL(UI3DCtrl_SetOriginPt_XY_wrapper, {
-        0x0047F7F2,
-        0x0047F864,
-        0x004AC450,
-        0x004AC4D7,
-        0x00525E3D,
-        0x00525EAA,
-        0x00525FA7,
-        0x005288F9,
-        0x00528B19,
+        0x0047D631,
+        0x0047D569,
+        0x0047FFF1,
     });
     INIT_WRAPPER_CALL(UI3DCtrl_SetOriginPt_XYFromY_wrapper, {
-        0x0045E6D9,
-        0x0046C4CA,
-        0x0046EB65,
-        0x00470477,
-        0x004729C0,
-        0x00478114,
-        0x0047A25F,
-        0x0048E4B5,
-        0x00494E76,
-        0x00495038,
-        0x004951FB,
-        0x004953D8,
-        0x0049559B,
-        0x0049575E,
-        0x00495AB0,
-        0x00496D30,
-        0x004984EB,
-        0x0049B33B,
-        0x0049B365,
-        0x0049F91F,
-        0x004A0EBF,
+        0x00466439,
+        0x0046CFE3,
+        0x0046D3C1,
+        0x0046D548,
+        0x00470187,
+        0x00470BFB,
+        0x00470FB3,
+        0x00471113,
+        0x00471189,
+        0x0047124E,
+        0x0047130A,
+        0x004713C2,
+        0x004714CB,
+        0x0047158E,
+        0x00471622,
+        0x0047466E,
+        0x00478B8F,
+        0x00478F6D,
+        0x00479104,
+        0x004794C0,
+        0x00479620,
+        0x00479698,
+        0x0047975B,
+        0x00479817,
+        0x004798CF,
+        0x004799DA,
+        0x00479A9D,
+        0x00479B31,
+        0x00491997,
+        0x0049216F,
+        0x00492568,
+        0x0049266B,
+        0x004926F7,
+        0x00499699,
+        0x0049A1BF,
+        0x0049A577,
+        0x0049A6D7,
+        0x0049A74D,
+        0x0049A812,
+        0x0049A8CE,
+        0x0049A986,
+        0x0049AA8F,
+        0x0049AB52,
+        0x0049ABE6,
+        0x0049E7AE,
     });
 
-    INIT_WRAPPER_VFPTR(UI3DCtrl_Render_wrapper, 0x0056AC24);
-    INIT_WRAPPER_VFPTR(UI3DCtrl_Update_wrapper, 0x0056AC28);
+    INIT_WRAPPER_VFPTR(UI3DCtrl_Render_wrapper, 0x00558C04);
+    INIT_WRAPPER_VFPTR(UI3DCtrl_Update_wrapper, 0x00558C08);
 }

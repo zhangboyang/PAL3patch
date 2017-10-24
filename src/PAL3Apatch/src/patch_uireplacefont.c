@@ -497,8 +497,8 @@ static void ui_replacefont_d3dxfont_init()
     add_onresetdevice_hook(d3dxfont_onresetdevice);
     
     // hook gbPrintFont_UNICODE's member function
-    make_jmp(gboffset + 0x10023A90, gbPrintFont_UNICODE_Flush);
-    make_jmp(gboffset + 0x10023FD0, gbPrintFont_UNICODE_PrintString);
+    make_jmp(gboffset + 0x10023350, gbPrintFont_UNICODE_Flush);
+    make_jmp(gboffset + 0x10023820, gbPrintFont_UNICODE_PrintString);
 }
 
 
@@ -569,8 +569,8 @@ static void hook_UIDrawTextEx()
 {
     // xref of UIDrawTextEx()
     INIT_WRAPPER_CALL(UIDrawTextEx_wrapper, {
-        0x00450533,
-        0x005411F2,
+        0x004568FB,
+        0x0052A72F,
     });
 }
 
@@ -590,12 +590,11 @@ static void UIPrint_wrapper(int x, int y, char *str, struct gbColorQuad *color, 
 static void hook_UIPrint()
 {
     INIT_WRAPPER_CALL(UIPrint_wrapper, {
-        0x0043E8A0 + 0x11F,
-        0x0043E8A0 + 0x13B,
-        0x0044DAC0 + 0x66,
-        0x0053C990 + 0xE6,
-        0x0053C990 + 0x10A,
-        0x0053C990 + 0x143,
+        0x004467AB,
+        0x00525A28,
+        0x00525A4C,
+        0x00525A82,
+        0x00525AFE,
     });
 }
 

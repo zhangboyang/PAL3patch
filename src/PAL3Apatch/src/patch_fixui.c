@@ -156,6 +156,7 @@ static void fixui_setdefaultransform(int new_def)
 static int fixui_map_gamestate(int pal3_gamestate)
 {
     switch (pal3_gamestate) {
+        case GAME_COMPDONATE:
         case GAME_UI:
             return FIXUI_AUTO_TRANSFORM;
         default:
@@ -618,31 +619,6 @@ static void init_align_uirect()
         0x00445B2D,
     });
     SIMPLE_PATCH(0x0055F0E0, "\x00\x00\x00\xBF", "\x00\x00\x00\x00", 4); // patch UIRenderQuad functions
-/*
-    // fix 0.5 and -0.5 to 0
-    PATCH_FLOAT_MEMREF_EXPR(0.0f, {
-        // UIRenderQuad_2Rect_byFVF
-        0x005402CD,
-        0x00540303,
-        0x00540315,
-        0x0054038E,
-        0x005403C7,
-        
-        // _Texture_Info::_CalculateUV()
-        0x0053F329,
-        0x0053F349,
-        0x0053F303,
-        0x0053F36D,
-        
-        // UIStaticFlex::DrawRect()
-        0x004457AC,
-        0x004457D9,
-        
-        // UIFlexBar::DrawRect()
-        0x0043DBCE,
-        0x0043DB52,
-    });
-    SIMPLE_PATCH(0x00570A6C, "\x00\x00\x00\xBF", "\x00\x00\x00\x00", 4); // patch UIRenderQuad functions*/
 }
 
 

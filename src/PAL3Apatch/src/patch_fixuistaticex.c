@@ -52,16 +52,16 @@ MAKE_PATCHSET(fixuistaticex)
     float a = ratio, b = 1.0 / ratio, c = 1.0;
     
     // fix UIStaticEX aspect ratio (e.g. compass at scene)
-    memcpy_to_process(0x00442F2C, &c, sizeof(float));
-    memcpy_to_process(0x00442F31, &b, sizeof(float));
-    memcpy_to_process(0x00442F7E, &c, sizeof(float));
-    memcpy_to_process(0x00442F83, &a, sizeof(float));
-    INIT_WRAPPER_VFPTR(UIStaticEX_Render_wrapper, 0x0056AE14);
+    PATCH_FLOAT_MEMREF_EXPR(c, { 0x0044B3B6 });
+    PATCH_FLOAT_MEMREF_EXPR(b, { 0x0044B3C0 });
+    PATCH_FLOAT_MEMREF_EXPR(c, { 0x0044B40C });
+    PATCH_FLOAT_MEMREF_EXPR(a, { 0x0044B416 });
+    INIT_WRAPPER_VFPTR(UIStaticEX_Render_wrapper, 0x00558DFC);
     
     // fix UIStaticEXA aspect ratio (e.g. taiji at splash)
-    memcpy_to_process(0x004432BD, &c, sizeof(float));
-    memcpy_to_process(0x004432C2, &b, sizeof(float));
-    memcpy_to_process(0x0044330F, &c, sizeof(float));
-    memcpy_to_process(0x00443314, &a, sizeof(float));
-    INIT_WRAPPER_VFPTR(UIStaticEXA_Render_wrapper, 0x0056AE30);
+    PATCH_FLOAT_MEMREF_EXPR(c, { 0x0044B6D3 });
+    PATCH_FLOAT_MEMREF_EXPR(b, { 0x0044B6DD });
+    PATCH_FLOAT_MEMREF_EXPR(c, { 0x0044B729 });
+    PATCH_FLOAT_MEMREF_EXPR(a, { 0x0044B733 });
+    INIT_WRAPPER_VFPTR(UIStaticEXA_Render_wrapper, 0x00558E18);
 }

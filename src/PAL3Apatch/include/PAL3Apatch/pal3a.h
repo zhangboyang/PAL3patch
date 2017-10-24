@@ -841,6 +841,114 @@ struct RenderTarget {
     int m_nState;
 };
 
+struct gbCachedChinaFont {
+    struct gbPrintFont;
+    int nCacheTex;
+    unsigned char *pFontImage;
+    struct gbTexture *pCacheTex[16];
+    int maxChars;
+    unsigned char *pCharPoint;
+    unsigned short *pAllChar;
+    int nCacheSlot;
+    struct gbCharCacheSlot *pCacheSlots;
+    unsigned int iFrame;
+    union {
+        int FONT_SIZE;
+        int fontsize;
+    };
+    int FONT_BITCOUNT;
+    int FONT_BYTES;
+    int CACHE_TEX_SIZE;
+    float FONT_TEX_SIZE;
+    int TEX_NCHAR;
+};
+#define gbPrintFont_UNICODE gbCachedChinaFont
+
+enum gbFontType {
+    GB_FONT_UNICODE12 = 0x0,
+    GB_FONT_UNICODE16 = 0x1,
+    GB_FONT_UNICODE20 = 0x2,
+    GB_FONT_NUMBER = 0x3,
+    GB_FONT_ASC = 0x4,
+};
+
+struct UI3DObj {
+    bool m_mouseoff;
+    int m_enable;
+    int m_needdel;
+    int m_type;
+    union {
+        struct gbGeomNode *m_pol;
+        struct Actor *m_actor;
+    };
+    struct gbVec3D m_pos;
+};
+
+struct UI3DCtrl {
+    struct UIWnd;
+    int m_numobj;
+    struct UI3DObj m_obj[5];
+    float m_orthosize;
+    int m_rotatemode;
+    bool m_isrotateto;
+    int m_speed;
+    float m_rotate;
+    float m_rotatetarget;
+    float m_rotx;
+    float m_rotz;
+    float m_dropx;
+    float m_dropy;
+    float m_dropz;
+    float m_scalex;
+    float m_scaley;
+    float m_scalez;
+    struct gbLightObj *m_lightobj;
+    struct gbCamera *m_camera;
+    struct gbVec3D m_raydir;
+};
+
+struct UIStatic {
+    struct UIWnd;
+    int m_bordersize;
+    int m_align;
+    float m_ratiow;
+    float m_ratioh;
+    int m_textx;
+    int m_texty;
+    enum gbFontType m_fonttype;
+    struct std_basic_string m_text;
+    struct gbTexture *m_pbk;
+    struct _PlugInfo *m_pbkInfo;
+    struct gbTexture *m_ppic;
+    struct _PlugInfo *m_ppicInfo;
+    struct gbTexture *m_disablepic;
+    struct _PlugInfo *m_disablepicInfo;
+    struct gbTexture *m_pbk2;
+    bool m_mouseoff;
+    int m_FVF;
+    int m_nTextW;
+    bool m_PureColor;
+    int m_richtext;
+};
+
+struct UIStaticEX {
+    struct UIStatic;
+    float m_rotate;
+    int m_rotmode;
+    float m_rotdst;
+    float m_rotspeed;
+    int m_rotdir;
+    bool m_isStoped;
+    float m_accelerate;
+    float m_notespeed;
+};
+
+struct UIStaticEXA {
+    struct UIStaticEX;
+    int center_x;
+    int center_y;
+};
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -864,6 +972,7 @@ struct RenderTarget {
 #define gbCamera_SetDimention(this, a2, a3) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021680, void, struct gbCamera *, int, int), this, a2, a3)
 #define gbPrintFont_PrintString(this, str, x, y, endx, endy) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10022510, void, struct gbPrintFont *, const char *, float, float, float, float), this, str, x, y, endx, endy)
 #define gbVertPoolMgr_GetDynVertBuf(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021150, struct gbDynVertBuf *, struct gbVertPoolMgr *, unsigned int), this, a2)
+#define gbPrintFontMgr_GetFont(this, fonttype) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100045F0, struct gbPrintFont *, struct gbPrintFontMgr *, enum gbFontType), this, fonttype)
 
 
 
@@ -898,6 +1007,15 @@ struct RenderTarget {
 #define CTrail_Begin(this, pCam) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004B7424, void, struct CTrail *, struct gbCamera *), this, pCam)
 #define UICursor_IRender(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0052B769, void, struct UICursor *), this)
 #define RenderTarget_Inst ((struct RenderTarget *(*)(void)) TOPTR(0x004ADCF5))
+#define UIDrawTextEx ((void (*)(const char *, RECT *, struct gbPrintFont *, int, int)) TOPTR(0x0052A73C))
+#define UIPrint ((void (*)(int, int, char *, struct gbColorQuad *, int)) TOPTR(0x0052A54C))
+#define UI3DCtrl_SetOriginPt_XY(this, x, y) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00441E73, void, struct UI3DCtrl *, int, int), this, x, y)
+#define UI3DCtrl_SetOriginPt_XYFromY(this, x, y, from_y) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00441F34, void, struct UI3DCtrl *, int, int, int), this, x, y, from_y)
+#define UI3DCtrl_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00441ACA, void, struct UI3DCtrl *), this)
+#define UI3DCtrl_Update(this, deltatime, haveinput) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00441FFA, int, struct UI3DCtrl *, float, int), this, deltatime, haveinput)
+#define UIStaticEX_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044B319, void, struct UIStaticEX *), this)
+#define UIStaticEXA_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044B611, void, struct UIStaticEXA *), this)
+
 
 
 
@@ -967,6 +1085,12 @@ struct RenderTarget {
     assert(sizeof(struct gbDynVertBuf) == 0x3C); \
     assert(sizeof(struct gbPrintFont) == 0x4C); \
     assert(sizeof(struct RenderTarget) == 0xC8); \
+    assert(sizeof(struct gbCachedChinaFont) == 0xC4); \
+    assert(sizeof(struct UI3DObj) == 0x20); \
+    assert(sizeof(struct UI3DCtrl) == 0x134); \
+    assert(sizeof(struct UIStatic) == 0xA0); \
+    assert(sizeof(struct UIStaticEX) == 0xC0); \
+    assert(sizeof(struct UIStaticEXA) == 0xC8); \
 } while (0)
 
 
