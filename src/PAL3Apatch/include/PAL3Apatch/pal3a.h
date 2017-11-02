@@ -949,6 +949,16 @@ struct UIStaticEXA {
     int center_y;
 };
 
+struct UnderWater {
+    bool m_bEnable;
+    IDirect3DIndexBuffer9 *m_pIB;
+    IDirect3DVertexBuffer9 *m_pVB;
+    IDirect3DTexture9 *m_pBumpmapTex;
+    int m_iMode;
+    float m_fTime;
+};
+
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -1015,6 +1025,7 @@ struct UIStaticEXA {
 #define UI3DCtrl_Update(this, deltatime, haveinput) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00441FFA, int, struct UI3DCtrl *, float, int), this, deltatime, haveinput)
 #define UIStaticEX_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044B319, void, struct UIStaticEX *), this)
 #define UIStaticEXA_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044B611, void, struct UIStaticEXA *), this)
+#define UnderWater_Inst ((struct UnderWater *(*)(void)) TOPTR(0x004AFA9E))
 
 
 
@@ -1091,6 +1102,7 @@ struct UIStaticEXA {
     assert(sizeof(struct UIStatic) == 0xA0); \
     assert(sizeof(struct UIStaticEX) == 0xC0); \
     assert(sizeof(struct UIStaticEXA) == 0xC8); \
+    assert(sizeof(struct UnderWater) == 0x18); \
 } while (0)
 
 
