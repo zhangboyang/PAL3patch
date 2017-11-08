@@ -13,6 +13,17 @@ extern PATCHAPI void set_d3dxfont_matrices(IDirect3DDevice9 *pd3dDevice);
 
 #ifdef USE_PAL3A_DEFINITIONS
 
+struct member_function_pointer {
+    union {
+        struct {
+            void *fp;
+            BYTE gap4[12];
+        };
+        struct {
+            unsigned long long gap0[2]; // force align
+        };
+    };
+};
 
 struct gbAudioMgrDesc {
     unsigned int frequence;
@@ -53,6 +64,7 @@ struct UIWnd {
     int m_benable;
     int m_bfocus;
 };
+
 struct UIWndVtbl {
     MAKE_THISCALL(void, *ShowWindow, struct UIWnd *this, int);
     MAKE_THISCALL(void, *Render, struct UIWnd *this);
@@ -573,15 +585,7 @@ struct tagCmdData {
 };
 
 struct tagThread {
-    union {
-        struct {
-            void *fp;
-            BYTE gap4[12];
-        };
-        struct {
-            unsigned long long gap0[2]; // force align
-        };
-    };
+    struct member_function_pointer fp;
     unsigned int dwID;
     int nTaskIndex;
     unsigned int dwTaskID;
@@ -958,6 +962,152 @@ struct UnderWater {
     float m_fTime;
 };
 
+struct C2DSpark_tagSpark {
+    float fx;
+    float fy;
+    float fVx;
+    float fVy;
+    float fAx;
+    float fAy;
+    float fLum;
+    float fLumInc;
+    float fSize;
+    float fSizeInc;
+    BYTE byColor;
+    bool bValid;
+    struct gbColorQuad color;
+};
+
+enum ECBShowItemKind {
+    CBSIK_Null,
+    CBSIK_Txt,
+    CBSIK_RoleState,
+    CBSIK_PrintTxt,
+    CBSIK_Pic,
+    CBSIK_FiveLineup,
+    CBSIK_EnemyFiveLineup,
+    CBSIK_CombatDialog,
+    CBSIK_ScreenQuad,
+    CBSIK_End,
+};
+
+struct tagShowItem {
+    enum ECBShowItemKind eKind;
+    char sTxt[256];
+    struct tagRGBQUAD color;
+    float fX;
+    float fY;
+    float fZ;
+    float fSize;
+};
+
+struct UIFrameWnd {
+    struct UIWnd;
+    struct gbTexture *m_pbktex;
+};
+
+struct tagUIParam {
+    struct UIWnd *pUI;
+    float fFromX;
+    float fFromY;
+    float fEndX;
+    float fEndY;
+    float fSpeed;
+    float fEnergy;
+    int nTimes;
+};
+
+struct tagUITask {
+    struct member_function_pointer fp;
+    bool bValid;
+    bool bExecuted;
+    bool bFinished;
+    unsigned int dwID;
+    float fStartTime;
+    float fExpectStartTime;
+    float fExpectEndTime;
+    struct tagUIParam param;
+};
+
+struct CCBUI {
+    struct UIFrameWnd;
+    struct UIStatic *m_pAttackSequenBack;
+    struct UIStatic *pPanel;
+    struct UIStatic *m_pBattleFieldAttr[6];
+    struct UIStatic *m_pAttackSequenFace[11];
+    struct UIStatic *m_pRoleStatePanel[4];
+    struct UIStatic *m_pRoleStateFace[5];
+    struct UIStatic *m_pRoleStateFaceName[5];
+    union {
+        struct {
+            struct UIStatic *m_pRoleStateAttackInc[11];
+            struct UIStatic *m_pRoleStateAttackDec[11];
+            struct UIStatic *m_pRoleStateDefenceInc[11];
+            struct UIStatic *m_pRoleStateDefenceDec[11];
+            struct UIStatic *m_pRoleStateLuckInc[11];
+            struct UIStatic *m_pRoleStateLuckDec[11];
+            struct UIStatic *m_pRoleStateSpeedInc[11];
+            struct UIStatic *m_pRoleStateSpeedDec[11];
+            struct UIStatic *m_pRoleStateStable[11];
+            struct UIStatic *m_pRoleStateBlank[11];
+            struct UIStatic *m_pRoleStateForbid[11];
+            struct UIStatic *m_pRoleStateSleep[11];
+            struct UIStatic *m_pRoleStateChaos[11];
+            struct UIStatic *m_pRoleStateMad[11];
+            struct UIStatic *m_pRoleStateMirror[11];
+            struct UIStatic *m_pRoleStateWall[11];
+            struct UIStatic *m_pRoleStateBound[11];
+            struct UIStatic *m_pRoleStateHermit[11];
+            struct UIStatic *m_pRoleStateImmunity[11];
+        };
+        struct UIStatic *m_pRoleSpecState[19][11];
+    };
+    struct UIStatic *m_pWinPanel;
+    struct UIStatic *m_pLosePanel;
+    struct UIProgressBar *m_pRoleStateHP[4];
+    struct UIProgressBar *m_pRoleStateGP[4];
+    struct UIProgressBar *m_pRoleStateMP[4];
+    struct UIProgressBar *m_pRoleStateSword;
+    struct UIStaticCB *m_pTrickName;
+    struct UIStaticCB *m_pTrickName2;
+    struct UIStatic *m_pDialogBack;
+    struct UIStatic *m_pResultLevelup;
+    struct UIStatic *m_pResultWindLvup;
+    struct UIStatic *m_pResultThunderLvup;
+    struct UIStatic *m_pResultWaterLvup;
+    struct UIStatic *m_pResultFireLvup;
+    struct UIStatic *m_pResultEarthLvup;
+    struct UIStatic *m_pResultDoubleLvup;
+    struct UIStatic *m_pResultGetItem;
+    struct CCBControlWindow *m_pMain;
+    struct CCBItemWindow *m_pItemWindow;
+    struct CCBParabolaWindow *m_pParabolaWindow;
+    struct CCBMagicWindow *m_pMagicWindow;
+    struct CCBSkillWindow *m_pSkillWindow;
+    struct CCBAIWindow *m_pAIWindow;
+    struct CCBLineupWindow *m_pLineupWindow;
+    struct CCBProtectWindow *m_pProtectWindow;
+    struct CCBResultWindow *m_pResultWindow[4];
+    struct CCBFiveNimbusWindow *m_pFiveNimbusWindow;
+    struct CCBSystem *m_pCBSystem;
+    struct CUtil *m_pUtil;
+    struct tagUITask m_Task[32];
+    bool m_bShowResult;
+    struct member_function_pointer m_fp;
+    int m_nTask;
+    int m_nCurTask;
+    int mImbibeNimbusNum;
+    struct tagImbibeNimbus *m_pImbibeNimbus;
+};
+
+struct CCBLineupWindow {
+    struct UIFrameWnd;
+    int m_nInitRoleFaceLineup[5];
+    struct UIStatic *m_pBack;
+    struct UIStatic *m_pFace[5];
+    int m_nSelected;
+    struct CCBUI *m_pUI;
+};
 
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
@@ -1026,7 +1176,14 @@ struct UnderWater {
 #define UIStaticEX_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044B319, void, struct UIStaticEX *), this)
 #define UIStaticEXA_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044B611, void, struct UIStaticEXA *), this)
 #define UnderWater_Inst ((struct UnderWater *(*)(void)) TOPTR(0x004AFA9E))
-
+#define C2DSpark_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004CA00F, void, struct C2DSpark *), this)
+#define C2DSpark_CreateSingle(this, pSpark) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004C9D01, bool, struct C2DSpark *, struct C2DSpark_tagSpark *), this, pSpark)
+#define C2DSpark_CreateStars(this, x, y, nWidth, fStarSize) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004C9E96, void, struct C2DSpark *, int, int, int, float), this, x, y, nWidth, fStarSize)
+#define C2DSpark_CreateMore(this, x, y, color) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004C9D66, void, struct C2DSpark *, int, int, struct gbColorQuad), this, x, y, color)
+#define CCBUI_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0050B5F6, bool, struct CCBUI *), this)
+#define CCBUI_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0050ED2B, void, struct CCBUI *), this)
+#define UIWnd_MoveWindow(this, x, y) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044D075, void, struct UIWnd *, int, int), this, x, y)
+#define UIFrameWnd_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445CF3, void, struct UIFrameWnd *), this)
 
 
 
@@ -1103,6 +1260,13 @@ struct UnderWater {
     assert(sizeof(struct UIStaticEX) == 0xC0); \
     assert(sizeof(struct UIStaticEXA) == 0xC8); \
     assert(sizeof(struct UnderWater) == 0x18); \
+    assert(sizeof(struct C2DSpark_tagSpark) == 0x30); \
+    assert(sizeof(struct tagShowItem) == 0x118); \
+    assert(sizeof(struct UIFrameWnd) == 0x48); \
+    assert(sizeof(struct tagUIParam) == 0x20); \
+    assert(sizeof(struct tagUITask) == 0x48); \
+    assert(sizeof(struct CCBUI) == 0xDE0); \
+    assert(sizeof(struct CCBLineupWindow) == 0x7C); \
 } while (0)
 
 

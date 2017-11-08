@@ -2,8 +2,8 @@
 
 #define CB_POPSTATE fixui_popstate
 
-#define CB_PUSHSTATE(lr, tb) fixui_pushstate(     &game_frect_original , get_ptag_frect(ccbui_dstrect_type), (lr), (tb), cb_scalefactor)
-#define CB_PTAG(lr, tb)      MAKE_PTAG(SF_COMBAT, PTR_GAMERECT_ORIGINAL, ccbui_dstrect_type                , (lr), (tb))
+#define CB_PUSHSTATE(lr, tb) fixui_pushstate(     &game_frect , get_ptag_frect(ccbui_dstrect_type), (lr), (tb), cb_scalefactor)
+#define CB_PTAG(lr, tb)      MAKE_PTAG(SF_COMBAT, PTR_GAMERECT, ccbui_dstrect_type                , (lr), (tb))
 
 static int ccbui_dstrect_type;
 
@@ -26,44 +26,40 @@ static MAKE_THISCALL(void, C2DSpark_CreateStars_wrapper, struct C2DSpark *this, 
 {
     C2DSpark_CreateStars(this, x, y, nWidth * cb_scalefactor, fStarSize);
 }
+static MAKE_THISCALL(void, C2DSpark_CreateMore_wrapper, struct C2DSpark *this, int x, int y, struct gbColorQuad color)
+{
+    POINT pt = {x, y};
+    CB_PUSHSTATE(TR_HIGH, TR_LOW);
+    fixui_adjust_POINT(&pt, &pt);
+    CB_POPSTATE();
+    C2DSpark_CreateMore(this, pt.x, pt.y, color);
+}
 static void patch_c2dspark()
 {
     // fix random range
     INIT_WRAPPER_CALL(C2DSpark_CreateStars_wrapper, {
-        0x004F85FC,
-        0x004F8636,
+        0x004E96EB,
+        0x004E971F,
     });
     
     // fix initial velocity and acceleration
     INIT_WRAPPER_CALL(C2DSpark_CreateSingle_wrapper, {
-        0x004D618F,
-        0x004D6011,
-        0x004D6484,
+        0x004C9FEB,
+        0x004C9E60,
+        0x004CA2EF,
     });
     
     // fix spark size
-    INIT_WRAPPER_CALL(C2DSpark_Render_wrapper, { 0x00513141 });
+    INIT_WRAPPER_CALL(C2DSpark_Render_wrapper, { 0x00506AA3 });
+    
+    // fix spart position
+    INIT_WRAPPER_CALL(C2DSpark_CreateMore_wrapper, {
+        0x004CFCA3,
+        0x0050EC43,
+    });
 }
 
-// fix c2dspark positions
-static MAKE_ASMPATCH(fixattacksequen_c2dspark)
-{
-    POINT pt = {691, 36};
-    CB_PUSHSTATE(TR_HIGH, TR_LOW);
-    fixui_adjust_POINT(&pt, &pt);
-    CB_POPSTATE();
-    PUSH_DWORD(pt.y);
-    PUSH_DWORD(pt.x);
-}
-static MAKE_ASMPATCH(fix_statuspanel_c2dspark)
-{
-    POINT pt = {25, 570};
-    CB_PUSHSTATE(TR_LOW, TR_HIGH);
-    fixui_adjust_POINT(&pt, &pt);
-    CB_POPSTATE();
-    PUSH_DWORD(pt.y);
-    PUSH_DWORD(pt.x);
-}
+
 
 
 // fix CCBDisplayChain
@@ -100,6 +96,7 @@ static MAKE_ASMPATCH(CCBDisplayChain_Render_PostEachItem)
 }
 
 
+
 // fix others
 static MAKE_THISCALL(bool, CCBUI_Create_wrapper, struct CCBUI *this)
 {
@@ -110,7 +107,6 @@ static MAKE_THISCALL(bool, CCBUI_Create_wrapper, struct CCBUI *this)
     
     // fix rolestate panel
     ptag = CB_PTAG(TR_LOW, TR_HIGH);
-    set_uiwnd_ptag(pUIWND(this->m_pRoleStateSword), ptag);
     for (i = 0; i < 4; i++) {
         set_uiwnd_ptag(pUIWND(this->m_pRoleStateHP[i]), ptag);
         set_uiwnd_ptag(pUIWND(this->m_pRoleStateGP[i]), ptag);
@@ -139,12 +135,13 @@ static MAKE_THISCALL(bool, CCBUI_Create_wrapper, struct CCBUI *this)
     set_uiwnd_ptag(pUIWND(this->m_pTrickName), ptag);
     set_uiwnd_ptag(pUIWND(this->m_pTrickName2), ptag);
     
-    // fix attacksequen
+    // fix attacksequen and five nimbus window
     ptag = CB_PTAG(TR_HIGH, TR_LOW);
     set_uiwnd_ptag(pUIWND(this->m_pAttackSequenBack), ptag);
     for (i = 0; i < 11; i++) {
         set_uiwnd_ptag(pUIWND(this->m_pAttackSequenFace[i]), ptag);
     }
+    set_uiwnd_ptag(pUIWND(this->m_pFiveNimbusWindow), ptag);
     
     // fix result popup box
     ptag = CB_PTAG(TR_CENTER, TR_CENTER);
@@ -180,11 +177,11 @@ static MAKE_THISCALL(bool, CCBUI_Create_wrapper, struct CCBUI *this)
     for (i = 0; i < 5; i++) {
         set_uiwnd_ptag(pUIWND(this->m_pLineupWindow->m_pFace[i]), ptag);
     }
-    int *lineup_head_left = TOPTR(0x0057024C);
-    int *lineup_head_top = TOPTR(0x00570268);
+    int *lineup_head_left = TOPTR(0x005EC16C);
+    int *lineup_head_top = TOPTR(0x005EC188);
     CB_PUSHSTATE(TR_LOW, TR_HIGH);
     for (i = 1; i <= 6; i++) {
-        int xoffset = 9, yoffset = 232;
+        int xoffset = M_DWORD(0x020B58A0), yoffset = M_DWORD(0x020B589C);
         POINT pt = { .x = lineup_head_left[i] + xoffset, .y = lineup_head_top[i] + yoffset };
         fixui_adjust_POINT(&pt, &pt);
         lineup_head_left[i] = pt.x - xoffset;
@@ -199,8 +196,8 @@ static MAKE_THISCALL(bool, CCBUI_Create_wrapper, struct CCBUI *this)
     return true;
 }
 
-// CCBUI use baseclass's Render(), we write a vitual function for it as a wrapper
-static MAKE_THISCALL(void, CCBUI_Render, struct CCBUI *this)
+
+static MAKE_THISCALL(void, CCBUI_Render_wrapper, struct CCBUI *this)
 {
     int i, j, k;
     
@@ -213,22 +210,24 @@ static MAKE_THISCALL(void, CCBUI_Render, struct CCBUI *this)
         for (k = 0; k < 19; k++) {
             j = icon_seq[k];
             struct UIStatic *pWnd = this->m_pRoleSpecState[j][i];
-            if (pWnd->baseclass.m_bcreateok && pWnd->baseclass.m_bvisible) {
+            if (pWnd->m_bcreateok && pWnd->m_bvisible) {
                 if (firstflag) {
-                    left = pWnd->baseclass.m_rect.left;
-                    top = pWnd->baseclass.m_rect.top;
+                    left = pWnd->m_rect.left;
+                    top = pWnd->m_rect.top;
                     firstflag = 0;
                 }
-                UIWnd_MoveWindow(&pWnd->baseclass, left, top);
+                UIWnd_MoveWindow(pUIWND(pWnd), left, top);
                 left += ceil(icon_width[j] * cb_scalefactor - eps);
             }
         }
     }
     
-    // call baseclass's method
-    UIFrameWnd_Render((struct UIFrameWnd *) this);
+    // render, and fix the imbibe nimbus
+// FIXME!!!
+//    CB_PUSHSTATE(TR_HIGH, TR_LOW);
+    CCBUI_Render(this);
+//    CB_POPSTATE();
 }
-
 
 // rewrite CCBLineupWindow::Render
 static MAKE_THISCALL(void, CCBLineupWindow_Render, struct CCBLineupWindow *this)
@@ -239,6 +238,7 @@ static MAKE_THISCALL(void, CCBLineupWindow_Render, struct CCBLineupWindow *this)
     UIWnd_vfptr_Render(pSelectedFace);
     pop_ptag_state(pSelectedFace);
 }
+
 // rewrite CCBLineupWindow::IsPtOnFace
 static MAKE_THISCALL(bool, CCBLineupWindow_IsPtOnFace, struct CCBLineupWindow *this, int nFaceIndex, POINT pt)
 {
@@ -260,11 +260,11 @@ static void setcursorpos_ccbcontrol_hookfunc(void *arg)
     CB_POPSTATE();
 }
 
-
 static MAKE_ASMPATCH(role_hp_string_position_limiter)
 {
-    int lr = R_ESI, tb = R_EBX;
-    char *hp_string = TOPTR(0x017AB8B8);
+    int lr = M_DWORD(R_EBP - 0x8);
+    int tb = M_DWORD(R_EBP - 0x4);
+    char *hp_string = TOPTR(0x020B3BD0);
     
     int cw = 10 * cb_scalefactor; // calc char width and height
     int ch = 20 * cb_scalefactor;
@@ -274,8 +274,8 @@ static MAKE_ASMPATCH(role_hp_string_position_limiter)
     lr = imax(imin(lr, game_width - sw), 0);
     tb = imax(imin(tb, game_height), ch);
     
-    R_ESI = lr;
-    R_EBX = tb;
+    M_DWORD(R_EBP - 0x8) = lr;
+    M_DWORD(R_EBP - 0x4) = tb;
 }
 
 MAKE_PATCHSET(fixcombatui)
@@ -285,27 +285,24 @@ MAKE_PATCHSET(fixcombatui)
 
     // fix C2DSpark
     patch_c2dspark();
-    INIT_ASMPATCH(fixattacksequen_c2dspark, 0x004DC4F0, 0x7, "\x6A\x24\x68\xB3\x02\x00\x00");
-    INIT_ASMPATCH(fix_statuspanel_c2dspark, 0x004F85F5, 0x7, "\x68\x3A\x02\x00\x00\x6A\x19");
-    INIT_ASMPATCH(fix_statuspanel_c2dspark, 0x004F862F, 0x7, "\x68\x3A\x02\x00\x00\x6A\x19");
-    
+
     // fix CCBDisplayChain::Render
-    INIT_ASMPATCH(CCBDisplayChain_Render_PreEachItem, 0x004DF732, 0x6, "\x8B\x86\xEC\xFE\xFF\xFF");
-    INIT_ASMPATCH(CCBDisplayChain_Render_PostEachItem, 0x004DF981, 0x6, "\x81\xC6\x18\x01\x00\x00");
-    
+    INIT_ASMPATCH(CCBDisplayChain_Render_PreEachItem, 0x004D30E3, 0x6, "\x8B\x86\xEC\xFE\xFF\xFF");
+    INIT_ASMPATCH(CCBDisplayChain_Render_PostEachItem, 0x004D3302, 0x6, "\x81\xC6\x18\x01\x00\x00");
+
     // hook CCBUI::Create
-    INIT_WRAPPER_CALL(CCBUI_Create_wrapper, { 0x0051270B });
-    
+    INIT_WRAPPER_CALL(CCBUI_Create_wrapper, { 0x0050A32D });
+
     // hook CCBUI::Render
-    INIT_WRAPPER_VFPTR(CCBUI_Render, 0x005704AC);
-    
+    INIT_WRAPPER_VFPTR(CCBUI_Render_wrapper, 0x0055EB78);
+ 
     // hook SetCursorPos
     add_setcursorpos_hook(setcursorpos_ccbcontrol_hookfunc);
-    
+
     // patch CCBLineupWindow
-    make_jmp(0x0051B920, CCBLineupWindow_Render);
-    make_jmp(0x0051B950, CCBLineupWindow_IsPtOnFace);
-    
+    make_jmp(0x0051263C, CCBLineupWindow_Render);
+    make_jmp(0x0051265E, CCBLineupWindow_IsPtOnFace);
+
     // patch role HP string position limiter
-    INIT_ASMPATCH(role_hp_string_position_limiter, 0x00509DAA, 0x2A, "\x7D\x04\x33\xF6\xEB\x0D\xA1\xD0\xD6\xBF\x00\x2B\xC7\x3B\xF0\x7E\x02\x8B\xF0\x83\xFB\x14\x7D\x07\xBB\x14\x00\x00\x00\xEB\x0B\xA1\xD4\xD6\xBF\x00\x3B\xD8\x7E\x02\x8B\xD8");
+    INIT_ASMPATCH(role_hp_string_position_limiter, 0x004FD0E5, 0x2C, "\x7D\x06\x83\x65\xF8\x00\xEB\x0F\xA1\x90\x17\xC0\x00\x2B\xC7\x39\x45\xF8\x7E\x03\x89\x45\xF8\x6A\x14\x58\x39\x45\xFC\x7C\x0A\xA1\x94\x17\xC0\x00\x39\x45\xFC\x7E\x03\x89\x45\xFC");
 }
