@@ -1109,6 +1109,26 @@ struct CCBLineupWindow {
     struct CCBUI *m_pUI;
 };
 
+enum ECBFiveNimbus {
+    CBFN_Water = 0x0,
+    CBFN_Fire = 0x1,
+    CBFN_Thunder = 0x2,
+    CBFN_Wind = 0x3,
+    CBFN_Earth = 0x4,
+    CBFN_Max = 0x5,
+};
+
+struct tagImbibeNimbus {
+    struct UIStatic *mNimbus;
+    enum ECBFiveNimbus mNimbustype;
+    struct gbVec3D mVelocity;
+    struct tagPOINT mPos;
+    bool bAlive;
+    float mAccelerate;
+    float mFX;
+    float mFY;
+};
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -1181,10 +1201,9 @@ struct CCBLineupWindow {
 #define C2DSpark_CreateStars(this, x, y, nWidth, fStarSize) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004C9E96, void, struct C2DSpark *, int, int, int, float), this, x, y, nWidth, fStarSize)
 #define C2DSpark_CreateMore(this, x, y, color) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004C9D66, void, struct C2DSpark *, int, int, struct gbColorQuad), this, x, y, color)
 #define CCBUI_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0050B5F6, bool, struct CCBUI *), this)
-#define CCBUI_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0050ED2B, void, struct CCBUI *), this)
 #define UIWnd_MoveWindow(this, x, y) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044D075, void, struct UIWnd *, int, int), this, x, y)
 #define UIFrameWnd_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445CF3, void, struct UIFrameWnd *), this)
-
+#define CCBUI_GetNimbusArea(this, rc, nimbustype) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0050E7EC, RECT *, struct CCBUI *, RECT *, enum ECBFiveNimbus), this, rc, nimbustype)
 
 
 // global variables
@@ -1267,6 +1286,7 @@ struct CCBLineupWindow {
     assert(sizeof(struct tagUITask) == 0x48); \
     assert(sizeof(struct CCBUI) == 0xDE0); \
     assert(sizeof(struct CCBLineupWindow) == 0x7C); \
+    assert(sizeof(struct tagImbibeNimbus) == 0x2C); \
 } while (0)
 
 

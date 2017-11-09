@@ -55,7 +55,7 @@ static void patch_c2dspark()
     // fix spart position
     INIT_WRAPPER_CALL(C2DSpark_CreateMore_wrapper, {
         0x004CFCA3,
-        0x0050EC43,
+        //0x0050EC43, // should not hook CCBUI::Update because imbibe nimbus spark use real coord
     });
 }
 
@@ -135,13 +135,20 @@ static MAKE_THISCALL(bool, CCBUI_Create_wrapper, struct CCBUI *this)
     set_uiwnd_ptag(pUIWND(this->m_pTrickName), ptag);
     set_uiwnd_ptag(pUIWND(this->m_pTrickName2), ptag);
     
-    // fix attacksequen and five nimbus window
+    // fix attacksequen
     ptag = CB_PTAG(TR_HIGH, TR_LOW);
     set_uiwnd_ptag(pUIWND(this->m_pAttackSequenBack), ptag);
     for (i = 0; i < 11; i++) {
         set_uiwnd_ptag(pUIWND(this->m_pAttackSequenFace[i]), ptag);
     }
+
+    // fix five nimbus
+    ptag = CB_PTAG(TR_HIGH, TR_LOW);
+    set_uiwnd_ptag(pUIWND(this->pPanel), ptag);
     set_uiwnd_ptag(pUIWND(this->m_pFiveNimbusWindow), ptag);
+    for (i = 0; i < 6; i++) {
+        set_uiwnd_ptag(pUIWND(this->m_pAttackSequenFace[i]), ptag);
+    }
     
     // fix result popup box
     ptag = CB_PTAG(TR_CENTER, TR_CENTER);
@@ -166,6 +173,7 @@ static MAKE_THISCALL(bool, CCBUI_Create_wrapper, struct CCBUI *this)
     ptag = CB_PTAG(TR_LOW, TR_HIGH);
     set_uiwnd_ptag(pUIWND(this->m_pMain), ptag);
     set_uiwnd_ptag(pUIWND(this->m_pItemWindow), ptag);
+    set_uiwnd_ptag(pUIWND(this->m_pParabolaWindow), ptag);
     set_uiwnd_ptag(pUIWND(this->m_pMagicWindow), ptag);
     set_uiwnd_ptag(pUIWND(this->m_pSkillWindow), ptag);
     set_uiwnd_ptag(pUIWND(this->m_pAIWindow), ptag);
@@ -197,7 +205,7 @@ static MAKE_THISCALL(bool, CCBUI_Create_wrapper, struct CCBUI *this)
 }
 
 
-static MAKE_THISCALL(void, CCBUI_Render_wrapper, struct CCBUI *this)
+static MAKE_THISCALL(void, CCBUI_Render, struct CCBUI *this)
 {
     int i, j, k;
     
@@ -222,12 +230,30 @@ static MAKE_THISCALL(void, CCBUI_Render_wrapper, struct CCBUI *this)
         }
     }
     
-    // render, and fix the imbibe nimbus
-// FIXME!!!
-//    CB_PUSHSTATE(TR_HIGH, TR_LOW);
-    CCBUI_Render(this);
-//    CB_POPSTATE();
+    // call baseclass's Render()
+    UIFrameWnd_Render((struct UIFrameWnd *) this);
+    
+    // render imbible nimbus
+    fixui_pushstate(&game_frect, &game_frect, TR_SCALE_MID, TR_SCALE_MID, cb_scalefactor);
+    for (i = 0; i < this->mImbibeNimbusNum; i++) {
+        struct tagImbibeNimbus *cur = &this->m_pImbibeNimbus[i];
+        if (cur->bAlive) {
+            UIWnd_vfptr_Render(pUIWND(cur->mNimbus));
+        }
+    }
+    fixui_popstate();
 }
+
+
+static MAKE_THISCALL(RECT *, CCBUI_GetNimbusArea_wrapper, struct CCBUI *this, RECT *rc, enum ECBFiveNimbus nimbustype)
+{
+    CCBUI_GetNimbusArea(this, rc, nimbustype);
+    CB_PUSHSTATE(TR_HIGH, TR_LOW);
+    fixui_adjust_RECT(rc, rc);
+    CB_POPSTATE();
+    return rc;
+}
+
 
 // rewrite CCBLineupWindow::Render
 static MAKE_THISCALL(void, CCBLineupWindow_Render, struct CCBLineupWindow *this)
@@ -293,9 +319,19 @@ MAKE_PATCHSET(fixcombatui)
     // hook CCBUI::Create
     INIT_WRAPPER_CALL(CCBUI_Create_wrapper, { 0x0050A32D });
 
-    // hook CCBUI::Render
-    INIT_WRAPPER_VFPTR(CCBUI_Render_wrapper, 0x0055EB78);
- 
+    // replace CCBUI::Render
+    INIT_WRAPPER_VFPTR(CCBUI_Render, 0x0055EB78);
+    
+    // hook CCBUI::GetNimbusArea
+    INIT_WRAPPER_CALL(CCBUI_GetNimbusArea_wrapper, {
+        0x0050E5D3,
+        0x0050EB7C,
+    });
+
+    // patch 1024x768 check
+    SIMPLE_PATCH_NOP(0x0050D1B5, "\x7D\x03", 2);
+
+    
     // hook SetCursorPos
     add_setcursorpos_hook(setcursorpos_ccbcontrol_hookfunc);
 
