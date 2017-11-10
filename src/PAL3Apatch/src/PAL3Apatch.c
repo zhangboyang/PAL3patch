@@ -110,7 +110,9 @@ static void init_stage2()
             INIT_PATCHSET(uireplacefont);
             INIT_PATCHSET(fixcombatui);
             INIT_PATCHSET(fix3dctrl);
-            //INIT_PATCHSET(fixlineupui);
+            INIT_PATCHSET(fixlineupui);
+            INIT_PATCHSET(fixobjectcamera);
+            INIT_PATCHSET(fixcompdonateui);
             INIT_PATCHSET(fixuistaticex);
             //INIT_PATCHSET(fixsceneui);
             INIT_PATCHSET(uireplacetexf);

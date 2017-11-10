@@ -1129,6 +1129,33 @@ struct tagImbibeNimbus {
     float mFY;
 };
 
+struct ObjectCamera {
+    struct gbCamera *m_pCamera;
+    struct gbVec3D m_camFrom;
+    struct gbVec3D m_camTo;
+    struct gbVec3D m_camUp;
+    struct gbVec3D m_camDirect;
+    float m_yaw;
+    float m_pitch;
+    float m_roll;
+    float m_dist;
+    float m_nyaw;
+    float m_npitch;
+    float m_nroll;
+    struct gbVec3D m_forward;
+    struct gbVec3D m_side;
+    float m_stepRotSpeed;
+    float m_stepRot;
+    int m_stepRotMode;
+    int m_stepRotAxis;
+    bool m_bStepRot;
+};
+
+struct LineupUI;
+
+struct LineupComp;
+
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -1204,6 +1231,9 @@ struct tagImbibeNimbus {
 #define UIWnd_MoveWindow(this, x, y) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044D075, void, struct UIWnd *, int, int), this, x, y)
 #define UIFrameWnd_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00445CF3, void, struct UIFrameWnd *), this)
 #define CCBUI_GetNimbusArea(this, rc, nimbustype) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0050E7EC, RECT *, struct CCBUI *, RECT *, enum ECBFiveNimbus), this, rc, nimbustype)
+#define ObjectCamera_Create(this, pMgr) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0047B079, void, struct ObjectCamera *, struct gbGfxManager *), this, pMgr)
+#define LineupUI_Create(this, pWnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00480EBF, void, struct LineupUI *, struct UIWnd *), this, pWnd)
+#define LineupComp_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005215DE, void, struct LineupComp *), this)
 
 
 // global variables
@@ -1287,6 +1317,7 @@ struct tagImbibeNimbus {
     assert(sizeof(struct CCBUI) == 0xDE0); \
     assert(sizeof(struct CCBLineupWindow) == 0x7C); \
     assert(sizeof(struct tagImbibeNimbus) == 0x2C); \
+    assert(sizeof(struct ObjectCamera) == 0x7C); \
 } while (0)
 
 

@@ -253,6 +253,8 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(clampuilib);
         MAKE_PATCHSET(fixuibuttonex);
         MAKE_PATCHSET(fixunderwater);
+        MAKE_PATCHSET(fixobjectcamera);
+        MAKE_PATCHSET(fixcompdonateui);
 
     MAKE_PATCHSET(fixeffect);
     MAKE_PATCHSET(forcesettexture);
