@@ -1155,6 +1155,246 @@ struct LineupUI;
 
 struct LineupComp;
 
+struct UIPar_Star {
+    struct UIWnd;
+    struct gbTexture *m_pTex;
+    struct gbColorQuad m_color;
+    int m_nFinalAlpha;
+    int m_nMinAlpha;
+    int m_nFade;
+    int m_IsFadeRand;
+    int m_IsFadeOut;
+    int m_nLastTime;
+    int m_IsLastTimeRand;
+    int m_IsHighPoint;
+    int m_IsInFlash;
+    int m_nNextTime;
+    int m_IsNextTimeRand;
+    int m_nFrame;
+};
+
+struct UIPar_Meteor {
+    struct UIWnd;
+    struct gbTexture *m_pTex[2];
+    struct gbColorQuad m_color;
+    int m_nWidth;
+    int m_nHeight;
+    struct tagRECT m_StartToEnd;
+    struct tagPOINT m_tmpPt;
+    struct tagPOINT m_TailPt[16];
+    int m_nTailNum;
+    int m_ntmpTailNum;
+    int m_nFrameNumBetweenTail;
+    float m_fVelocityX;
+    float m_fVelocityY;
+    float m_passtime;
+    int m_IsInMeteor;
+    int m_nNextTime;
+    int m_nFrame;
+};
+
+struct _CLOUD {
+    struct UIStatic _cloud;
+    struct tagRECT _cloudRc;
+    float _cloudFX;
+    int _width;
+    int _height;
+    float _cloudSpeed;
+    float _alpha;
+    float _fade;
+    bool _isfade;
+    int _up;
+    int _yPt;
+    int _fluctuate;
+};
+
+
+struct UITextureArray {
+    struct gbTexture *m_ptex[16];
+    int m_num;
+};
+
+enum UIButton_UIBUTTON_STATE {
+    NORMAL = 0x0,
+    MOUSEON = 0x1,
+    MOUSEDOWN = 0x2,
+    NUMSTATE = 0x3,
+};
+
+struct UIButton {
+    struct UIWnd;
+    bool m_hasDBclk;
+    float m_ratiow;
+    float m_ratioh;
+    struct tagRECT m_drawrc;
+    enum UIButton_UIBUTTON_STATE m_state;
+    bool m_canctrl;
+    bool m_bLockUpdate;
+    int m_offsetx;
+    int m_offsety;
+    bool m_bBigFont;
+    struct UITextureArray m_texarray;
+    struct _PlugInfo *m_texarrayInfo[3];
+    struct gbTexture *m_disablepic;
+    struct _PlugInfo *m_disablepicInfo;
+    bool m_mouseoff;
+    bool m_mouseon;
+    int m_alignmode;
+    char m_caption[128];
+    bool m_benable_snd;
+};
+
+struct _btnOPTDATA {
+    char *pData;
+    unsigned int width;
+    unsigned int height;
+    unsigned int bpp;
+};
+
+struct UIButtonEX {
+    struct UIButton;
+    struct _btnOPTDATA m_optData[3];
+};
+
+
+enum MENU_TYPE {
+    MENU_COVER = 0x0,
+    MENU_QCYM = 0x1,
+    MENU_LEAVE = 0x2,
+    MENU_JDHY = 0x3,
+    MENU_SCENE = 0x4,
+    MENU_YXXX = 0x5,
+    MENU_XJTM = 0x6,
+    MENU_ARCSAVE = 0x7,
+    MENU_NONE = 0x8,
+};
+
+struct Average {
+    unsigned int _size;
+    float *_data;
+    float ret;
+    unsigned int _cur;
+    unsigned int _real;
+    bool _initialize;
+    bool _invalid;
+    bool _full;
+};
+
+#define UIStaticFlex_State UIButton_UIBUTTON_STATE
+struct UIStaticFlex {
+    struct UIWnd;
+    float DURATION;
+    struct std_basic_string m_text;
+    struct tagRECT m_currect;
+    struct UITextureArray m_texs;
+    enum UIStaticFlex_State m_state;
+    float m_statetime;
+    enum gbFontType m_fonttype;
+    int m_tilesize;
+    int m_openstyle;
+};
+
+struct UIDialog {
+    struct UIWnd;
+    int m_bmodal;
+};
+
+enum DLG_TYPE {
+    DLG_YES = 0x0,
+    DLG_NO = 0x1,
+    DLG_YESNO = 0x2,
+    DLG_MSGBOX = 0x3,
+    DLG_TYPENUM = 0x4,
+};
+
+enum DLG_MSG {
+    DLG_MSG_NONE = 0xFFFFFFFF,
+    DLG_BT_YES = 0x0,
+    DLG_BT_NO = 0x1,
+    DLG_MSG_END = 0x2,
+    DLG_MSG_NUM = 0x3,
+};
+
+struct _TimeMgr {
+    unsigned int newtick;
+    unsigned int oldtick;
+    bool bNote;
+};
+
+struct MUIDialog {
+    struct UIDialog;
+    //struct MUIDialogMgr;
+    struct UIWnd *ptr_Dlg;
+    unsigned int m_DlgId;
+    struct tagRECT m_rect;
+    struct tagRECT m_textRc;
+    struct UIStaticFlex m_bk;
+    struct UIStatic m_static;
+    struct UIStatic m_text;
+    int m_btnW;
+    int m_btnH;
+    struct tagRECT m_btRc;
+    struct UIButton mb_Yes;
+    struct UIButton mb_No;
+    int Lacune;
+    enum DLG_TYPE m_type;
+    enum DLG_MSG m_getMsg;
+    int dft_W;
+    int dft_H;
+    bool m_IsModel;
+    bool m_isDoModel;
+    int m_xOffset;
+    int m_yOffset;
+    struct _TimeMgr _m_timeMgr;
+    bool _m_canEndDlg;
+    bool _haveSound;
+};
+
+struct UICoverFrm {
+    struct UIFrameWnd;
+    struct tagRECT rc;
+    char buf[256];
+    struct UIStatic m_background;
+    struct UIPar_Star m_Star[13];
+    struct UIPar_Meteor m_Meteor;
+    struct _CLOUD m_cloud[10];
+    struct _CLOUD m_midCloud[5];
+    struct _CLOUD m_smlCloud[5];
+    struct _CLOUD m_testCloud[9];
+    struct UIStatic m_mountainA;
+    struct UIStatic m_mountainB;
+    struct UIStatic m_frame;
+    struct UIStatic m_Logo;
+    bool m_isAlpha;
+    float m_alpha;
+    struct UIStaticEXA m_tjA;
+    struct UIStaticEXA m_tjB;
+    struct UIButtonEX m_XDGS;
+    struct UIButtonEX m_QCYM;
+    struct UIButtonEX m_XJTM;
+    struct UIButtonEX m_LKYX;
+    struct UIButtonEX m_YXXX;
+    struct UIButtonEX m_JDHY;
+    struct UIButtonEX *m_CtrlBtn[6];
+    int m_SelBtn;
+    bool m_ExitGame;
+    struct UITitle_QCYM *pQCYM;
+    struct UITitle_JDHY *pJDHY;
+    struct UITitle_YXXX *pYXXX;
+    struct UITitle_XJTM *pXJTM;
+    struct UITitle_ArcSave *pArcSave;
+    struct UILoadingFrm *pLoadingFrm;
+    enum MENU_TYPE m_MenuType;
+    struct Average m_timeAverage;
+    bool m_gotogame;
+    unsigned int m_flag;
+    struct UIStatic m_test;
+    struct MUIDialog m_ArcDlg;
+    struct MUIDialog m_Not1stDlg;
+    bool m_goingin;
+    bool m_ArcSaveSuc;
+    bool m_IsReadFinishSave;
+};
 
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
@@ -1234,6 +1474,7 @@ struct LineupComp;
 #define ObjectCamera_Create(this, pMgr) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0047B079, void, struct ObjectCamera *, struct gbGfxManager *), this, pMgr)
 #define LineupUI_Create(this, pWnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00480EBF, void, struct LineupUI *, struct UIWnd *), this, pWnd)
 #define LineupComp_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005215DE, void, struct LineupComp *), this)
+#define UICoverFrm_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00451581, void, struct UICoverFrm *), this)
 
 
 // global variables
@@ -1318,6 +1559,19 @@ struct LineupComp;
     assert(sizeof(struct CCBLineupWindow) == 0x7C); \
     assert(sizeof(struct tagImbibeNimbus) == 0x2C); \
     assert(sizeof(struct ObjectCamera) == 0x7C); \
+    assert(sizeof(struct UICoverFrm) == 0x3AE8); \
+    assert(sizeof(struct UIPar_Star) == 0x7C); \
+    assert(sizeof(struct UIPar_Meteor) == 0x114); \
+    assert(sizeof(struct _CLOUD) == 0xD8); \
+    assert(sizeof(struct UITextureArray) == 0x44); \
+    assert(sizeof(struct UIButton) == 0x158); \
+    assert(sizeof(struct _btnOPTDATA) == 0x10); \
+    assert(sizeof(struct UIButtonEX) == 0x188); \
+    assert(sizeof(struct Average) == 0x18); \
+    assert(sizeof(struct UIStaticFlex) == 0xC0); \
+    assert(sizeof(struct UIDialog) == 0x48); \
+    assert(sizeof(struct _TimeMgr) == 0xC); \
+    assert(sizeof(struct MUIDialog) == 0x568); \
 } while (0)
 
 

@@ -113,6 +113,8 @@ static void init_stage2()
             INIT_PATCHSET(fixlineupui);
             INIT_PATCHSET(fixobjectcamera);
             INIT_PATCHSET(fixcompdonateui);
+            INIT_PATCHSET(fixjusticebookui);
+            INIT_PATCHSET(fixcoverfrm);
             INIT_PATCHSET(fixuistaticex);
             //INIT_PATCHSET(fixsceneui);
             INIT_PATCHSET(uireplacetexf);

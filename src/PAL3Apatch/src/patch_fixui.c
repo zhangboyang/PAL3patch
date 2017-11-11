@@ -570,10 +570,14 @@ static void init_uiwnd_positiontag_patch()
 fRECT *get_ptag_frect(int rect_type)
 {
     switch (rect_type) {
-        case PTR_GAMERECT:           return &game_frect;
-        case PTR_GAMERECT_43:        return &game_frect_43;
-        case PTR_GAMERECT_ORIGINAL:  return &game_frect_original;
-        case PTR_GAMERECT_UIAUTO:    return &game_frect_ui_auto;
+        case PTR_GAMERECT:                  return &game_frect;
+        case PTR_GAMERECT_43:               return &game_frect_43;
+        case PTR_GAMERECT_ORIGINAL:         return &game_frect_original;
+        case PTR_GAMERECT_ORIGINAL_LT:      return &game_frect_original_lt;
+        case PTR_GAMERECT_ORIGINAL_BIG:     return &game_frect_original_big;
+        case PTR_GAMERECT_ORIGINAL_BIG_LT:  return &game_frect_original_big_lt;
+
+        case PTR_GAMERECT_UIAUTO:           return &game_frect_ui_auto;
         default:
             if (PTR_GAMERECT_CUSTOM0 <= rect_type && rect_type < PTR_GAMERECT_CUSTOM0 + MAX_CUSTOM_GAME_FRECT) {
                 return &game_frect_custom[rect_type - PTR_GAMERECT_CUSTOM0];
@@ -674,6 +678,7 @@ MAKE_PATCHSET(fixui)
     // calc game_frect_ui_auto
     game_frect_ui_auto = game_frect_original;
     ui_scalefactor = str2scalefactor(get_string_from_configfile("uiscalefactor"));
+    ui_big_scalefactor = ui_scalefactor * GAME_WIDTH_ORG / GAME_WIDTH_ORG_BIG;
     transform_frect(&game_frect_ui_auto, &game_frect_ui_auto, &game_frect, &game_frect, TR_CENTER, TR_CENTER, ui_scalefactor);
     
     // init fixui, use identity transform

@@ -59,6 +59,8 @@ extern PATCHAPI void print_wstring_end(void);
 
 #define GAME_WIDTH_ORG 800
 #define GAME_HEIGHT_ORG 600
+#define GAME_WIDTH_ORG_BIG 1024
+#define GAME_HEIGHT_ORG_BIG 768
 
 // all patchs
 MAKE_PATCHSET(cdpatch);
@@ -87,7 +89,9 @@ MAKE_PATCHSET(reginstalldir);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
-    extern fRECT game_frect, game_frect_43, game_frect_original;
+    extern fRECT game_frect, game_frect_43;
+    extern fRECT game_frect_original, game_frect_original_big;
+    extern fRECT game_frect_original_lt, game_frect_original_big_lt;
     #define MAX_CUSTOM_GAME_FRECT 4 // NOTE: pay attention to enum uiwnd_rect_type
     extern fRECT game_frect_custom[MAX_CUSTOM_GAME_FRECT];
     extern fRECT game_frect_sqrtex;
@@ -102,6 +106,7 @@ MAKE_PATCHSET(graphicspatch);
         
         // these values need initinialize by their own init functions
         SF_UI,
+        SF_UI_BIG,
         SF_SOFTCURSOR,
         SF_COMBAT,
         SF_SCENEUI,
@@ -139,17 +144,21 @@ MAKE_PATCHSET(graphicspatch);
 
         #define softcursor_scalefactor (scalefactor_table[SF_SOFTCURSOR])
         #define ui_scalefactor (scalefactor_table[SF_UI])
+        #define ui_big_scalefactor (scalefactor_table[SF_UI_BIG])
         extern void fixui_update_gamestate(void);
         
         enum uiwnd_rect_type { // PTR = pos tag rect
-            PTR_GAMERECT,          // game_frect
-            PTR_GAMERECT_43,       // game_frect_43
-            PTR_GAMERECT_ORIGINAL, // game_frect_original
-            PTR_GAMERECT_UIAUTO,   // game_frect_ui_auto
-            PTR_GAMERECT_CUSTOM0,  // game_frect_custom[0]
-            //PTR_GAMERECT_CUSTOM0+1,  // game_frect_custom[1]
-            //PTR_GAMERECT_CUSTOM0+2,  // game_frect_custom[2]
-            //PTR_GAMERECT_CUSTOM0+3,  // game_frect_custom[3]
+            PTR_GAMERECT,                 // game_frect
+            PTR_GAMERECT_43,              // game_frect_43
+            PTR_GAMERECT_ORIGINAL,        // game_frect_original
+            PTR_GAMERECT_ORIGINAL_LT,     // game_frect_original_lt
+            PTR_GAMERECT_ORIGINAL_BIG,    // game_frect_original_big
+            PTR_GAMERECT_ORIGINAL_BIG_LT, // game_frect_original_big_lt
+            PTR_GAMERECT_UIAUTO,          // game_frect_ui_auto
+            PTR_GAMERECT_CUSTOM0,         // game_frect_custom[0]
+            //PTR_GAMERECT_CUSTOM0+1,       // game_frect_custom[1]
+            //PTR_GAMERECT_CUSTOM0+2,       // game_frect_custom[2]
+            //PTR_GAMERECT_CUSTOM0+3,       // game_frect_custom[3]
             // NOTE: PTR_GAMERECT_CUSTOM0 must be last one, since it occupy MAX_CUSTOM_GAME_FRECT values
             // NOTE: if you want to modify this enum, pay attention to the size limit in struct uiwnd_ptag
         };
@@ -165,8 +174,8 @@ MAKE_PATCHSET(graphicspatch);
         
         struct uiwnd_ptag {
             unsigned scalefactor_index : 4;
-            unsigned self_srcrect_type : 3;
-            unsigned self_dstrect_type : 3;
+            unsigned self_srcrect_type : 4;
+            unsigned self_dstrect_type : 4;
             unsigned self_lr_method : 3;
             unsigned self_tb_method : 3;
             unsigned no_cursor_virt : 1; // if set to 1, will disable cursor transform for this UIWnd
@@ -174,8 +183,8 @@ MAKE_PATCHSET(graphicspatch);
             unsigned in_use : 1;
             unsigned enabled : 1;
             
-            #define UIWND_PTAG_MAGIC 1223u // TangXueJian's birthday, hahahaha
-            unsigned magic : 12; // must be non-zero
+            #define UIWND_PTAG_MAGIC 162u // TangXueJian's height, hahahaha
+            unsigned magic : 10; // must be non-zero
         };
         #define M_PWND(addr) TOPTR(M_DWORD(addr))
         #define PWND TOPTR
@@ -255,6 +264,8 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fixunderwater);
         MAKE_PATCHSET(fixobjectcamera);
         MAKE_PATCHSET(fixcompdonateui);
+        MAKE_PATCHSET(fixjusticebookui);
+        MAKE_PATCHSET(fixcoverfrm);
 
     MAKE_PATCHSET(fixeffect);
     MAKE_PATCHSET(forcesettexture);
