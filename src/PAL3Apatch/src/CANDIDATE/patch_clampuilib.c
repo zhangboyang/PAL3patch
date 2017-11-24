@@ -30,6 +30,7 @@ static char *clamp_list[] = {
     
     "ui\\Menu\\yun16.tga",
 };
+
 static int in_clamp_list(const char *filename)
 {
     int i;

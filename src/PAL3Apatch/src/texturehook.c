@@ -109,10 +109,10 @@ static MAKE_ASMPATCH(texhook_part1)
     const char *texpath;
     if (fp) {
         // if DDS is successfully opened, the use DDS as texture file name
-        texpath = TOPTR(gboffset + 0x10140C68);
+        texpath = TOPTR(gboffset + 0x101155C8);
     } else {
         // otherwise use original filename as texture file name
-        texpath = this->baseclass.pName;
+        texpath = this->pName;
     }
     
     // fill thinfo
@@ -148,21 +148,22 @@ static MAKE_ASMPATCH(texhook_part1)
     
     // oldcode
     R_ESI = R_EAX = TOUINT(fp);
+    R_EDI = 0;
     if (!fp) {
-        RETNADDR = gboffset + 0x100206BB; // jump to gbImage2D loader
+        RETNADDR = gboffset + 0x10020201; // jump to gbImage2D loader
     } // else fallthrough to D3DX texture loading
 }
 
 // asmpatch should only be effective when gbImage2D::LoadImageFile
 // is call from gbTexture::LoadTexture
-#define EXPECTED_GBIMAGE2D_LOADIMAGEFILE_RETNADDR (gboffset + 0x10020701)
+#define EXPECTED_GBIMAGE2D_LOADIMAGEFILE_RETNADDR (gboffset + 0x10020244)
 
 static MAKE_ASMPATCH(texhook_part2)
 {
-    const char *texpath = TOPTR(M_DWORD(R_ESP + 0x130));
+    const char *texpath = TOPTR(M_DWORD(R_EBP + 0x8));
     
     // check caller's address first
-    if (M_DWORD(R_ESP + 0x12C) != EXPECTED_GBIMAGE2D_LOADIMAGEFILE_RETNADDR) {
+    if (M_DWORD(R_EBP + 0x4) != EXPECTED_GBIMAGE2D_LOADIMAGEFILE_RETNADDR) {
         goto done;
     }
     
@@ -172,16 +173,17 @@ static MAKE_ASMPATCH(texhook_part2)
     
 done:
     // oldcode
-    R_EBX = M_DWORD(R_ESP + 0x130) = TOUINT(texpath);
+    R_EDI = M_DWORD(R_EBP + 0x8) = TOUINT(texpath);
+    R_ECX = 0xFFFFFFFF;
 }
 
 static MAKE_ASMPATCH(texhook_part3)
 {
-    struct gbImage2D *this = TOPTR(R_EBP);
+    struct gbImage2D *this = TOPTR(R_EBX);
     int flag = 0; // imaged loaded flag
     
     // check caller's address first
-    if (M_DWORD(R_ESP + 0x148) != EXPECTED_GBIMAGE2D_LOADIMAGEFILE_RETNADDR) {
+    if (M_DWORD(R_EBP + 0x4) != EXPECTED_GBIMAGE2D_LOADIMAGEFILE_RETNADDR) {
         goto done;
     }
     
@@ -197,14 +199,15 @@ static MAKE_ASMPATCH(texhook_part3)
 
 done:
     R_ESP += 0x10; // oldcode
+    R_ESI = 1;
     if (flag) {
         // texture already loaded, should jump to processing
-        M_DWORD(R_ESP + 0x10) = 2; // fake type to TGA (any number != 0 should OK)
-        RETNADDR = gboffset + 0x1001E6C9; // jump to processing
+        M_DWORD(R_EBP - 0x4) = 2; // fake type to TGA (any number != 0 should OK)
+        RETNADDR = gboffset + 0x1001E195; // jump to processing
     } else {
         // texture not loaded, should continue loading
         if (R_EAX) { // if extension is not TGA
-            RETNADDR = gboffset + 0x1001E544; // jump to next extension checking
+            RETNADDR = gboffset + 0x1001E0C0; // jump to next extension checking
         } // else fallthrough the TGA processing procdure
     }
 }
@@ -212,10 +215,10 @@ done:
 static MAKE_ASMPATCH(texhook_part4)
 {
     int div_alpha = 1;
-    struct gbImage2D *this = TOPTR(R_EBP);
+    struct gbImage2D *this = TOPTR(R_EBX);
     
     // check caller's address first
-    if (M_DWORD(R_ESP + 0x138) != EXPECTED_GBIMAGE2D_LOADIMAGEFILE_RETNADDR) {
+    if (M_DWORD(R_EBP + 0x4) != EXPECTED_GBIMAGE2D_LOADIMAGEFILE_RETNADDR) {
         goto done;
     }
     
@@ -239,7 +242,7 @@ static MAKE_ASMPATCH(texhook_part4)
     
 done:
     if (this->BitCount != 32 || !div_alpha) {
-        RETNADDR = gboffset + 0x1001E885; // skip alpha div
+        RETNADDR = gboffset + 0x1001E321; // skip alpha div
     } // fallthrough to alpha div
 }
 
@@ -252,14 +255,14 @@ static MAKE_ASMPATCH(texhook_part5)
     if (thinfo->fakeheight) this->Height = thinfo->fakeheight;
     
     // oldcode
-    this->baseclass.IsLoaded = 1;
+    this->IsLoaded = 1;
 }
 
 void init_texture_hooks()
 {
-    INIT_ASMPATCH(texhook_part1, gboffset + 0x1002063C, 6, "\x8B\xF0\x3B\xF5\x74\x79");
-    INIT_ASMPATCH(texhook_part2, gboffset + 0x1001E497, 7, "\x8B\x9C\x24\x30\x01\x00\x00");
-    INIT_ASMPATCH(texhook_part3, gboffset + 0x1001E517, 7, "\x83\xC4\x10\x85\xC0\x75\x26");
-    INIT_ASMPATCH(texhook_part4, gboffset + 0x1001E7FE, 8, "\x39\x9D\xB4\x00\x00\x00\x75\x7F");
-    INIT_ASMPATCH(texhook_part5, gboffset + 0x1002073F, 7, "\xC7\x43\x10\x01\x00\x00\x00");
+    INIT_ASMPATCH(texhook_part1, gboffset + 0x1002017C, 8, "\x8B\xF0\x33\xFF\x3B\xF7\x74\x7D");
+    INIT_ASMPATCH(texhook_part2, gboffset + 0x1001E01E, 6, "\x8B\x7D\x08\x83\xC9\xFF");
+    INIT_ASMPATCH(texhook_part3, gboffset + 0x1001E090, 10, "\x83\xC4\x10\xBE\x01\x00\x00\x00\x85\xC0");
+    INIT_ASMPATCH(texhook_part4, gboffset + 0x1001E290, 13, "\x83\xBB\xB4\x00\x00\x00\x20\x0F\x85\x84\x00\x00\x00");
+    INIT_ASMPATCH(texhook_part5, gboffset + 0x10020281, 7, "\xC7\x43\x10\x01\x00\x00\x00");
 }

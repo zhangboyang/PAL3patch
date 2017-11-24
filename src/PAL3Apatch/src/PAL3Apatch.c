@@ -68,7 +68,7 @@ static void init_stage2()
     // init hook framework
     init_hooks();
     init_effect_hooks();
-//    init_texture_hooks();
+    init_texture_hooks();
     
     // init freetype
     init_ftfont();

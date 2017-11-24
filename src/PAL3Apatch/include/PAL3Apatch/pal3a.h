@@ -1396,6 +1396,46 @@ struct UICoverFrm {
     bool m_IsReadFinishSave;
 };
 
+struct gbImage2DInfo {
+    int isdiskinfo;
+    int goal;
+    int ngrade;
+    int detail[8];
+    int wdiv[8];
+    int hdiv[8];
+    int wrap_u;
+    int wrap_v;
+    int mipmap;
+    int minfilter;
+    int magfilter;
+};
+
+struct gbImage2D {
+    struct gbImage2DInfo ImgInfo;
+    int Width;
+    int Height;
+    struct gbPixelFormat PixelFmt;
+    int BitCount;
+    char *pBits;
+    struct gbColorQuad *pPalette;
+    int numPalEntry;
+    struct gbColorQuad ColorKey;
+};
+
+struct gbVFileSystem {
+    int IsInit;
+    char *rtDirectory;
+    struct gbVFile *pFileBuffer;
+    enum {
+        VFSYS_DISKFILE = 0x0,
+        VFSYS_PACKFILE = 0x1,
+        VFSYS_MEMIMAGE = 0x2,
+    } Type;
+    struct _iobuf *m_pckfp;
+    unsigned int m_itemcount;
+    struct CPK m_cpk;
+};
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -1420,6 +1460,10 @@ struct UICoverFrm {
 #define gbPrintFont_PrintString(this, str, x, y, endx, endy) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10022510, void, struct gbPrintFont *, const char *, float, float, float, float), this, str, x, y, endx, endy)
 #define gbVertPoolMgr_GetDynVertBuf(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021150, struct gbDynVertBuf *, struct gbVertPoolMgr *, unsigned int), this, a2)
 #define gbPrintFontMgr_GetFont(this, fonttype) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x100045F0, struct gbPrintFont *, struct gbPrintFontMgr *, enum gbFontType), this, fonttype)
+#define gbVFileSystem_OpenFile(this, filename, mode) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1002DB10, struct gbVFile *, struct gbVFileSystem *, const char *, unsigned int), this, filename, mode)
+#define gbVFileSystem_GetFileSize(this, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1002E170, long, struct gbVFileSystem *, struct gbVFile *), this, fp)
+#define gbVFileSystem_Read(this, buf, size, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1002DD70, void, struct gbVFileSystem *, void *, unsigned int, struct gbVFile *), this, buf, size, fp)
+#define gbVFileSystem_CloseFile(this, fp) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1002DCF0, void, struct gbVFileSystem *, struct gbVFile *), this, fp)
 
 
 
@@ -1486,7 +1530,7 @@ struct UICoverFrm {
 #define xmusic ((PAL3_s_flag & 4) == 0)
 #define ui_tex_color_gbf (*(struct gbRenderEffect **) TOPTR(0x0228F004))
 #define ui_color_blend_tex_gbf (*(struct gbRenderEffect **) TOPTR(0x0228F01C))
-
+#define g_pVFileSys (*(struct gbVFileSystem **) TOPTR(gboffset + 0x10131D08))
 
 
 // structure selfcheck
@@ -1572,6 +1616,9 @@ struct UICoverFrm {
     assert(sizeof(struct UIDialog) == 0x48); \
     assert(sizeof(struct _TimeMgr) == 0xC); \
     assert(sizeof(struct MUIDialog) == 0x568); \
+    assert(sizeof(struct gbImage2DInfo) == 0x80); \
+    assert(sizeof(struct gbImage2D) == 0xC8); \
+    assert(sizeof(struct gbVFileSystem) == 0xE01D4); \
 } while (0)
 
 
