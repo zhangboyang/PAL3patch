@@ -175,6 +175,59 @@ const char *vfs_cpkname()
     return cpkname ? cpkname : "";
 }
 
+void make_area_transparent(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom)
+{
+    assert(bitcount == 32);
+    int i, j;
+    for (i = top; i < bottom; i++) {
+        unsigned char *line = PTRADD(bits, i * pitch);
+        for (j = left; j < right; j++) {
+            line[4 * j + 3] = 0x00;
+        }
+    }
+}
+
+void make_border_transparent(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom)
+{
+    assert(bitcount == 32);
+    make_area_transparent(bits, width, height, bitcount, pitch, 0, 0, width, top);
+    make_area_transparent(bits, width, height, bitcount, pitch, 0, bottom, width, height);
+    make_area_transparent(bits, width, height, bitcount, pitch, 0, top, left, bottom);
+    make_area_transparent(bits, width, height, bitcount, pitch, right, top, width, bottom);
+}
+
+int is_area_transparent(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom)
+{
+    if (bitcount == 32) {
+        int i, j;
+        for (i = top; i < bottom; i++) {
+            unsigned char *line = PTRADD(bits, i * pitch);
+            for (j = left; j < right; j++) {
+                if (line[4 * j + 3] != 0x00) {
+                    return 0;
+                }
+            }
+        }
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+void get_solid_area(void *bits, int width, int height, int bitcount, int pitch, int *left, int *top, int *right, int *bottom)
+{
+    *left = *top = 0;
+    *right = width;
+    *bottom = height;
+    
+    if (bitcount == 32) { // image have alpha channel
+        while (*top < *bottom - 1 && is_area_transparent(bits, width, height, bitcount, pitch, *left, *top, *right, *top + 1)) (*top)++;
+        while (*top < *bottom - 1 && is_area_transparent(bits, width, height, bitcount, pitch, *left, *bottom - 1, *right, *bottom)) (*bottom)--;
+        while (*left < *right - 1 && is_area_transparent(bits, width, height, bitcount, pitch, *left, *top, *left + 1, *bottom)) (*left)++;
+        while (*left < *right - 1 && is_area_transparent(bits, width, height, bitcount, pitch, *right - 1, *top, *right, *bottom)) (*right)--;
+    }
+}
+
 void clamp_rect(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom)
 {
     int i, j;

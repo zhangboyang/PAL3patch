@@ -83,7 +83,7 @@ static void get_movie_uv(const char *filename, int movie_width, int movie_height
     } *p, uvdata[] = { // input custom U and V value here
         
         // opening
-        { "Movie\\Pal3op.bik", 0.0, (60.0 / 480.0), 1.0, (420.0 / 480.0), -1.0 },
+        { "Movie\\Pal3a.bik", 0.0, (75.0 / 600.0), 1.0, (525.0 / 600.0), -1.0 },
         
         { NULL } // EOF
     };

@@ -5,6 +5,10 @@
 
 extern PATCHAPI void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height, int *bitcount, const struct memory_allocator *mem_allocator);
 extern PATCHAPI void ensure_cooperative_level(int requirefocus);
+extern PATCHAPI void make_area_transparent(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom);
+extern PATCHAPI void make_border_transparent(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom);
+extern PATCHAPI int is_area_transparent(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom);
+extern PATCHAPI void get_solid_area(void *bits, int width, int height, int bitcount, int pitch, int *left, int *top, int *right, int *bottom);
 extern PATCHAPI void clamp_rect(void *bits, int width, int height, int bitcount, int pitch, int left, int top, int right, int bottom);
 extern PATCHAPI void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, void *src, int src_pitch, int src_x, int src_y, int width, int height, int bitcount);
 extern PATCHAPI void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color);
@@ -1436,6 +1440,47 @@ struct gbVFileSystem {
     struct CPK m_cpk;
 };
 
+struct UIPosMaker {
+    bool m_bIsLoaded;
+    struct _UIPOS *m_pUIPos;
+    int m_nPosNum;
+};
+
+struct ArtistPlugIn {
+    struct _iobuf *pFile;
+    char _libfolder[512];
+    struct _PlugInfo *pInfo;
+    unsigned int m_infoNum;
+    bool m_alreadyLoad;
+    struct tagRECT m_tRect;
+    bool m_bOptmize;
+    struct UIPosMaker m_posMaker;
+};
+
+struct _Texture_uv {
+    float u;
+    float v;
+};
+
+struct _PlugInfo {
+    int filepos;
+    char name[256];
+    unsigned int crc;
+    unsigned int left;
+    unsigned int top;
+    unsigned int width;
+    unsigned int height;
+    unsigned int srcWidth;
+    unsigned int srcHeight;
+    char libName[256];
+    unsigned int libWidth;
+    unsigned int libHeight;
+    struct _Texture_uv _tex_uvLT;
+    struct _Texture_uv _tex_uvLB;
+    struct _Texture_uv _tex_uvRB;
+    struct _Texture_uv _tex_uvRT;
+};
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -1519,6 +1564,7 @@ struct gbVFileSystem {
 #define LineupUI_Create(this, pWnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00480EBF, void, struct LineupUI *, struct UIWnd *), this, pWnd)
 #define LineupComp_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x005215DE, void, struct LineupComp *), this)
 #define UICoverFrm_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00451581, void, struct UICoverFrm *), this)
+#define ArtistPlugIn_GetPlugFileInfo(this, filename) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044789A, void, struct ArtistPlugIn *, const char *), this, filename)
 
 
 // global variables
@@ -1619,6 +1665,10 @@ struct gbVFileSystem {
     assert(sizeof(struct gbImage2DInfo) == 0x80); \
     assert(sizeof(struct gbImage2D) == 0xC8); \
     assert(sizeof(struct gbVFileSystem) == 0xE01D4); \
+    assert(sizeof(struct UIPosMaker) == 0xC); \
+    assert(sizeof(struct ArtistPlugIn) == 0x230); \
+    assert(sizeof(struct _Texture_uv) == 0x8); \
+    assert(sizeof(struct _PlugInfo) == 0x248); \
 } while (0)
 
 

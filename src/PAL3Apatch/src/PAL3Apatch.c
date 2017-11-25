@@ -118,7 +118,7 @@ static void init_stage2()
             INIT_PATCHSET(fixuistaticex);
             //INIT_PATCHSET(fixsceneui);
             INIT_PATCHSET(uireplacetexf);
-            //INIT_PATCHSET(clampuilib);
+            INIT_PATCHSET(clampuilib);
         }
 
         INIT_PATCHSET(fixtrail);
