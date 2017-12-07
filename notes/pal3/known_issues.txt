@@ -159,4 +159,5 @@ ABANDONED: 用AlphaBlend代替AlphaTest获得更好的透明效果（这几乎�
 TCC 编译器的 fastcall 调用约定是调用者将参数从栈上弹出而不是被调用者弹参（见notes20170827.txt）
 TCC 编译器在遇到宽字符串字面值中有宽字符时，会直接按字节转换为wchar_t（见notes20170904.txt）
 TCC 编译器当编译 DLL 时，在遇到直接将数字常量转换为函数指针的时候，生成的调用指令不正确（见notes20170904.txt）
+用 freetype 2.8.1 时，由于没有初始化内存，粗体文本会显示不正常（freetype savannah；bug #52613）
 
