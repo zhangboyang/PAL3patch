@@ -116,7 +116,7 @@ static void init_stage2()
             INIT_PATCHSET(fixjusticebookui);
             INIT_PATCHSET(fixcoverfrm);
             INIT_PATCHSET(fixuistaticex);
-            //INIT_PATCHSET(fixsceneui);
+            INIT_PATCHSET(fixsceneui);
             INIT_PATCHSET(uireplacetexf);
             INIT_PATCHSET(clampuilib);
         }
