@@ -186,7 +186,7 @@ static void fix_gamescene()
     INIT_WRAPPER_VFPTR(UIEmote_Render, 0x00558FD0);
     
     // fix ChatRest dialog position
-    SIMPLE_PATCH(0x00450394, "\x05\x2C\x01\x00\x00", "\x05\xFA\x00\x00\x00", 5);
+    SIMPLE_PATCH(0x00450394, "\x05\x2C\x01\x00\x00", "\x05\x10\x01\x00\x00", 5);
 }
 
 

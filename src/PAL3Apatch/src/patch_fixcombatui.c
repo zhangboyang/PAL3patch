@@ -147,7 +147,7 @@ static MAKE_THISCALL(bool, CCBUI_Create_wrapper, struct CCBUI *this)
     set_uiwnd_ptag(pUIWND(this->pPanel), ptag);
     set_uiwnd_ptag(pUIWND(this->m_pFiveNimbusWindow), ptag);
     for (i = 0; i < 6; i++) {
-        set_uiwnd_ptag(pUIWND(this->m_pAttackSequenFace[i]), ptag);
+        set_uiwnd_ptag(pUIWND(this->m_pBattleFieldAttr[i]), ptag);
     }
     
     // fix result popup box
