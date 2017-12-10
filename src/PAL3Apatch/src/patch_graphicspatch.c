@@ -737,6 +737,51 @@ static void init_resolution_and_window_patch()
 }
 
 
+
+
+// drvinfo stack
+struct drvinfo_sv {
+    int width;
+    int height;
+    
+    struct drvinfo_sv *next;
+};
+static struct drvinfo_sv *drvinfo_stack = NULL;
+
+void push_drvinfo()
+{
+    struct drvinfo_sv *node = malloc(sizeof(struct drvinfo_sv));
+    *node = (struct drvinfo_sv) {
+        .width = PAL3_s_drvinfo.width,
+        .height = PAL3_s_drvinfo.height,
+        
+        .next = drvinfo_stack,
+    };
+    
+    drvinfo_stack = node;    
+}
+
+// push current drvinfo and set w/h to given value
+void push_drvinfo_setwh(int width, int height)
+{
+    push_drvinfo(); 
+    PAL3_s_drvinfo.width = width;
+    PAL3_s_drvinfo.height = height;
+}
+
+void pop_drvinfo()
+{
+    PAL3_s_drvinfo.width = drvinfo_stack->width;
+    PAL3_s_drvinfo.height = drvinfo_stack->height;
+    
+    struct drvinfo_sv *next = drvinfo_stack->next;
+    free(drvinfo_stack);
+    drvinfo_stack = next;
+}
+
+
+
+
 MAKE_PATCHSET(graphicspatch)
 {
     patch_refreshrate_config(get_string_from_configfile("game_refreshrate"));

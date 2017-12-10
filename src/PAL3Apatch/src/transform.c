@@ -164,6 +164,7 @@ void set_fseg(fSEG *fseg, double start, double length)
         TR_SCALE_LOW: length is scaled by len_factor (keep lower point), offset is scaled by (dst_total / src_total)
         TR_SCALE_HIGH: length is scaled by len_factor (keep higher point), offset is scaled by (dst_total / src_total)
         TR_SCALE_MID: length is scaled by len_factor (keep middle point), offset is scaled by (dst_total / src_total)
+        TR_SCALE_SIMPLE: length and offset are scaled by (dst_total / src_total)
     
     out_seg == seg is allowed
 */
@@ -194,6 +195,10 @@ void transform_fseg(fSEG *out_fseg, const fSEG *fseg, double src_total, double d
         case TR_SCALE_MID:
             start = (start + length / 2.0) * (dst_total / src_total) - length * len_factor / 2.0;
             length *= len_factor;
+            break;
+        case TR_SCALE_SIMPLE:
+            start *= dst_total / src_total;
+            length *= dst_total / src_total;
             break;
         default:
             fail("invalid segment translate method: %d", method);

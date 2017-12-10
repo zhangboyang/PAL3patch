@@ -160,4 +160,4 @@ TCC 编译器的 fastcall 调用约定是调用者将参数从栈上弹出而不
 TCC 编译器在遇到宽字符串字面值中有宽字符时，会直接按字节转换为wchar_t（见notes20170904.txt）
 TCC 编译器当编译 DLL 时，在遇到直接将数字常量转换为函数指针的时候，生成的调用指令不正确（见notes20170904.txt）
 用 freetype 2.8.1 时，由于没有初始化内存，粗体文本会显示不正常（freetype savannah；bug #52613）
-
+用 freetype 2.8 或更低时，宋体的数字、字母等在小字号（类似点阵）的情况下显示得很难看，这可能是因为 hint 处理的 BUG 造成的，用 ftcharhack.c 可绕过（见 freetype 2.8.1 更新说明）

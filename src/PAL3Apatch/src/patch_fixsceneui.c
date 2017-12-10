@@ -190,22 +190,26 @@ static void fix_gamescene()
 }
 
 
-#if 0
 
 // fix RoleDialog
-#define ROLEDLG_FACESIZE 2.0 // ratio of text frame
+#define ROLEDLG_FACESIZE 2.2 // ratio of text frame
 #define ROLEDLG_FACEHEIGHTFACTOR (256.0 / 512.0) // real face height : face texture height
 static double dlg_minsize; // ratio of whole screen
 static fRECT dlg_frect; // screen rect of role dialog
 static fRECT dlg_real_frect; // real role dialog rect before scale
-static fRECT dlg_old_frect; // original role dialog rect
+static fRECT dlg_old_frect; // original role dialog rect (effective)
+static fRECT dlg_old_ref_frect; // original role dialog rect (reference)
 static fRECT dlg_facearea_frect; // face area
+static struct UIStaticVtbl *dlg_bk_oldvtbl = TOPTR(0x00558DB8); // original vftable for m_bk
+static struct UIStaticVtbl *dlg_bk_newvtbl; // hooked vftable for m_bk
 
 static MAKE_THISCALL(void, UIRoleDialog_SetFace_wrapper, struct UIRoleDialog *this, const char *path, int leftright)
 {
     // call SetFace() with original rect
-    set_rect_frect(&pUIWND(this)->m_rect, &dlg_old_frect);
+    set_rect_frect(&pUIWND(this)->m_rect, &dlg_old_ref_frect);
+    push_drvinfo_setwh(GAME_WIDTH_ORG, GAME_HEIGHT_ORG);
     UIRoleDialog_SetFace(this, path, leftright);
+    pop_drvinfo();
     set_rect_frect(&pUIWND(this)->m_rect, &dlg_real_frect);
     
     // get original textbox rect and arrow rect
@@ -224,7 +228,7 @@ static MAKE_THISCALL(void, UIRoleDialog_SetFace_wrapper, struct UIRoleDialog *th
         // adjust face
         fRECT face_frect, face_old_frect;
         set_frect_rect(&face_old_frect, &pUIWND(&this->m_face)->m_rect);
-        transform_frect(&face_frect, &face_old_frect, &game_frect, &dlg_facearea_frect, (leftright ? TR_HIGH : TR_LOW), TR_HIGH, 1.0);
+        transform_frect(&face_frect, &face_old_frect, &game_frect_original_lt, &dlg_facearea_frect, (leftright ? TR_HIGH : TR_LOW), TR_HIGH, 1.0);
         scenedlgface_scalefactor = fmin(ROLEDLG_FACESIZE * get_frect_height(&dlg_frect) / (get_frect_height(&face_frect) * ROLEDLG_FACEHEIGHTFACTOR), sceneui_dstrect_scalefactor);
         set_uiwnd_ptag(pUIWND(&this->m_face), MAKE_PTAG(SF_SCENEDLGFACE, PTR_GAMERECT, PTR_GAMERECT, (leftright ? TR_SCALE_HIGH : TR_SCALE_LOW), TR_SCALE_HIGH));
         set_rect_frect(&pUIWND(&this->m_face)->m_rect, &face_frect);
@@ -259,23 +263,22 @@ static MAKE_THISCALL(void, UIRoleDialog_SetFace_wrapper, struct UIRoleDialog *th
 }
 static MAKE_THISCALL(void, UIRoleDialog_Create_wrapper, struct UIRoleDialog *this, int id, RECT *rect, struct UIWnd *pfather, const char *bkfile)
 {
+    push_drvinfo_setwh(GAME_WIDTH_ORG, GAME_HEIGHT_ORG);
     UIRoleDialog_Create(this, id, rect, pfather, bkfile);
+    pop_drvinfo();
+    
+    // hook m_bk->vfptr
+    this->m_bk.vfptr = (struct UIWndVtbl *) dlg_bk_newvtbl;
     
     // calc role dialog rect
-    set_frect_rect(&dlg_old_frect, &pUIWND(this)->m_rect);
-    transform_frect(&dlg_frect, &dlg_old_frect, &game_frect_original, &sceneui_dstrect, TR_CENTER, TR_HIGH, sceneui_dstrect_scalefactor);
+    set_frect_rect(&dlg_old_ref_frect, &pUIWND(this)->m_rect);
+    set_frect_rect(&dlg_old_frect, &this->m_bkRc);
+    transform_frect(&dlg_frect, &dlg_old_frect, &game_frect_original_lt, &sceneui_dstrect, TR_CENTER, TR_HIGH, sceneui_dstrect_scalefactor);
     dlg_frect.top = fmin(dlg_frect.bottom - get_frect_height(&dlg_old_frect) * scenetext_scalefactor, sceneui_dstrect.top + get_frect_height(&sceneui_dstrect) * (1.0 - dlg_minsize));
     
     transform_frect(&dlg_real_frect, &dlg_frect, &dlg_frect, &dlg_frect, TR_LOW, TR_LOW, 1.0 / scenetext_scalefactor);
-    set_rect_frect(&pUIWND(&this->m_bk)->m_rect, &dlg_real_frect);
     set_rect_frect(&pUIWND(this)->m_rect, &dlg_real_frect);
     set_uiwnd_ptag(pUIWND(this), MAKE_PTAG(SF_SCENETEXT, PTR_GAMERECT, PTR_GAMERECT, TR_SCALE_LOW, TR_SCALE_LOW));
-    
-    // calc timeclose and timeprogress rect
-    fixui_pushstate(&dlg_old_frect, &dlg_real_frect, TR_CENTER, TR_HIGH, 1.0);
-    fixui_adjust_RECT(&pUIWND(&this->timeclose)->m_rect, &pUIWND(&this->timeclose)->m_rect);
-    fixui_adjust_RECT(&pUIWND(&this->timeprogress)->m_rect, &pUIWND(&this->timeprogress)->m_rect);
-    fixui_popstate();
     
     // calc face area rect (not face rect itself)
     dlg_facearea_frect = dlg_frect;
@@ -284,42 +287,48 @@ static MAKE_THISCALL(void, UIRoleDialog_Create_wrapper, struct UIRoleDialog *thi
     // update face and textbox positions
     THISCALL_WRAPPER(UIRoleDialog_SetFace_wrapper, this, NULL, 0);
 }
-/*static MAKE_ASMPATCH(dlgfillchar)
+static MAKE_THISCALL(void, bk_Render, struct UIWnd *this)
 {
-    static char *s = NULL;
-    if (!s) {
-        int sz = 1000;
-        s = malloc(sz + 1);
-        s[sz] = 0;
-        memset(s, 'A', sz);
-    }
-    R_ECX = R_EBX;
-    R_EAX = TOUINT(s);
-}*/
-static MAKE_UIWND_RENDER_WRAPPER(UIRoleDialog_Render_wrapper, 0x004512F0)
-static MAKE_UIWND_UPDATE_WRAPPER(UIRoleDialog_Update_wrapper, 0x004515E0)
+    fixui_pushstate(&dlg_old_frect, &dlg_frect, TR_SCALE_SIMPLE, TR_SCALE_SIMPLE, 1.0);
+    THISCALL_WRAPPER(dlg_bk_oldvtbl->Render, this);
+    fixui_popstate();
+}
+static MAKE_UIWND_RENDER_WRAPPER(UIRoleDialog_Render_wrapper, 0x0045742A)
+static MAKE_UIWND_UPDATE_WRAPPER(UIRoleDialog_Update_wrapper, 0x004576CC)
 static void fix_RoleDialog()
 {
+    dlg_bk_newvtbl = dup_vftable(dlg_bk_oldvtbl, sizeof(struct UIStaticVtbl));
+    dlg_bk_newvtbl->Render = bk_Render;
+    
     // manually add wrapper to UIRoleDialog::Render/Update()
-    INIT_WRAPPER_VFPTR(UIRoleDialog_Render_wrapper, 0x0056B150);
-    INIT_WRAPPER_VFPTR(UIRoleDialog_Update_wrapper, 0x0056B154);
+    INIT_WRAPPER_VFPTR(UIRoleDialog_Render_wrapper, 0x005590D4);
+    INIT_WRAPPER_VFPTR(UIRoleDialog_Update_wrapper, 0x005590D8);
     
     // hook UIRoleDialog::Create
-    INIT_WRAPPER_CALL(UIRoleDialog_Create_wrapper, { 0x0044F2E9 });
+    INIT_WRAPPER_CALL(UIRoleDialog_Create_wrapper, {
+        0x004558D2,
+        //0x005207A6, // no need to hook comp-donate releated calls
+    });
     
     // hook UIRoleDialog::SetFace
     INIT_WRAPPER_CALL(UIRoleDialog_SetFace_wrapper, {
-        0x004515BB,
-        0x00436B23,
-        0x00451795,
+        0x0043F25B,
+        0x00455946,
+        0x0045596F,
+        0x00455998,
+        0x004559C1,
+        0x004559EA,
+        0x00455A13,
+        0x00455A3C,
+        0x004576B2,
+        0x004578A3,
+        //0x00520B8C, // no need to hook comp-donate releated calls
+        //0x00520D91,
+        //0x0052103B,
+        //0x005211CB,
+        //0x00521293,
     });
-
-    // fill dlgtext, for debug purpose
-    //INIT_ASMPATCH(dlgfillchar, 0x00451215, 6, "\x8B\x44\x24\x30\x8B\xCB");
 }
-
-
-#endif
 
 
 
@@ -347,17 +356,13 @@ MAKE_PATCHSET(fixsceneui)
     sceneicon_scalefactor = str2scalefactor(get_string_from_configfile("fixsceneui_iconscalefactor"));
     scenetext_scalefactor = str2scalefactor(get_string_from_configfile("fixsceneui_textscalefactor"));
     
-    #if 0
     dlg_minsize = str2double(get_string_from_configfile("fixsceneui_dlgminsize"));
-    #endif
 
     // general fixes
     fix_gamescene();
     
-    #if 0
     // fix RoleDialog
     fix_RoleDialog();
-    #endif
     
     // fix UIGameOver
     fix_UIGameOver();

@@ -124,6 +124,10 @@ MAKE_PATCHSET(graphicspatch);
     extern void try_goto_desktop(void);
     extern void try_refresh_clipcursor(void);
     
+    extern void push_drvinfo(void);
+    extern void push_drvinfo_setwh(int width, int height);
+    extern void pop_drvinfo(void);
+    
     MAKE_PATCHSET(fixfov);
     MAKE_PATCHSET(fixortho);
         extern float orthofactor;

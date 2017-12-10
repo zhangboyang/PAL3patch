@@ -15,6 +15,7 @@ extern PATCHAPI void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color);
 extern PATCHAPI void set_d3dxfont_matrices(IDirect3DDevice9 *pd3dDevice);
 
 
+
 #ifdef USE_PAL3A_DEFINITIONS
 
 struct member_function_pointer {
@@ -1931,6 +1932,10 @@ struct UIGameOver {
     float m_fTime;
 };
 
+struct UIStaticVtbl {
+    struct UIWndVtbl;
+};
+
 
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
@@ -1963,6 +1968,8 @@ struct UIGameOver {
 #define gbMatrixStack_Scale(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10026460, void, struct gbMatrixStack *, float, float, float), this, a2, a3, a4)
 #define gbMatrixStack_Translate(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10026430, void, struct gbMatrixStack *, float, float, float), this, a2, a3, a4)
 #define gbMatrixStack_Rotate(this, angle, axis) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10026350, void, struct gbMatrixStack *, float, struct gbVec3D *), this, angle, axis)
+
+
 
 
 // PAL3A functions
@@ -2023,6 +2030,8 @@ struct UIGameOver {
 #define UIWnd_Render_rewrited(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044CFE8, void, struct UIWnd *), this)
 #define UIGameFrm_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00455751, void, struct UIGameFrm *), this)
 #define UIGameOver_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00456524, void, struct UIGameOver *), this)
+#define UIRoleDialog_Create(this, id, rect, pfather, bkfile) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004571FB, void, struct UIRoleDialog *, int, RECT *, struct UIWnd *, const char *), this, id, rect, pfather, bkfile)
+#define UIRoleDialog_SetFace(this, path, leftright) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00457481, void, struct UIRoleDialog *, const char *, int), this, path, leftright)
 
 
 
@@ -2172,7 +2181,6 @@ extern int gbGfxManager_D3D_GetBackBufferBitCount(struct gbGfxManager_D3D *this)
 extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
 extern void *vfs_readfile(const char *filepath, unsigned *length, const struct memory_allocator *mem_allocator);
 extern const char *vfs_cpkname(void);
-
 
 #endif
 #endif

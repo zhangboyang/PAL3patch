@@ -225,3 +225,26 @@ void flush_instruction_cache(void *base, unsigned size)
 {
     FlushInstructionCache(GetCurrentProcess(), base, size);
 }
+
+// copy vftable, will alloc memory and dyncode
+void *dup_vftable(void *vftable, unsigned size)
+{
+    assert(size % 4 == 0);
+    size /= 4;
+
+    void **vtbl = malloc(size * 4);
+    
+    unsigned i;
+    for (i = 0; i < size; i++) {
+        void *entry = PTRADD(vftable, i * 4);
+        
+        void *codebuf = alloc_dyncode_buffer(6);
+        memcpy(codebuf, "\xFF\x25", 2);
+        memcpy(PTRADD(codebuf, 2), &entry, 4);
+        flush_instruction_cache(codebuf, 6);
+        
+        vtbl[i] = codebuf;
+    }
+    
+    return vtbl;
+}

@@ -20,6 +20,7 @@ extern PATCHAPI void *hook_import_table(void *image_base, const char *dllname, c
 extern PATCHAPI void *alloc_dyncode_buffer(unsigned size);
 extern PATCHAPI void add_dyncode_with_jmpback(unsigned patchaddr, unsigned jmpback, void *code, unsigned size);
 extern PATCHAPI void flush_instruction_cache(void *base, unsigned size);
+extern PATCHAPI void *dup_vftable(void *vftable, unsigned size);
 
 #define SIMPLE_PATCH(addr, oldcode, newcode, size) \
     do { \

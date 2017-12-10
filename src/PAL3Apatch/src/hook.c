@@ -182,6 +182,7 @@ static void init_pauseresume_hook()
 
 
 // atexit hook
+static void *atexit_hooks_dyncode;
 void call_atexit_hooks()
 {
     run_hooks(HOOKID_ATEXIT, NULL);
@@ -190,9 +191,7 @@ static MAKE_ASMPATCH(atexit_normal)
 {
     call_atexit_hooks();
     
-    R_EAX = M_DWORD(R_EBP - 0x1C); // old code
-    R_EDI = POP_DWORD();
-    R_ESI = POP_DWORD();
+    LINK_JMP(TOUINT(atexit_hooks_dyncode));
 }
 void add_atexit_hook(void (*funcptr)(void))
 {
@@ -200,7 +199,11 @@ void add_atexit_hook(void (*funcptr)(void))
 }
 static void init_atexit_hook()
 {
-    INIT_ASMPATCH(atexit_normal, 0x0052BB01, 5, "\x8B\x45\xE4\x5F\x5E");
+    INIT_ASMPATCH(atexit_normal, 0x0052BB04, 7, "\x5F\x5E\x5B\xC9\xC2\x10\x00");
+    
+    atexit_hooks_dyncode = alloc_dyncode_buffer(7);
+    memcpy(atexit_hooks_dyncode, "\x5F\x5E\x5B\xC9\xC2\x10\x00", 7);
+    flush_instruction_cache(atexit_hooks_dyncode, 7);
 }
 
 
