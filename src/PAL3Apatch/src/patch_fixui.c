@@ -1,7 +1,7 @@
 #include "common.h"
 
 // ui configuration (automatic transform)
-static fRECT game_frect_ui_auto;
+fRECT game_frect_ui_auto;
 
 // fixui state
 static struct fixui_state def_fs; // default fixui state, at stack bottom, also for default cursor rect
@@ -159,6 +159,19 @@ static int fixui_map_gamestate(int pal3_gamestate)
         case GAME_COMPDONATE:
         case GAME_UI:
             return FIXUI_AUTO_TRANSFORM;
+        case GAME_CATCHGHOST:
+            // many safety checks
+            if (g_gamefrm.m_curfrmid == FRM_CATCHGHOST) {
+                if (CG_Entry_GetCGEntry()->m_bUIActive) {
+                    if (CG_Entry_GetCGEntry()->m_pUI) {
+                        // check if rendering buy UI
+                        if (CG_Entry_GetCGEntry()->m_pUI->m_bRenderBuyUI) {
+                            return FIXUI_AUTO_TRANSFORM;
+                        }
+                    }
+                }
+            }
+            return FIXUI_MANUAL_TRANSFORM;
         default:
             return FIXUI_MANUAL_TRANSFORM;
     }

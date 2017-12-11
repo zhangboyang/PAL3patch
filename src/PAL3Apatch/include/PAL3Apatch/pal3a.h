@@ -1937,6 +1937,220 @@ struct UIStaticVtbl {
 };
 
 
+
+struct UIButtonEXA {
+    struct UIButton;
+    struct _btnOPTDATA m_optData;
+    int m_EnableMode;
+    struct gbColorQuad m_color;
+    struct gbColorQuad m_enablecolor;
+    struct gbColorQuad m_surecolor;
+};
+
+struct _MapElement {
+    bool m_bShow;
+    bool m_cango;
+    struct tagPOINT m_screenPt;
+    struct UIButtonEXA m_btn;
+    bool m_isBtnCreate;
+    bool m_show;
+};
+
+enum _BIGMAP_ELEMENT {
+    _invalid = 0xFFFFFFFF,
+    _tangjiabao = 0x0,
+    _dengyunlu = 0x1,
+    _shushan = 0x2,
+    _dimaimenhu = 0x3,
+    _lvluozhang = 0x4,
+    _lvluoshan = 0x5,
+    _lishushan = 0x6,
+    _shengzhou = 0x7,
+    _nalingheyuan = 0x8,
+    _jingcheng = 0x9,
+    _shicun = 0xA,
+    _shushangudao = 0xB,
+    _suoyaota = 0xC,
+    _yuzhou = 0xD,
+    _shidong = 0xE,
+    _yuguangcheng = 0xF,
+    _ELEMENT_NUM = 0x10,
+};
+
+struct UIBigMap {
+    struct UIFrameWnd;
+    struct tagRECT screenrect;
+    int bkWndX;
+    int bkWndY;
+    int i;
+    int j;
+    char buf[256];
+    struct UIStatic ms_BigMap;
+    struct _MapElement m_Element[16];
+    struct tagRECT m_spiritRect;
+    struct UIAnimateCtrl m_spirit;
+    float m_spiritPosX;
+    float m_spiritPosY;
+    struct tagPOINT m_spiritPos;
+    struct tagPOINT m_movetopos;
+    float m_movetoX;
+    float m_movetoY;
+    int m_spiritspeed;
+    float m_speedFX;
+    float m_speedFY;
+    bool m_bSpiritCanMove;
+    bool m_isSpiritMoveTo;
+    float m_timescale;
+    int m_stopdir;
+    enum _BIGMAP_ELEMENT m_curElement;
+    struct MUIDialog m_Answer;
+    struct MUIDialog m_Msg;
+    struct TxtFile scnname;
+    bool m_haveopen;
+    bool m_bupalpha;
+    int m_alpha;
+    int m_alphatime;
+};
+
+
+struct LEVELPARAM {
+    int nMonster;
+    int nSecond;
+};
+
+struct CG_Entry {
+    bool m_bActive;
+    bool m_bUIActive;
+    struct CG_Scene *m_pScene;
+    struct CG_UI *m_pUI;
+    struct CG_Edit *m_pEdit;
+    struct LEVELPARAM m_LEVELPARAM[5];
+    enum PAL3_FRAME m_EntryFrame;
+    struct gbVec3D m_EntryRolePos;
+    char m_EntryCityName[64];
+    char m_EntryName[64];
+    bool b_NoteJumpFree;
+};
+
+enum UIS_RM_Mode {
+    RM_DEFAULT = 0x0,
+    RM_ALPHA = 0x1,
+};
+struct UIStaticRM {
+    struct UIStatic;
+    struct gbColorQuad m_color;
+    int m_dstAlpha;
+    int m_alpha;
+    int m_minAlpha;
+    float m_fadespeed;
+    bool m_isAdd;
+    bool m_isFlash;
+    bool m_stop;
+    enum UIS_RM_Mode m_mode;
+};
+
+struct st_Manager {
+    bool m_Type;
+    bool m_Dicker;
+    unsigned short m_ID;
+    char m_Name[256];
+    bool m_C;
+    int m_Patience;
+    char m_BeginTalk[256];
+    char m_EntryBuy[256];
+    char m_EntrySale[256];
+    char m_NormalAcptTalk[256];
+    char m_NormalCnslTalk[256];
+    char m_NoEnoughMoney[256];
+    char m_Leave[256];
+    char m_HarshTalkbuy[256];
+    float m_AcptQuantum[5];
+    char m_AcptTalk[5][2][256];
+    float m_RfusQuantum[5];
+    char m_RfusTalk[5][2][256];
+    float m_HarshQuantum[5];
+    char m_HarshTalk[5][2][256];
+    char m_ForceAcptTalk[5][2][256];
+    char m_ForceAcptTalkback[5][256];
+    int m_StoreNum[2];
+    unsigned int m_StoreID[2][200];
+    struct FightItem *m_StoreData[2][200];
+    bool m_IsCtrl[2][200];
+};
+
+struct CG_UI {
+    struct UIFrameWnd;
+    char buf[256];
+    struct tagRECT m_ParentRc;
+    struct CG_Entry *m_pFather;
+    int m_SelType;
+    int m_SelPropType;
+    int m_nResultValue;
+    int m_nWinState;
+    struct UIStatic m_OutFrameT;
+    struct UIStatic m_OutFrameR;
+    struct UIStatic m_OutFrameL;
+    struct UIStatic m_OutFrameB;
+    struct UIStatic m_pTime;
+    struct UIStatic m_pMoney;
+    struct UIStatic m_pTools;
+    struct UIButton m_pItems[9];
+    struct UIStatic m_pName;
+    struct UIStatic m_pPrice;
+    struct UIStatic m_pHurt;
+    struct UIStatic m_pInfo;
+    struct UIButton m_pBuy;
+    struct UIButton m_pRun;
+    struct UIStatic m_pProp;
+    struct UIButton m_pProps[5];
+    struct UIStatic m_pPropsNum[5];
+    struct UIStatic m_pHP;
+    struct UIProgressBar m_pBossHP;
+    struct UIProgressBar m_pRoleHP;
+    struct UIStatic m_pRoleFace;
+    struct UIStatic m_pBossFace;
+    struct UIStatic m_pTimeBackground;
+    struct UIStaticRM m_pTimeHunDigit;
+    struct UIStaticRM m_pTimeTenDigit;
+    struct UIStaticRM m_pTimeSinDigit;
+    struct UIStatic m_pResult;
+    struct MUIDialog m_pWinAnswer;
+    struct MUIDialog m_pLoseAnswer;
+    struct MUIDialog m_pNoMoneyMsg;
+    struct MUIDialog m_pSurpassMsg;
+    struct MUIDialog m_pAccountMsg;
+    struct MUIDialog m_pOverGameMsg;
+    struct MUIDialog m_pExitDlg;
+    struct PtrArray m_ComboBuffer;
+    struct UISceneMap m_SceneMap;
+    struct UIButton m_Exit;
+    bool m_IsExit;
+    struct tagRECT m_InvalidRc0;
+    struct tagRECT m_InvalidRc1;
+    struct tagRECT m_InvalidRc2;
+    int m_nTimeSec;
+    int m_nBossHP;
+    float m_fBossHP;
+    int m_nRoleFullHP;
+    int m_nRoleCurHP;
+    float m_ComboHitLastTime;
+    float m_ComboHitTime;
+    int m_nComboHit;
+    int m_nTotalComboHit;
+    struct UIStatic m_pCombo;
+    bool m_mouseon[9];
+    int m_nPropCost;
+    int m_nNoteMoney;
+    struct PropUI *m_pBuyUI;
+    bool m_bRenderBuyUI;
+    struct st_Manager m_PropData;
+    bool bUseKeyLocked;
+    unsigned int m_nPropNum[5];
+    unsigned int m_dwCurPropID;
+};
+
+
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -2032,7 +2246,8 @@ struct UIStaticVtbl {
 #define UIGameOver_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00456524, void, struct UIGameOver *), this)
 #define UIRoleDialog_Create(this, id, rect, pfather, bkfile) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004571FB, void, struct UIRoleDialog *, int, RECT *, struct UIWnd *, const char *), this, id, rect, pfather, bkfile)
 #define UIRoleDialog_SetFace(this, path, leftright) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00457481, void, struct UIRoleDialog *, const char *, int), this, path, leftright)
-
+#define UIBigMap_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044EA6B, void, struct UIBigMap *), this)
+#define CG_Entry_GetCGEntry ((struct CG_Entry *(*)(void)) TOPTR(0x0040779C))
 
 
 
@@ -2047,6 +2262,7 @@ struct UIStaticVtbl {
 #define ui_color_blend_tex_gbf (*(struct gbRenderEffect **) TOPTR(0x0228F01C))
 #define g_pVFileSys (*(struct gbVFileSystem **) TOPTR(gboffset + 0x10131D08))
 #define g_msgbk (*(struct UIStaticFlex *) TOPTR(0x00C01D50))
+#define g_gamefrm (*(struct UIGameFrm *) TOPTR(0x00F79E98))
 
 
 
@@ -2166,6 +2382,14 @@ struct UIStaticVtbl {
     assert(sizeof(struct UISceneFace) == 0x734); \
     assert(sizeof(struct UISceneFrm) == 0xC34); \
     assert(sizeof(struct UIGameOver) == 0xF0); \
+    assert(sizeof(struct UIButtonEXA) == 0x178); \
+    assert(sizeof(struct _MapElement) == 0x188); \
+    assert(sizeof(struct UIBigMap) == 0x2860); \
+    assert(sizeof(struct LEVELPARAM) == 0x8); \
+    assert(sizeof(struct CG_Entry) == 0xCC); \
+    assert(sizeof(struct UIStaticRM) == 0xBC); \
+    assert(sizeof(struct st_Manager) == 0x4460); \
+    assert(sizeof(struct CG_UI) == 0x9A50); \
 } while (0)
 
 

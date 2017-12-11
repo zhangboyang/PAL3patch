@@ -135,6 +135,8 @@ MAKE_PATCHSET(graphicspatch);
     MAKE_PATCHSET(reduceinputlatency);
     MAKE_PATCHSET(fixreset);
     MAKE_PATCHSET(fixui);
+        extern fRECT game_frect_ui_auto;
+        
         struct fixui_state {
             fRECT src_frect, dst_frect;
             int lr_method, tb_method;
@@ -270,6 +272,7 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fixcompdonateui);
         MAKE_PATCHSET(fixjusticebookui);
         MAKE_PATCHSET(fixcoverfrm);
+        MAKE_PATCHSET(fixbigmap);
 
     MAKE_PATCHSET(fixeffect);
     MAKE_PATCHSET(forcesettexture);
