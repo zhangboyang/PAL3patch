@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Application" 0x0101
 
-CFG=PatchConfig - Win32 Debug
+CFG=PatchConfig - Win32 Debug PAL3
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,16 +13,14 @@ CFG=PatchConfig - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "PatchConfig.mak" CFG="PatchConfig - Win32 Debug"
+!MESSAGE NMAKE /f "PatchConfig.mak" CFG="PatchConfig - Win32 Debug PAL3"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "PatchConfig - Win32 Static MBCS Release" (based on "Win32 (x86) Application")
-!MESSAGE "PatchConfig - Win32 Static Release" (based on "Win32 (x86) Application")
-!MESSAGE "PatchConfig - Win32 MBCS Release" (based on "Win32 (x86) Application")
-!MESSAGE "PatchConfig - Win32 MBCS Debug" (based on "Win32 (x86) Application")
-!MESSAGE "PatchConfig - Win32 Release" (based on "Win32 (x86) Application")
-!MESSAGE "PatchConfig - Win32 Debug" (based on "Win32 (x86) Application")
+!MESSAGE "PatchConfig - Win32 Release PAL3A" (based on "Win32 (x86) Application")
+!MESSAGE "PatchConfig - Win32 Debug PAL3A" (based on "Win32 (x86) Application")
+!MESSAGE "PatchConfig - Win32 Release PAL3" (based on "Win32 (x86) Application")
+!MESSAGE "PatchConfig - Win32 Debug PAL3" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -33,132 +31,26 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "PatchConfig - Win32 Static MBCS Release"
+!IF  "$(CFG)" == "PatchConfig - Win32 Release PAL3A"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "PatchConfig___Win32_Static_MBCS_Release"
-# PROP BASE Intermediate_Dir "PatchConfig___Win32_Static_MBCS_Release"
+# PROP BASE Output_Dir "Release_PAL3A"
+# PROP BASE Intermediate_Dir "Release_PAL3A"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 5
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Static_MBCS_Release"
-# PROP Intermediate_Dir "Static_MBCS_Release"
+# PROP Output_Dir "Release_PAL3A"
+# PROP Intermediate_Dir "Release_PAL3A"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "BUILD_FOR_PAL3A" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x804 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /subsystem:windows /machine:I386
-
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Static Release"
-
-# PROP BASE Use_MFC 6
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "PatchConfig___Win32_Static_Release"
-# PROP BASE Intermediate_Dir "PatchConfig___Win32_Static_Release"
-# PROP BASE Ignore_Export_Lib 0
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 5
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Static_Release"
-# PROP Intermediate_Dir "Static_Release"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /Yu"stdafx.h" /FD /c
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x804 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 winmm.lib d3d9.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
-
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 MBCS Release"
-
-# PROP BASE Use_MFC 6
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "PatchConfig___Win32_MBCS_Release"
-# PROP BASE Intermediate_Dir "PatchConfig___Win32_MBCS_Release"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 6
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "MBCS_Release"
-# PROP Intermediate_Dir "MBCS_Release"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /subsystem:windows /machine:I386
-
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 MBCS Debug"
-
-# PROP BASE Use_MFC 6
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "PatchConfig___Win32_MBCS_Debug"
-# PROP BASE Intermediate_Dir "PatchConfig___Win32_MBCS_Debug"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 6
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir "MBCS_Debug"
-# PROP Intermediate_Dir "MBCS_Debug"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x804 /d "_DEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x804 /d "_DEBUG" /d "_AFXDLL"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Release"
-
-# PROP BASE Use_MFC 6
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "Release"
-# PROP BASE Intermediate_Dir "Release"
-# PROP BASE Ignore_Export_Lib 0
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 6
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release"
-# PROP Intermediate_Dir "Release"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /Yu"stdafx.h" /FD /c
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
+# ADD RSC /l 0x804 /d "BUILD_FOR_PAL3A" /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -166,26 +58,26 @@ LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
 # ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
 
-!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Debug"
+!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Debug PAL3A"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "Debug"
-# PROP BASE Intermediate_Dir "Debug"
+# PROP BASE Output_Dir "Debug_PAL3A"
+# PROP BASE Intermediate_Dir "Debug_PAL3A"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
-# PROP Use_MFC 6
+# PROP Use_MFC 5
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug"
-# PROP Intermediate_Dir "Debug"
+# PROP Output_Dir "Debug_PAL3A"
+# PROP Intermediate_Dir "Debug_PAL3A"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "BUILD_FOR_PAL3A" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_UNICODE" /FR /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x804 /d "_DEBUG" /d "_AFXDLL"
-# ADD RSC /l 0x804 /d "_DEBUG" /d "_AFXDLL"
+# ADD RSC /l 0x804 /d "BUILD_FOR_PAL3A" /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -193,16 +85,68 @@ LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
+!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Release PAL3"
+
+# PROP BASE Use_MFC 5
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "Release_PAL3"
+# PROP BASE Intermediate_Dir "Release_PAL3"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 5
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Release_PAL3"
+# PROP Intermediate_Dir "Release_PAL3"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "BUILD_FOR_PAL3" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "BUILD_FOR_PAL3" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /Yu"stdafx.h" /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x804 /d "BUILD_FOR_PAL3" /d "NDEBUG"
+# ADD RSC /l 0x804 /d "BUILD_FOR_PAL3" /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
+# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
+
+!ELSEIF  "$(CFG)" == "PatchConfig - Win32 Debug PAL3"
+
+# PROP BASE Use_MFC 5
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "Debug_PAL3"
+# PROP BASE Intermediate_Dir "Debug_PAL3"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 5
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "Debug_PAL3"
+# PROP Intermediate_Dir "Debug_PAL3"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "BUILD_FOR_PAL3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_UNICODE" /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "BUILD_FOR_PAL3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_UNICODE" /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x804 /d "BUILD_FOR_PAL3" /d "_DEBUG"
+# ADD RSC /l 0x804 /d "BUILD_FOR_PAL3" /d "_DEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
+
 !ENDIF 
 
 # Begin Target
 
-# Name "PatchConfig - Win32 Static MBCS Release"
-# Name "PatchConfig - Win32 Static Release"
-# Name "PatchConfig - Win32 MBCS Release"
-# Name "PatchConfig - Win32 MBCS Debug"
-# Name "PatchConfig - Win32 Release"
-# Name "PatchConfig - Win32 Debug"
+# Name "PatchConfig - Win32 Release PAL3A"
+# Name "PatchConfig - Win32 Debug PAL3A"
+# Name "PatchConfig - Win32 Release PAL3"
+# Name "PatchConfig - Win32 Debug PAL3"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
@@ -382,7 +326,11 @@ SOURCE=.\res\PatchConfig.rc2
 # End Group
 # Begin Source File
 
-SOURCE=.\default.conf
+SOURCE=.\default_PAL3.conf
+# End Source File
+# Begin Source File
+
+SOURCE=.\default_PAL3A.conf
 # End Source File
 # Begin Source File
 

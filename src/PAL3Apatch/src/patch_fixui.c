@@ -30,6 +30,8 @@ struct fixui_state *fixui_newstate(fRECT *src_frect, fRECT *dst_frect, int lr_me
     cur->no_cursor_virt = 0;
     cur->no_align = 0;
     cur->gb_align = 0;
+    memset(cur->alt_father, 0, sizeof(cur->alt_father));
+    cur->ps_data = NULL;
     cur->prev = NULL;
     return cur;
 }
@@ -38,6 +40,7 @@ struct fixui_state *fixui_dupstate()
 {
     struct fixui_state *ptr = malloc(sizeof(struct fixui_state));
     *ptr = *fs;
+    ptr->ps_data = NULL;
     ptr->prev = NULL;
     return ptr;
 }
@@ -55,6 +58,7 @@ void fixui_popstate()
     // remove stack top item
     struct fixui_state *cur = fs;
     fs = cur->prev;
+    assert(cur->ps_data == NULL);
     free(cur);
 }
 // adjust structures
@@ -160,7 +164,7 @@ static int fixui_map_gamestate(int pal3_gamestate)
         case GAME_UI:
             return FIXUI_AUTO_TRANSFORM;
         case GAME_CATCHGHOST:
-            // many safety checks
+            // many safety checks (see also: patch_graphicspatch.c)
             if (g_gamefrm.m_curfrmid == FRM_CATCHGHOST) {
                 if (CG_Entry_GetCGEntry()->m_bUIActive) {
                     if (CG_Entry_GetCGEntry()->m_pUI) {
@@ -447,6 +451,20 @@ static void init_softcursor_sizepatch()
 #define get_ptag_raw(this) ((unsigned)((this)->m_bcreateok))
 #define get_ptag(this) (*(struct uiwnd_ptag *)(&(this)->m_bcreateok))
 
+void set_alt_father(unsigned index, struct UIWnd *ptr)
+{
+    assert(ptr);
+    assert(1 <= index && index <= MAX_ALT_FATHER);
+    fs->alt_father[index - 1] = ptr;
+}
+static struct UIWnd *get_alt_father(unsigned index)
+{
+    assert(1 <= index && index <= MAX_ALT_FATHER);
+    struct UIWnd *ret = fs->alt_father[index - 1];
+    assert(ret);
+    return ret;;
+}
+
 static int verify_ptag_magic(struct UIWnd *this)
 {
     if (get_ptag(this).magic == UIWND_PTAG_MAGIC) {
@@ -457,53 +475,99 @@ static int verify_ptag_magic(struct UIWnd *this)
     }
 }
 
+static struct UIWnd *get_ptag_alt_father(struct uiwnd_ptag ptag)
+{
+    // because get_alt_father use fs->alt_father[]
+    // you can't call this function when new state is pushed
+    if (ptag.alt_father_index) {
+        return get_alt_father(ptag.alt_father_index);
+    } else {
+        return NULL;
+    }
+}
+
 void push_ptag_state(struct UIWnd *pwnd)
 {
     if (!verify_ptag_magic(pwnd)) return;
     struct uiwnd_ptag ptag = get_ptag(pwnd);
-    if (!ptag.enabled) return;
     
-    // check in-use flag
-    if (ptag.in_use) {
-        warning("duplicate ptag in stack.");
+    // alloc runtime data
+    struct ptag_state_runtime_data *sv = malloc(sizeof(struct ptag_state_runtime_data));
+    
+    // check alternative father
+    sv->alt_father = get_ptag_alt_father(ptag);
+    if (sv->alt_father) {
+        push_ptag_state(sv->alt_father);
     }
     
-    // read rect information from ptag
-    fRECT *trans_src_frect, *trans_dst_frect;
-    trans_src_frect = get_ptag_frect(ptag.self_srcrect_type);
-    if (!trans_src_frect) fail("invalid ptag srcrect type %d.", ptag.self_srcrect_type);
-    trans_dst_frect = get_ptag_frect(ptag.self_dstrect_type);
-    if (!trans_dst_frect) fail("invalid ptag dstrect type %d.", ptag.self_dstrect_type);
+    // check if current ptag is enabled
+    if (ptag.enabled) {
     
-    // transform window rect using ptag
-    fRECT src_frect, dst_frect;
-    double len_factor;
-    set_frect_rect(&src_frect, &pwnd->m_rect);
-    len_factor = scalefactor_table[ptag.scalefactor_index];
-    set_frect_rect(&dst_frect, &pwnd->m_rect);
-    transform_frect(&dst_frect, &dst_frect, trans_src_frect, trans_dst_frect, ptag.self_lr_method, ptag.self_tb_method, len_factor);
+        // check in-use flag
+        if (ptag.in_use) {
+            warning("duplicate ptag in stack.");
+        }
+        
+        // read rect information from ptag
+        fRECT *trans_src_frect, *trans_dst_frect;
+        trans_src_frect = get_ptag_frect(ptag.self_srcrect_type);
+        if (!trans_src_frect) fail("invalid ptag srcrect type %d.", ptag.self_srcrect_type);
+        trans_dst_frect = get_ptag_frect(ptag.self_dstrect_type);
+        if (!trans_dst_frect) fail("invalid ptag dstrect type %d.", ptag.self_dstrect_type);
+        
+        // transform window rect using ptag
+        fRECT src_frect, dst_frect;
+        double len_factor;
+        set_frect_rect(&src_frect, &pwnd->m_rect);
+        len_factor = scalefactor_table[ptag.scalefactor_index];
+        set_frect_rect(&dst_frect, &pwnd->m_rect);
+        transform_frect(&dst_frect, &dst_frect, trans_src_frect, trans_dst_frect, ptag.self_lr_method, ptag.self_tb_method, len_factor);
+        
+        // scale window contents
+        fixui_pushstate(&src_frect, &dst_frect, TR_SCALE_LOW, TR_SCALE_LOW, len_factor);
+        if (ptag.no_cursor_virt) set_cursor_virt(0); // update cursor virt status
+        
+        // update in-use flag
+        get_ptag(pwnd).in_use = 1;
+        
+    }
     
-    // scale window contents
-    fixui_pushstate(&src_frect, &dst_frect, TR_SCALE_LOW, TR_SCALE_LOW, len_factor);
-    if (ptag.no_cursor_virt) set_cursor_virt(0); // update cursor virt status
-    
-    // update in-use flag
-    get_ptag(pwnd).in_use = 1;
+    // link runtime data to fixui state stack
+    sv->next = fs->ps_data;
+    fs->ps_data = sv;
 }
+
 void pop_ptag_state(struct UIWnd *pwnd)
 {
     if (!verify_ptag_magic(pwnd)) return;
     struct uiwnd_ptag ptag = get_ptag(pwnd);
-    if (!ptag.enabled) return;
     
-    // restore in-use flag
-    if (!ptag.in_use) {
-        warning("unmatched ptag pop operation.");
+    struct ptag_state_runtime_data *sv;
+    
+    // unlink runtime data from fixui state stack
+    sv = fs->ps_data;
+    fs->ps_data = sv->next;
+    assert(sv);
+    
+    // check if current ptag is enabled
+    if (ptag.enabled) {
+        // restore in-use flag
+        if (!ptag.in_use) {
+            warning("unmatched ptag pop operation.");
+        }
+        get_ptag(pwnd).in_use = 0;
+        
+        // pop state
+        fixui_popstate();
     }
-    get_ptag(pwnd).in_use = 0;
+
+    // check alternative father
+    if (sv->alt_father) {
+        pop_ptag_state(sv->alt_father);
+    }
     
-    // pop state
-    fixui_popstate();
+    // free runtime data
+    free(sv);
 }
 
 void set_uiwnd_ptag(struct UIWnd *this, struct uiwnd_ptag ptag)
@@ -512,6 +576,8 @@ void set_uiwnd_ptag(struct UIWnd *this, struct uiwnd_ptag ptag)
         get_ptag(this) = ptag;
     }
 }
+
+
 static MAKE_THISCALL(void, UIWnd_Render, struct UIWnd *this)
 {
     if (!this->m_bvisible) return;

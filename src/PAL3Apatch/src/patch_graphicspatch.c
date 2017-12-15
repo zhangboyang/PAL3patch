@@ -32,9 +32,27 @@ static void update_fpslimit()
 {
     double fps = default_fps;
     switch (PAL3_s_gamestate) {
-        // FIXME: more state?
         case GAME_UI:
-            fps = standard_fps; break;
+            fps = standard_fps;
+            break;
+        case GAME_CATCHGHOST:
+            // many safety checks (see also: patch_fixui.c)
+            if (g_gamefrm.m_curfrmid == FRM_CATCHGHOST) {
+                if (CG_Entry_GetCGEntry()->m_bUIActive) {
+                    if (CG_Entry_GetCGEntry()->m_pUI) {
+                        // check if rendering buy UI
+                        if (CG_Entry_GetCGEntry()->m_pUI->m_bRenderBuyUI) {
+                            fps = standard_fps;
+                        }
+                        
+                        // check if edit mode
+                        if (CG_Entry_GetCGEntry()->m_pUI->m_pTools.m_bvisible) {
+                            fps = standard_fps;
+                        }
+                    }
+                }
+            }
+            break;
     }
     set_fpslimit(fps);
 }

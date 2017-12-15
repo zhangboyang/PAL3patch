@@ -137,6 +137,13 @@ MAKE_PATCHSET(graphicspatch);
     MAKE_PATCHSET(fixui);
         extern fRECT game_frect_ui_auto;
         
+        #define MAX_ALT_FATHER (8 - 1) // NOTE: pay attention to struct uiwnd_ptag
+        
+        struct ptag_state_runtime_data {
+            struct UIWnd *alt_father;
+            struct ptag_state_runtime_data *next;
+        };
+        
         struct fixui_state {
             fRECT src_frect, dst_frect;
             int lr_method, tb_method;
@@ -145,6 +152,9 @@ MAKE_PATCHSET(graphicspatch);
             int no_cursor_virt; // if set to non-zero, there is no cursor virtualizion
             int no_align; // if set to non-zero, no uirect alignment
             int gb_align; // if (gb_align && !no_align) then use gb-coord for uirect alignment
+            struct UIWnd *alt_father[MAX_ALT_FATHER];
+            
+            struct ptag_state_runtime_data *ps_data; // runtime data for ptag state
         };
         extern struct fixui_state *fs;
 
@@ -173,6 +183,8 @@ MAKE_PATCHSET(graphicspatch);
         struct fixui_state *fixui_newstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor);
         struct fixui_state *fixui_dupstate(void);
         extern void fixui_pushstate_node(struct fixui_state *cur);
+        #define fixui_pushdup() \
+            fixui_pushstate_node(fixui_dupstate())
         #define fixui_pushstate(src_frect, dst_frect, lr_method, tb_method, len_factor) \
             fixui_pushstate_node(fixui_newstate(src_frect, dst_frect, lr_method, tb_method, len_factor))
         extern void fixui_popstate(void);
@@ -189,12 +201,14 @@ MAKE_PATCHSET(graphicspatch);
             unsigned in_use : 1;
             unsigned enabled : 1;
             
-            #define UIWND_PTAG_MAGIC 162u // TangXueJian's height, hahahaha
-            unsigned magic : 10; // must be non-zero
+            unsigned alt_father_index : 3; // if set to non-zero, will behave like fs->alt_father[index - 1] as it's father window, have many restrictions (e.g. father can't use self_only_ptag)
+            
+            #define UIWND_PTAG_MAGIC 23u // TangXueJian's birthday, hahahaha
+            unsigned magic : 7; // must be non-zero
         };
         #define M_PWND(addr) TOPTR(M_DWORD(addr))
         #define PWND TOPTR
-        #define MAKE_PTAG(sf_idx, src_type, dst_type, lr, tb) \
+        #define MAKE_PTAG_INTERNAL(sf_idx, src_type, dst_type, lr, tb, alt_fa, enb) \
             ((struct uiwnd_ptag) { \
                 .scalefactor_index = (sf_idx), \
                 .self_srcrect_type = (src_type), \
@@ -203,12 +217,17 @@ MAKE_PATCHSET(graphicspatch);
                 .self_tb_method = (tb), \
                 .no_cursor_virt = 0, \
                 .self_only_ptag = 0, \
+                .alt_father_index = (alt_fa), \
                 .in_use = 0, \
-                .enabled = 1, \
+                .enabled = (enb), \
                 .magic = UIWND_PTAG_MAGIC, \
             })
-        
+
+        #define MAKE_ALT_FATHER_PTAG(alt_fa) MAKE_PTAG_INTERNAL(0, 0, 0, 0, 0, alt_fa, 0)
+        #define MAKE_PTAG(sf_idx, src_type, dst_type, lr, tb) MAKE_PTAG_INTERNAL(sf_idx, src_type, dst_type, lr, tb, 0, 1)
         #define FIXUI_AUTO_TRANSFORM_PTAG MAKE_PTAG(SF_UI, PTR_GAMERECT_ORIGINAL, PTR_GAMERECT_UIAUTO, TR_SCALE_LOW, TR_SCALE_LOW)
+        
+        extern void set_alt_father(unsigned index, struct UIWnd *ptr);
         
         extern void set_uiwnd_ptag(struct UIWnd *this, struct uiwnd_ptag ptag);
         extern fRECT *get_ptag_frect(int rect_type);
@@ -224,6 +243,7 @@ MAKE_PATCHSET(graphicspatch);
         
         extern void push_ptag_state(struct UIWnd *pwnd);
         extern void pop_ptag_state(struct UIWnd *pwnd);
+        
         #define MAKE_UIWND_RENDER_WRAPPER_CUSTOM(render_wrapper_name, original_render_address, pre_action, post_action) \
             MAKE_THISCALL(void, render_wrapper_name, struct UIWnd *this) \
             { \

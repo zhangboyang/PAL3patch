@@ -1,6 +1,12 @@
 #include "stdafx.h"
 
+#ifdef BUILD_FOR_PAL3
 #define CONFIG_FILE "PAL3patch.conf"
+#endif
+
+#ifdef BUILD_FOR_PAL3A
+#define CONFIG_FILE "PAL3Apatch.conf"
+#endif
 
 static int is_spacechar(char ch)
 {

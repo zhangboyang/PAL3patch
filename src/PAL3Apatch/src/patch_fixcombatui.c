@@ -260,6 +260,7 @@ static MAKE_THISCALL(void, CCBLineupWindow_Render, struct CCBLineupWindow *this)
 {
     UIFrameWnd_Render((struct UIFrameWnd *) this);
     struct UIWnd *pSelectedFace = pUIWND(this->m_pFace[this->m_nSelected]);
+    
     push_ptag_state(pSelectedFace);
     UIWnd_vfptr_Render(pSelectedFace);
     pop_ptag_state(pSelectedFace);
@@ -270,6 +271,7 @@ static MAKE_THISCALL(bool, CCBLineupWindow_IsPtOnFace, struct CCBLineupWindow *t
 {
     struct UIWnd *pFace = pUIWND(this->m_pFace[nFaceIndex]);
     RECT rc = pFace->m_rect;
+    
     push_ptag_state(pFace);
     fixui_adjust_RECT(&rc, &rc);
     pop_ptag_state(pFace);

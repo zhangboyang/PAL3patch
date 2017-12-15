@@ -136,7 +136,6 @@ static MAKE_THISCALL(void, UIEmote_Render, struct UIEmote *this)
     fixui_popstate();
 }
 
-
 // general sceneui fixes
 static MAKE_THISCALL(void, UIGameFrm_Create_wrapper, struct UIGameFrm *this)
 {
@@ -145,9 +144,6 @@ static MAKE_THISCALL(void, UIGameFrm_Create_wrapper, struct UIGameFrm *this)
     
     ptag = FIXUI_AUTO_TRANSFORM_PTAG;
     set_uiwnd_ptag(pUIWND(&this->m_ChatRest), ptag);
-    set_uiwnd_ptag(pUIWND(&this->m_selemote_frame), ptag);
-    set_uiwnd_ptag(pUIWND(&this->m_selemote_BTN1), ptag);
-    set_uiwnd_ptag(pUIWND(&this->m_selemote_BTN2), ptag);
     
     ptag = SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT, TR_CENTER, TR_LOW);
     set_uiwnd_ptag(pUIWND(&this->m_note), ptag);
@@ -155,8 +151,6 @@ static MAKE_THISCALL(void, UIGameFrm_Create_wrapper, struct UIGameFrm *this)
     ptag = SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT, TR_CENTER, TR_CENTER);
     set_uiwnd_ptag(pUIWND(&this->m_seldlg), ptag);
     
-    ptag = SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT, TR_SCALE_MID, TR_SCALE_MID);
-
     ptag = SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT_ORIGINAL, TR_SCALE_HIGH, TR_SCALE_LOW);
     set_uiwnd_ptag(pUIWND(&this->m_cap), ptag);
     
@@ -167,6 +161,30 @@ static MAKE_THISCALL(void, UIGameFrm_Create_wrapper, struct UIGameFrm *this)
     set_uiwnd_ptag(pUIWND(&this->m_scenefrm->m_face), ptag);
 }
 
+static void pre_UIGameFrm(struct UIWnd *this)
+{
+    fixui_pushdup();
+    
+    struct UIGameFrm *gamefrm = TOPTR(this);    
+    struct uiwnd_ptag ptag;
+    
+    ptag = SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT, TR_CENTER, TR_CENTER);
+    set_uiwnd_ptag(pUIWND(&gamefrm->m_selemote_frame), ptag);
+    
+    #define FAPTR_SELEMOTE_FRAME 1
+    set_alt_father(FAPTR_SELEMOTE_FRAME, pUIWND(&gamefrm->m_selemote_frame));
+
+    set_uiwnd_ptag(pUIWND(&gamefrm->m_selemote_BTN1), MAKE_ALT_FATHER_PTAG(FAPTR_SELEMOTE_FRAME));
+    set_uiwnd_ptag(pUIWND(&gamefrm->m_selemote_BTN2), MAKE_ALT_FATHER_PTAG(FAPTR_SELEMOTE_FRAME));
+}
+
+static void post_UIGameFrm(struct UIWnd *this)
+{
+    fixui_popstate();
+}
+
+static MAKE_UIWND_RENDER_WRAPPER_CUSTOM(UIGameFrm_Render_wrapper, 0x00455E39, pre_UIGameFrm, post_UIGameFrm)
+static MAKE_UIWND_UPDATE_WRAPPER_CUSTOM(UIGameFrm_Update_wrapper, 0x00455D6E, pre_UIGameFrm, post_UIGameFrm)
 
 static void fix_gamescene()
 {
@@ -174,6 +192,17 @@ static void fix_gamescene()
     INIT_WRAPPER_CALL(UIGameFrm_Create_wrapper, {
         0x00406A73,
         0x00406AC2,
+    });
+    
+    // hook UIGameFrm::Render() and UIGameFrm::Update()
+    INIT_WRAPPER_VFPTR(UIGameFrm_Render_wrapper, 0x0055901C);
+    INIT_WRAPPER_CALL(UIGameFrm_Render_wrapper, {
+        0x004EDC64,
+        0x00407C1B,
+    });
+    INIT_WRAPPER_VFPTR(UIGameFrm_Update_wrapper, 0x00559020);
+    INIT_WRAPPER_CALL(UIGameFrm_Update_wrapper, {
+        0x00407449,
     });
     
     // hook PlayerMgr::DrawMsg()
@@ -192,7 +221,7 @@ static void fix_gamescene()
 
 
 // fix RoleDialog
-#define ROLEDLG_FACESIZE 2.2 // ratio of text frame
+#define ROLEDLG_FACESIZE 2.0 // ratio of text frame
 #define ROLEDLG_FACEHEIGHTFACTOR (256.0 / 512.0) // real face height : face texture height
 static double dlg_minsize; // ratio of whole screen
 static fRECT dlg_frect; // screen rect of role dialog
@@ -349,6 +378,118 @@ static void fix_UIGameOver()
 
 
 
+
+
+
+// fix CG_UI
+
+static void pre_CG_UI(struct UIWnd *this)
+{
+    fixui_pushdup();
+    
+    struct CG_UI *ui = TOPTR(this);
+    struct uiwnd_ptag ptag;
+    int i;
+    
+    
+    // tools
+    #define FAPTR_TOOLS 1
+    set_alt_father(FAPTR_TOOLS, pUIWND(&ui->m_pTools));
+    ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT_ORIGINAL, TR_HIGH, TR_CENTER);
+    set_uiwnd_ptag(pUIWND(&ui->m_pTools), ptag);
+
+    set_uiwnd_ptag(pUIWND(&ui->m_pTime), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pMoney), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    for (i = 0; i < 9; i++) {
+        set_uiwnd_ptag(pUIWND(&ui->m_pItems[i]), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    }
+    set_uiwnd_ptag(pUIWND(&ui->m_pName), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pPrice), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pHurt), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pInfo), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pBuy), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pRun), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_Exit), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+
+    
+    // prop
+    #define FAPTR_PROP 2
+    set_alt_father(FAPTR_PROP, pUIWND(&ui->m_pProp));
+    ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_LOW, TR_HIGH);
+    set_uiwnd_ptag(pUIWND(&ui->m_pProp), ptag);
+
+    for (i = 0; i < 5; i++) {
+        set_uiwnd_ptag(pUIWND(&ui->m_pProps[i]), MAKE_ALT_FATHER_PTAG(FAPTR_PROP));
+        set_uiwnd_ptag(pUIWND(&ui->m_pPropsNum[i]), MAKE_ALT_FATHER_PTAG(FAPTR_PROP));
+    }
+    
+    
+    // HP
+    #define FAPTR_HP 3
+    set_alt_father(FAPTR_HP, pUIWND(&ui->m_pHP));
+    ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_LOW, TR_LOW);
+    set_uiwnd_ptag(pUIWND(&ui->m_pHP), ptag);
+    
+    set_uiwnd_ptag(pUIWND(&ui->m_pBossHP), MAKE_ALT_FATHER_PTAG(FAPTR_HP));
+    set_uiwnd_ptag(pUIWND(&ui->m_pRoleHP), MAKE_ALT_FATHER_PTAG(FAPTR_HP));
+    set_uiwnd_ptag(pUIWND(&ui->m_pBossFace), MAKE_ALT_FATHER_PTAG(FAPTR_HP));
+    set_uiwnd_ptag(pUIWND(&ui->m_pRoleFace), MAKE_ALT_FATHER_PTAG(FAPTR_HP));
+
+
+    // TimeBackground
+    #define FAPTR_TIMEBACKGROUND 4
+    set_alt_father(FAPTR_TIMEBACKGROUND, pUIWND(&ui->m_pTimeBackground));
+    ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_HIGH, TR_LOW);
+    set_uiwnd_ptag(pUIWND(&ui->m_pTimeBackground), ptag);
+    
+    set_uiwnd_ptag(pUIWND(&ui->m_pTimeHunDigit), MAKE_ALT_FATHER_PTAG(FAPTR_TIMEBACKGROUND));
+    set_uiwnd_ptag(pUIWND(&ui->m_pTimeTenDigit), MAKE_ALT_FATHER_PTAG(FAPTR_TIMEBACKGROUND));
+    set_uiwnd_ptag(pUIWND(&ui->m_pTimeSinDigit), MAKE_ALT_FATHER_PTAG(FAPTR_TIMEBACKGROUND));
+
+
+    // scene map
+    if (ui->m_pTools.m_bvisible) {
+        set_uiwnd_ptag(pUIWND(&ui->m_SceneMap), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    } else {
+        set_uiwnd_ptag(pUIWND(&ui->m_SceneMap), SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_HIGH, TR_HIGH));
+    }
+    
+    // dialog
+    ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT_ORIGINAL, TR_SCALE_LOW, TR_SCALE_LOW);
+    set_uiwnd_ptag(pUIWND(&ui->m_pResult), ptag);
+    set_uiwnd_ptag(pUIWND(&ui->m_pWinAnswer), ptag);
+    set_uiwnd_ptag(pUIWND(&ui->m_pLoseAnswer), ptag);
+    set_uiwnd_ptag(pUIWND(&ui->m_pNoMoneyMsg), ptag);
+    set_uiwnd_ptag(pUIWND(&ui->m_pSurpassMsg), ptag);
+    set_uiwnd_ptag(pUIWND(&ui->m_pAccountMsg), ptag);
+    set_uiwnd_ptag(pUIWND(&ui->m_pOverGameMsg), ptag);
+    set_uiwnd_ptag(pUIWND(&ui->m_pExitDlg), ptag);
+    
+    // update InvalidRect
+    push_ptag_state(pUIWND(&ui->m_pTools));
+    fixui_adjust_RECT(&ui->m_InvalidRc0, &ui->m_pTools.m_rect);
+    pop_ptag_state(pUIWND(&ui->m_pTools));
+}
+static void post_CG_UI(struct UIWnd *this)
+{
+    fixui_popstate();
+}
+
+static MAKE_UIWND_RENDER_WRAPPER_CUSTOM(CG_UI_Render_wrapper, 0x0051CE29, pre_CG_UI, post_CG_UI)
+static MAKE_UIWND_UPDATE_WRAPPER_CUSTOM(CG_UI_Update_wrapper, 0x0051CEBF, pre_CG_UI, post_CG_UI)
+
+static void fix_CG_UI()
+{
+    INIT_WRAPPER_VFPTR(CG_UI_Render_wrapper, 0x0055EEB0);
+    INIT_WRAPPER_VFPTR(CG_UI_Update_wrapper, 0x0055EEB4);
+}
+
+
+
+
+
+
+
 MAKE_PATCHSET(fixsceneui)
 {
     sceneui_dstrect_type = parse_uiwnd_rect_type(get_string_from_configfile("fixsceneui_scaletype"));
@@ -366,4 +507,7 @@ MAKE_PATCHSET(fixsceneui)
     
     // fix UIGameOver
     fix_UIGameOver();
+    
+    // fix CG_UI
+    fix_CG_UI();
 }

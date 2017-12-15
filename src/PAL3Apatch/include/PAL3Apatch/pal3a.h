@@ -1331,7 +1331,7 @@ struct MUIDialog {
     //struct MUIDialogMgr;
     struct UIWnd *ptr_Dlg;
     unsigned int m_DlgId;
-    struct tagRECT m_rect;
+    struct tagRECT m_rect_MUIDialog;
     struct tagRECT m_textRc;
     struct UIStaticFlex m_bk;
     struct UIStatic m_static;
@@ -1501,7 +1501,7 @@ struct HeadMsg {
 };
 
 struct PalScriptWaitObj {
-    struct PalScriptWaitObjVtbl *vfptr;
+    struct PalScriptWaitObjVtbl *vfptr_PalScriptWaitObjVtbl;
     int m_needscriptdel;
 };
 
@@ -1927,7 +1927,7 @@ struct UISceneFrm {
 
 struct UIGameOver {
     struct UIFrameWnd;
-    struct gbTexture *m_pbktex;
+    struct gbTexture *m_pbktex_UIGameOver;
     struct UIStatic m_Blood;
     float m_fTime;
 };

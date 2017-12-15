@@ -9,13 +9,25 @@ const char *pFileHash[] = {
 
 	// format: filename, sha1 hash,
 
+#ifdef BUILD_FOR_PAL3
 	// PAL3 executables
 	"PAL3.EXE",          "05e1cbd148957dfb635d291c13f19105133ba875",
 	"GBENGINE.DLL",      "ead9bba8ce18fb68f111c1cb1edbf30ddb78b367",
 	"PAL3UNPACK.DLL",    "7b04cded42cd388f7e4493fa8588c885dc6e3d4b",
 
 	// PAL3patch files
-	// ADD_SHA1_HERE
+	// ADD_PAL3PATCH_SHA1_HERE
+#endif
+
+#ifdef BUILD_FOR_PAL3A
+	// PAL3 executables
+	"PAL3A.EXE",         "4a55f5e61c4caf227c7f72f9b9ce85eb1b3f1c83",
+	"GBENGINE.DLL",      "d9a754d11f8e4ad6a8c09a94d3703ed3e8e97af9",
+	"PAL3AUNPACK.DLL",   "b2895792b3e148c22c2a66d1a5fba2d3421bcd5a",
+
+	// PAL3Apatch files
+	// ADD_PAL3APATCH_SHA1_HERE
+#endif
 
 	// MSS32 version 6.1c
 	"Mss32.dll",                  "2ee3fffdb4a5c4b9c7da106f07506d0d1685b395",

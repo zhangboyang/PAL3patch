@@ -13,7 +13,14 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		0, FALSE, TRUE,
 		NULL,
 		_T("欢迎"),
-		_T("欢迎使用《仙剑奇侠传三》分辨率补丁 ") PATCH_VERSION _T("\r\n")
+
+#ifdef BUILD_FOR_PAL3
+		_T("欢迎使用《仙剑奇侠传三》分辨率补丁 ")
+#endif
+#ifdef BUILD_FOR_PAL3A
+		_T("欢迎使用《仙剑三外传·问情篇》分辨率补丁 ")
+#endif
+			PATCH_VERSION _T("\r\n")
 			_T("本补丁可以扩大游戏的分辨率，\r\n")
 			_T("同时修复一些游戏程序的小问题，\r\n")
 			_T("并且添加了一些实用的小功能。"),
