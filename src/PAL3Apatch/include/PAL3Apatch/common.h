@@ -13,8 +13,8 @@
 
 
 // patch version
-#define PATCH_VERSION          9900
-#define PATCH_VERSION_STRING "v0.99"
+#define PATCH_VERSION          9901
+#define PATCH_VERSION_STRING "v0.99.1"
 
 
 

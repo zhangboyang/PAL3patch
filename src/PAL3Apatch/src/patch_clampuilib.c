@@ -1,9 +1,44 @@
 #include "common.h"
 
+struct clamp_list_outside_t {
+    char *texpath;
+    RECT clamp_area;
+};
+
+static struct clamp_list_outside_t clamp_list_outside[] = { // images outside UILib
+    { "ui\\GameMainUI\\Communal\\StpCtl\\StpBarL.tga", {0, 0, 62, 64} },
+};
+
+static struct clamp_list_outside_t *find_clamp_list_outside(const char *filename)
+{
+    int i;
+    int clamp_list_cnt = sizeof(clamp_list_outside) / sizeof(clamp_list_outside[0]);
+    for (i = 0; i < clamp_list_cnt; i++) {
+        if (stricmp(clamp_list_outside[i].texpath, filename) == 0) {
+            return &clamp_list_outside[i];
+        }
+    }
+    return NULL;
+}
+
+static void clamp_outside(struct texture_hook_info *thinfo)
+{
+    struct clamp_list_outside_t *ptr = find_clamp_list_outside(thinfo->texpath);
+    if (ptr) {
+        if (thinfo->type == TH_PRE_IMAGELOAD) {
+            thinfo->interested = 1;
+        } else if (thinfo->type == TH_POST_IMAGELOAD) {
+            // clamp image bits
+            clamp_rect(thinfo->bits, thinfo->width, thinfo->height, thinfo->bitcount, thinfo->width * (thinfo->bitcount / 8), ptr->clamp_area.left, ptr->clamp_area.top, ptr->clamp_area.right, ptr->clamp_area.bottom);
+        }
+    }
+}
+
+
 #define MAX_TEX_NAME 0x100
 #define TEXLIB_MAGIC "TEXLIB"
 
-static char *clamp_list[] = {
+static char *clamp_list[] = {  // images in UILib
     "ui\\gamemainui\\communal\\stpctl\\battle_array0.tga",
     "ui\\gamemainui\\communal\\stpctl\\battle_array1.tga",
     "ui\\gamemainui\\communal\\stpctl\\battle_array2.tga",
@@ -209,4 +244,5 @@ MAKE_PATCHSET(clampuilib)
 {
     INIT_WRAPPER_CALL(ArtistPlugIn_GetPlugFileInfo_wrapper, { 0x004557A8 });
     add_texture_hook(texlib_loader);
+    add_texture_hook(clamp_outside);
 }

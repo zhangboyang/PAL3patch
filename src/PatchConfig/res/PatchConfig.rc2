@@ -10,4 +10,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Add manually edited resources here...
 
+#ifdef BUILD_FOR_PAL3
+IDR_DEFCONFIG           RCDATA  DISCARDABLE     "default_PAL3.conf"
+#endif
+#ifdef BUILD_FOR_PAL3A
+IDR_DEFCONFIG           RCDATA  DISCARDABLE     "default_PAL3A.conf"
+#endif
+
 /////////////////////////////////////////////////////////////////////////////

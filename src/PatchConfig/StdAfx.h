@@ -53,6 +53,7 @@
 #include "FontEnum.h"
 #include "HASH_SHA1.h"
 #include "MouseMsgButton.h"
+#include "OpenConfigTool.h"
 #include "OpenGameFolder.h"
 #include "PatchConfig.h"
 #include "PatchVersionInfo.h"

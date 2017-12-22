@@ -45,10 +45,12 @@ struct texture_hook_info {
     {
         check_magic(thinfo);
         check_autoload(thinfo);
-        if (thinfo->type == TH_PRE_IMAGELOAD && is_interested(thinfo)) {
-            thinfo->interested = 1;
-        } else if (thinfo->type == TH_POST_IMAGELOAD) {
-            do_some_processing(thinfo);
+        if (is_interested(thinfo)) { 
+            if (thinfo->type == TH_PRE_IMAGELOAD) {
+                thinfo->interested = 1;
+            } else if (thinfo->type == TH_POST_IMAGELOAD) {
+                do_some_processing(thinfo);
+            }
         }
     }
 */

@@ -358,12 +358,19 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		1, TRUE, TRUE,
 		_T("console"),
 		_T("调出控制台"),
-		_T("原始情况下，需要输入 sOFTsTAR_pAL3_2003 并按回车后才能调出控制台。本选项可以允许直接调出控制台（按 ~ 所在的按键）。"),
+		_T("原始情况下，需要输入 ")
+#ifdef BUILD_FOR_PAL3
+		_T("sOFTsTAR_pAL3_2003")
+#endif
+#ifdef BUILD_FOR_PAL3A
+		_T("SoftStar-PAL3A-2004-07-02")
+#endif
+		_T(" 并按回车后才能调出控制台。本选项可以允许直接调出控制台（按 ~ 所在的按键）。"),
 		NULL,
 		NULL,
 		{
 			{ _T("禁用"), _T("禁用此选项后，需要输入密码才能调出控制台。"), _T("0") },
-			{ _T("启用"), _T("启用此选项后，可以直接按键调出控制台。"), _T("1") },
+			{ _T("启用"), _T("启用此选项后，可以直接按 ~ 键调出控制台。"), _T("1") },
 		}
 	},
 	{
@@ -424,6 +431,18 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		_T("此功能可以将所有补丁配置项全部恢复为默认值。"),
 		_T("如果您在修改配置文件或升级补丁版本后，遇到游戏启动时报错的情况，您可以尝试用此功能将补丁配置文件重置为初始状态。"),
 		CPatchConfigDlg::RestoreAllConfigToDefault,
+	},
+	{
+		1, FALSE, TRUE,
+		NULL,
+		_T("官方配置工具"),
+		_T("此功能可以打开官方编写的游戏配置工具。使用它可以编辑“垂直同步”、“软件光标”等选项。"),
+		_T("官方配置工具是游戏目录下的“config.exe”，相关的配置数据存储在“config.ini”文件内。")
+#ifdef BUILD_FOR_PAL3A
+		_T("注意：补丁的分辨率设置会覆盖官方工具的分辨率设置。")
+#endif
+		,
+		OpenConfigTool,
 	},
 	{
 		1, FALSE, TRUE,

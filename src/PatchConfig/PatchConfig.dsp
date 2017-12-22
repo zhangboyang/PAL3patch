@@ -192,6 +192,10 @@ SOURCE=.\MouseMsgButton.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\OpenConfigTool.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\OpenGameFolder.cpp
 # End Source File
 # Begin Source File
@@ -274,6 +278,10 @@ SOURCE=.\HASH_SHA1.h
 # Begin Source File
 
 SOURCE=.\MouseMsgButton.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OpenConfigTool.h
 # End Source File
 # Begin Source File
 

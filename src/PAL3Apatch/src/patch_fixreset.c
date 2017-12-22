@@ -40,7 +40,7 @@ MAKE_PATCHSET(fixreset)
     char codebuf[6] = "\xBB\x00\x00\x00\x00\x90";
     void *funcptr = SendMessageA_wrapper;
     memcpy(codebuf + 1, &funcptr, 4);
-    memcpy_to_process(0x1001A487, codebuf, sizeof(codebuf));
+    memcpy_to_process(gboffset + 0x1001A487, codebuf, sizeof(codebuf));
 
     // patch Reset3DEnvironment
     INIT_ASMPATCH(retryreset, gboffset + 0x1001A4CB, 6, "\x0F\x8C\xDD\x00\x00\x00");

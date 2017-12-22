@@ -285,6 +285,7 @@ static MAKE_THISCALL(void, UIRoleDialog_SetFace_wrapper, struct UIRoleDialog *th
         translate_frect_rel(&new_text_frect, &new_text_frect, textarea_frect.right - new_text_frect.right, 0.0);
     }
     
+    //new_text_frect = textarea_frect;    
     
     // set rect for textbox and arrow
     set_rect_frect(&pUIWND(&this->m_static)->m_rect, &new_text_frect);

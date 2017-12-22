@@ -184,6 +184,7 @@
     <ClCompile Include="FontEnum.cpp" />
     <ClCompile Include="HASH_SHA1.cpp" />
     <ClCompile Include="MouseMsgButton.cpp" />
+    <ClCompile Include="OpenConfigTool.cpp" />
     <ClCompile Include="OpenGameFolder.cpp" />
     <ClCompile Include="PatchConfig.cpp" />
     <ClCompile Include="PatchConfigDlg.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="FontEnum.h" />
     <ClInclude Include="HASH_SHA1.h" />
     <ClInclude Include="MouseMsgButton.h" />
+    <ClInclude Include="OpenConfigTool.h" />
     <ClInclude Include="OpenGameFolder.h" />
     <ClInclude Include="PatchConfig.h" />
     <ClInclude Include="PatchConfigDlg.h" />

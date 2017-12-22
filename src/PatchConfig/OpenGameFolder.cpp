@@ -19,7 +19,7 @@ static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR subdir)
 		openpath = buf;
 	}
 	
-	r = (DWORD) ShellExecute(NULL, _T("explore"), openpath, NULL, NULL, SW_SHOWNORMAL);
+	r = (DWORD) ShellExecute(dlg->GetSafeHwnd(), _T("explore"), openpath, NULL, NULL, SW_SHOWNORMAL);
 	if (r <= 32) {
 		msg.Format(IDS_CANTOPENGAMEFOLDER, subdir);
 		GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CANTOPENGAMEFOLDER_TITLE), MB_ICONERROR);

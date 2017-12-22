@@ -164,18 +164,6 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Data
-//
-
-#ifdef BUILD_FOR_PAL3
-IDR_DEFCONFIG           RCDATA  DISCARDABLE     "default_PAL3.conf"
-#endif
-#ifdef BUILD_FOR_PAL3A
-IDR_DEFCONFIG           RCDATA  DISCARDABLE     "default_PAL3A.conf"
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // 24
 //
 
@@ -251,6 +239,9 @@ BEGIN
     IDS_CANTOPENWEBSITE     "无法打开补丁网站。"
     IDS_CHECKFORUPDATES_ERROR "服务器返回错误：%s"
     IDS_CHECKFORUPDATES_INFO "服务器返回信息：%s"
+    IDS_OPENCONFIGTOOLINPROGRESS "正在打开官方游戏配置工具，请稍候 ..."
+    IDS_CANTOPENCONFIGTOOL  "无法打开官方游戏配置工具。"
+    IDS_CANTOPENCONFIGTOOL_TITLE "无法打开"
 END
 
 #endif    // Chinese (P.R.C.) resources
