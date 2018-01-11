@@ -211,7 +211,7 @@ struct CPKHeader {
 文件索引以dwCRC升序排序，以便进行二分查找
 struct CPKTable {
     ULONG dwCRC;           // 完整路径转小写后的CRC，不是文件本身的CRC
-    ULONG dwFlag;          // 0x30表示目录，0x10005表示未压缩文件
+    ULONG dwFlag;          // 0x3表示目录，0x10005表示未压缩文件
     ULONG dwFatherCRC;     // 如果是根目录下的文件，则为0
     ULONG dwStartPos;      // 数据开始位置相对于文件头的偏移
     ULONG dwPackedSize;    // 文件数据压缩后的大小，若是目录则为0
@@ -258,6 +258,8 @@ int __thiscall append_data_to_cpkfile(CPKPatcher *this, int a2, LPCSTR lpString2
 也就是说，我们可以通过研究“垃圾数据”可以知晓music.cpk是在一台win98se计算机上打包出来的！
 打开basedata.cpk，发现它也是在win98se机器上打包的。
 这有点出乎我的意料，我以为上海软星会在win2000或者winxp上运行打包程序的。
+（PAL3A: 可看到有77E7F0B4这个值，上网搜索可发现是win2000sp4）
+（PAL3A: 另外发现可能打不开三外的CPK是因为CPK文件上有只读属性，去掉就可以打开了，文件结构上应该没有差别）
 
 打包工具mkcpk的使用方法：
   mkcpk cpkname.cpk < filelist.txt

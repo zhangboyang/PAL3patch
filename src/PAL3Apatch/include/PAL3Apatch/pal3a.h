@@ -2149,6 +2149,102 @@ struct CG_UI {
     unsigned int m_dwCurPropID;
 };
 
+enum _BGM {
+    _BGM_UPDW = 0x0,
+    _BGM_LR = 0x1,
+};
+
+struct BtnGroup {
+    struct tagRECT upRc;
+    struct tagRECT dwRc;
+    struct UIButton m_btnUp;
+    struct UIButton m_btnDw;
+    int m_sizex;
+    int m_sizey;
+    enum _BGM m_mode;
+    int m_Interval;
+    bool m_opt;
+};
+
+struct PropUI {
+    struct UIFrameWnd;
+    int bkWndX;
+    int bkWndY;
+    int m_ListWidth;
+    int m_ListHeight;
+    struct st_Manager m_PropData;
+    struct PlayerItem *p_DealData;
+    char buf[256];
+    char remarkbuf[256];
+    int m_SelNum;
+    int *m_ListSelNum;
+    int *m_MaxNum;
+    int m_x;
+    int m_y;
+    int m_Sum;
+    int i;
+    int j;
+    bool _isCreatable;
+    struct UIStatic m_Frame;
+    struct UIFlexBar m_FrameBar;
+    struct UIStatic m_Flag;
+    struct UIStatic m_OutFrameT;
+    struct UIStatic m_OutFrameR;
+    struct UIStatic m_OutFrameL;
+    struct UIStatic m_OutFrameB;
+    struct tagRECT mb_ExitRc;
+    struct UIButton mb_Exit;
+    struct UIAnimateCtrl m_ani;
+    struct UIStatic m_Role[5];
+    struct tagRECT m_RoleRc[5];
+    int RoleX;
+    int RoleY;
+    int HeadW;
+    int HeadH;
+    bool m_Is[5];
+    struct MUIDialog m_Msg;
+    struct UI3DCtrl m_3DObj;
+    struct UIStatic m_Dlg;
+    struct tagRECT m_DlgRc;
+    struct UIStatic m_TalkFrame;
+    struct UIStatic m_Ready;
+    struct tagRECT m_ReadyRc;
+    struct UIStatic m_ListFrame;
+    struct UIStatic m_ListGrid[14];
+    struct UIStatic m_ScrollHB;
+    struct UIStatic m_EquipFlag;
+    struct UIStatic m_ListPropTitle;
+    struct tagRECT m_ListPropTitleRc;
+    struct UIListBox ml_ListProp;
+    struct tagRECT ml_ListPropRc;
+    struct BtnGroup m_btnGroup;
+    float m_ctrlTime;
+    bool m_bCanUpdate1;
+    bool m_bCanUpdate2;
+    struct UIStatic m_PropRemarkBk;
+    struct UIStatic m_PropRemark;
+    struct UIStatic m_PropAtt;
+    struct UIStatic m_MoneyRemark;
+    struct tagRECT m_MoneyRc;
+    struct UIStatic m_SumProp;
+    struct tagRECT m_SumRc;
+    struct UIButton mb_OK;
+    struct tagRECT mb_OKRc;
+    bool m_IsDeal;
+    struct UIButton mb_Cancel;
+    struct tagRECT mb_CancelRc;
+    unsigned int *m_DealID;
+    int DealNum;
+    int curID;
+    bool m_isBuy;
+    bool b_IsExterior;
+    int exterior_num;
+    float discount_price;
+    int m_extmode;
+    struct DealUI *pDealUI;
+    struct UITabBtn m_TabBtn;
+    bool m_opt;
+};
 
 
 // GBENGINE functions
@@ -2248,6 +2344,8 @@ struct CG_UI {
 #define UIRoleDialog_SetFace(this, path, leftright) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00457481, void, struct UIRoleDialog *, const char *, int), this, path, leftright)
 #define UIBigMap_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044EA6B, void, struct UIBigMap *), this)
 #define CG_Entry_GetCGEntry ((struct CG_Entry *(*)(void)) TOPTR(0x0040779C))
+#define PropUI_Create(this, pWnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0046F512, void, struct PropUI *, struct UIWnd *), this, pWnd)
+
 
 
 
@@ -2390,6 +2488,8 @@ struct CG_UI {
     assert(sizeof(struct UIStaticRM) == 0xBC); \
     assert(sizeof(struct st_Manager) == 0x4460); \
     assert(sizeof(struct CG_UI) == 0x9A50); \
+    assert(sizeof(struct BtnGroup) == 0x2E4); \
+    assert(sizeof(struct PropUI) == 0x72C8); \
 } while (0)
 
 

@@ -17,6 +17,7 @@ FIXED: Win10下，初次启动时会提示VirtualProtect（memcpy_to_process）�
 FIXED: 系统界面仍有“缝隙”没有修正（新增 clamp_outside 相关代码）
 FIXED: v0.99中的补丁配置工具中控制台口令没有更新
 FIXED: 说明文件中PAL3A.EXE应来自繁体补丁1.20；GBENGINE.DLL应来自简体光盘（简繁体 GBENGINE.DLL 的不同在于，只有编译的时间戳、PE时间戳不一样）
+FIXED: 购买物品时，若超出100个，会弹框，这个框的位置没有修正（可能有其它的框要修正）
 进入捉鬼小游戏的加载界面会有一小段时间变换不正确，退出时则一直显示不正常
 剧情对话框的弹出动画有时不正常
 

@@ -293,6 +293,7 @@ MAKE_PATCHSET(graphicspatch);
         MAKE_PATCHSET(fixjusticebookui);
         MAKE_PATCHSET(fixcoverfrm);
         MAKE_PATCHSET(fixbigmap);
+        MAKE_PATCHSET(fixpropui);
 
     MAKE_PATCHSET(fixeffect);
     MAKE_PATCHSET(forcesettexture);

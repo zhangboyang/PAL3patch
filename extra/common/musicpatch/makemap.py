@@ -67,7 +67,7 @@ for o, dl in cmpresult:
     for x in sorted(dl)[0:5]:
         print("   ", x)
 
-    dl = list(filter(lambda x: x[0] < DIST_LIMIT, dl))
+    dl = sorted(list(filter(lambda x: x[0] < DIST_LIMIT, dl)))
     
     l1 = list(filter(lambda x: x[1].split('.')[-1].lower() in FIRST_EXT, dl))
     l2 = list(filter(lambda x: x[1].split('.')[-1].lower() in SECOND_EXT, dl))

@@ -120,6 +120,7 @@ static void init_stage2()
             INIT_PATCHSET(uireplacetexf);
             INIT_PATCHSET(clampuilib);
             INIT_PATCHSET(fixbigmap);
+            INIT_PATCHSET(fixpropui);
         }
 
         INIT_PATCHSET(fixtrail);
