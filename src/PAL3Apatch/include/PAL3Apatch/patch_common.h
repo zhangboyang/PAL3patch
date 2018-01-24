@@ -194,6 +194,7 @@ MAKE_PATCHSET(graphicspatch);
             unsigned scalefactor_index : 4;
             unsigned self_srcrect_type : 4;
             unsigned self_dstrect_type : 4;
+            unsigned self_dstrect_use43 : 1;
             unsigned self_lr_method : 3;
             unsigned self_tb_method : 3;
             unsigned no_cursor_virt : 1; // if set to 1, will disable cursor transform for this UIWnd
@@ -204,7 +205,7 @@ MAKE_PATCHSET(graphicspatch);
             unsigned alt_father_index : 3; // if set to non-zero, will behave like fs->alt_father[index - 1] as it's father window, have many restrictions (e.g. father can't use self_only_ptag)
             
             #define UIWND_PTAG_MAGIC 23u // TangXueJian's birthday, hahahaha
-            unsigned magic : 7; // must be non-zero
+            unsigned magic : 6; // must be non-zero
         };
         #define M_PWND(addr) TOPTR(M_DWORD(addr))
         #define PWND TOPTR
@@ -213,6 +214,7 @@ MAKE_PATCHSET(graphicspatch);
                 .scalefactor_index = (sf_idx), \
                 .self_srcrect_type = (src_type), \
                 .self_dstrect_type = (dst_type), \
+                .self_dstrect_use43 = 0, \
                 .self_lr_method = (lr), \
                 .self_tb_method = (tb), \
                 .no_cursor_virt = 0, \

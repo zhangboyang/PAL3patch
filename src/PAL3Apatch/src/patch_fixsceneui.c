@@ -152,6 +152,7 @@ static MAKE_THISCALL(void, UIGameFrm_Create_wrapper, struct UIGameFrm *this)
     set_uiwnd_ptag(pUIWND(&this->m_seldlg), ptag);
     
     ptag = SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT_ORIGINAL, TR_SCALE_HIGH, TR_SCALE_LOW);
+    ptag.self_dstrect_use43 = 1;
     set_uiwnd_ptag(pUIWND(&this->m_cap), ptag);
     
     ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_LOW, TR_HIGH);
@@ -455,16 +456,26 @@ static void pre_CG_UI(struct UIWnd *this)
         set_uiwnd_ptag(pUIWND(&ui->m_SceneMap), SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_HIGH, TR_HIGH));
     }
     
-    // dialog
-    ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT_ORIGINAL, TR_SCALE_LOW, TR_SCALE_LOW);
+    // result    
+    ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT_ORIGINAL, TR_CENTER, TR_SCALE_LOW);
+    ptag.self_dstrect_use43 = 1;
     set_uiwnd_ptag(pUIWND(&ui->m_pResult), ptag);
-    set_uiwnd_ptag(pUIWND(&ui->m_pWinAnswer), ptag);
-    set_uiwnd_ptag(pUIWND(&ui->m_pLoseAnswer), ptag);
-    set_uiwnd_ptag(pUIWND(&ui->m_pNoMoneyMsg), ptag);
-    set_uiwnd_ptag(pUIWND(&ui->m_pSurpassMsg), ptag);
-    set_uiwnd_ptag(pUIWND(&ui->m_pAccountMsg), ptag);
-    set_uiwnd_ptag(pUIWND(&ui->m_pOverGameMsg), ptag);
-    set_uiwnd_ptag(pUIWND(&ui->m_pExitDlg), ptag);
+    
+    // dialog
+    ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT_ORIGINAL, TR_CENTER, TR_CENTER);
+    ptag.self_dstrect_use43 = 1;
+    
+    RECT yesno_dlgrc;
+    set_rect_ltwh(&yesno_dlgrc, 250 + (PAL3_s_drvinfo.width - 800) / 2, 200 + (PAL3_s_drvinfo.height - 600) / 2, 256, 128);
+    set_uiwnd_ptag(pUIWND(&ui->m_pWinAnswer), ptag); pUIWND(&ui->m_pWinAnswer)->m_rect = yesno_dlgrc;
+    set_uiwnd_ptag(pUIWND(&ui->m_pLoseAnswer), ptag); pUIWND(&ui->m_pLoseAnswer)->m_rect = yesno_dlgrc;
+    set_uiwnd_ptag(pUIWND(&ui->m_pExitDlg), ptag); pUIWND(&ui->m_pExitDlg)->m_rect = yesno_dlgrc;
+    
+    set_uiwnd_ptag(pUIWND(&ui->m_pNoMoneyMsg), ptag); pUIWND(&ui->m_pNoMoneyMsg)->m_rect = pUIWND(&ui->m_pNoMoneyMsg.m_bk)->m_rect;
+    set_uiwnd_ptag(pUIWND(&ui->m_pSurpassMsg), ptag); pUIWND(&ui->m_pSurpassMsg)->m_rect = pUIWND(&ui->m_pSurpassMsg.m_bk)->m_rect;
+    set_uiwnd_ptag(pUIWND(&ui->m_pAccountMsg), ptag); pUIWND(&ui->m_pAccountMsg)->m_rect = pUIWND(&ui->m_pAccountMsg.m_bk)->m_rect;
+    set_uiwnd_ptag(pUIWND(&ui->m_pOverGameMsg), ptag); pUIWND(&ui->m_pOverGameMsg)->m_rect = pUIWND(&ui->m_pOverGameMsg.m_bk)->m_rect;
+    
     
     // update InvalidRect
     push_ptag_state(pUIWND(&ui->m_pTools));

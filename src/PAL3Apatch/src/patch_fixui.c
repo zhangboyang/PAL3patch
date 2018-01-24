@@ -515,6 +515,14 @@ void push_ptag_state(struct UIWnd *pwnd)
         trans_dst_frect = get_ptag_frect(ptag.self_dstrect_type);
         if (!trans_dst_frect) fail("invalid ptag dstrect type %d.", ptag.self_dstrect_type);
         
+        // transform to 4:3 rect if required
+        fRECT trans_dst_frect_43;
+        if (ptag.self_dstrect_use43) {
+            trans_dst_frect_43 = *trans_dst_frect;
+            trans_dst_frect = &trans_dst_frect_43;
+            get_ratio_frect(trans_dst_frect, trans_dst_frect, 4.0 / 3.0, TR_CENTER, TR_CENTER);
+        }
+
         // transform window rect using ptag
         fRECT src_frect, dst_frect;
         double len_factor;

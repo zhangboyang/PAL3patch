@@ -2345,7 +2345,7 @@ struct PropUI {
 #define UIBigMap_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0044EA6B, void, struct UIBigMap *), this)
 #define CG_Entry_GetCGEntry ((struct CG_Entry *(*)(void)) TOPTR(0x0040779C))
 #define PropUI_Create(this, pWnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0046F512, void, struct PropUI *, struct UIWnd *), this, pWnd)
-
+#define MUIDialog_DoModel(this, havesnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0049B948, void, struct MUIDialog *, bool), this, havesnd)
 
 
 
