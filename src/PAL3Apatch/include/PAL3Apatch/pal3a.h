@@ -2246,6 +2246,8 @@ struct PropUI {
     bool m_opt;
 };
 
+struct FindArc;
+
 
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)

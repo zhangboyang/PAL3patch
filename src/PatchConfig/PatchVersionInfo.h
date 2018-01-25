@@ -8,7 +8,7 @@
 
 
 #ifdef BUILD_FOR_PAL3A
-#define PATCH_VERSION_CSTR "v0.99.1"
+#define PATCH_VERSION_CSTR "v1.0"
 #define PATCH_APPNAME _T("PAL3A-PatchConfig")
 #endif
 

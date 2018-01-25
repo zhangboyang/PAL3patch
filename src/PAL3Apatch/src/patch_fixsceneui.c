@@ -164,24 +164,20 @@ static MAKE_THISCALL(void, UIGameFrm_Create_wrapper, struct UIGameFrm *this)
 
 static void pre_UIGameFrm(struct UIWnd *this)
 {
-    fixui_pushdup();
-    
     struct UIGameFrm *gamefrm = TOPTR(this);    
     struct uiwnd_ptag ptag;
     
     ptag = SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT, TR_CENTER, TR_CENTER);
     set_uiwnd_ptag(pUIWND(&gamefrm->m_selemote_frame), ptag);
     
-    #define FAPTR_SELEMOTE_FRAME 1
-    set_alt_father(FAPTR_SELEMOTE_FRAME, pUIWND(&gamefrm->m_selemote_frame));
+    set_alt_father(FAPTR_UIGAMEFRM_SELEMOTE_FRAME, pUIWND(&gamefrm->m_selemote_frame));
 
-    set_uiwnd_ptag(pUIWND(&gamefrm->m_selemote_BTN1), MAKE_ALT_FATHER_PTAG(FAPTR_SELEMOTE_FRAME));
-    set_uiwnd_ptag(pUIWND(&gamefrm->m_selemote_BTN2), MAKE_ALT_FATHER_PTAG(FAPTR_SELEMOTE_FRAME));
+    set_uiwnd_ptag(pUIWND(&gamefrm->m_selemote_BTN1), MAKE_ALT_FATHER_PTAG(FAPTR_UIGAMEFRM_SELEMOTE_FRAME));
+    set_uiwnd_ptag(pUIWND(&gamefrm->m_selemote_BTN2), MAKE_ALT_FATHER_PTAG(FAPTR_UIGAMEFRM_SELEMOTE_FRAME));
 }
 
 static void post_UIGameFrm(struct UIWnd *this)
 {
-    fixui_popstate();
 }
 
 static MAKE_UIWND_RENDER_WRAPPER_CUSTOM(UIGameFrm_Render_wrapper, 0x00455E39, pre_UIGameFrm, post_UIGameFrm)
@@ -387,71 +383,64 @@ static void fix_UIGameOver()
 
 static void pre_CG_UI(struct UIWnd *this)
 {
-    fixui_pushdup();
-    
     struct CG_UI *ui = TOPTR(this);
     struct uiwnd_ptag ptag;
     int i;
     
-    
     // tools
-    #define FAPTR_TOOLS 1
-    set_alt_father(FAPTR_TOOLS, pUIWND(&ui->m_pTools));
+    set_alt_father(FAPTR_CGUI_TOOLS, pUIWND(&ui->m_pTools));
     ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT_ORIGINAL, TR_HIGH, TR_CENTER);
     set_uiwnd_ptag(pUIWND(&ui->m_pTools), ptag);
 
-    set_uiwnd_ptag(pUIWND(&ui->m_pTime), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
-    set_uiwnd_ptag(pUIWND(&ui->m_pMoney), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pTime), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pMoney), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
     for (i = 0; i < 9; i++) {
-        set_uiwnd_ptag(pUIWND(&ui->m_pItems[i]), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+        set_uiwnd_ptag(pUIWND(&ui->m_pItems[i]), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
     }
-    set_uiwnd_ptag(pUIWND(&ui->m_pName), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
-    set_uiwnd_ptag(pUIWND(&ui->m_pPrice), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
-    set_uiwnd_ptag(pUIWND(&ui->m_pHurt), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
-    set_uiwnd_ptag(pUIWND(&ui->m_pInfo), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
-    set_uiwnd_ptag(pUIWND(&ui->m_pBuy), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
-    set_uiwnd_ptag(pUIWND(&ui->m_pRun), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
-    set_uiwnd_ptag(pUIWND(&ui->m_Exit), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pName), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pPrice), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pHurt), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pInfo), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pBuy), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_pRun), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
+    set_uiwnd_ptag(pUIWND(&ui->m_Exit), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
 
     
     // prop
-    #define FAPTR_PROP 2
-    set_alt_father(FAPTR_PROP, pUIWND(&ui->m_pProp));
+    set_alt_father(FAPTR_CGUI_PROP, pUIWND(&ui->m_pProp));
     ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_LOW, TR_HIGH);
     set_uiwnd_ptag(pUIWND(&ui->m_pProp), ptag);
 
     for (i = 0; i < 5; i++) {
-        set_uiwnd_ptag(pUIWND(&ui->m_pProps[i]), MAKE_ALT_FATHER_PTAG(FAPTR_PROP));
-        set_uiwnd_ptag(pUIWND(&ui->m_pPropsNum[i]), MAKE_ALT_FATHER_PTAG(FAPTR_PROP));
+        set_uiwnd_ptag(pUIWND(&ui->m_pProps[i]), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_PROP));
+        set_uiwnd_ptag(pUIWND(&ui->m_pPropsNum[i]), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_PROP));
     }
     
     
     // HP
-    #define FAPTR_HP 3
-    set_alt_father(FAPTR_HP, pUIWND(&ui->m_pHP));
+    set_alt_father(FAPTR_CGUI_HP, pUIWND(&ui->m_pHP));
     ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_LOW, TR_LOW);
     set_uiwnd_ptag(pUIWND(&ui->m_pHP), ptag);
     
-    set_uiwnd_ptag(pUIWND(&ui->m_pBossHP), MAKE_ALT_FATHER_PTAG(FAPTR_HP));
-    set_uiwnd_ptag(pUIWND(&ui->m_pRoleHP), MAKE_ALT_FATHER_PTAG(FAPTR_HP));
-    set_uiwnd_ptag(pUIWND(&ui->m_pBossFace), MAKE_ALT_FATHER_PTAG(FAPTR_HP));
-    set_uiwnd_ptag(pUIWND(&ui->m_pRoleFace), MAKE_ALT_FATHER_PTAG(FAPTR_HP));
+    set_uiwnd_ptag(pUIWND(&ui->m_pBossHP), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_HP));
+    set_uiwnd_ptag(pUIWND(&ui->m_pRoleHP), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_HP));
+    set_uiwnd_ptag(pUIWND(&ui->m_pBossFace), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_HP));
+    set_uiwnd_ptag(pUIWND(&ui->m_pRoleFace), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_HP));
 
 
     // TimeBackground
-    #define FAPTR_TIMEBACKGROUND 4
-    set_alt_father(FAPTR_TIMEBACKGROUND, pUIWND(&ui->m_pTimeBackground));
+    set_alt_father(FAPTR_CGUI_TIMEBACKGROUND, pUIWND(&ui->m_pTimeBackground));
     ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_HIGH, TR_LOW);
     set_uiwnd_ptag(pUIWND(&ui->m_pTimeBackground), ptag);
     
-    set_uiwnd_ptag(pUIWND(&ui->m_pTimeHunDigit), MAKE_ALT_FATHER_PTAG(FAPTR_TIMEBACKGROUND));
-    set_uiwnd_ptag(pUIWND(&ui->m_pTimeTenDigit), MAKE_ALT_FATHER_PTAG(FAPTR_TIMEBACKGROUND));
-    set_uiwnd_ptag(pUIWND(&ui->m_pTimeSinDigit), MAKE_ALT_FATHER_PTAG(FAPTR_TIMEBACKGROUND));
+    set_uiwnd_ptag(pUIWND(&ui->m_pTimeHunDigit), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TIMEBACKGROUND));
+    set_uiwnd_ptag(pUIWND(&ui->m_pTimeTenDigit), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TIMEBACKGROUND));
+    set_uiwnd_ptag(pUIWND(&ui->m_pTimeSinDigit), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TIMEBACKGROUND));
 
 
     // scene map
     if (ui->m_pTools.m_bvisible) {
-        set_uiwnd_ptag(pUIWND(&ui->m_SceneMap), MAKE_ALT_FATHER_PTAG(FAPTR_TOOLS));
+        set_uiwnd_ptag(pUIWND(&ui->m_SceneMap), MAKE_ALT_FATHER_PTAG(FAPTR_CGUI_TOOLS));
     } else {
         set_uiwnd_ptag(pUIWND(&ui->m_SceneMap), SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_HIGH, TR_HIGH));
     }
@@ -484,7 +473,6 @@ static void pre_CG_UI(struct UIWnd *this)
 }
 static void post_CG_UI(struct UIWnd *this)
 {
-    fixui_popstate();
 }
 
 static MAKE_UIWND_RENDER_WRAPPER_CUSTOM(CG_UI_Render_wrapper, 0x0051CE29, pre_CG_UI, post_CG_UI)

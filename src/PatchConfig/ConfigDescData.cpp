@@ -317,6 +317,15 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		_T(""),
 		_T(""),
 	},
+#ifdef BUILD_FOR_PAL3A
+	{
+		1, TRUE, TRUE,
+		_T("setpal3path"),
+		_T("仙三安装路径"),
+		_T("设置仙三安装路径，以便继承仙三存档。游戏会从此路径下的“save”文件夹内读取存档。"),
+		_T("请在文本框内键入仙三安装路径（注意不是存档路径；长度须小于 256 字节）。若设为“autodetect”则会自动从注册表中获取。"),
+	},
+#endif
 	{
 		1, TRUE, TRUE,
 		_T("cdpatch"),
@@ -358,14 +367,14 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		1, TRUE, TRUE,
 		_T("console"),
 		_T("调出控制台"),
-		_T("原始情况下，需要输入 ")
+		_T("原始情况下，需要输入“")
 #ifdef BUILD_FOR_PAL3
 		_T("sOFTsTAR_pAL3_2003")
 #endif
 #ifdef BUILD_FOR_PAL3A
 		_T("SoftStar-PAL3A-2004-07-02")
 #endif
-		_T(" 并按回车后才能调出控制台。本选项可以允许直接调出控制台（按 ~ 所在的按键）。"),
+		_T("”并按回车后才能调出控制台。本选项可以允许直接调出控制台（按 ~ 所在的按键）。"),
 		NULL,
 		NULL,
 		{

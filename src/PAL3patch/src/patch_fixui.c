@@ -153,9 +153,9 @@ static void fixui_setdefaultransform(int new_def)
 
 
 // PAL3 game state functions
-static int fixui_map_gamestate(int pal3_gamestate)
+static int fixui_map_gamestate()
 {
-    switch (pal3_gamestate) {
+    switch (PAL3_s_gamestate) {
         case GAME_UI:
             return FIXUI_AUTO_TRANSFORM;
         default:
@@ -166,7 +166,7 @@ static int fixui_map_gamestate(int pal3_gamestate)
 // check and update game state
 void fixui_update_gamestate()
 {
-    fixui_setdefaultransform(fixui_map_gamestate(PAL3_s_gamestate));
+    fixui_setdefaultransform(fixui_map_gamestate());
 }
 
 

@@ -13,8 +13,8 @@
 
 
 // patch version
-#define PATCH_VERSION          9901
-#define PATCH_VERSION_STRING "v0.99.1"
+#define PATCH_VERSION          10000
+#define PATCH_VERSION_STRING "v1.0"
 
 
 
@@ -305,6 +305,7 @@ extern "C" {
 #include "plugin.h"
 #include "fsutil.h"
 #include "bytevector.h"
+#include "setpal3path.h"
 
 
 #ifdef __cplusplus

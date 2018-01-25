@@ -137,7 +137,16 @@ MAKE_PATCHSET(graphicspatch);
     MAKE_PATCHSET(fixui);
         extern fRECT game_frect_ui_auto;
         
-        #define MAX_ALT_FATHER (8 - 1) // NOTE: pay attention to struct uiwnd_ptag
+        #define MAX_ALT_FATHER ((1 << 3) - 1) // NOTE: pay attention to struct uiwnd_ptag
+        enum { // faptr id is a globally allocated resource
+            FAPTR_NONE, // zero is reserved
+            
+            FAPTR_UIGAMEFRM_SELEMOTE_FRAME,
+            FAPTR_CGUI_TOOLS,
+            FAPTR_CGUI_PROP,
+            FAPTR_CGUI_HP,
+            FAPTR_CGUI_TIMEBACKGROUND,
+        };
         
         struct ptag_state_runtime_data {
             struct UIWnd *alt_father;
@@ -183,8 +192,6 @@ MAKE_PATCHSET(graphicspatch);
         struct fixui_state *fixui_newstate(fRECT *src_frect, fRECT *dst_frect, int lr_method, int tb_method, double len_factor);
         struct fixui_state *fixui_dupstate(void);
         extern void fixui_pushstate_node(struct fixui_state *cur);
-        #define fixui_pushdup() \
-            fixui_pushstate_node(fixui_dupstate())
         #define fixui_pushstate(src_frect, dst_frect, lr_method, tb_method, len_factor) \
             fixui_pushstate_node(fixui_newstate(src_frect, dst_frect, lr_method, tb_method, len_factor))
         extern void fixui_popstate(void);

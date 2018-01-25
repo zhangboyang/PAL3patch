@@ -77,6 +77,9 @@ static void init_stage2()
     INIT_PATCHSET(setlocale);
     init_locale();
     
+    // init pal3 setup path patch
+    init_setpal3path();
+    
     // init patchsets
     INIT_PATCHSET(cdpatch);
     INIT_PATCHSET(dpiawareness);
