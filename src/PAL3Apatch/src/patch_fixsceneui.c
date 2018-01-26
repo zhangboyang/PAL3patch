@@ -70,13 +70,29 @@ static void install_PlayerMgr_DrawMsg_hook()
 // fix UISceneMap::Render(): scene small map
 static MAKE_ASMPATCH(UISceneMap_Render_hookpart1)
 {
-    // step1: transform rect and push identity
-    RECT *rc = TOPTR(R_EBP - 0x14);
-    fixui_adjust_RECT(rc, rc);
-    fixui_pushidentity();
+    // step1: transform small map rect
+    fRECT src_frect, dst_frect;
+    set_frect_rect(&src_frect, TOPTR(R_EBP - 0x14));
+    fixui_adjust_fRECT(&dst_frect, &src_frect);
+    floor_frect(&dst_frect, &dst_frect);
+    frect2gbfrect(&src_frect, &src_frect);
+    frect2gbfrect(&dst_frect, &dst_frect);
+    
+    fixui_pushstate(&src_frect, &dst_frect, TR_SCALE_SIMPLE, TR_SCALE_SIMPLE, 1.0);
     fs->gb_align = 1;
     
     R_ESI += 0x0010AF24; // oldcode
+}
+static MAKE_ASMPATCH(UISceneMap_Render_hookpart2)
+{
+    // step2: push identity
+    fixui_popstate();
+    fixui_pushidentity();
+    fs->gb_align = 1;
+    
+    if (M_DWORD(R_EBX + 0x45C) != 2) { // oldcode
+        LINK_JMP(0x0045930C);
+    }
 }
 static MAKE_ASMPATCH(UISceneMap_Render_fixui_stack_balance)
 {
@@ -84,9 +100,9 @@ static MAKE_ASMPATCH(UISceneMap_Render_fixui_stack_balance)
     
     M_DWORD(R_EBX + 0x4B4) = R_ESI; // oldcode
 }
-static MAKE_THISCALL(void, UISceneMap_Render_hookpart2, struct UIWnd *this)
+static MAKE_THISCALL(void, UISceneMap_Render_hookpart3, struct UIWnd *this)
 {
-    // step2: restore fixui state
+    // step3: restore fixui state
     fixui_popstate();
     UIWnd_Render_rewrited(this); // should call rewrited version
 }
@@ -111,9 +127,12 @@ static void install_UISceneMap_Render_hook()
 
     // hookpart1 is an asmpatch
     INIT_ASMPATCH(UISceneMap_Render_hookpart1, 0x00458E62, 6, "\x81\xC6\x24\xAF\x10\x00");
+
+    // hookpart2 is an asmpatch
+    INIT_ASMPATCH(UISceneMap_Render_hookpart2, 0x00458E84, 6, "\x0F\x85\x82\x04\x00\x00");
     
-    // hookpart2 is an wrapper to UIWnd::Render()
-    INIT_WRAPPER_CALL(UISceneMap_Render_hookpart2, { 0x0045930E });
+    // hookpart3 is an wrapper to UIWnd::Render()
+    INIT_WRAPPER_CALL(UISceneMap_Render_hookpart3, { 0x0045930E });
     
     // fix role icon size
     INIT_WRAPPER_CALL(UISceneMap_Render_fixroleicon_gbMatrixStack_Translate_wrapper, {
