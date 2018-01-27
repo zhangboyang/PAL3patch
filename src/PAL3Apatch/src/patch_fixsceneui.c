@@ -7,6 +7,13 @@ static int sceneui_dstrect_type;
 #define sceneui_dstrect_scalefactor get_frect_min_scalefactor(&sceneui_dstrect, &game_frect_original)
 
 // fix PlayerMgr: pushable notification, ShenYan numbers
+static MAKE_THISCALL(void, HeadMsg_MsgDlg_Render_wrapper, struct UIStatic *this)
+{
+    set_uiwnd_ptag(pUIWND(this), MAKE_PTAG(SF_SCENETEXT, PTR_GAMERECT, PTR_GAMERECT, TR_SCALE_MID, TR_SCALE_HIGH));
+    push_ptag_state(pUIWND(this));
+    UIWnd_vfptr_Render(pUIWND(this));
+    pop_ptag_state(pUIWND(this));
+}
 static MAKE_THISCALL(void, HeadMsg_Render_wrapper, struct HeadMsg *this)
 {
     // step2: fix lost blood message in scene
@@ -41,6 +48,9 @@ static void fix_headmsg_offset()
 }
 static void fix_scene_lostblood()
 {
+    // override call to UIStatic::Render(m_pMsgDlg) in HeadMsg::Render()
+    make_call(0x004037BF, HeadMsg_MsgDlg_Render_wrapper);
+    
     // init wrapper to HeadMsg::Render()
     INIT_WRAPPER_CALL(HeadMsg_Render_wrapper, {
         0x0040C255,
@@ -68,27 +78,31 @@ static void install_PlayerMgr_DrawMsg_hook()
 
 
 // fix UISceneMap::Render(): scene small map
+static fRECT smallmap_src_frect, smallmap_dst_frect;
+
 static MAKE_ASMPATCH(UISceneMap_Render_hookpart1)
 {
     // step1: transform small map rect
-    fRECT src_frect, dst_frect;
-    set_frect_rect(&src_frect, TOPTR(R_EBP - 0x14));
-    fixui_adjust_fRECT(&dst_frect, &src_frect);
-    floor_frect(&dst_frect, &dst_frect);
-    frect2gbfrect(&src_frect, &src_frect);
-    frect2gbfrect(&dst_frect, &dst_frect);
+    set_frect_rect(&smallmap_src_frect, TOPTR(R_EBP - 0x14));
+    fixui_adjust_fRECT(&smallmap_dst_frect, &smallmap_src_frect);
+    floor_frect(&smallmap_dst_frect, &smallmap_dst_frect);
+
+    fRECT src_gbfrect, dst_gbfrect;
+    frect2gbfrect(&src_gbfrect, &smallmap_src_frect);
+    frect2gbfrect(&dst_gbfrect, &smallmap_dst_frect);
     
-    fixui_pushstate(&src_frect, &dst_frect, TR_SCALE_SIMPLE, TR_SCALE_SIMPLE, 1.0);
+    fixui_pushstate(&src_gbfrect, &dst_gbfrect, TR_SCALE_SIMPLE, TR_SCALE_SIMPLE, 1.0);
     fs->gb_align = 1;
     
     R_ESI += 0x0010AF24; // oldcode
 }
 static MAKE_ASMPATCH(UISceneMap_Render_hookpart2)
 {
-    // step2: push identity
+    // step2: pop previous state, set rect and push identity
+    set_rect_frect(TOPTR(R_EBP - 0x14), &smallmap_dst_frect);
     fixui_popstate();
     fixui_pushidentity();
-    fs->gb_align = 1;
+    fs->no_align = 1;
     
     if (M_DWORD(R_EBX + 0x45C) != 2) { // oldcode
         LINK_JMP(0x0045930C);
@@ -163,6 +177,7 @@ static MAKE_THISCALL(void, UIGameFrm_Create_wrapper, struct UIGameFrm *this)
     
     ptag = FIXUI_AUTO_TRANSFORM_PTAG;
     set_uiwnd_ptag(pUIWND(&this->m_ChatRest), ptag);
+    set_uiwnd_ptag(pUIWND(&this->m_FinishSave), ptag);
     
     ptag = SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT, TR_CENTER, TR_LOW);
     set_uiwnd_ptag(pUIWND(&this->m_note), ptag);

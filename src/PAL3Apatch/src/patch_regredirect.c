@@ -90,7 +90,14 @@ static void save_reg()
     
         int i;
         for (i = 0; i < nr_reg; i++) {
-            fprintf(fp, "%-40s%-15s%08X\n", reg[i].key1, reg[i].key2, reg[i].val);
+            // only write known registry item to file
+            struct reg_item *pdef;
+            for (pdef = reg_default; pdef->key1 && pdef->key2; pdef++) {
+                if (strcmp(reg[i].key1, pdef->key1) == 0 && strcmp(reg[i].key2, pdef->key2) == 0) {
+                    fprintf(fp, "%-40s%-15s%08X\n", reg[i].key1, reg[i].key2, reg[i].val);
+                    break;
+                }
+            }
         }
         fclose(fp);
     } else {
