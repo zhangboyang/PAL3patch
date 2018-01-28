@@ -17,7 +17,7 @@ static MAKE_THISCALL(void, HeadMsg_MsgDlg_Render_wrapper, struct UIStatic *this)
 static MAKE_THISCALL(void, HeadMsg_Render_wrapper, struct HeadMsg *this)
 {
     // step2: fix lost blood message in scene
-    int flag = this->m_bEnable && !this->m_nType;
+    int flag = this->m_bEnable && (this->m_nType == 0 || this->m_nType == 3);
     if (flag) fixui_pushstate(&game_frect, &game_frect, TR_SCALE_LOW, TR_SCALE_LOW, sceneicon_scalefactor);
     HeadMsg_Render(this);
     if (flag) fixui_popstate();
@@ -78,20 +78,23 @@ static void install_PlayerMgr_DrawMsg_hook()
 
 
 // fix UISceneMap::Render(): scene small map
-static fRECT smallmap_src_frect, smallmap_dst_frect;
-
+static fPOINT scenemap_src_center, scenemap_dst_center;
 static MAKE_ASMPATCH(UISceneMap_Render_hookpart1)
 {
     // step1: transform small map rect
-    set_frect_rect(&smallmap_src_frect, TOPTR(R_EBP - 0x14));
-    fixui_adjust_fRECT(&smallmap_dst_frect, &smallmap_src_frect);
-    floor_frect(&smallmap_dst_frect, &smallmap_dst_frect);
-
-    fRECT src_gbfrect, dst_gbfrect;
-    frect2gbfrect(&src_gbfrect, &smallmap_src_frect);
-    frect2gbfrect(&dst_gbfrect, &smallmap_dst_frect);
+    fRECT src_frect, dst_frect;
     
-    fixui_pushstate(&src_gbfrect, &dst_gbfrect, TR_SCALE_SIMPLE, TR_SCALE_SIMPLE, 1.0);
+    set_frect_rect(&src_frect, TOPTR(R_EBP - 0x14));
+    fixui_adjust_fRECT(&dst_frect, &src_frect);
+    floor_frect(&dst_frect, &dst_frect);
+
+    frect2gbfrect(&src_frect, &src_frect);
+    frect2gbfrect(&dst_frect, &dst_frect);
+    
+    set_fpoint(&scenemap_src_center, (src_frect.left + src_frect.right) / 2.0, (src_frect.top + src_frect.bottom) / 2.0);
+    set_fpoint(&scenemap_dst_center, (dst_frect.left + dst_frect.right) / 2.0, (dst_frect.top + dst_frect.bottom) / 2.0);
+    
+    fixui_pushstate(&src_frect, &dst_frect, TR_SCALE_SIMPLE, TR_SCALE_SIMPLE, 1.0);
     fs->gb_align = 1;
     
     R_ESI += 0x0010AF24; // oldcode
@@ -99,7 +102,6 @@ static MAKE_ASMPATCH(UISceneMap_Render_hookpart1)
 static MAKE_ASMPATCH(UISceneMap_Render_hookpart2)
 {
     // step2: pop previous state, set rect and push identity
-    set_rect_frect(TOPTR(R_EBP - 0x14), &smallmap_dst_frect);
     fixui_popstate();
     fixui_pushidentity();
     fs->no_align = 1;
@@ -123,8 +125,10 @@ static MAKE_THISCALL(void, UISceneMap_Render_hookpart3, struct UIWnd *this)
 
 static MAKE_THISCALL(void, UISceneMap_Render_fixroleicon_gbMatrixStack_Translate_wrapper, struct gbMatrixStack *this, float x, float y, float z)
 {
+    gbMatrixStack_Translate(this, scenemap_dst_center.x, scenemap_dst_center.y, 0.0f);
+    gbMatrixStack_Scale(this, sceneui_scalefactor, sceneui_scalefactor, 1.0f);
+    gbMatrixStack_Translate(this, -scenemap_src_center.x, -scenemap_src_center.y, 0.0f);
     gbMatrixStack_Translate(this, x, y, z);
-    gbMatrixStack_Scale(this, sceneui_scalefactor, sceneui_scalefactor, 1.0);
 }
 
 static MAKE_THISCALL(void, UISceneMap_Render_fixroleicon_gbMatrixStack_Rotate_wrapper, struct gbMatrixStack *this, float angle, struct gbVec3D *axis)
