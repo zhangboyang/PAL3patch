@@ -520,6 +520,8 @@ static void fix_CG_UI()
 {
     INIT_WRAPPER_VFPTR(CG_UI_Render_wrapper, 0x0055EEB0);
     INIT_WRAPPER_VFPTR(CG_UI_Update_wrapper, 0x0055EEB4);
+    
+    SIMPLE_PATCH(0x0051ACFB, "\x0F\x85\x1E\x01\x00\x00", "\xE9\x1F\x01\x00\x00\x90", 6);
 }
 
 

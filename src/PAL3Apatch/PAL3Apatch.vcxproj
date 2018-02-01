@@ -40,12 +40,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype\include</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype\objs\vc2010\Win32</LibraryPath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype\objs\Win32\Debug Static</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)_PAL3A\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype\include</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype\objs\vc2010\Win32</LibraryPath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype\objs\Win32\Release Static</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)_PAL3A\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -125,6 +125,7 @@
     <ClCompile Include="src\patch_fixlineupui.c" />
     <ClCompile Include="src\patch_fixobjectcamera.c" />
     <ClCompile Include="src\patch_fixortho.c" />
+    <ClCompile Include="src\patch_fixpropui.c" />
     <ClCompile Include="src\patch_fixreset.c" />
     <ClCompile Include="src\patch_fixsceneui.c" />
     <ClCompile Include="src\patch_fixtrail.c" />
@@ -147,6 +148,7 @@
     <ClCompile Include="src\patch_uireplacefont.c" />
     <ClCompile Include="src\patch_uireplacetexf.c" />
     <ClCompile Include="src\plugin.c" />
+    <ClCompile Include="src\setpal3path.c" />
     <ClCompile Include="src\texturehook.c" />
     <ClCompile Include="src\transform.c" />
     <ClCompile Include="src\wstr.c" />
@@ -172,6 +174,7 @@
     <ClInclude Include="include\PAL3Apatch\PAL3Apatch.h" />
     <ClInclude Include="include\PAL3Apatch\patch_common.h" />
     <ClInclude Include="include\PAL3Apatch\plugin.h" />
+    <ClInclude Include="include\PAL3Apatch\setpal3path.h" />
     <ClInclude Include="include\PAL3Apatch\texturehook.h" />
     <ClInclude Include="include\PAL3Apatch\tiny_d3d9sdk.h" />
     <ClInclude Include="include\PAL3Apatch\transform.h" />
