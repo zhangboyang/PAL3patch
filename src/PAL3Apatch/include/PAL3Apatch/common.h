@@ -111,12 +111,8 @@
 #error require MSVC++ 2013 or higher
 #endif
 
-#pragma comment(linker, "/export:_launcher_entry")
-#pragma comment(linker, "/export:_sforce_unpacker_entry")
-
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "comctl32.lib")
-#pragma comment(lib, "PAL3Apatch_entry.lib")
 
 #ifdef _DEBUG
 #pragma comment(lib, "d3dx9d.lib")

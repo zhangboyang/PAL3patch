@@ -4,9 +4,10 @@
 编译说明：
    补丁编译方式有两种：
     （1）使用 VC++ 2013（或更高版本）编译
-    （2）使用 GCC & VC++ 6.0 编译
-   两种方式各有利弊，但编译出来的结果理论上是一样的
-   编译过程中若遇到问题，可以参考 notes/known_issues.txt 中 NOT OUR BUG 部分
+    （2）使用 MinGW GCC & VC++ 6.0 编译
+   两种方式各有利弊，但编译出来的结果理论上是一样的；
+   本补丁的发布版是用方式（2）编译的，但如果是刚刚接触本补丁，建议用方式（1）进行编译。
+   编译过程中若遇到问题，可以参考 notes/known_issues.txt 中 NOT OUR BUG 部分。
 
 
 注意：
@@ -32,28 +33,27 @@
     （2）可以使用 VC++ 的强大的调试和分析工具
    缺点：
     （1）编译出的程序只能在 Windows XP SP3 或更高版本的操作系统上运行
-    （2）由于 VC++ 不支持编译 .S 文件，因此需要已编译好的 PAL3patch_entry.lib 文件
+    （2）编译出的文件大小较大
    环境配置：
     （1）安装 VC++ 2013 或更高版本（VC++ 2013, 2015, 2017 均已测试，可以正常编译）
          注意需要安装“对 C++ 的 Windows XP 支持”、“MFC 和 ATL 支持”（如果有必要的话）
     （2）解压缩 SDK 安装包 dx90updatesdk.exe 到 C:\DX90SDK 目录下（注意只需解压缩，无需安装）
     （3）解压缩并编译 FreeType 库（具体步骤见后）
    编译方法：
-    （1）将 extra\pal3\asm\PAL3patch_entry.lib 复制到 src\PAL3patch 目录下
-    （2）打开 src\PAL3patch.sln 直接编译即可
-    （3）编译出的文件在 src\Debug_PAL3 或是 src\Release_PAL3 目录下
+    （1）打开 src\PAL3patch.sln 直接编译即可
+    （2）编译出的文件在 src\Debug_PAL3 或是 src\Release_PAL3 目录下
    调试方法：
     （1）建议先安装 June 2010 DirectX SDK（DXSDK_Jun10.exe）
     （2）假设游戏安装目录为 C:\PAL3
     （3）先安装一遍发布的分辨率补丁，保证 PAL3.exe、gbengine.dll、PAL3unpack.dll 等文件的版本正确
     （4）打开 src\PAL3patch.sln
-    （5）在“解决方案资源管理器”中按住 Ctrl 键选择“PAL3”、“PAL3patch”、“PatchConfig”这三个工程，右键菜单中选择“属性”，
-         在“属性页”窗口中，先在左上角“配置”处选择“所有配置”，
+    （5）在“解决方案资源管理器”中，对“PAL3”、“PAL3patch”、“PatchConfig”这三个工程分别操作：
+         右键菜单中选择“属性”，在“属性页”窗口中，先在左上角“配置”处选择“所有配置”，
          在左侧栏中选择“配置属性——常规”，将右侧“输出目录”改为“C:\PAL3\”，
          在左侧栏中选择“配置属性——调试”，将右侧“工作目录”改为“$(TargetDir)”，
          然后点“确定”关闭属性页（如果提示错误，可能需要将“配置属性——常规——目标平台版本”设置为“7.0”）
-    （6）在“解决方案资源管理器”中选择“PAL3”、“PAL3patch”这两个工程，右键菜单中选择“属性”，
-         在“属性页”窗口中，先在左上角“配置”处选择“所有配置”，
+    （6）在“解决方案资源管理器”中，对“PAL3”、“PAL3patch”这两个工程分别进行操作：
+         右键菜单中选择“属性”，在“属性页”窗口中，先在左上角“配置”处选择“所有配置”，
          在左侧栏中选择“配置属性——调试”，将右侧“命令”改为“C:\PAL3\PAL3.exe”，
          然后点“确定”关闭属性页
     （7）在“解决方案资源管理器”中选择“PAL3”，右键菜单中点击“设为启动项目”
@@ -86,37 +86,34 @@
     （5）选择“生成”菜单中的“批生成”，在弹出的对话框中点击“全选”再点击“重新生成”
 
 
-编译方式二：使用 GCC & VC++ 6.0 编译
+编译方式二：使用 MinGW GCC & VC++ 6.0 编译
    优点：
-    （1）GCC 支持编译 .S 文件
-    （2）编译出的程序即使在 Windows 98 操作系统上也能运行
+    （1）编译出的程序即使在 Windows 98 操作系统上也能运行
+    （2）编译出的文件较小
    缺点：
     （1）环境配置复杂
     （2）调试较为困难
    环境配置：
     （1）强烈建议使用 Windows XP 操作系统
-    （2）安装 VC++ 6.0，需要打 SP6 补丁
+    （2）安装 VC++ 6.0，最好打 SP6 补丁
     （3）安装 Dev-C++ 4.9.9.2
     （4）安装 MSYS 1.0.11（安装时需配置好路径，让其使用 Dev-C++ 带有的 GCC 3.4.2，即在 msys 命令行中能够执行 gcc）
     （5）安装 DirectX 9.0b SDK（具体步骤见后）
     （6）解压缩并编译 FreeType 库（具体步骤见后）
    编译方法：
-    （1）运行 MSYS，在命令行中切换目录到 src 目录下，执行 make 命令即可编译
-    （2）编译好的程序位于：
+    （1）按实际情况修改 Makefile （如 freetype 库的路径、DirectX SDK 的路径等）
+    （2）运行 MSYS，在命令行中切换目录到 src 目录下，执行 make 命令即可编译
+    （3）编译好的程序位于：
          src\PAL3patch\PAL3patch.dll
          src\PatchConfig\Release_PAL3\PatchConfig.exe
-        此外，供 MSVC 使用的汇编代码的库文件位于：
-         src\PAL3patch\PAL3patch_entry.lib
    注意：
     （1）如果使用 Dev-C++ 4.9.9.2 随附的 GCC 3.4.2 编译，请不要打开编译优化，否则可能生成错误的代码
-   附：为 VC++ 6.0 安装 DirectX 9.0b SDK 的方法 
-    （1）解压缩 SDK 安装包 dx90updatesdk.exe 到 C:\DX90SDK 目录下（注意只需解压缩，无需安装）
-    （2）在 VC++ 6.0 中配置好 VC++ 目录（添加 C:\DX90SDK\Include 到引用目录最前面，添加 C:\DX90SDK\Lib 到库目录最前面）
+   附：为 VC++ 6.0 安装 DirectX 9.0b SDK 的方法
+    （1）解压缩 SDK 安装包 dx90updatesdk.exe（注意只需解压缩，无需安装）
+    （2）在 VC++ 6.0 中配置好 VC++ 目录（添加 Include 目录的完整路径到引用目录最前面，添加 Lib 目录的完整路径到库目录最前面）
    附：为 VC++ 6.0 安装 FreeType 库的方法
     （1）下载 FreeType 源代码，以 2.9 版本为例，源码包为 freetype-2.9.tar.bz2
-    （2）解压缩到 C:\ 下，然后将带版本的目录名（freetype-2.9）改为不带版本的目录名，即 freetype
-    （3）打开 C:\freetype\builds\windows\visualc\freetype.dsw
-    （4）选择“Build”菜单中“Batch Build”，然后在对话框左侧选择所有配置项，在点击“Rebuild All”
-    （5）将 C:\freetype\objs 目录下带版本号的库文件（freetype29.lib）重命名为不带版本号的文件 freetype.lib
-    （6）在 VC++ 6.0 中配置好 VC++ 目录（添加 C:\freetype\include 到引用目录最前面，添加 C:\freetype\objs 到库目录最前面）
+    （2）解压缩并打开源码包目录下的 builds\windows\visualc\freetype.dsw 这个工程文件
+    （3）选择“Build”菜单中“Batch Build”，然后在对话框左侧选择所有配置项，再点击“Rebuild All”
+    （4）在 VC++ 6.0 中配置好 VC++ 目录（添加 include 目录的完整路径到引用目录最前面，添加 objs 目录的完整路径到库目录最前面）
 

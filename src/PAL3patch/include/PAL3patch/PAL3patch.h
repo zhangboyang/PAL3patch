@@ -19,7 +19,8 @@ extern PATCHAPI HINSTANCE patch_hinstDLL;
 #define PAL3_WINMM_IATBASE TOPTR(0x0056A1C0)
 #define PAL3_USER32_IATBASE TOPTR(0x0056A134)
 
-extern void launcher_entry(unsigned oep_addr);
+extern PATCHAPI void launcher_entry(unsigned oep_addr);
+extern unsigned sforce_unpacker_init(void);
 
 #endif
 #endif

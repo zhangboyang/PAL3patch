@@ -20,7 +20,8 @@ extern PATCHAPI HINSTANCE patch_hinstDLL;
 
 
 
-extern void launcher_entry(unsigned oep_addr);
+extern PATCHAPI void launcher_entry(unsigned oep_addr);
+extern unsigned sforce_unpacker_init(void);
 
 #endif
 #endif

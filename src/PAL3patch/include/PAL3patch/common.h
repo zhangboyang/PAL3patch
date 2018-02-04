@@ -111,18 +111,15 @@
 #error require MSVC++ 2013 or higher
 #endif
 
-#pragma comment(linker, "/export:_launcher_entry")
-#pragma comment(linker, "/export:_sforce_unpacker_entry")
-
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "comctl32.lib")
-#pragma comment(lib, "PAL3patch_entry.lib")
 
 #ifdef _DEBUG
 #pragma comment(lib, "d3dx9d.lib")
 #else
 #pragma comment(lib, "d3dx9.lib")
 #endif
+
 #if _MSC_VER >= 1900
 #pragma comment(lib, "legacy_stdio_definitions.lib")
 #endif
