@@ -234,7 +234,7 @@ static MAKE_ASMPATCH(fixreset_gbGfxManager_D3D_BeginScene_patch)
 static MAKE_ASMPATCH(retryreset)
 {
     if (R_EAX >> 31) {
-        if (MessageBox(NULL, "Reset() failed, retry?\n\npress ENTER to retry.\npress ESC to exit game.", "PAL3patch", MB_RETRYCANCEL | MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND | MB_SYSTEMMODAL) == IDCANCEL) {
+        if (MessageBoxW(NULL, wstr_resetfailed_text, wstr_resetfailed_title, MB_RETRYCANCEL | MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND | MB_SYSTEMMODAL) == IDCANCEL) {
             RETNADDR = gboffset + 0x1001AD76; // oldcode
         } else {
             RETNADDR = gboffset + 0x1001AC78; // try Reset() again

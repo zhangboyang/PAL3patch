@@ -387,6 +387,25 @@ int call_postwndproc_hook(HWND *hWnd, UINT *Msg, WPARAM *wParam, LPARAM *lParam,
 }
 
 
+// GRPinput keyboard state hook
+void add_grpkbdstate_hook(void (*funcptr)(void))
+{
+    add_hook(HOOKID_GRPKBDSTATE, funcptr);
+}
+static MAKE_ASMPATCH(post_kbdstate_update)
+{
+    // state in g_input.m_keyRaw
+    run_hooks(HOOKID_GRPKBDSTATE, NULL);
+    R_EBX = R_ESI + 0x1030;
+}
+static void init_grpkbdstate_hook()
+{
+    INIT_ASMPATCH(post_kbdstate_update, 0x00402C1A, 6, "\x8D\x9E\x30\x10\x00\x00");
+}
+
+
+
+
 // init all hooks
 void init_hooks()
 {
@@ -399,4 +418,5 @@ void init_hooks()
     init_postpal3create_prepal3destroy_hook();
     init_preendscene_postpresent_hook();
     init_pauseresume_hook();
+    init_grpkbdstate_hook();
 }

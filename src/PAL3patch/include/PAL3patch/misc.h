@@ -5,6 +5,7 @@
 extern PATCHAPI int is_win9x(void);
 extern PATCHAPI void NORETURN die(int status);
 
+extern PATCHAPI int is_spacechar(char ch);
 extern PATCHAPI int str2int(const char *valstr);
 extern PATCHAPI double str2double(const char *valstr);
 extern PATCHAPI int str_endswith(const char *a, const char *b);

@@ -37,10 +37,13 @@ static const DWORD defaultfont_charset_CHS = GB2312_CHARSET;
 static const int defaultfont_bold_CHS = 48;
 
 static const wchar_t wstr_defaultfont_CHS[] = L"宋体";
-static const wchar_t wstr_gameloading_CHS[] = L"游戏加载中，请稍候……";
+static const wchar_t wstr_gameloading_CHS[] = L"游戏加载中，请稍候……";  // 少女祈祷中
 
 static const wchar_t wstr_cantsavereg_text_CHS[] = L"无法保存注册表数据到存档文件夹，部分存档数据可能会丢失。\n请确认游戏对存档文件夹有可写权限。";
 static const wchar_t wstr_cantsavereg_title_CHS[] = L"注册表重定向";
+
+static const wchar_t wstr_badregfile_text_CHS[] = L"注册表存档数据可能已损坏，是否继续？\n注意：若继续则部分存档数据可能会丢失。";
+static const wchar_t wstr_badregfile_title_CHS[] = L"注册表重定向";
 
 static const wchar_t wstr_nocfgfile_text_CHS[] = L"无法读取补丁配置文件。请运行“补丁配置工具”来生成默认配置文件。";
 static const wchar_t wstr_nocfgfile_title_CHS[] = L"无法加载配置";
@@ -48,6 +51,8 @@ static const wchar_t wstr_nocfgfile_title_CHS[] = L"无法加载配置";
 static const wchar_t wstr_badcfgfile_text_CHS[] = L"补丁配置文件损坏。请运行“补丁配置工具”，使用“实用工具——恢复默认设置”功能来重写配置文件。";
 static const wchar_t wstr_badcfgfile_title_CHS[] = L"无法加载配置";
 
+static const wchar_t wstr_resetfailed_text_CHS[] = L"无法重置 Direct3D 设备，是否重试？\n\n按【回车】键重试；\n按【ESC】键退出游戏。";
+static const wchar_t wstr_resetfailed_title_CHS[] = L"重置失败";
 
 static const wchar_t wstr_pluginerr_notfound_text_CHS[] = L"找不到指定的插件模块“%s”。";
 static const wchar_t wstr_pluginerr_loadfailed_text_CHS[] = L"无法加载插件模块“%s”。";
@@ -83,10 +88,14 @@ int defaultfont_bold;
 const wchar_t *wstr_gameloading;
 const wchar_t *wstr_cantsavereg_text;
 const wchar_t *wstr_cantsavereg_title;
+const wchar_t *wstr_badregfile_text;
+const wchar_t *wstr_badregfile_title;
 const wchar_t *wstr_nocfgfile_text;
 const wchar_t *wstr_nocfgfile_title;
 const wchar_t *wstr_badcfgfile_text;
 const wchar_t *wstr_badcfgfile_title;
+const wchar_t *wstr_resetfailed_text;
+const wchar_t *wstr_resetfailed_title;
 const wchar_t *wstr_pluginerr_notfound_text;
 const wchar_t *wstr_pluginerr_loadfailed_text;
 const wchar_t *wstr_pluginerr_noentry_text;
@@ -139,6 +148,10 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_gameloading);
     IMPORT_LOCALE_ITEM(CHS, wstr_cantsavereg_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_cantsavereg_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badregfile_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badregfile_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_notfound_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_loadfailed_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_noentry_text);

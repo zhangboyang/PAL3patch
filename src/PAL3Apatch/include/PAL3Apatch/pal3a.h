@@ -2363,6 +2363,7 @@ struct FindArc;
 #define g_pVFileSys (*(struct gbVFileSystem **) TOPTR(gboffset + 0x10131D08))
 #define g_msgbk (*(struct UIStaticFlex *) TOPTR(0x00C01D50))
 #define g_gamefrm (*(struct UIGameFrm *) TOPTR(0x00F79E98))
+#define g_input (*(struct GRPinput *) TOPTR(0x00BFEE30))
 
 
 

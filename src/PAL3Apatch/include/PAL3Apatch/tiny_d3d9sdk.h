@@ -23,6 +23,8 @@ typedef struct _DIMOUSESTATE2 {
     BYTE    rgbButtons[8];
 } DIMOUSESTATE2, *LPDIMOUSESTATE2;
 
+#define DIK_F8              0x42
+
 #endif
 
 

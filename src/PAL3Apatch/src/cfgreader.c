@@ -14,11 +14,6 @@ static int config_line_cmp(const void *a, const void *b)
     return stricmp(pa->key, pb->key);
 }
 
-static int is_spacechar(char ch)
-{
-	return !!strchr(SPACECHAR_LIST, ch);
-}
-
 #define badcfg(fmt, ...) fail_with_extra_msg(wstr_badcfgfile_text, wstr_badcfgfile_title, fmt, ## __VA_ARGS__)
 
 void read_config_file()

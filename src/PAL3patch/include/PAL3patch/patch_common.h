@@ -164,6 +164,10 @@ MAKE_PATCHSET(graphicspatch);
         #define fixui_pushidentity() fixui_pushstate(&game_frect, &game_frect, TR_LOW, TR_LOW, 1.0)
         
         struct uiwnd_ptag {
+            // put magic at lowest byte to detect illegal modify (e.g. by cheater)
+            #define UIWND_PTAG_MAGIC 1223u // TangXueJian's birthday, hahahaha
+            unsigned magic : 12; // must be non-zero
+            
             unsigned scalefactor_index : 4;
             unsigned self_srcrect_type : 3;
             unsigned self_dstrect_type : 3;
@@ -173,9 +177,6 @@ MAKE_PATCHSET(graphicspatch);
             unsigned self_only_ptag : 1; // if set to 1, this ptag apply to this UIWnd only, will not affect it's childrens
             unsigned in_use : 1;
             unsigned enabled : 1;
-            
-            #define UIWND_PTAG_MAGIC 1223u // TangXueJian's birthday, hahahaha
-            unsigned magic : 12; // must be non-zero
         };
         #define M_PWND(addr) TOPTR(M_DWORD(addr))
         #define PWND TOPTR

@@ -50,9 +50,15 @@ static void screenshot_wndproc_hook(void *arg)
     }
 }
 
+static void screenshot_grpkbdstate_hook()
+{
+    g_input.m_keyRaw[DIK_F8] = 0;
+}
+
 MAKE_PATCHSET(screenshot)
 {
     screenshot_enabled = 1;
     add_preendscene_hook(screenshot_hook);
     add_postwndproc_hook(screenshot_wndproc_hook);
+    add_grpkbdstate_hook(screenshot_grpkbdstate_hook);
 }

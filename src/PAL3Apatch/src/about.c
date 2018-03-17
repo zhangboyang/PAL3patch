@@ -40,6 +40,6 @@ void show_about()
     if (flag) {
         wchar_t buf[MAXLINE];
         snwprintf(buf, sizeof(buf) / sizeof(wchar_t), wstr_about_text, patch_version, build_info);
-        MessageBoxW(NULL, buf, wstr_about_title, MB_ICONINFORMATION | MB_SETFOREGROUND); 
+        MessageBoxW(NULL, buf, wstr_about_title, MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND); 
     }
 }

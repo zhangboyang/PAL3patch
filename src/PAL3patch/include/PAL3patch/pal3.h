@@ -1777,6 +1777,7 @@ struct CCBAttackSequen {
 #define g_gamefrm (*(struct UIGameFrm *) TOPTR(0x00DB9FD0))
 #define g_bink (*(struct gbBinkVideo *) TOPTR(0x00A3A7D8))
 #define g_CurrentTime (*(double *) TOPTR(gboffset + 0x1015D338))
+#define g_input (*(struct GRPinput *) TOPTR(0x00BFAD70))
 
 
 

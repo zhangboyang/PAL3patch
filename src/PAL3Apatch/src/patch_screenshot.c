@@ -56,6 +56,11 @@ static void PAL3_PrintScreen(int width, int height)
     // do NOTHING here since we processed keyboard events in WndProc
 }
 
+static void screenshot_grpkbdstate_hook()
+{
+    g_input.m_keyRaw[DIK_F8] = 0;
+}
+
 MAKE_PATCHSET(screenshot)
 {
     screenshot_enabled = 1;
@@ -63,4 +68,6 @@ MAKE_PATCHSET(screenshot)
     
     add_postwndproc_hook(screenshot_wndproc_hook);
     make_jmp(0x00408699, PAL3_PrintScreen);
+    
+    add_grpkbdstate_hook(screenshot_grpkbdstate_hook);
 }

@@ -45,25 +45,44 @@ static void load_reg()
     nr_reg = 0;
     FILE *fp = fopen(MY_REG_FILE, "r");
     if (!fp) return;
-    char buf1[MAXLINE], buf2[MAXLINE];
+    char buf[MAXLINE];
+    char *ptr;
+    char key1[MAXLINE], key2[MAXLINE];
     unsigned val;
     int ret;
+    int badreg_flag = 0;
     fscanf(fp, UTF8_BOM_STR);
-    while (1) {
-        // skip comment lines
-        char tmp[3];
-        while (fscanf(fp, " %2[;#]%*[^\n] ", tmp) == 1);
+    while (fgets(buf, sizeof(buf), fp)) {
+        // ltrim the line
+        for (ptr = buf; *ptr && is_spacechar(*ptr); ptr++);
+        memmove(buf, ptr, strlen(ptr) + 1);
+        
+        // skip empty and comment lines
+        if (!buf[0] || buf[0] == ';' || buf[0] == '#' || (buf[0] == '/' && buf[1] == '/')) continue;
+        
+        // remove '\n' and end of line
+        ptr = strchr(buf, '\n');
+        if (ptr) *ptr = '\0';
         
         // read registry tuple
-        ret = fscanf(fp, MAXLINEFMT MAXLINEFMT "%x ", buf1, buf2, &val);
-        if (ret != 3) break;
-        int id = alloc_reg();
-        reg[id].key1 = strdup(buf1);
-        reg[id].key2 = strdup(buf2);
-        reg[id].val = val;
+        ret = sscanf(buf, MAXLINEFMT MAXLINEFMT "%x ", key1, key2, &val);
+        if (ret == 3) {
+            int id = alloc_reg();
+            reg[id].key1 = strdup(key1);
+            reg[id].key2 = strdup(key2);
+            reg[id].val = val;
+        } else {
+            badreg_flag = 1;
+        }
     }
     fclose(fp);
-    if (ret != 0 && ret != EOF) fail("can't parse registry file.");
+    
+    if (badreg_flag == 1) {
+        if (MessageBoxW(NULL, wstr_badregfile_text, wstr_badregfile_title, MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND | MB_YESNO | MB_DEFBUTTON2) == IDNO) {
+            fail("can't parse registry file, user abort.");
+        }
+    }
+    
     qsort(reg, nr_reg, sizeof(struct reg_item), reg_cmp);
     int i;
     for (i = 1; i < nr_reg; i++) {

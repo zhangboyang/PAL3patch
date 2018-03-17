@@ -11,6 +11,11 @@ int is_win9x()
     return osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS;
 }
 
+int is_spacechar(char ch)
+{
+	return !!strchr(SPACECHAR_LIST, ch);
+}
+
 int str2int(const char *valstr)
 {
     int result, ret;

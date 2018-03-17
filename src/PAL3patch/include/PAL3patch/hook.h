@@ -75,6 +75,9 @@ struct wndproc_hook_data {
 extern PATCHAPI void add_prewndproc_hook(void (*funcptr)(void *));
 extern PATCHAPI void add_postwndproc_hook(void (*funcptr)(void *));
 
+// GRPinput keyboard state hook
+extern PATCHAPI void add_grpkbdstate_hook(void (*funcptr)(void));
+
 
 #ifdef PATCHAPI_EXPORTS
 // INTERNAL DEFINITIONS
@@ -97,6 +100,7 @@ enum hook_type {
     HOOKID_GAMEPAUSERESUME,
     HOOKID_PREWNDPROC,
     HOOKID_POSTWNDPROC,
+    HOOKID_GRPKBDSTATE,
     
     MAX_HOOK_TYPES // EOF
 };
