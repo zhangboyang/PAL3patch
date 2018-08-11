@@ -185,6 +185,8 @@ static void init_pauseresume_hook()
 static void *atexit_hooks_dyncode;
 void call_atexit_hooks()
 {
+    game_hwnd = NULL; // game_hwnd is invalid at exit, set it to NULL
+    
     run_hooks(HOOKID_ATEXIT, NULL);
 }
 static MAKE_ASMPATCH(atexit_normal)

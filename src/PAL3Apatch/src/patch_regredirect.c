@@ -95,7 +95,11 @@ static void save_reg()
 {
     PrepareDir(); // call PrepareDir() to create the "./save" Directory
     qsort(reg, nr_reg, sizeof(struct reg_item), reg_cmp);
-    FILE *fp = fopen(MY_REG_FILE, "w");
+    static int ask_retry = 1;
+    FILE *fp;
+    
+retry:
+    fp = fopen(MY_REG_FILE, "w");
     if (fp) {
         fputs(UTF8_BOM_STR, fp);
         fprintf(fp, "; PAL3A registry save file\n");
@@ -120,8 +124,14 @@ static void save_reg()
         }
         fclose(fp);
     } else {
-        try_goto_desktop();
-        MessageBoxW(game_hwnd, wstr_cantsavereg_text, wstr_cantsavereg_title, MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
+        if (ask_retry) {
+            try_goto_desktop();
+            if (MessageBoxW(game_hwnd, wstr_cantsavereg_text, wstr_cantsavereg_title, MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND | MB_RETRYCANCEL) == IDRETRY) {
+                goto retry;
+            } else {
+                ask_retry = 0;
+            }
+        }
     }
 }
 static void assign_reg(const char *key1, const char *key2, unsigned val)

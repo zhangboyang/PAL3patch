@@ -13,8 +13,8 @@
 
 
 // patch version
-#define PATCH_VERSION          10600
-#define PATCH_VERSION_STRING "v1.6"
+#define PATCH_VERSION          10700
+#define PATCH_VERSION_STRING "v1.7"
 
 
 

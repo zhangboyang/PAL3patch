@@ -2,30 +2,49 @@
 
 static int screenshot_flag = 0;
 
+#define SCREENSHOT_MSG_TIME 5000
+static wchar_t screenshot_msg[MAXLINE];
+static DWORD screenshot_msg_time;
+static int screenshot_msg_enable = 0;
+
 static void screenshot_hook()
 {
-    if (!screenshot_flag) return;
+    if (screenshot_flag) {
 
-    // create directory
-    CreateDirectory("snap", NULL);
+        // create directory
+        CreateDirectory("snap", NULL);
+        
+        // prepare filename
+        char buf[MAXLINE];
+        SYSTEMTIME SystemTime;
+        GetLocalTime(&SystemTime);
+        snprintf(buf, sizeof(buf), "snap\\%04hu%02hu%02hu_%02hu%02hu%02hu_%03hu.bmp", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
     
-    // prepare filename
-    char buf[MAXLINE];
-    SYSTEMTIME SystemTime;
-    GetLocalTime(&SystemTime);
-    snprintf(buf, sizeof(buf), "snap\\%04hu%02hu%02hu_%02hu%02hu%02hu_%03hu.bmp", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
-
-    // save image
-    IDirect3DSurface9 *suf = NULL;
-    if (SUCCEEDED(IDirect3DDevice9_GetBackBuffer(GB_GfxMgr->m_pd3dDevice, 0, 0, D3DBACKBUFFER_TYPE_MONO, &suf))) {
-        if (FAILED(D3DXSaveSurfaceToFileA(buf, D3DXIFF_BMP, suf, NULL, NULL))) {
-            warning("screenshot failed.");
+        // save image
+        IDirect3DSurface9 *suf = NULL;
+        if (SUCCEEDED(IDirect3DDevice9_GetBackBuffer(GB_GfxMgr->m_pd3dDevice, 0, 0, D3DBACKBUFFER_TYPE_MONO, &suf))) {
+            if (SUCCEEDED(D3DXSaveSurfaceToFileA(buf, D3DXIFF_BMP, suf, NULL, NULL))) {
+                snwprintf(screenshot_msg, sizeof(screenshot_msg) / sizeof(wchar_t), wstr_screenshot_msg, buf);
+                screenshot_msg_time = timeGetTime();
+                screenshot_msg_enable = 1;
+            } else {
+                warning("screenshot failed.");
+            }
+            IDirect3DSurface9_Release(suf);
         }
-        IDirect3DSurface9_Release(suf);
+        
+        // reset flag
+        screenshot_flag = 0;
     }
     
-    // reset flag
-    screenshot_flag = 0;
+    if (screenshot_msg_enable) {
+        print_wstring_begin();
+        print_wstring(FONTID_U12_SCALED, screenshot_msg, 12 * game_scalefactor, 12 * game_scalefactor, 0xFFFFFF00);
+        print_wstring_end();
+        if (timeGetTime() - screenshot_msg_time >= SCREENSHOT_MSG_TIME) {
+            screenshot_msg_enable = 0;
+        }
+    }
 }
 
 
