@@ -12,9 +12,6 @@ static void write_logfile_header(FILE *fp)
     fputs("build information:\n", fp);
     fputs(build_info, fp);
     
-    fputs("library information:\n", fp);
-    fputs(lib_info, fp);
-    
     fputs("patch configuration:\n", fp);
     dump_all_config(fp);
 }
@@ -99,7 +96,7 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
             if (plog_msgboxes + 1 <= MAXWARNMSGBOXES) {
                 plog_msgboxes++;
                 if (plog_msgboxes >= MAXWARNMSGBOXES) {
-                    strncat(msgbuf, "\n\nmax messagebox limit reached.", sizeof(msgbuf) - strlen(msgbuf) - 1);
+                    strncat(msgbuf, "\n\nmax messagebox limit reached, suppressing further messageboxes.", sizeof(msgbuf) - strlen(msgbuf) - 1);
                     msgbuf[sizeof(msgbuf) - 1] = '\0';
                 }
                 try_goto_desktop();

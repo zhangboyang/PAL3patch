@@ -18,11 +18,11 @@ extern PATCHAPI int game_locale;
 #define CODEPAGE_CHT 950
 
 
-extern PATCHAPI const char *ftfont_filename;
-extern PATCHAPI int ftfont_index;
+extern PATCHAPI const char *defaultfont_ftfilename;
+extern PATCHAPI int defaultfont_ftindex;
 extern PATCHAPI DWORD defaultfont_charset;
 extern PATCHAPI int defaultfont_bold;
-
+extern PATCHAPI const wchar_t *wstr_defaultfont;
 
 
 #ifdef PATCHAPI_EXPORTS
@@ -36,7 +36,6 @@ extern const wchar_t *wstr_about_title;
 extern const wchar_t *wstr_about_text;
 extern const wchar_t *wstr_confirmquit_text;
 extern const wchar_t *wstr_confirmquit_title;
-extern const wchar_t *wstr_defaultfont;
 extern const wchar_t *wstr_gameloading;
 extern const wchar_t *wstr_cantsavereg_text;
 extern const wchar_t *wstr_cantsavereg_title;

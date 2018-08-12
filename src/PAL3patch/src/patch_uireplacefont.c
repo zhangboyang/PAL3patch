@@ -8,6 +8,8 @@ static int d3dxfont_initflag = 0;
 static DWORD d3dxfont_charset;
 static int d3dxfont_quality;
 static LPCWSTR d3dxfont_facename;
+static const char *ftfont_filename;
+static int ftfont_index;
 static int d3dxfont_sizelist_orig[PRINTWSTR_COUNT] = {12, 16, 20};
 static int d3dxfont_sizelist[PRINTWSTR_COUNT];
 static int d3dxfont_boldflag[PRINTWSTR_COUNT];
@@ -472,8 +474,31 @@ static void ui_replacefont_d3dxfont_init()
     d3dxfont_quality = get_int_from_configfile("uireplacefont_quality");
     const char *facename = get_string_from_configfile("uireplacefont_facename");
     if (stricmp(facename, "default") == 0) {
-        d3dxfont_facename = wstr_defaultfont;
+        d3dxfont_facename = wstr_defaultfont; // set fallback font
+        ftfont_filename = defaultfont_ftfilename;
+        ftfont_index = defaultfont_ftindex;
         d3dxfont_ftfont = 1;
+    } else if (strnicmp(facename, "freetype:", 9) == 0) {
+        d3dxfont_facename = wstr_defaultfont; // set fallback font
+        char *buf = strdup(facename + 9);
+        char *saveptr;
+        const char *pfn, *pidx;
+        pfn = strtok_r(buf, ":", &saveptr);
+        if (pfn == NULL) {
+            pfn = "";
+            pidx = NULL;
+        } else {
+            pidx = strtok_r(NULL, ":", &saveptr);
+        }
+        if (pidx == NULL) {
+            pidx = "0";
+        }
+        ftfont_filename = cs2cs_alloc(pfn, CP_UTF8, CP_ACP); // let it leak
+        if (sscanf(pidx, "%d", &ftfont_index) != 1) {
+            ftfont_index = 0;
+        }
+        d3dxfont_ftfont = 1;
+        free(buf);
     } else {
         d3dxfont_facename = cs2wcs_alloc(facename, CP_UTF8); // let it leak
     }

@@ -17,22 +17,22 @@ const char build_info[] =
     "  compiler: " BUILD_COMPILER "\n"
     "  config:"
 #ifdef HAVE_THISCALL
-" +thiscall"
+        " +thiscall"
 #else
-" -thiscall"
+        " -thiscall"
 #endif
 #ifdef HAVE_D3D9SDK
-" +d3d9sdk"
+        " +d3d9sdk"
 #else
-" -d3d9sdk"
+        " -d3d9sdk"
 #endif
-    "\n";
-
-const char lib_info[] =
-    "  d3d9: " TOSTR(D3D_SDK_VERSION) "\n"
-    "  d3dx9: " TOSTR(D3DX_SDK_VERSION) "\n"
-    "  freetype: " FTFONT_VERSTR "\n"
-;
+"\n"
+    "  library:"
+        " d3d9/" TOSTR(D3D_SDK_VERSION)
+        " d3dx9/" TOSTR(D3DX_SDK_VERSION)
+        " freetype/" FTFONT_VERSTR
+"\n"
+    ;
 
 void show_about()
 {

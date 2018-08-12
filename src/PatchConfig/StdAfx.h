@@ -42,6 +42,12 @@
 #include <functional>
 #include <algorithm>
 
+#if _MSC_VER < 1800
+typedef unsigned int uint32_t;
+#else
+#include <cstdint>
+#endif
+
 #include "Resource.h"
 #include "ConfigDescData.h"
 #include "PatchConfigDlg.h"

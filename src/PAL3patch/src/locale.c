@@ -31,8 +31,8 @@ static const wchar_t wstr_about_text_CHS[] =
 static const wchar_t wstr_confirmquit_text_CHS[] = L"您确定要退出游戏吗？\n未保存的游戏进度将会丢失。";
 static const wchar_t wstr_confirmquit_title_CHS[] = L"退出";
 
-static const char ftfont_filename_CHS[] = "simsun.ttc";
-static const int ftfont_index_CHS = 0;
+static const char defaultfont_ftfilename_CHS[] = "simsun.ttc";
+static const int defaultfont_ftindex_CHS = 0;
 static const DWORD defaultfont_charset_CHS = GB2312_CHARSET;
 static const int defaultfont_bold_CHS = 48;
 
@@ -64,8 +64,8 @@ static const wchar_t wstr_pluginerr_title_CHS[] = L"无法加载插件";
 
 
 // CHT
-static const char ftfont_filename_CHT[] = "mingliu.ttc";
-static const int ftfont_index_CHT = 0;
+static const char defaultfont_ftfilename_CHT[] = "mingliu.ttc";
+static const int defaultfont_ftindex_CHT = 0;
 static const DWORD defaultfont_charset_CHT = CHINESEBIG5_CHARSET;
 static const int defaultfont_bold_CHT = 32;
 
@@ -82,11 +82,11 @@ const wchar_t *wstr_about_title;
 const wchar_t *wstr_about_text;
 const wchar_t *wstr_confirmquit_text;
 const wchar_t *wstr_confirmquit_title;
-const char *ftfont_filename;
-int ftfont_index;
-const wchar_t *wstr_defaultfont;
+const char *defaultfont_ftfilename;
+int defaultfont_ftindex;
 DWORD defaultfont_charset;
 int defaultfont_bold;
+const wchar_t *wstr_defaultfont;
 const wchar_t *wstr_gameloading;
 const wchar_t *wstr_cantsavereg_text;
 const wchar_t *wstr_cantsavereg_title;
@@ -143,11 +143,11 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_about_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_confirmquit_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_confirmquit_title);
-    IMPORT_LOCALE_ITEM(CHS, ftfont_filename);
-    IMPORT_LOCALE_ITEM(CHS, ftfont_index);
-    IMPORT_LOCALE_ITEM(CHS, wstr_defaultfont);
+    IMPORT_LOCALE_ITEM(CHS, defaultfont_ftfilename);
+    IMPORT_LOCALE_ITEM(CHS, defaultfont_ftindex);
     IMPORT_LOCALE_ITEM(CHS, defaultfont_charset);
     IMPORT_LOCALE_ITEM(CHS, defaultfont_bold);
+    IMPORT_LOCALE_ITEM(CHS, wstr_defaultfont);
     IMPORT_LOCALE_ITEM(CHS, wstr_gameloading);
     IMPORT_LOCALE_ITEM(CHS, wstr_cantsavereg_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_cantsavereg_title);
@@ -163,11 +163,11 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_title);
 
     if (target_codepage == CODEPAGE_CHT) { // CHT
-        IMPORT_LOCALE_ITEM(CHT, ftfont_filename);
-        IMPORT_LOCALE_ITEM(CHT, ftfont_index);
-        IMPORT_LOCALE_ITEM(CHT, wstr_defaultfont);
+        IMPORT_LOCALE_ITEM(CHT, defaultfont_ftfilename);
+        IMPORT_LOCALE_ITEM(CHT, defaultfont_ftindex);
         IMPORT_LOCALE_ITEM(CHT, defaultfont_charset);
         IMPORT_LOCALE_ITEM(CHT, defaultfont_bold);
+        IMPORT_LOCALE_ITEM(CHT, wstr_defaultfont);
         // FIXME
     }
 }

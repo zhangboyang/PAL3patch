@@ -143,7 +143,7 @@ ConfigDescItem ConfigDescList_CHS[] = {
 		1, TRUE, TRUE,
 		_T("uireplacefont_facename"),
 		_T("字体"),
-		_T("指定游戏使用的字体。\r\n只有使用默认字体才会启用 FreeType 字体渲染方式。"),
+		_T("指定游戏使用的字体。"),
 		NULL,
 		NULL,
 		{ { NULL } },

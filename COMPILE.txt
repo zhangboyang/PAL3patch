@@ -73,8 +73,8 @@
          在右侧取消选择“在运行时仅生成启动项目和依赖项”，
          然后点击“确定”关闭对话框即可
    附：用 VC++ 2013 编译 FreeType 库的方法
-    （1）下载 FreeType 源代码，以 2.9 版本为例，源码包为 freetype-2.9.tar.bz2
-    （2）解压缩到 C:\ 下，然后将带版本的目录名（freetype-2.9）改为不带版本的目录名，即 freetype
+    （1）下载 FreeType 源代码，以 2.9.1 版本为例，源码包为 freetype-2.9.1.tar.bz2
+    （2）解压缩到 C:\ 下，然后将带版本的目录名（freetype-2.9.1）改为不带版本的目录名，即 freetype
     （3）打开 C:\freetype\builds\windows\vc2010\freetype.sln
     （4）打开后需要更改工程配置：
          在“解决方案资源管理器”中选中 freetype 这个工程，右键菜单中选择“属性”，
@@ -112,7 +112,7 @@
     （1）解压缩 SDK 安装包 dx90updatesdk.exe（注意只需解压缩，无需安装）
     （2）在 VC++ 6.0 中配置好 VC++ 目录（添加 Include 目录的完整路径到引用目录最前面，添加 Lib 目录的完整路径到库目录最前面）
    附：为 VC++ 6.0 安装 FreeType 库的方法
-    （1）下载 FreeType 源代码，以 2.9 版本为例，源码包为 freetype-2.9.tar.bz2
+    （1）下载 FreeType 源代码，以 2.9.1 版本为例，源码包为 freetype-2.9.1.tar.bz2
     （2）解压缩并打开源码包目录下的 builds\windows\visualc\freetype.dsw 这个工程文件
     （3）选择“Build”菜单中“Batch Build”，然后在对话框左侧选择所有配置项，再点击“Rebuild All”
     （4）在 VC++ 6.0 中配置好 VC++ 目录（添加 include 目录的完整路径到引用目录最前面，添加 objs 目录的完整路径到库目录最前面）
