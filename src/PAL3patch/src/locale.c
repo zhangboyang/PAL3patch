@@ -56,11 +56,13 @@ static const wchar_t wstr_resetfailed_title_CHS[] = L"重置失败";
 
 static const wchar_t wstr_screenshot_msg_CHS[] = L"屏幕截图已保存至“%hs”";
 
-static const wchar_t wstr_pluginerr_notfound_text_CHS[] = L"找不到指定的插件模块“%s”。";
-static const wchar_t wstr_pluginerr_loadfailed_text_CHS[] = L"无法加载插件模块“%s”。";
-static const wchar_t wstr_pluginerr_noentry_text_CHS[] = L"无法在“%s”中找到插件模块入口点“%hs”，请确认它是否为合法的插件模块。";
-static const wchar_t wstr_pluginerr_initfailed_text_CHS[] = L"无法初始化插件模块“%s”，返回值为 %d。";
-static const wchar_t wstr_pluginerr_title_CHS[] = L"无法加载插件";
+static const wchar_t wstr_pluginerr_loadfailed_CHS[] = L"无法加载模块";
+static const wchar_t wstr_pluginerr_noentry_CHS[] = L"无入口点";
+static const wchar_t wstr_pluginerr_initfailed_CHS[] = L"初始化失败，返回值为 %d";
+static const wchar_t wstr_pluginreport_title_CHS[] = L"插件加载报告";
+static const wchar_t wstr_pluginreport_template_CHS[] = L"以下是插件加载情况：\n\n%s\n已成功加载 %d 个插件模块。";
+static const wchar_t wstr_pluginreport_success_CHS[] = L"[成功]  %s\n";
+static const wchar_t wstr_pluginreport_failed_CHS[] = L"[失败]  %s （%s）\n";
 
 
 // CHT
@@ -99,11 +101,13 @@ const wchar_t *wstr_badcfgfile_title;
 const wchar_t *wstr_resetfailed_text;
 const wchar_t *wstr_resetfailed_title;
 const wchar_t *wstr_screenshot_msg;
-const wchar_t *wstr_pluginerr_notfound_text;
-const wchar_t *wstr_pluginerr_loadfailed_text;
-const wchar_t *wstr_pluginerr_noentry_text;
-const wchar_t *wstr_pluginerr_initfailed_text;
-const wchar_t *wstr_pluginerr_title;
+const wchar_t *wstr_pluginerr_loadfailed;
+const wchar_t *wstr_pluginerr_noentry;
+const wchar_t *wstr_pluginerr_initfailed;
+const wchar_t *wstr_pluginreport_title;
+const wchar_t *wstr_pluginreport_template;
+const wchar_t *wstr_pluginreport_success;
+const wchar_t *wstr_pluginreport_failed;
 
 
 
@@ -156,11 +160,13 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_screenshot_msg);
-    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_notfound_text);
-    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_loadfailed_text);
-    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_noentry_text);
-    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_initfailed_text);
-    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_loadfailed);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_noentry);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_initfailed);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_template);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_success);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_failed);
 
     if (target_codepage == CODEPAGE_CHT) { // CHT
         IMPORT_LOCALE_ITEM(CHT, defaultfont_ftfilename);

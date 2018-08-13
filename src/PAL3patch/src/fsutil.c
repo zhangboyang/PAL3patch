@@ -60,6 +60,19 @@ char *get_filepart(const char *filepath)
     return filepart;
 }
 
+wchar_t *get_wfilepart(const wchar_t *wfilepath)
+{
+    wchar_t *t;
+    wchar_t *wfilepart = (wchar_t *) wfilepath;
+    
+    t = wcsrchr(wfilepart, L'\\');
+    if (t) wfilepart = t + 1;
+    t = wcsrchr(wfilepart, L'/');
+    if (t) wfilepart = t + 1;
+    
+    return wfilepart;
+}
+
 int is_relpath(const char *filepath)
 {
     return !(*filepath == '\\' || (filepath[0] && filepath[1] == ':'));

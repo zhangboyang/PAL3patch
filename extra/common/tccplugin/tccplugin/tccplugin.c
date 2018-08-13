@@ -1,4 +1,6 @@
-#define PLUGIN_NAME "TCC"
+#define PLUGIN_INTERNAL_NAME "TCC"
+#define PLUGIN_FRIENDLY_NAME "TCC ²å¼þ"
+#define PLUGIN_VERSION       "v1.1" 
 #define USE_PAL3_DEFINITIONS
 #include "PAL3patch.h"
 #define TCCPLUGINAPI_EXPORTS
@@ -290,7 +292,7 @@ int run_c_program(const char *filepath, const char *entrysymbol, int persist)
 
 static void load_cplugin(const char *filepath, void *filelist)
 {
-    if (run_c_program(filepath, TOSTR(PLUGIN_ENTRY_NAME), 1)) {
+    if (run_c_program(filepath, TOSTR(PLUGINSYMBOL_ENTRY), 1)) {
         if (filelist) {
             cstr_strcat(filelist, strrchr(filepath, '\\') ? strrchr(filepath, '\\') + 1 : filepath);
             cstr_strcat(filelist, "\n");
@@ -307,7 +309,7 @@ void search_cplugins(const char *dirpath, struct cstr *filelist)
 }
 
 
-
+MAKE_PLUGINABOUT()
 
 MAKE_PLUGINENTRY()
 {

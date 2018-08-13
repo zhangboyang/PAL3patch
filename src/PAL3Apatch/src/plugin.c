@@ -117,7 +117,7 @@ void plugin_warning(const char *module, int indent, const char *fmt, ...)
     if (plugin_warning_msgboxes + 1 <= MAXWARNMSGBOXES) {
         plugin_warning_msgboxes++;
         if (plugin_warning_msgboxes >= MAXWARNMSGBOXES) {
-            strncat(msgbuf, "\n\nmax messagebox limit reached.", sizeof(msgbuf) - strlen(msgbuf) - 1);
+            strncat(msgbuf, "\n\nmax messagebox limit reached, suppressing further messageboxes.", sizeof(msgbuf) - strlen(msgbuf) - 1);
             msgbuf[sizeof(msgbuf) - 1] = '\0';
         }
         try_goto_desktop();
@@ -155,16 +155,26 @@ void plugin_fail(const char *module, int indent, const char *fmt, ...)
 #define pplog_leave() (--plugin_log_indent)
 
 struct plugin_desc {
+    struct plugin_desc *next;
+    
     HMODULE handle;
     int mode;
     int type;
-    DECL_PLUGINENTRY(*entry); // may be NULL if plain DLL
     
-    struct plugin_desc *next;
+    // may be NULL if plain DLL
+    DECL_PLUGINENTRY(*entry);
+    const char *internal_name;
+    const wchar_t *friendly_name;
+    const char *version;
+    const char *platform;
+    const char *builton;
+    const char *compiler;
 };
 
 static int total_plugins = 0;
 static struct plugin_desc *plugin_list_head = NULL;
+
+static struct wstr plugin_report_body;
 
 // check if plugin already loaded, O(n)
 static int check_register_plugin(struct plugin_desc *newplugin)
@@ -197,10 +207,16 @@ static void load_plugin_dll_with_mode(const char *filename, int mode, int type)
     
     DWORD dwFlags;
     wchar_t *wfilename_managed = NULL;
+    char *u8name_managed = NULL;
     struct plugin_desc *newplugin = NULL;
     HMODULE hModule = NULL;
     DECL_PLUGINENTRY(*entry);
     int r;
+    int success = 0;
+    struct wstr errmsg, line, namepart;
+    wstr_ctor(&errmsg);
+    wstr_ctor(&line);
+    wstr_ctor(&namepart);
     
     dwFlags = mode ? LOAD_WITH_ALTERED_SEARCH_PATH : 0;
     
@@ -214,7 +230,7 @@ static void load_plugin_dll_with_mode(const char *filename, int mode, int type)
     if (!hModule) {
         pplog("error: LoadLibraryEx() failed.");
         try_goto_desktop();
-        MessageBoxW_format(NULL, wstr_pluginerr_loadfailed_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed);
+        wstr_wcscpy(&errmsg, wstr_pluginerr_loadfailed);
         goto fail;
     }
 
@@ -224,13 +240,32 @@ static void load_plugin_dll_with_mode(const char *filename, int mode, int type)
     }
     
     if (type == 0) { // is plugin DLL
-        newplugin->entry = entry = TOPTR(GetProcAddress(hModule, TOSTR(PLUGIN_ENTRY_NAME)));
+        newplugin->entry = entry = TOPTR(GetProcAddress(hModule, TOSTR(PLUGINSYMBOL_ENTRY)));
+        
         if (!entry) {
             pplog("error: GetProcAddress() failed.");
             try_goto_desktop();
-            MessageBoxW_format(NULL, wstr_pluginerr_noentry_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed, TOSTR(PLUGIN_ENTRY_NAME));
+            wstr_wcscpy(&errmsg, wstr_pluginerr_noentry);
             goto fail;
         }
+
+        newplugin->internal_name = TOPTR(GetProcAddress(hModule, TOSTR(PLUGINSYMBOL_INTERNAL_NAME)));
+        newplugin->friendly_name = TOPTR(GetProcAddress(hModule, TOSTR(PLUGINSYMBOL_FRIENDLY_NAME)));
+        newplugin->version       = TOPTR(GetProcAddress(hModule, TOSTR(PLUGINSYMBOL_VERSION)));
+        newplugin->platform      = TOPTR(GetProcAddress(hModule, TOSTR(PLUGINSYMBOL_PLATFORM)));
+        newplugin->builton       = TOPTR(GetProcAddress(hModule, TOSTR(PLUGINSYMBOL_BUILTON)));
+        newplugin->compiler      = TOPTR(GetProcAddress(hModule, TOSTR(PLUGINSYMBOL_COMPILER)));
+        if (newplugin->friendly_name) {
+            wcs2cs_managed(newplugin->friendly_name, CP_UTF8, &u8name_managed);
+        }
+        
+        pplog("plugin entry         : %08X (base %08X)\n", TOUINT(entry) - TOUINT(hModule), TOUINT(hModule));
+        if (newplugin->internal_name) pplog("plugin internal-name : %s", newplugin->internal_name);
+        if (u8name_managed)           pplog("plugin friendly-name : %s", u8name_managed);
+        if (newplugin->version)  pplog("plugin version       : %s", newplugin->version);
+        if (newplugin->platform) pplog("plugin platform      : %s", newplugin->platform);
+        if (newplugin->builton)  pplog("plugin built on      : %s", newplugin->builton);
+        if (newplugin->compiler) pplog("plugin compiler      : %s", newplugin->compiler);
 
         pplog("executing plugin initialization procedure ...");
         pplog_enter();
@@ -239,17 +274,38 @@ static void load_plugin_dll_with_mode(const char *filename, int mode, int type)
         if (r != 0) {
             pplog("error: initialization procedure returns %d.", r);
             try_goto_desktop();
-            MessageBoxW_format(NULL, wstr_pluginerr_initfailed_text, wstr_pluginerr_title, MB_ICONWARNING, wfilename_managed, r);
+            wstr_format(&errmsg, wstr_pluginerr_initfailed, r);
             goto fail;
         }
     }
     
-    commit_register_plugin(newplugin); newplugin = NULL;
+    commit_register_plugin(newplugin);
     pplog("dll loaded successfully.");
+    success = 1;
     
 done:
+    
+    if (type == 0) {
+        if (success && newplugin->friendly_name) {
+            wstr_format(&namepart, L"%s %hs (%s)", newplugin->friendly_name, newplugin->version ? newplugin->version : "", get_wfilepart(wfilename_managed));
+        } else {
+            wstr_wcscpy(&namepart, get_wfilepart(wfilename_managed));
+        }
+        if (success) {
+            wstr_format(&line, wstr_pluginreport_success, wstr_getwcs(&namepart));
+        } else {
+            wstr_format(&line, wstr_pluginreport_failed, wstr_getwcs(&namepart), wstr_getwcs(&errmsg));
+        }
+        wstr_wcscat(&plugin_report_body, wstr_getwcs(&line));
+    }
+    
+    if (success) newplugin = NULL;
     free(newplugin);
     free(wfilename_managed);
+    free(u8name_managed);
+    wstr_dtor(&errmsg);
+    wstr_dtor(&line);
+    wstr_dtor(&namepart);
     return;
 fail:
 skip:
@@ -402,7 +458,17 @@ void init_plugins()
 {
     int flag = get_int_from_configfile("loadplugins");
     if (flag) {
+        wstr_ctor(&plugin_report_body);
+        
         search_plugins("plugins");
         pplog("total %d plugin%s loaded at game startup time.", total_plugins, total_plugins > 1 ? "s" : "");
+
+        struct wstr report;
+        wstr_ctor(&report);
+        wstr_format(&report, wstr_pluginreport_template, wstr_getwcs(&plugin_report_body), total_plugins);
+        MessageBoxW(NULL, wstr_getwcs(&report), wstr_pluginreport_title,  MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND);
+        
+        wstr_dtor(&report);
+        // do not destruct plugin_report here, because plugins may load other plugins after initialization
     }
 }

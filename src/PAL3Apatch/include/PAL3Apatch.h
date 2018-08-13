@@ -39,15 +39,28 @@
 #define PATCHAPI_IMPORTS
 
 
-// define PLUGIN_NAME if needed
-#ifndef PLUGIN_NAME
-#ifdef TCCPLUGIN_FILE
-#define PLUGIN_NAME TCCPLUGIN_FILE
+// define PLUGIN_INTERNAL_NAME if needed
+#ifndef PLUGIN_INTERNAL_NAME
+#ifdef PLUGIN_NAME
+#define PLUGIN_INTERNAL_NAME PLUGIN_NAME
 #else
-#define PLUGIN_NAME __FILE__
+#ifdef TCCPLUGIN_FILE
+#define PLUGIN_INTERNAL_NAME TCCPLUGIN_FILE
+#else
+#define PLUGIN_INTERNAL_NAME __FILE__
+#endif
 #endif
 #endif
 
+// define PLUGIN_FRIENDLY_NAME if needed
+#ifndef PLUGIN_FRIENDLY_NAME
+#define PLUGIN_FRIENDLY_NAME PLUGIN_INTERNAL_NAME
+#endif
+
+// define PLUGIN_VERSION is needed
+#ifndef PLUGIN_VERSION
+#define PLUGIN_VERSION BUILD_DATE
+#endif
 
 // finally, include "common.h"
 #include "PAL3Apatch/common.h"
