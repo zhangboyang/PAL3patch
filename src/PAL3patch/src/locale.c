@@ -12,20 +12,20 @@ static const wchar_t wstr_about_title_CHS[] = L"关于";
 static const wchar_t wstr_about_text_CHS[] = 
     L"欢迎使用《仙剑奇侠传三》分辨率补丁 %hs\n" 
     L"\n"
-    L"本补丁可以扩大游戏的分辨率\n"
-    L"同时修复一些游戏程序的小问题\n"
-    L"并且添加了一些实用的小功能\n" 
-    L"详细信息和使用方法请参见补丁说明文件\n"
+    L"本补丁可以扩大游戏的分辨率，\n"
+    L"并修复一些游戏程序的小问题，\n"
+    L"还添加了一些实用的小功能，\n" 
+    L"详细信息和使用方法请参见补丁说明文件。\n"
     L"\n"
     L"\n"
-    L"如果您不想每次启动时看到此信息\n"
-    L"请使用补丁配置工具，将“显示关于”设为“禁用”\n" 
+    L"如果您不想每次启动时看到此信息，\n"
+    L"请使用补丁配置工具，将“显示关于”设为“禁用”。\n" 
     L"\n"
     L"\n"
-    L"补丁网站:\n"
+    L"补丁网站：\n"
     L"  https://pal3.zbyzbyzby.com\n"
     L"\n"
-    L"编译信息:\n%hs"
+    L"编译信息：\n%hs"
 ;
 
 static const wchar_t wstr_confirmquit_text_CHS[] = L"您确定要退出游戏吗？\n未保存的游戏进度将会丢失。";
@@ -61,8 +61,9 @@ static const wchar_t wstr_pluginerr_noentry_CHS[] = L"无入口点";
 static const wchar_t wstr_pluginerr_initfailed_CHS[] = L"初始化失败，返回值为 %d";
 static const wchar_t wstr_pluginreport_title_CHS[] = L"插件加载报告";
 static const wchar_t wstr_pluginreport_template_CHS[] = L"以下是插件加载情况：\n\n%s\n已成功加载 %d 个插件模块。";
-static const wchar_t wstr_pluginreport_success_CHS[] = L"[成功]  %s\n";
-static const wchar_t wstr_pluginreport_failed_CHS[] = L"[失败]  %s （%s）\n";
+static const wchar_t wstr_pluginreport_namepart_CHS[] = L"%s %hs （%s）";
+static const wchar_t wstr_pluginreport_success_CHS[] = L"【成功】 %s\n";
+static const wchar_t wstr_pluginreport_failed_CHS[] = L"【失败】 %s （%s）\n";
 
 
 // CHT
@@ -106,6 +107,7 @@ const wchar_t *wstr_pluginerr_noentry;
 const wchar_t *wstr_pluginerr_initfailed;
 const wchar_t *wstr_pluginreport_title;
 const wchar_t *wstr_pluginreport_template;
+const wchar_t *wstr_pluginreport_namepart;
 const wchar_t *wstr_pluginreport_success;
 const wchar_t *wstr_pluginreport_failed;
 
@@ -165,6 +167,7 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_initfailed);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_template);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_namepart);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_success);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_failed);
 

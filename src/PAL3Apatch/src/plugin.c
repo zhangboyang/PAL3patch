@@ -275,7 +275,7 @@ static void load_plugin_dll_with_mode(const char *filename, int mode, int type)
             pplog("error: initialization procedure returns %d.", r);
             try_goto_desktop();
             wstr_format(&errmsg, wstr_pluginerr_initfailed, r);
-            goto fail;
+            goto initfail;
         }
     }
     
@@ -287,7 +287,7 @@ done:
     
     if (type == 0) {
         if (success && newplugin->friendly_name) {
-            wstr_format(&namepart, L"%s %hs (%s)", newplugin->friendly_name, newplugin->version ? newplugin->version : "", get_wfilepart(wfilename_managed));
+            wstr_format(&namepart, wstr_pluginreport_namepart, newplugin->friendly_name, newplugin->version ? newplugin->version : "", get_wfilepart(wfilename_managed));
         } else {
             wstr_wcscpy(&namepart, get_wfilepart(wfilename_managed));
         }
@@ -310,6 +310,7 @@ done:
 fail:
 skip:
     if (hModule) FreeLibrary(hModule);
+initfail:
     goto done;
 }
 
@@ -463,12 +464,13 @@ void init_plugins()
         search_plugins("plugins");
         pplog("total %d plugin%s loaded at game startup time.", total_plugins, total_plugins > 1 ? "s" : "");
 
-        struct wstr report;
-        wstr_ctor(&report);
-        wstr_format(&report, wstr_pluginreport_template, wstr_getwcs(&plugin_report_body), total_plugins);
-        MessageBoxW(NULL, wstr_getwcs(&report), wstr_pluginreport_title,  MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND);
-        
-        wstr_dtor(&report);
+        if (wstr_at(&plugin_report_body, 0)) {
+            struct wstr report;
+            wstr_ctor(&report);
+            wstr_format(&report, wstr_pluginreport_template, wstr_getwcs(&plugin_report_body), total_plugins);
+            MessageBoxW(NULL, wstr_getwcs(&report), wstr_pluginreport_title,  MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND);
+            wstr_dtor(&report);
+        }
         // do not destruct plugin_report here, because plugins may load other plugins after initialization
     }
 }

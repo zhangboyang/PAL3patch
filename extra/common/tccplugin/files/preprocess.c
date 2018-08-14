@@ -4,9 +4,6 @@
 #include <fcntl.h>
 #include <windows.h>
 
-#define MAXSIZE (1024 * 1024 * 64)
-#define MAXLINE 1
-
 #define UTF8_BOM_STR "\xEF\xBB\xBF"
 #define UTF8_BOM_LEN 3
 
@@ -18,6 +15,19 @@ static int str_remove_utf8_bom(char *str)
         ret = 1;
     }
     return ret;
+}
+
+static char *get_filepart(const char *filepath)
+{
+    char *t;
+    char *filepart = (char *) filepath;
+    
+    t = strrchr(filepart, '\\');
+    if (t) filepart = t + 1;
+    t = strrchr(filepart, '/');
+    if (t) filepart = t + 1;
+    
+    return filepart;
 }
 
 
@@ -103,9 +113,9 @@ int main(int argc, char *argv[])
     int ret = 1;
     char *data = NULL;
     char *newdata = NULL;
-    FILE *fp = NULL;
-    int len;
-    int cur;
+    char *u8path = NULL;
+    HANDLE hFile = INVALID_HANDLE_VALUE;
+    DWORD dwSize, dwRead;
     UINT cp;
     
     // check command args
@@ -114,15 +124,22 @@ int main(int argc, char *argv[])
     // set stdout to binary
     setmode(fileno(stdout), O_BINARY);
     
-    // alloc memory
-    data = malloc(MAXSIZE);
-
-    // read input file
-    fp = fopen(argv[1], "rb");
-    if (!fp) goto fail;
-    for (len = 0; (cur = fread(data + len, 1, (MAXSIZE - len < MAXLINE ? MAXSIZE - len : MAXLINE), fp)); len += cur);
-    fclose(fp); fp = NULL;
-    data[len < MAXSIZE ? len : MAXSIZE - 1] = 0;
+    // convert file-path
+    u8path = cs2cs_alloc(argv[1], CP_ACP, CP_UTF8);
+    if (!u8path) goto fail;
+    
+    // open input file
+    hFile = CreateFileA(argv[1], GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) goto fail;
+    
+    // get input file size
+    dwSize = GetFileSize(hFile, NULL);
+    if (dwSize == INVALID_FILE_SIZE) goto fail;
+    
+    // allocate memory and read file
+    data = malloc(dwSize + 1);
+    if (!ReadFile(hFile, data, dwSize, &dwRead, NULL) || dwSize != dwRead) goto fail;
+    data[dwSize] = 0;
     
     // detect original codepage
     cp = CP_ACP;
@@ -135,6 +152,7 @@ int main(int argc, char *argv[])
     if (!newdata) goto fail;
     
     // write output to stdout
+    fprintf(stdout, "#define TCCPLUGIN_FILE \"%s\"\n", get_filepart(u8path));
     fputs(newdata, stdout);
     
     ret = 0;
@@ -142,7 +160,8 @@ int main(int argc, char *argv[])
 done:
     free(data);
     free(newdata);
-    if (fp) fclose(fp);
+    free(u8path);
+    if (hFile != INVALID_HANDLE_VALUE) CloseHandle(hFile);
     return ret;
 fail:
     puts("#error \"can't convert to UTF-8.\"");

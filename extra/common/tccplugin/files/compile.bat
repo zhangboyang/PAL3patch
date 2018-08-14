@@ -8,7 +8,7 @@ SET OUTFILE=%~d1%~p1%~n1.dll
 SET DEFFILE=%~d1%~p1%~n1.def
 
 CD /D %~dp0
-tcc -run to_utf8.c "%SRCFILE%" | tcc - -shared -o "%OUTFILE%" -lgdi32 -lcomdlg32 -luser32 -lkernel32 -ladvapi32 -lshell32 -lPAL3patch
+tcc -run preprocess.c "%SRCFILE%" | tcc - -shared -o "%OUTFILE%" -lgdi32 -lcomdlg32 -luser32 -lkernel32 -ladvapi32 -lshell32 -lPAL3patch
 IF %ERRORLEVEL% EQU 0 (ECHO ±‡“Î≥…π¶°£) ELSE (ECHO ±‡“Î ß∞‹°£)
 IF EXIST "%DEFFILE%" DEL "%DEFFILE%"
 

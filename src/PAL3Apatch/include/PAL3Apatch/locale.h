@@ -53,6 +53,7 @@ extern const wchar_t *wstr_pluginerr_noentry;
 extern const wchar_t *wstr_pluginerr_initfailed;
 extern const wchar_t *wstr_pluginreport_title;
 extern const wchar_t *wstr_pluginreport_template;
+extern const wchar_t *wstr_pluginreport_namepart;
 extern const wchar_t *wstr_pluginreport_success;
 extern const wchar_t *wstr_pluginreport_failed;
 
