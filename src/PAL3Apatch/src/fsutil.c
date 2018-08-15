@@ -104,7 +104,7 @@ char *read_file_as_cstring(const char *filepath)
     filedata[dwSize] = 0;
     
 done:
-    if (hFile) CloseHandle(hFile);
+    if (hFile != INVALID_HANDLE_VALUE) CloseHandle(hFile);
     return filedata;
 fail:
     free(filedata); filedata = NULL;
