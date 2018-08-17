@@ -1,5 +1,5 @@
-#ifndef PAL3PATCH_TCCPLUGIN_H
-#define PAL3PATCH_TCCPLUGIN_H
+#ifndef TCCPLUGIN_H
+#define TCCPLUGIN_H
 
 #include "libtcc.h"
 

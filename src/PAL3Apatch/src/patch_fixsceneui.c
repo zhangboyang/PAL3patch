@@ -259,6 +259,7 @@ static void fix_gamescene()
 #define ROLEDLG_FACESIZE 2.0 // ratio of text frame
 #define ROLEDLG_FACEHEIGHTFACTOR (256.0 / 512.0) // real face height : face texture height
 static double dlg_minsize; // ratio of whole screen
+static int dlg_margin; // text margin flag
 static fRECT dlg_frect; // screen rect of role dialog
 static fRECT dlg_real_frect; // real role dialog rect before scale
 static fRECT dlg_old_frect; // original role dialog rect (effective)
@@ -309,18 +310,19 @@ static MAKE_THISCALL(void, UIRoleDialog_SetFace_wrapper, struct UIRoleDialog *th
     textarea_frect.right = ani_frect.left - text_ani_distance;
     
     // calc textbox location
-    fRECT ideal_textarea_frect;
     fRECT new_text_frect;
-    set_frect_ltrb(&ideal_textarea_frect, dlg_real_frect.left, textarea_frect.top, dlg_real_frect.right, textarea_frect.bottom);
-    transform_frect(&new_text_frect, &text_frect, &ideal_textarea_frect, &ideal_textarea_frect, TR_CENTER, TR_CENTER, 1.0);
-    
-    if (new_text_frect.left < textarea_frect.left) {
-        translate_frect_rel(&new_text_frect, &new_text_frect, textarea_frect.left - new_text_frect.left, 0.0);
-    } else if (new_text_frect.right > textarea_frect.right) {
-        translate_frect_rel(&new_text_frect, &new_text_frect, textarea_frect.right - new_text_frect.right, 0.0);
+    if (dlg_margin) {
+        fRECT ideal_textarea_frect;
+        set_frect_ltrb(&ideal_textarea_frect, dlg_real_frect.left, textarea_frect.top, dlg_real_frect.right, textarea_frect.bottom);
+        transform_frect(&new_text_frect, &text_frect, &ideal_textarea_frect, &ideal_textarea_frect, TR_CENTER, TR_CENTER, 1.0);
+        if (new_text_frect.left < textarea_frect.left) {
+            translate_frect_rel(&new_text_frect, &new_text_frect, textarea_frect.left - new_text_frect.left, 0.0);
+        } else if (new_text_frect.right > textarea_frect.right) {
+            translate_frect_rel(&new_text_frect, &new_text_frect, textarea_frect.right - new_text_frect.right, 0.0);
+        }
+    } else {
+        new_text_frect = textarea_frect;
     }
-    
-    //new_text_frect = textarea_frect;    
     
     // set rect for textbox and arrow
     set_rect_frect(&pUIWND(&this->m_static)->m_rect, &new_text_frect);
@@ -538,6 +540,7 @@ MAKE_PATCHSET(fixsceneui)
     scenetext_scalefactor = str2scalefactor(get_string_from_configfile("fixsceneui_textscalefactor"));
     
     dlg_minsize = str2double(get_string_from_configfile("fixsceneui_dlgminsize"));
+    dlg_margin = get_int_from_configfile("fixsceneui_dlgmargin");
 
     // general fixes
     fix_gamescene();

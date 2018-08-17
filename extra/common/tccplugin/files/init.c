@@ -1,12 +1,23 @@
-﻿#define PLUGIN_NAME "TCC"
+﻿#define PLUGIN_INTERNAL_NAME "TCCINIT"
+#ifdef BUILD_FOR_PAL3
 #define USE_PAL3_DEFINITIONS
 #include "PAL3patch.h"
+#endif
+#ifdef BUILD_FOR_PAL3A
+#define USE_PAL3A_DEFINITIONS
+#include "PAL3Apatch.h"
+#endif
 #define USE_TCCPLUGIN_DEFINITIONS
 #include "tccplugin.h"
 
 int tccplugin_main()
 {
+#ifdef BUILD_FOR_PAL3
     PAL3_STRUCT_SELFCHECK();
+#endif
+#ifdef BUILD_FOR_PAL3A
+    PAL3A_STRUCT_SELFCHECK();
+#endif
     
     struct cstr filelist;
     cstr_ctor(&filelist);

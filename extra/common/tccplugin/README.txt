@@ -2,24 +2,26 @@
 
   (1) 确保已经安装 tcc，也已编译 PAL3patch
   (2) 修改 tccplugin\Makefile 将其中的
-         PAL3PATCH_HEADER_PATH
-         PAL3PATCH_LIB_PATH
-         LIBTCC_HEADER_PATH
-         LIBTCC_LIB_PATH
+         PAL3PATCH_INCLUDE_PATH
+         PAL3PATCH_LIBRARY_PATH
+         PAL3PATCH_INCLUDE_PATH
+         PAL3PATCH_LIBRARY_PATH
+         LIBTCC_INCLUDE_PATH
+         LIBTCC_LIBRARY_PATH
       指向正确的目录
   (3) 在 MSYS 中进入 tccplugin 目录，并运行 make
-      此后应有 tccplugin\tccplugin.dll 生成
+      此后应有 tccplugin\PAL3\tccplugin.dll 和 tccplugin\PAL3A\tccplugin.dll 生成
 
 
 安装说明：
 
-  假设游戏安装在 C:\PAL3 目录下
+  以仙三为例，假设游戏安装在 C:\PAL3 目录下
   则应有以下目录/文件：
 
     C:\PAL3\plugins\tcc.plugin                // TCC 插件描述文件；来自 files\tcc.plugin
-    C:\PAL3\plugins\tcc\tccplugin.dll         // TCC 插件 DLL；来自刚编译好的 tccplugin\tccplugin.dll
+    C:\PAL3\plugins\tcc\tccplugin.dll         // TCC 插件 DLL；来自刚编译好的 tccplugin\PAL3\tccplugin.dll
     C:\PAL3\plugins\tcc\init.c                // TCC 初始化源码；来自 files\init.c
-    C:\PAL3\plugins\tcc\compile.bat           // 编译工具；来自 files\compile.bat
+    C:\PAL3\plugins\tcc\compile.bat           // 编译工具；来自 files\PAL3\compile.bat
     C:\PAL3\plugins\tcc\to_utf8.c             // UTF-8 转码工具；来自 files\to_utf8.c
     C:\PAL3\plugins\tcc\*                     // TCC 安装目录下的其他文件
     C:\PAL3\plugins\tcc\include\libtcc.def    // libtcc 头文件；来自 TCC 安装目录下 libtcc\libtcc.h
@@ -28,7 +30,7 @@
     C:\PAL3\plugins\tcc\include\PAL3patch\*   // PAL3patch 头文件
     C:\PAL3\plugins\tcc\lib\PAL3patch.def     // PAL3patch 库文件
     C:\PAL3\plugins\tcc\include\tccplugin.h   // tccplugin 头文件；来自 tccplugin\tccplugin.h
-    C:\PAL3\plugins\tcc\lib\tccplugin.def     // tccplugin 库文件；来自生成的 tccplugin\tccplugin.def
+    C:\PAL3\plugins\tcc\lib\tccplugin.def     // tccplugin 库文件；来自生成的 tccplugin\PAL3\tccplugin.def
 
   另外还需按照 tcc 的说明，将适当的 winapi 头文件安装到 include/winapi 目录下。
 

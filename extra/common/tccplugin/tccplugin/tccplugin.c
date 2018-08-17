@@ -1,8 +1,17 @@
 #define PLUGIN_INTERNAL_NAME "TCC"
 #define PLUGIN_FRIENDLY_NAME "TCC ²å¼þ"
 #define PLUGIN_VERSION       "v1.1" 
+
+#ifdef BUILD_FOR_PAL3
 #define USE_PAL3_DEFINITIONS
 #include "PAL3patch.h"
+#endif
+
+#ifdef BUILD_FOR_PAL3A
+#define USE_PAL3A_DEFINITIONS
+#include "PAL3Apatch.h"
+#endif
+
 #define TCCPLUGINAPI_EXPORTS
 #include "tccplugin.h"
 
@@ -138,8 +147,12 @@ int cpi_link(struct cpi *self)
     const char **pp;
     const char *defaultlib[] = {
         "gdi32", "comdlg32", "user32", "kernel32", "advapi32", "shell32",
+#ifdef BUILD_FOR_PAL3
         "PAL3patch",
-        
+#endif
+#ifdef BUILD_FOR_PAL3A
+        "PAL3Apatch",
+#endif
         NULL // EOF
     };
     
@@ -235,6 +248,7 @@ fail:
 void cpi_make_persist(struct cpi *self)
 {
     if (!self->err_flag) {
+        self->tcc = NULL;
         self->runmem = NULL;
     }
 }
@@ -271,6 +285,13 @@ int run_c_program(const char *filepath, const char *entrysymbol, int persist)
     
     cstr_format(&filepart_string, "\"%s\"", get_filepart(filepath));
     tcc_define_symbol(s.tcc, "TCCPLUGIN_FILE", cstr_getstr(&filepart_string));
+    
+    #ifdef BUILD_FOR_PAL3
+    tcc_define_symbol(s.tcc, "BUILD_FOR_PAL3", "1");
+    #endif
+    #ifdef BUILD_FOR_PAL3A
+    tcc_define_symbol(s.tcc, "BUILD_FOR_PAL3A", "1");
+    #endif
     
     cpi_add_c_source(&s, filepath);
     cpi_link(&s);
@@ -313,7 +334,12 @@ MAKE_PLUGINABOUT()
 
 MAKE_PLUGINENTRY()
 {
+#ifdef BUILD_FOR_PAL3
     PAL3_STRUCT_SELFCHECK();
+#endif
+#ifdef BUILD_FOR_PAL3A
+    PAL3A_STRUCT_SELFCHECK();
+#endif
 
     if (run_c_program(TCCPLUGIN_INSTALL_PATH "\\init.c", "tccplugin_main", 1)) {
         return 0;
