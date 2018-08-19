@@ -56,6 +56,10 @@ static const wchar_t wstr_resetfailed_title_CHS[] = L"重置失败";
 
 static const wchar_t wstr_screenshot_msg_CHS[] = L"屏幕截图已保存至“%hs”";
 
+static const wchar_t wstr_punctuation_nohead_CHS[] = L"，。！？；：、～”’）》」』】";
+static const wchar_t wstr_punctuation_notail_CHS[] = L"“‘（《「『【";
+static const wchar_t wstr_punctuation_double_CHS[] = L"—…";
+
 static const wchar_t wstr_pluginerr_loadfailed_CHS[] = L"无法加载模块";
 static const wchar_t wstr_pluginerr_noentry_CHS[] = L"无入口点";
 static const wchar_t wstr_pluginerr_initfailed_CHS[] = L"初始化失败，返回值为 %d";
@@ -102,6 +106,9 @@ const wchar_t *wstr_badcfgfile_title;
 const wchar_t *wstr_resetfailed_text;
 const wchar_t *wstr_resetfailed_title;
 const wchar_t *wstr_screenshot_msg;
+const wchar_t *wstr_punctuation_nohead;
+const wchar_t *wstr_punctuation_notail;
+const wchar_t *wstr_punctuation_double;
 const wchar_t *wstr_pluginerr_loadfailed;
 const wchar_t *wstr_pluginerr_noentry;
 const wchar_t *wstr_pluginerr_initfailed;
@@ -162,6 +169,9 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_screenshot_msg);
+    IMPORT_LOCALE_ITEM(CHS, wstr_punctuation_nohead);
+    IMPORT_LOCALE_ITEM(CHS, wstr_punctuation_notail);
+    IMPORT_LOCALE_ITEM(CHS, wstr_punctuation_double);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_loadfailed);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_noentry);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginerr_initfailed);

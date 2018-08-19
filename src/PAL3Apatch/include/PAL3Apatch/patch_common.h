@@ -285,6 +285,7 @@ MAKE_PATCHSET(graphicspatch);
             extern void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color);
             extern void print_wstring_end(void);
             
+        MAKE_PATCHSET(fixpunctuation);
         MAKE_PATCHSET(fixcombatui);
             #define cb_scalefactor (scalefactor_table[SF_COMBAT])
         MAKE_PATCHSET(fix3dctrl);

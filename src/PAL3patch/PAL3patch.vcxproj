@@ -128,6 +128,7 @@
     <ClCompile Include="src\patch_fixlongkuiattack.c" />
     <ClCompile Include="src\patch_fixmemfree.c" />
     <ClCompile Include="src\patch_fixortho.c" />
+    <ClCompile Include="src\patch_fixpunctuation.c" />
     <ClCompile Include="src\patch_fixreset.c" />
     <ClCompile Include="src\patch_fixsceneui.c" />
     <ClCompile Include="src\patch_fixtrail.c" />

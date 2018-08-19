@@ -278,18 +278,7 @@ static MAKE_THISCALL(void, UIRoleDialog_Create_wrapper, struct UIRoleDialog *thi
     // update face and textbox positions
     THISCALL_WRAPPER(UIRoleDialog_SetFace_wrapper, this, NULL, 0);
 }
-/*static MAKE_ASMPATCH(dlgfillchar)
-{
-    static char *s = NULL;
-    if (!s) {
-        int sz = 1000;
-        s = malloc(sz + 1);
-        s[sz] = 0;
-        memset(s, 'A', sz);
-    }
-    R_ECX = R_EBX;
-    R_EAX = TOUINT(s);
-}*/
+
 static MAKE_UIWND_RENDER_WRAPPER(UIRoleDialog_Render_wrapper, 0x004512F0)
 static MAKE_UIWND_UPDATE_WRAPPER(UIRoleDialog_Update_wrapper, 0x004515E0)
 static void fix_RoleDialog()
@@ -307,9 +296,6 @@ static void fix_RoleDialog()
         0x00436B23,
         0x00451795,
     });
-
-    // fill dlgtext, for debug purpose
-    //INIT_ASMPATCH(dlgfillchar, 0x00451215, 6, "\x8B\x44\x24\x30\x8B\xCB");
 }
 
 

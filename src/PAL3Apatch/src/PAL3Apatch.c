@@ -111,6 +111,7 @@ static void init_stage2()
             // ui fixes
 
             INIT_PATCHSET(uireplacefont);
+            INIT_PATCHSET(fixpunctuation);
             INIT_PATCHSET(fixcombatui);
             INIT_PATCHSET(fix3dctrl);
             INIT_PATCHSET(fixlineupui);

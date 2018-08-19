@@ -162,9 +162,12 @@
 #define _WSTR(x) L##x
 #define WSTR(x) _WSTR(x)
 
-// pointer macros
+// type macros
 #define TOPTR(addr) ((void *)(addr))
-#define TOUINT(addr) ((unsigned)(addr))
+#define TOUINT(x) ((unsigned)(x))
+#define TOUCHAR(x) ((unsigned char)(x))
+
+// pointer macros
 #define PTRADD(ptr, add) ((void *)(((char *)(ptr)) + (add)))
 #define PTRSUB(a, b) (((char *)(a)) - ((char *)(b)))
 

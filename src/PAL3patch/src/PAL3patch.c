@@ -124,6 +124,7 @@ static void init_stage2()
             // must called after INIT_PATCHSET(setlocale) because of D3DXCreateFont need charset information
             // ui fixes
             INIT_PATCHSET(uireplacefont);
+            INIT_PATCHSET(fixpunctuation);
             INIT_PATCHSET(fixcombatui);
             INIT_PATCHSET(fix3dctrl);
             INIT_PATCHSET(fixlineupui);
