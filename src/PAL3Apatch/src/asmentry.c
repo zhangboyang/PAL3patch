@@ -20,7 +20,7 @@ __declspec(naked) void __stdcall asmentry(unsigned patch_id)
         PUSHAD
         ADD DWORD PTR [ESP + 0xC], Z
         SUB ESP, 0x6C
-        FNSAVE [ESP]
+        FSAVE [ESP]
         PUSH ESP
         CALL patchentry
         ADD ESP, 0x4

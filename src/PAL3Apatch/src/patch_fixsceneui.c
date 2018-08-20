@@ -258,6 +258,8 @@ static void fix_gamescene()
 // fix RoleDialog
 #define ROLEDLG_FACESIZE 2.0 // ratio of text frame
 #define ROLEDLG_FACEHEIGHTFACTOR (256.0 / 512.0) // real face height : face texture height
+#define ROLEDLG_LEFTFACE_TEXTSHIFT 0.03
+#define ROLEDLG_RIGHTFACE_TEXTSHIFT -0.03
 static double dlg_minsize; // ratio of whole screen
 static int dlg_margin; // text margin flag
 static fRECT dlg_frect; // screen rect of role dialog
@@ -315,6 +317,13 @@ static MAKE_THISCALL(void, UIRoleDialog_SetFace_wrapper, struct UIRoleDialog *th
         fRECT ideal_textarea_frect;
         set_frect_ltrb(&ideal_textarea_frect, dlg_real_frect.left, textarea_frect.top, dlg_real_frect.right, textarea_frect.bottom);
         transform_frect(&new_text_frect, &text_frect, &ideal_textarea_frect, &ideal_textarea_frect, TR_CENTER, TR_CENTER, 1.0);
+        if (path) { // have face image
+            if (leftright) { // right
+                translate_frect_rel(&new_text_frect, &new_text_frect, ROLEDLG_RIGHTFACE_TEXTSHIFT * get_frect_width(&ideal_textarea_frect), 0.0);
+            } else { // left
+                translate_frect_rel(&new_text_frect, &new_text_frect, ROLEDLG_LEFTFACE_TEXTSHIFT * get_frect_width(&ideal_textarea_frect), 0.0);
+            }
+        }
         if (new_text_frect.left < textarea_frect.left) {
             translate_frect_rel(&new_text_frect, &new_text_frect, textarea_frect.left - new_text_frect.left, 0.0);
         } else if (new_text_frect.right > textarea_frect.right) {

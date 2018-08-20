@@ -1,4 +1,4 @@
-#define PLUGIN_INTERNAL_NAME "TCC"
+#define PLUGIN_INTERNAL_NAME "TCCHOST"
 #define PLUGIN_FRIENDLY_NAME "TCC ²å¼þ"
 #define PLUGIN_VERSION       "v1.1" 
 
