@@ -253,6 +253,10 @@ SOURCE=.\ConfigDescData.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ConfigDescLocale.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\D3DEnum.h
 # End Source File
 # Begin Source File

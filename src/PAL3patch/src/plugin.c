@@ -287,7 +287,7 @@ done:
     
     if (type == 0) {
         if (success && newplugin->friendly_name) {
-            wstr_format(&namepart, wstr_pluginreport_namepart, newplugin->friendly_name, newplugin->version ? newplugin->version : "", get_wfilepart(wfilename_managed));
+            wstr_format(&namepart, wstr_pluginreport_namepart, newplugin->friendly_name, newplugin->version ? " " : "", newplugin->version ? newplugin->version : "");
         } else {
             wstr_wcscpy(&namepart, get_wfilepart(wfilename_managed));
         }
@@ -464,7 +464,7 @@ void init_plugins()
         search_plugins("plugins");
         pplog("total %d plugin%s loaded at game startup time.", total_plugins, total_plugins > 1 ? "s" : "");
 
-        if (wstr_at(&plugin_report_body, 0)) {
+        if (flag == 1 && wstr_at(&plugin_report_body, 0)) {
             struct wstr report;
             wstr_ctor(&report);
             wstr_format(&report, wstr_pluginreport_template, wstr_getwcs(&plugin_report_body), total_plugins);

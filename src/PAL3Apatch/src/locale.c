@@ -65,7 +65,7 @@ static const wchar_t wstr_pluginerr_noentry_CHS[] = L"无入口点";
 static const wchar_t wstr_pluginerr_initfailed_CHS[] = L"初始化失败，返回值为 %d";
 static const wchar_t wstr_pluginreport_title_CHS[] = L"插件加载报告";
 static const wchar_t wstr_pluginreport_template_CHS[] = L"以下是插件加载情况：\n\n%s\n已成功加载 %d 个插件模块。";
-static const wchar_t wstr_pluginreport_namepart_CHS[] = L"%s %hs （%s）";
+static const wchar_t wstr_pluginreport_namepart_CHS[] = L"%s%hs%hs";
 static const wchar_t wstr_pluginreport_success_CHS[] = L"【成功】 %s\n";
 static const wchar_t wstr_pluginreport_failed_CHS[] = L"【失败】 %s （%s）\n";
 

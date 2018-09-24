@@ -55,6 +55,7 @@
 #define IDS_OPENCONFIGTOOLINPROGRESS    52
 #define IDS_CANTOPENCONFIGTOOL          53
 #define IDS_CANTOPENCONFIGTOOL_TITLE    54
+#define IDS_CONFIGDESCLIST              55
 #define IDD_PATCHCONFIG_DIALOG          102
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129

@@ -93,6 +93,8 @@ BOOL CPatchConfigApp::InitInstance()
 
 	if (!CheckDX90SDKVersion()) goto err;
 
+	LoadConfigDescList(STRTABLE(IDS_CONFIGDESCLIST));
+
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGVERIFY)); //Sleep(1000);
 	if (!VerifyPatchFiles()) goto err;
 

@@ -29,28 +29,28 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120_xp</PlatformToolset>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_PAL3A|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120_xp</PlatformToolset>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_PAL3|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120_xp</PlatformToolset>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_PAL3A|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120_xp</PlatformToolset>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -207,6 +207,7 @@
     <ClInclude Include="ChooseFromListDlg.h" />
     <ClInclude Include="ConfigData.h" />
     <ClInclude Include="ConfigDescData.h" />
+    <ClInclude Include="ConfigDescLocale.h" />
     <ClInclude Include="D3DEnum.h" />
     <ClInclude Include="d3denumeration.h" />
     <ClInclude Include="dxstdafx.h" />
@@ -229,11 +230,14 @@
     <Image Include="res\PatchConfig.ico" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="default.conf" />
     <CustomBuild Include="res\PatchConfig.rc2" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="PatchConfig.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="default_PAL3.conf" />
+    <None Include="default_PAL3A.conf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,9 +1,14 @@
+#include "PAL3Apatch.h"
 #pragma comment(lib, "PAL3Apatch.lib")
-#pragma comment(linker, "/export:_entry_stub,@1,NONAME")
 
-extern __declspec(dllimport) void sforce_unpacker_entry(void);
+#define DLLEXPORT __declspec(dllexport)
+#pragma comment(linker, "/export:_sf_entry,@1")
 
-__declspec(naked) void entry_stub(void)
+DLLEXPORT const char forwarder_version[] = PATCH_VERSION_STRING;
+DLLEXPORT const char forwarder_builton[] = __DATE__ ", " __TIME__;
+DLLEXPORT const char forwarder_compiler[] = BUILD_COMPILER;
+
+__declspec(naked) void sf_entry(void)
 {
 	__asm {
 		JMP DWORD PTR [sforce_unpacker_entry]

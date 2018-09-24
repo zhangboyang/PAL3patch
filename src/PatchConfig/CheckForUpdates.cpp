@@ -13,25 +13,34 @@ void CheckForUpdates(CPatchConfigDlg *dlg)
 	HINTERNET hInternet, hFile;
 	CString url;
 	CString msg;
+	CString descloc;
+	CString urlparam;
+	CString website;
 	char databuf[MAXRESPONSE];
 	DWORD datalen, recvlen;
 	DWORD httpcode, httpcodesz;
 	DWORD r;
+	unsigned acp;
 
 retry:
 
 	retry = false;
 	hInternet = NULL;
 	hFile = NULL;
-
+	
 	ShowPleaseWaitDlg(dlg, STRTABLE(IDS_WAITCHECKFORUPDATES));
+
+	// format url param 
+	acp = GetACP();
+	descloc = STRTABLE(IDS_CONFIGDESCLIST);
+	urlparam.Format(_T("?appname=%s&version=%hs&builton=%hs&compiler=%hs&locale=%s&codepage=%u"), PATCH_APPNAME, pVersionStr, pBuildDate, pCompiler, (LPCTSTR) descloc, acp);
 
 	// open internet handle
 	hInternet = InternetOpen(PATCH_UPDATEUA, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if (!hInternet) goto fail;
 
-	// format url and open it
-	url.Format(_T("%s?version=%hs&builton=%hs&compiler=%hs"), PATCH_UPDATEURL, pVersionStr, pBuildDate, pCompiler);
+	// make url and open it
+	url = CString(PATCH_UPDATEURL) + urlparam;
 	hFile = InternetOpenUrl(hInternet, url, NULL, 0, INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_UI | INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_RELOAD, 0);
 	if (!hFile) goto fail;
 
@@ -51,7 +60,7 @@ retry:
 	databuf[datalen] = 0;
 
 	// decode response
-	cs2wcs_managed((strncmp(databuf, "\xEF\xBB\xBF", 3) == 0 ? databuf + 3 : databuf), CP_UTF8, &response);
+	cs2wcs_managed((datalen >= 3 && strncmp(databuf, "\xEF\xBB\xBF", 3) == 0 ? databuf + 3 : databuf), CP_UTF8, &response);
 
 	// parse response
 #if defined(_UNICODE)
@@ -72,7 +81,8 @@ retry:
 		msg.Format(IDS_CHECKFORUPDATES_NEWVERSIONFOUND, GET_RESPONSE_DATA(response, HEADER_NEWVERSION));
 		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CHECKFORUPDATES_TITLE), MB_ICONQUESTION | MB_YESNO) == IDYES) {
 			ShowPleaseWaitDlg(dlg, STRTABLE(IDS_WAITOPENWEBSITE));
-			r = (DWORD) ShellExecute(NULL, _T("open"), PATCH_WEBSITE, NULL, NULL, SW_SHOWNORMAL);
+			website = CString(PATCH_WEBSITEURL) + urlparam;
+			r = (DWORD) ShellExecute(NULL, _T("open"), (LPCTSTR) website, NULL, NULL, SW_SHOWNORMAL);
 			if (r <= 32) {
 				GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_CANTOPENWEBSITE), STRTABLE(IDS_CHECKFORUPDATES_TITLE), MB_ICONERROR);
 			}

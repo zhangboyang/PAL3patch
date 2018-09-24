@@ -242,6 +242,7 @@ BEGIN
     IDS_OPENCONFIGTOOLINPROGRESS "正在打开官方游戏配置工具，请稍候 ..."
     IDS_CANTOPENCONFIGTOOL  "无法打开官方游戏配置工具。"
     IDS_CANTOPENCONFIGTOOL_TITLE "无法打开"
+    IDS_CONFIGDESCLIST      "CHS"
 END
 
 #endif    // Chinese (P.R.C.) resources

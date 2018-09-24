@@ -45,6 +45,13 @@ struct ConfigDescItem {
 	bool cur_expand; // lazy, only updated when tree reload
 };
 
+struct ConfigDescListIndex {
+	LPCTSTR name;
+	ConfigDescItem *list;
+};
+
 extern ConfigDescItem *ConfigDescList;
+
+void LoadConfigDescList(LPCTSTR name);
 
 #endif

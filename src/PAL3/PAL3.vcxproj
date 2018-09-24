@@ -40,15 +40,21 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)_PAL3\</OutDir>
+    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype\include</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype\objs\Win32\Debug Static</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)_PAL3\</OutDir>
+    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype\include</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype\objs\Win32\Release Static</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\PAL3patch\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -64,6 +70,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\PAL3patch\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
