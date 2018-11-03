@@ -11,10 +11,6 @@ extern size_t _safe_fread(void *ptr, size_t size, size_t nmemb, FILE *stream, co
 extern int _safe_fseek(FILE *stream, long offset, int whence, const char *msg);
 #define safe_fseek(stream, offset, whence) _safe_fseek(stream, offset, whence, "fseek(" #stream ", " #offset ", " #whence ")")
 
-
-extern std::string escape_string(const std::string &str);
-
-
 extern const char *getpathfilepart(const char *path);
 
 #define quote_escape '|'

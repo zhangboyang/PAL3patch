@@ -76,22 +76,72 @@ void scAsmDisassembler::ReadSCEFile(const char *scefile)
 	fclose(fp);
 }
 
-std::string scAsmDisassembler::scScriptBlock::get_string()
+std::vector<char> scAsmDisassembler::scScriptBlock::get_string()
 {
-	std::string ret;
+	std::vector<char> ret;
+
+	unsigned strstart = codeptr;
+
 	size_t len = get<WORD>();
 	bool zero = false;
 	for (size_t i = 0; i < len; i++) {
-		char ch = get<char>();
-		if (!zero && ch) {
-			ret.push_back(ch);
-		} else {
-			zero = true;
+		bool errfuse = false;
+		char ch = get<char>(&errfuse);
+		if (errfuse) {
+			scAsmTool::ReportError(LVL_WARN, "位于文件偏移 %04X+%04X=%04X 处字符串长度超过块长度", (unsigned) code_fileoffset, strstart, (unsigned) code_fileoffset + strstart);
 		}
+
+		if (!ch) zero = true;
+		ret.push_back(ch);
 	}
 	assert(zero);
 	return ret;
 }
+
+
+std::string scAsmDisassembler::scScriptBlock::escape_string(const std::vector<char> &str)
+{
+	bool zero = false;
+	bool nonzero_after_zero = false;
+
+	std::string ret;
+	std::string part1, part2;
+	
+	for (char ch: str) {
+		if (!zero) {
+			if (ch == 0) {
+				zero = true;
+			} else {
+				assert(ch != quote_escape);
+				if (ch == '\"') ch = quote_escape;
+				part1.push_back(ch);
+			}
+		}
+		if (zero) {
+			
+			if (ch != 0) {
+				nonzero_after_zero = true;
+			}
+
+			unsigned char uch = ch;
+			char buf[4];
+			sprintf(buf, " %02X", (unsigned) uch);
+			part2 += buf;
+
+		}
+	}
+	
+	
+	assert(zero);
+	if (!nonzero_after_zero) {
+		ret = '\"' + part1 + '\"';
+	} else {
+		ret = '\"' + part1 + "\" /* STRAY:" + part2 + " */";
+	}
+
+	return ret;
+}
+
 
 void scAsmDisassembler::scScriptBlock::scAsmInstr::scAsmInstrParam::PrintParam(FILE *fp)
 {
@@ -106,7 +156,7 @@ void scAsmDisassembler::scScriptBlock::scAsmInstr::scAsmInstrParam::PrintParam(F
 		fprintf(fp, "@loc_%04X", (unsigned)jdata);
 		break;
 	case VAR_STRING:
-		fprintf(fp, "\"%s\"", escape_string(sdata).c_str());
+		fprintf(fp, "%s", scScriptBlock::escape_string(sdata).c_str());
 		break;
 	case VAR_USERVAR:
 		if ((udata & 0x8000)) {
@@ -148,7 +198,7 @@ void scAsmDisassembler::scScriptBlock::scAsmInstr::scAsmInstrParam::GetParam(scS
 		break;
 	case VAR_STRING:
 		sdata = block->get_string();
-		if (scAsmTool::dbgflag) printf("    string: %s\n", sdata.c_str());
+		if (scAsmTool::dbgflag) printf("    string: %s\n", scScriptBlock::escape_string(sdata).c_str());
 		break;
 	case VAR_USERVAR:
 		udata = block->get<WORD>();
@@ -183,19 +233,33 @@ void scAsmDisassembler::scScriptBlock::DisassembleCodeData()
 		scAsmInstr instr;
 
 		loc = codeptr;
-		instr.cmdid = get<WORD>();
-		instr.paramflag = get<WORD>();
+		bool errfuse = false;
+		instr.cmdid = get<WORD>(&errfuse);
+		instr.paramflag = get<WORD>(&errfuse);
 		
-		if (!scCmdDef::IsLegalInstr(instr.cmdid, instr.paramflag)) {
-			scAsmTool::ReportError(LVL_WARN, "在文件偏移 %X+%04X=%X 处有无效指令 (%04X, %04X)", (unsigned)code_fileoffset, (unsigned)loc, (unsigned)(code_fileoffset + loc), (unsigned)instr.cmdid, (unsigned)instr.paramflag);
+		if (errfuse || !scCmdDef::IsLegalInstr(instr.cmdid, instr.paramflag)) {
+			if (errfuse) {
+				scAsmTool::ReportError(LVL_WARN, "在文件偏移 %04X+%04X=%04X 处的剩余数据不足以构成指令 (%04X < %04X)", (unsigned)code_fileoffset, (unsigned)loc, (unsigned)(code_fileoffset + loc), (unsigned)codeptr, (unsigned)codesize);
+			} else {
+				scAsmTool::ReportError(LVL_WARN, "在文件偏移 %04X+%04X=%04X 处有无效指令 (%04X, %04X)", (unsigned)code_fileoffset, (unsigned)loc, (unsigned)(code_fileoffset + loc), (unsigned)instr.cmdid, (unsigned)instr.paramflag);
+			}
 			size_t newptr = loc;
 
-			unsigned x;
-			printf("  请输入下一有效指令相对当前的偏移（十六进制）: ");
-			scanf("%x", &x);
-			newptr += x;
-			printf("  于块内偏移 %04X 处重新开始反汇编...\n", (unsigned)newptr);
-
+			if (errfuse) {
+				newptr = codesize;
+			} else {
+				unsigned x;
+				if (scAsmTool::dbgflag) {
+					printf("  请输入下一有效指令相对当前的偏移（十六进制）: ");
+					scanf("%x", &x);
+				} else {
+					x = 1;
+				}
+				newptr += x;
+				if (newptr > codesize) newptr = codesize;
+				printf("  于块内偏移 %04X 处重新开始反汇编...\n", (unsigned)newptr);
+			}
+			
 			instr.iscomment = true;
 			
 			char buf[MAXLINE];
@@ -207,7 +271,7 @@ void scAsmDisassembler::scScriptBlock::DisassembleCodeData()
 			}
 
 			//while (instr.comment.length() < 40) instr.comment += ' ';
-			sprintf(buf, " // SKIP: 无效指令 (%04X+%X=>%04X)", (unsigned)loc, x, (unsigned)newptr);
+			sprintf(buf, " // SKIP: 无效指令 (%04X+%04X=>%04X)", (unsigned)loc, (unsigned)newptr - (unsigned)loc, (unsigned)newptr);
 			instr.comment += std::string(buf);
 
 			codeptr = newptr;
@@ -229,7 +293,7 @@ void scAsmDisassembler::scScriptBlock::DisassembleCodeData()
 			param.GetParam(this, type);
 		}
 nextloop:
-		codeasm.insert(std::make_pair(loc, instr));
+		codeasm.insert(std::make_pair(std::make_pair(loc, codeptr), instr));
 	}
 
 	assert(codeptr == codesize);
@@ -263,7 +327,7 @@ void scAsmDisassembler::WriteASMFile(const char *asmfile)
 		SceIndex &curindex = index[i];
 		//printf("  正输出 %8s %-5d %08X %s\n", scename.c_str(), curindex.id, curindex.offset, curindex.desc);
 		scScriptBlock &curblock = block[i];
-		fprintf(fp, "#begin %d, \"%s\"\n", curblock.id, escape_string(curblock.desc.data()).c_str());
+		fprintf(fp, "#begin %d, %s\n", curblock.id, scScriptBlock::escape_string(curblock.desc).c_str());
 
 		for (unsigned varid = 0; varid < curblock.uservar.size(); varid++) {
 			auto &curvar = curblock.uservar[varid];
@@ -278,13 +342,26 @@ void scAsmDisassembler::WriteASMFile(const char *asmfile)
 
 		for (auto it = curblock.codeasm.begin(); it != curblock.codeasm.end(); it++) {
 			scScriptBlock::scAsmInstr &instr = it->second;
+
+			// print label if needed
+			for (auto lblit = curblock.codelabel.lower_bound(it->first.first); lblit != curblock.codelabel.end() && *lblit < it->first.second; lblit++) {
+				if (*lblit == it->first.first) {
+					fprintf(fp, "@loc_%04X:\n", it->first.first);
+				} else {
+					scAsmTool::ReportError(LVL_WARN, "标号 @loc_%04X 位于指令内部，详细信息请见反汇编结果", *lblit);
+					fprintf(fp, "// ERROR: 标号 @loc_%04X 位于下方指令内部 （标号在文件中偏移为 %04X+%04X=%04X；下方指令在文件中偏移为 %04X+%04X=%04X 长度为 %04X）\n",
+						*lblit,
+						(unsigned)curblock.code_fileoffset, *lblit, (unsigned)curblock.code_fileoffset + *lblit,
+						(unsigned)curblock.code_fileoffset, it->first.first, (unsigned)curblock.code_fileoffset + it->first.first,
+						it->first.second - it->first.first
+					);
+				}
+			}
+
+			// print instruction
 			if (!instr.iscomment) {
 				scCmdDef &curcmd = scCmdDef::GetCmdDef(instr.cmdid);
 				assert(curcmd.pfun);
-				if (curblock.codelabel.find(it->first) != curblock.codelabel.end()) {
-					fprintf(fp, "@loc_%04X:\n", it->first);
-				}
-				//fprintf(fp, "  %08X:", it->first);
 				fprintf(fp, "  %-20s ", curcmd.GetCmdName());
 				for (auto pit = instr.paramlist.begin(); pit != instr.paramlist.end(); pit++) {
 					if (pit != instr.paramlist.begin()) fprintf(fp, ", ");

@@ -18,15 +18,21 @@ class scAsmDisassembler {
 	class scScriptBlock {
 	private:
 		size_t codeptr;
-		template<class T> T get()
+		template<class T> T get(bool *errfuse = NULL)
 		{
 			T ret;
-			assert(codeptr + sizeof(T) <= codesize);
-			memcpy(&ret, codedata.data() + codeptr, sizeof(T));
-			codeptr += sizeof(T);
+			if (errfuse != NULL && codeptr + sizeof(T) > codesize) {
+				memset(&ret, 0, sizeof(ret));
+				*errfuse = true;
+			} else {
+				assert(codeptr + sizeof(T) <= codesize);
+				memcpy(&ret, codedata.data() + codeptr, sizeof(T));
+				codeptr += sizeof(T);
+			}
 			return ret;
 		}
-		std::string get_string();
+		std::vector<char> get_string();
+		
 
 	public:
 		DWORD	id;	//script id
@@ -45,13 +51,18 @@ class scAsmDisassembler {
 				BYTE type;
 				int idata;
 				float fdata;
-				std::string sdata;
+				std::vector<char> sdata;
 				DWORD jdata;
 				WORD udata;
 				std::vector<scAsmInstrParam> ldata;
 				
 				void GetParam(scScriptBlock *block, BYTE t);
 				void PrintParam(FILE *fp);
+				
+				
+
+
+
 			};
 			bool iscomment = false;
 			std::string comment;
@@ -60,9 +71,10 @@ class scAsmDisassembler {
 			std::vector<scAsmInstrParam> paramlist;
 		};
 
-		// <code_offset, asm_string>
-		std::map<unsigned, scAsmInstr> codeasm;
+		std::map<std::pair<unsigned, unsigned>, scAsmInstr> codeasm;
 		std::set<unsigned> codelabel;
+
+		static std::string escape_string(const std::vector<char> &str);
 
 		void DisassembleCodeData();
 	};

@@ -29,16 +29,6 @@ FILE *safe_fopen(const char *path, const char *mode)
 	return r;
 }
 
-std::string escape_string(const std::string &str)
-{
-	std::string ret(str);
-	assert(strchr(str.c_str(), quote_escape) == NULL);
-	std::replace(ret.begin(), ret.end(), '\"', quote_escape);;
-	return ret;
-}
-
-
-
 const char *getpathfilepart(const char *path)
 {
 	if (strrchr(path, '\\')) path = strrchr(path, '\\') + 1;

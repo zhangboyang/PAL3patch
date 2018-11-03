@@ -110,7 +110,10 @@ class scAsmAssembler {
 		int ln, col;
 		bool IsSpecial(int p);
 		bool IsSpace(int p);
-		bool IsComment(int p);
+		bool IsLineComment(int p);
+		bool IsBlockCommentBegin(int p);
+		bool IsBlockCommentEnd(int p);
+
 		void SkipSpace();
 
 		std::string txtfn;
@@ -120,6 +123,7 @@ class scAsmAssembler {
 
 	public:
 		void LoadFile(const std::string &txtfile);
+		AsmToken MakeEmptyTokenAtCurrentPosition();
 		AsmToken NextToken(TOKENTYPE expect = ANY_TOK);
 		bool NextLine();
 		void IncludeFile(const std::string &incfile);

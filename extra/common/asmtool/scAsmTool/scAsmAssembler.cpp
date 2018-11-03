@@ -16,15 +16,44 @@ bool scAsmAssembler::AsmLexer::IsSpace(int p)
 	assert(p <= (int)text[ln].length());
 	return text[ln][p] == ',' || isspace(text[ln][p]);
 }
-bool scAsmAssembler::AsmLexer::IsComment(int p)
+bool scAsmAssembler::AsmLexer::IsLineComment(int p)
 {
 	assert(p <= (int)text[ln].length());
 	return text[ln][p] == '/' && text[ln][p + 1] == '/';
 }
+bool scAsmAssembler::AsmLexer::IsBlockCommentBegin(int p)
+{
+	assert(p <= (int)text[ln].length());
+	return text[ln][p] == '/' && text[ln][p + 1] == '*';
+}
+bool scAsmAssembler::AsmLexer::IsBlockCommentEnd(int p)
+{
+	assert(p <= (int)text[ln].length());
+	return text[ln][p] == '*' && text[ln][p + 1] == '/';
+}
+
 void scAsmAssembler::AsmLexer::SkipSpace()
 {
-	while (IsSpace(col)) col++;
-	if (IsComment(col)) col = text[ln].length();
+	if (col < (int)text[ln].length()) {
+		while (IsSpace(col)) col++;
+		if (IsLineComment(col)) col = text[ln].length();
+		if (IsBlockCommentBegin(col)) {
+			AsmToken t = MakeEmptyTokenAtCurrentPosition();
+			while (1) {
+				if (IsBlockCommentEnd(col)) {
+					col += 2;
+					break;
+				}
+				col++;
+				if (col >= text[ln].length()) {
+					t.ecol = text[ln].length() - 1;
+					scAsmAssembler::Instance()->ReportError(LVL_ERROR, t, "块注释没有结束（仅支持单行内块注释）");
+					break;
+				}
+			}
+			SkipSpace();
+		}
+	}
 }
 int scAsmAssembler::AsmToken::GetParamType()
 {
@@ -118,6 +147,16 @@ void scAsmAssembler::AsmToken::PostProcess()
 	}
 	}
 }
+scAsmAssembler::AsmToken scAsmAssembler::AsmLexer::MakeEmptyTokenAtCurrentPosition()
+{
+	AsmToken ret;
+	ret.txtfn = txtfn;
+	ret.txtline = text[ln];
+	ret.ln = ln;
+	ret.col = col;
+	ret.ecol = col;
+	return ret;
+}
 scAsmAssembler::AsmToken scAsmAssembler::AsmLexer::NextToken(TOKENTYPE expect)
 {
 	if (inclexer) {
@@ -128,12 +167,8 @@ scAsmAssembler::AsmToken scAsmAssembler::AsmLexer::NextToken(TOKENTYPE expect)
 	SkipSpace();
 	assert(col <= (int)line.length());
 
-	AsmToken ret;
-	ret.txtfn = txtfn;
-	ret.txtline = line;
-	ret.ln = ln;
-	ret.col = col;
-	ret.ecol = col;
+	AsmToken ret = MakeEmptyTokenAtCurrentPosition();
+
 	TOKENTYPE &type = ret.type;
 	int &ecol = ret.ecol;
 	std::string &svalue = ret.svalue;
@@ -161,7 +196,7 @@ scAsmAssembler::AsmToken scAsmAssembler::AsmLexer::NextToken(TOKENTYPE expect)
 		goto readtok;
 
 	readtok:
-		while (!IsSpecial(ecol + 1) && !IsSpace(ecol + 1) && !IsComment(ecol + 1)) ecol++;
+		while (!IsSpecial(ecol + 1) && !IsSpace(ecol + 1) && !IsLineComment(ecol + 1) && !IsBlockCommentBegin(ecol + 1)) ecol++;
 		break;
 		
 	case '\"':
@@ -488,7 +523,7 @@ std::shared_ptr<scAsmAssembler::CodeBuffer::BufferItem> scAsmAssembler::AsmBlock
 {
 	auto it = labelindex.find(tok.svalue);
 	if (it == labelindex.end()) {
-		scAsmAssembler::Instance()->ReportError(LVL_ERROR, tok, "找不到标号");
+		scAsmAssembler::Instance()->ReportError(LVL_FATAL, tok, "找不到标号");
 	}
 	return it->second;
 }
