@@ -100,7 +100,7 @@ struct CPK {
 
 // helper macros
 #define TOPTR(addr) ((void *)(addr))
-#define MAKE_THISCALL_FUNCPTR(addr, ret_type, this_type, ...) ((ret_type __fastcall (*)(this_type, int, ##__VA_ARGS__)) TOPTR(addr))
+#define MAKE_THISCALL_FUNCPTR(addr, ret_type, this_type, ...) ((ret_type (__fastcall *)(this_type, int, ##__VA_ARGS__)) TOPTR(addr))
 #define THISCALL_WRAPPER(func, this, ...) func(this, 0, ##__VA_ARGS__)
 
 #define CPK_ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(pCPK_ctor, void, struct CPK *), this)
