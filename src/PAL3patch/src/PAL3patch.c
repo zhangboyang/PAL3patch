@@ -92,6 +92,7 @@ static void init_stage2()
     // init patchsets
     INIT_PATCHSET(cdpatch);
     INIT_PATCHSET(regredirect);
+    INIT_PATCHSET(disableime);
     INIT_PATCHSET(disablekbdhook);
     INIT_PATCHSET(terminateatexit);
     INIT_PATCHSET(timerresolution);

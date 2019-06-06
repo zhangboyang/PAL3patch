@@ -82,6 +82,7 @@ static void init_stage2()
     
     // init patchsets
     INIT_PATCHSET(cdpatch);
+    INIT_PATCHSET(disableime);
     INIT_PATCHSET(dpiawareness);
     INIT_PATCHSET(regredirect);
     INIT_PATCHSET(console);

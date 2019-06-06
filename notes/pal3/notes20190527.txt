@@ -1,0 +1,5 @@
+【输入法兼容性导致崩溃】
+Win10 1809 安装QQ五笔输入法（QQWubi_Setup_2.2.344.400.exe）后运行PAL3会导致PAL3崩溃
+贴吧上也有人反馈过QQ输入法的问题，当时没有注意
+在崩溃报告里显示的的故障模块是QQWubiTSF.dll，调试发现会在调用WTSQuerySessionInformationW时崩溃，导致崩溃的具体原因未知
+在启动时调用ImmDisableIME(-1);可以关闭输入法，从而避免这个问题

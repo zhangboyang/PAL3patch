@@ -63,6 +63,7 @@ extern PATCHAPI void print_wstring_end(void);
 // all patchs
 MAKE_PATCHSET(cdpatch);
 MAKE_PATCHSET(regredirect);
+MAKE_PATCHSET(disableime);
 MAKE_PATCHSET(disablekbdhook);
 MAKE_PATCHSET(terminateatexit);
 MAKE_PATCHSET(depcompatible);
