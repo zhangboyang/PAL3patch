@@ -45,6 +45,8 @@ extern const wchar_t *wstr_nocfgfile_text;
 extern const wchar_t *wstr_nocfgfile_title;
 extern const wchar_t *wstr_badcfgfile_text;
 extern const wchar_t *wstr_badcfgfile_title;
+extern const wchar_t *wstr_badpath_text;
+extern const wchar_t *wstr_badpath_title;
 extern const wchar_t *wstr_resetfailed_text;
 extern const wchar_t *wstr_resetfailed_title;
 extern const wchar_t *wstr_screenshot_msg;

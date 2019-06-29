@@ -357,6 +357,7 @@ static void after_unknownlocktype()
 
 
 // screenshot hooks
+static int ss_enable;
 static IDirect3DSurface9 *ss_surface;
 static void before_screenshot(struct gbSurfaceDesc *surface)
 {
@@ -372,7 +373,11 @@ static void before_screenshot(struct gbSurfaceDesc *surface)
     }
     
     IDirect3DDevice9_CreateOffscreenPlainSurface(gfxmgr->m_pd3dDevice, surface_width, surface_height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, (void *) &ss_surface, NULL);
-    IDirect3DDevice9_GetFrontBufferData(gfxmgr->m_pd3dDevice, 0, ss_surface);
+    if (ss_enable) {
+        IDirect3DDevice9_GetFrontBufferData(gfxmgr->m_pd3dDevice, 0, ss_surface);
+    } else {
+        IDirect3DDevice9_ColorFill(gfxmgr->m_pd3dDevice, ss_surface, NULL, 0xFF000000);
+    }
     RECT GameRect;
     if (gfxmgr->DrvInfo.fullscreen) {
         GameRect.left = GameRect.top = 0;
@@ -465,6 +470,9 @@ MAKE_PATCHSET(nolockablebackbuffer)
 {
     // load movie clamp settings
     mf_tex_clamp = get_int_from_configfile("clampmovie");
+    
+    // load screenshot settings
+    ss_enable = get_int_from_configfile("saveimg");
     
     // lock/unlock hooks
     SIMPLE_PATCH(gboffset + 0x10019AF2, "\xC7\x81\x08\x07\x00\x00\x03\x00\x00\x00", "\xC7\x81\x08\x07\x00\x00\x02\x00\x00\x00", 10);

@@ -18,7 +18,21 @@ static int WINAPI My_WideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWSTR l
     return WideCharToMultiByte(CodePage, dwFlags, lpWideCharStr, cchWideChar, lpMultiByteStr, cbMultiByte, lpDefaultChar, lpUsedDefaultChar);
 }
 
-
+static void check_badpath()
+{
+    wchar_t buf[MAXLINE];
+    if (GetModuleFileNameW(NULL, buf, MAXLINE) != 0) {
+        wchar_t *ptr;
+        for (ptr = buf; *ptr; ptr++) {
+            if (*ptr < 0x20 || *ptr > 0x7E) {
+                break;
+            }
+        }
+        if (*ptr) {
+            MessageBoxW(NULL, wstr_badpath_text, wstr_badpath_title, MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
+        }
+    }
+}
 
 MAKE_PATCHSET(setlocale)
 {   
@@ -36,7 +50,9 @@ MAKE_PATCHSET(setlocale)
     else fail("unknown language flag %d in setlocale.", flag);
     
     if (system_codepage != target_codepage) {
-    
+        
+        check_badpath();
+        
         // hook GBENGINE.DLL's IAT
         make_pointer(gboffset + 0x100F50A0, My_MultiByteToWideChar);
         make_pointer(gboffset + 0x100F50DC, My_WideCharToMultiByte);
