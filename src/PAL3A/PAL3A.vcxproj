@@ -40,13 +40,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)_PAL3A\</OutDir>
-    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype-2.10.0\include</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype-2.10.0\objs\Win32\Debug Static</LibraryPath>
+    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype-2.10.1\include</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype-2.10.1\objs\Win32\Debug Static</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)_PAL3A\</OutDir>
-    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype-2.10.0\include</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype-2.10.0\objs\Win32\Release Static</LibraryPath>
+    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype-2.10.1\include</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype-2.10.1\objs\Win32\Release Static</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

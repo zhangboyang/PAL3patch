@@ -76,7 +76,7 @@ static MAKE_ASMPATCH(UITextArea_Draw_newlinetest)
     int nexti = M_DWORD(R_EBP - 0xC) + 1;
     int fontsize = M_DWORD(R_EBP - 0x1C);
     int *x = TOPTR(R_EBP - 0x24);
-    int *y = &R_EBX;
+    int *y = TOPTR(&R_EBX);
     int *col = TOPTR(R_EBP - 0x10);
     const char *out = TOPTR(R_EBP - 0x8);
     const char *nextstr = text->_Ptr ? text->_Ptr + nexti : "";

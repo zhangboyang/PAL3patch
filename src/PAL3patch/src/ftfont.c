@@ -67,7 +67,7 @@ static int ftlayout_addrect(struct ftlayout *l, int w, int h, int *u, int *v)
 
 // font face has initialized
 // adjust size and quality
-void ftfont_optimize_size_quality(struct ftfont *font)
+static void ftfont_optimize_size_quality(struct ftfont *font)
 {
     // dirty hack: disable bitmap font for MingLiU > 17px
     if (font->face->family_name && strstr(font->face->family_name, "MingLiU")) {

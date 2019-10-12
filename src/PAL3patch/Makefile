@@ -1,6 +1,6 @@
 # freetype
-FREETYPE_INCLUDE_PATH := C:\freetype-2.10.0\include
-FREETYPE_LIBRARY_PATH := C:\freetype-2.10.0\objs\Win32\Release Static
+FREETYPE_INCLUDE_PATH := C:\freetype-2.10.1\include
+FREETYPE_LIBRARY_PATH := C:\freetype-2.10.1\objs\Win32\Release Static
 FREETYPE_LIB := freetype.lib
 
 # dx90sdk
@@ -68,7 +68,7 @@ $(TARGET_DLL_SRCPATH)/%.obj: $(TARGET_DLL_SRCPATH)/%.c
 
 $(TARGET_DLL): $(TARGET_DLL_OBJS)
 	$(CCLD) -o $(TARGET_DLL_ROBJ) -r -Wl,--unique=.drectve -nostdlib $(TARGET_DLL_COBJS) -lmingwex -lgcc
-	$(DLLTOOL) -z $(TARGET_DLL:.dll=.r.def) $(TARGET_DLL_ROBJ)
+	$(DLLTOOL) -z $(TARGET_DLL:.dll=.r.def) $(TARGET_DLL_COBJS)
 	echo "LIBRARY $(TARGET_DLL)" > $(TARGET_DLL:.dll=.def)
 	$(SED) -e '/^;/d' -e 's/ @ [0-9][0-9]*//' $(TARGET_DLL:.dll=.r.def) >> $(TARGET_DLL:.dll=.def)
 	$(STRIP) --strip-unneeded --remove-section=.drectve $(TARGET_DLL_ROBJ)

@@ -27,7 +27,7 @@ static void method1_init()
 
 // method2: lock backbuffer before endscene, force flush command buffer
 
-IDirect3DSurface9 *method2_pRenderTarget = NULL;
+static IDirect3DSurface9 *method2_pRenderTarget = NULL;
 static void method2_release_rendertarget()
 {
     if (method2_pRenderTarget) {

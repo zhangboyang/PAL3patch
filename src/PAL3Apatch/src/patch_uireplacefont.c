@@ -383,7 +383,7 @@ struct d3dxfont_strnode {
     struct d3dxfont_strnode *next;
 };
 
-struct d3dxfont_strnode *d3dxfont_strlist_head = NULL, *d3dxfont_strlist_tail = NULL;
+static struct d3dxfont_strnode *d3dxfont_strlist_head = NULL, *d3dxfont_strlist_tail = NULL;
 
 static MAKE_THISCALL(void, gbPrintFont_UNICODE_PrintString, struct gbPrintFont_UNICODE *this, const char *str, float x, float y, float endx, float endy)
 {
