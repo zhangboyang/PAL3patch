@@ -26,6 +26,7 @@ https://sourceforge.net/p/mingw/bugs/2322/
 
 【用 mingw-gcc 编译时，有可能因为缺少 iconv 而导致编译失败】
 找不到 iconv 的原因未知。
+（20191015：是mingw-gcc的bug，见https://osdn.net//projects/mingw/ticket/39639）
 解决办法：
 (1) 将 locale.c 转换为 UTF-8 编码（仅此文件中有中文字符；低版本 GCC 可能不认识 UTF-8 BOM，需要手动删去）
 (2) 将 src/PAL3patch/Makefile 中 CFLAG 处的 -finput-charset=cp936 -fexec-charset=cp936 删去
