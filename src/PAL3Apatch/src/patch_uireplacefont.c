@@ -473,22 +473,24 @@ static void ui_replacefont_d3dxfont_init()
     
     d3dxfont_quality = get_int_from_configfile("uireplacefont_quality");
     const char *facename = get_string_from_configfile("uireplacefont_facename");
+    int use_default = 0;
     if (stricmp(facename, "default") == 0) {
         d3dxfont_facename = wstr_defaultfont; // set fallback font
         ftfont_filename = defaultfont_ftfilename;
         ftfont_index = defaultfont_ftindex;
         d3dxfont_ftfont = 1;
+        use_default = 1;
     } else if (strnicmp(facename, "freetype:", 9) == 0) {
         d3dxfont_facename = wstr_defaultfont; // set fallback font
         char *buf = strdup(facename + 9);
         char *saveptr;
         const char *pfn, *pidx;
-        pfn = strtok_r(buf, ":", &saveptr);
+        pfn = strtok_r(buf, "|", &saveptr);
         if (pfn == NULL) {
             pfn = "";
             pidx = NULL;
         } else {
-            pidx = strtok_r(NULL, ":", &saveptr);
+            pidx = strtok_r(NULL, "|", &saveptr);
         }
         if (pidx == NULL) {
             pidx = "0";
@@ -511,6 +513,9 @@ static void ui_replacefont_d3dxfont_init()
         fail("can't parse font bold flag string.");
     }
     
+    if (boldfactor_u12 < 0) boldfactor_u12 = use_default ? 1 : 0;
+    if (boldfactor_u16 < 0) boldfactor_u16 = use_default ? 1 : 0;
+    if (boldfactor_u20 < 0) boldfactor_u20 = use_default ? 1 : 0;
     d3dxfont_boldflag[PRINTWSTR_U12] = round(boldfactor_u12 * defaultfont_bold + eps);
     d3dxfont_boldflag[PRINTWSTR_U16] = round(boldfactor_u16 * defaultfont_bold + eps);
     d3dxfont_boldflag[PRINTWSTR_U20] = round(boldfactor_u20 * defaultfont_bold + eps);

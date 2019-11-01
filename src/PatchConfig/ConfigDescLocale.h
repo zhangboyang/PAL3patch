@@ -99,7 +99,7 @@ static ConfigDescItem LISTNAME[] = {
 		NULL,
 		NULL,
 		{ { NULL } },
-		EnumDisplayMode,
+		&EnumDisplayModeInstance,
 	},
 	{
 		1, FALSE, TRUE,
@@ -122,7 +122,7 @@ static ConfigDescItem LISTNAME[] = {
 		NULL,
 		NULL,
 		{ { NULL } },
-		EnumDepthBuffer,
+		&EnumDepthBufferInstance,
 	},
 	{
 		1, FALSE, TRUE,
@@ -132,7 +132,7 @@ static ConfigDescItem LISTNAME[] = {
 		NULL,
 		NULL,
 		{ { NULL } },
-		EnumMultisample,
+		&EnumMultisampleInstance,
 	},
 	{
 		1, FALSE, TRUE,
@@ -174,7 +174,7 @@ static ConfigDescItem LISTNAME[] = {
 		NULL,
 		NULL,
 		{ { NULL } },
-		EnumFontface,
+		&EnumFontfaceInstance,
 	},
 	{
 		1, TRUE, TRUE,
@@ -184,6 +184,7 @@ static ConfigDescItem LISTNAME[] = {
 		NULL,
 		NULL,
 		{
+			{ _T("默认"), _T("选择此项后，仅当使用游戏默认字体时会进行加粗。"), _T("-1,-1,-1") },
 			{ _T("常规"), _T("选择此项后，文字不会加粗。"), _T("0,0,0") },
 			{ _T("加粗"), _T("选择此项后，文字会加粗。"), _T("1,1,1") },
 		}
@@ -196,9 +197,9 @@ static ConfigDescItem LISTNAME[] = {
 		NULL,
 		NULL,
 		{
+			{ _T("自动"), _T("选择此项后，自动选择相对更清晰的方式输出。"), _T("2") },
 			{ _T("锐利"), _T("选择此项后，不启用文字抗锯齿。"), _T("0") },
 			{ _T("平滑"), _T("选择此项后，启用文字抗锯齿。"), _T("1") },
-			{ _T("自动"), _T("选择此项后，自动选择相对更清晰的方式输出。"), _T("2") },
 		}
 	},
 	{

@@ -17,6 +17,7 @@ CChooseFromListDlg::CChooseFromListDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CChooseFromListDlg::IDD, pParent)
 {
 	m_Choosen = -1;
+	m_pEnumObj = NULL;
 	m_pEnumData = NULL;
 	//{{AFX_DATA_INIT(CChooseFromListDlg)
 	//}}AFX_DATA_INIT
@@ -46,9 +47,9 @@ BOOL CChooseFromListDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	// TODO: Add extra initialization here
-	std::vector<std::pair<CString, std::pair<CString, CString> > >::iterator it;
+	std::vector<CString>::iterator it;
 	for (it = m_pEnumData->begin(); it != m_pEnumData->end(); it++) {
-		m_EnumList.AddString(it->second.first);
+		m_EnumList.AddString(m_pEnumObj->GetValueTitle(*it));
 	}
 	m_EnumList.SetCurSel(m_Choosen);
 	
@@ -61,7 +62,10 @@ void CChooseFromListDlg::OnOK()
 	// TODO: Add extra validation here
 	m_Choosen = m_EnumList.GetCurSel();
 	if (m_Choosen >= 0) {
-		CDialog::OnOK();
+		m_Result = (*m_pEnumData)[m_Choosen];
+		if (m_pEnumObj->TranslateSelectedValue(m_hWnd, m_Result)) {
+			CDialog::OnOK();
+		}
 	} else {
 		MessageBox(STRTABLE(IDS_NOCHOOSEN), STRTABLE(IDS_APPTITLE), MB_ICONWARNING);
 	}

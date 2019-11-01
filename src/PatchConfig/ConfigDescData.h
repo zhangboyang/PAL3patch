@@ -11,6 +11,15 @@ struct ConfigDescOptionItem {
 	LPCTSTR value;
 };
 
+class ConfigDescOptionListEnum {
+public:
+	virtual void EnumConfigValues(std::vector<CString> &result) = 0;
+	virtual bool TranslateSelectedValue(HWND hWnd, CString &value);
+	virtual bool IsValueEqual(const CString &lstval, const CString &selval);
+	virtual CString GetValueTitle(const CString &value);
+	virtual CString GetValueDescription(const CString &value);
+};
+
 class CPatchConfigDlg;
 
 struct ConfigDescItem {
@@ -37,7 +46,7 @@ struct ConfigDescItem {
 
 	// if this is a "option item"
 	//    if item type is "choose from list", here is the enum function
-	void (*enumfunc)(std::vector<std::pair<CString, std::pair<CString, CString> > > &result);
+	ConfigDescOptionListEnum *enumobj;
 
 
 	// run-time data

@@ -216,16 +216,12 @@ void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 		if (reload) txtinput->ShowWindow(SW_HIDE);
 	}
 
-	if (pItem->enumfunc) {
-		if (reload) pItem->enumfunc(m_EnumList);
-		std::vector<std::pair<CString, std::pair<CString, CString> > >::iterator it;
+	if (pItem->enumobj) {
+		if (reload) pItem->enumobj->EnumConfigValues(m_EnumList);
+		std::vector<CString>::iterator it;
 		for (it = m_EnumList.begin(); it != m_EnumList.end(); it++) {
-			if (it->first == *pItem->pvalue) {
-				if (it->second.second != EMPTYSTR) {
-					m_OptDesc = it->second.second;
-				} else {
-					m_OptDesc = it->second.first;
-				}
+			if (pItem->enumobj->IsValueEqual(*it, *pItem->pvalue)) {
+				m_OptDesc = pItem->enumobj->GetValueDescription(*pItem->pvalue);
 				descflag = 1;
 				break;
 			}
@@ -399,19 +395,21 @@ void CPatchConfigDlg::OnChoosefromlist()
 {
 	// TODO: Add your control notification handler code here
 	CChooseFromListDlg enumdlg;
+	
+	enumdlg.m_pEnumObj = m_ItemSelected->enumobj;
 	enumdlg.m_pEnumData = &m_EnumList;
 
 	enumdlg.m_Choosen = -1;
-	std::vector<std::pair<CString, std::pair<CString, CString> > >::iterator it;
+	std::vector<CString>::iterator it;
 	for (it = m_EnumList.begin(); it != m_EnumList.end(); it++) {
-		if (it->first == m_CfgVal) {
+		if (m_ItemSelected->enumobj->IsValueEqual(*it, m_CfgVal)) {
 			enumdlg.m_Choosen = it - m_EnumList.begin();
 			break;
 		}
 	}
 	int nResponse = enumdlg.DoModal();
 	if (nResponse == IDOK) {
-		*m_ItemSelected->pvalue = m_EnumList[enumdlg.m_Choosen].first;
+		*m_ItemSelected->pvalue = enumdlg.m_Result;
 		UpdateConfigItem();
 	}
 }

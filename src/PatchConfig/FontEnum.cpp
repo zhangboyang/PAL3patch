@@ -1,40 +1,117 @@
 #include "stdafx.h"
 
-class helper_arg {
-public:
-	std::vector<std::pair<CString, std::pair<CString, CString> > > *result;
-};
+
+EnumFontface EnumFontfaceInstance;
 
 static int CALLBACK EnumFontfaceHelper(ENUMLOGFONTEX *lpelfe, NEWTEXTMETRICEX *lpntme, DWORD FontType, LPARAM lParam)
 {
-	helper_arg *arg = (helper_arg *) lParam;
-	CString fontface(lpelfe->elfLogFont.lfFaceName);
-	arg->result->push_back(std::make_pair(fontface, std::make_pair(fontface, EMPTYSTR)));
+	EnumFontface *arg = (EnumFontface *) lParam;
+	arg->buf.push_back(CString(lpelfe->elfLogFont.lfFaceName));
 	return 1;
 }
-void EnumFontface(std::vector<std::pair<CString, std::pair<CString, CString> > > &result)
+
+void EnumFontface::EnumConfigValues(std::vector<CString> &result)
 {
-	std::vector<std::pair<CString, std::pair<CString, CString> > > buf;
-	std::vector<std::pair<CString, std::pair<CString, CString> > >::iterator it;
-	helper_arg arg;
-	arg.result = &buf;
+	std::vector<CString>::iterator it;
+	buf.clear();
 	LOGFONT lf;
 	lf.lfCharSet = DEFAULT_CHARSET;
 	lf.lfFaceName[0] = '\0';
 	lf.lfPitchAndFamily = 0;
-	EnumFontFamiliesEx(GetDC(NULL), &lf, (FONTENUMPROC) EnumFontfaceHelper, (LPARAM) &arg, 0);
+	EnumFontFamiliesEx(GetDC(NULL), &lf, (FONTENUMPROC) EnumFontfaceHelper, (LPARAM) this, 0);
 	std::sort(buf.begin(), buf.end());
 	buf.erase(std::unique(buf.begin(), buf.end()), buf.end());
 	result.clear();
 	for (it = buf.begin(); it != buf.end(); it++) {
-		if (it->first >= CString(_T("\x80"))) {
+		if (*it >= CString(_T("\x80"))) {
 			result.push_back(*it);
 		}
 	}
 	for (it = buf.begin(); it != buf.end(); it++) {
-		if (it->first < CString(_T("\x80"))) {
+		if (*it < CString(_T("\x80"))) {
 			result.push_back(*it);
 		}
 	}
-	result.insert(result.begin(), std::make_pair(CString(_T("default")), std::make_pair(STRTABLE(IDS_DEFAULTFONT), STRTABLE(IDS_DEFAULTFONT_DESC))));
+	result.insert(result.begin(), CString(_T("freetype:")));
+	result.insert(result.begin(), CString(_T("default")));
+}
+CString EnumFontface::GetValueTitle(const CString &value)
+{
+	if (value == CString(_T("default"))) {
+		return STRTABLE(IDS_DEFAULTFONT);
+	}
+	if (value.Left(9) == CString(_T("freetype:"))) {
+		return STRTABLE(IDS_FREETYPEFONT);
+	}
+	return ConfigDescOptionListEnum::GetValueTitle(value);
+}
+CString EnumFontface::GetValueDescription(const CString &value)
+{
+	if (value == CString(_T("default"))) {
+		return STRTABLE(IDS_DEFAULTFONT_DESC);
+	}
+	if (value.Left(9) == CString(_T("freetype:"))) {
+		CString desc;
+		TCHAR *tmp = _tcsdup(value);
+		TCHAR *pfn, *pidx;
+		pfn = _tcstok(tmp + 9, _T("|"));
+        if (pfn == NULL) {
+            pfn = _T("");
+            pidx = NULL;
+        } else {
+            pidx = _tcstok(NULL, _T("|"));
+        }
+        if (pidx == NULL) {
+            pidx = _T("0");
+        }
+		desc.Format(IDS_FREETYPEFONT_DESC, pfn, pidx);
+		free(tmp);
+		return desc;
+	}
+	CString desc;
+	desc.Format(STRTABLE(IDS_GDIFONT_DESC), (LPCTSTR) value);
+	return desc;
+}
+bool EnumFontface::TranslateSelectedValue(HWND hWnd, CString &value)
+{
+	if (value == CString(_T("freetype:"))) {
+		TCHAR curdir[MAXLINE];
+		GetCurrentDirectory(MAXLINE, curdir);
+		if (curdir[_tcslen(curdir) - 1] != '\\') {
+			_tcscat(curdir, _T("\\"));
+		}
+		
+		CString filters = STRTABLE(IDS_FREETYPEFONT_FILTER);
+		OutputDebugString(filters);
+
+		CFileDialog fileDlg(TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY, filters);
+
+		bool ret = (fileDlg.DoModal() == IDOK);
+		TCHAR *pathName = NULL;
+
+		if (ret) {
+			pathName = _tcsdup(fileDlg.GetPathName());
+
+			TCHAR *rpath;
+			if (_tcsncmp(pathName, curdir, _tcslen(curdir)) == 0) {
+				rpath = pathName + _tcslen(curdir);
+			} else {
+				rpath = pathName;
+			}
+
+			value.Format(_T("freetype:%s|0"), rpath);
+		}
+
+		SetCurrentDirectory(curdir);
+		free(pathName);
+		return ret;
+	}
+	return true;
+}
+bool EnumFontface::IsValueEqual(const CString &lstval, const CString &selval)
+{
+	if (lstval.Left(9) == CString(_T("freetype:"))) {
+		return selval.Left(9) == CString(_T("freetype:"));
+	}
+	return lstval == selval;
 }

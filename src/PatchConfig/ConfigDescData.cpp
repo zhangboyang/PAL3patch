@@ -1,6 +1,23 @@
 #include "stdafx.h"
 
 
+bool ConfigDescOptionListEnum::TranslateSelectedValue(HWND hWnd, CString &value)
+{
+	return true;
+}
+bool ConfigDescOptionListEnum::IsValueEqual(const CString &lstval, const CString &selval)
+{
+	return lstval == selval;
+}
+CString ConfigDescOptionListEnum::GetValueTitle(const CString &value)
+{
+	return value;
+}
+CString ConfigDescOptionListEnum::GetValueDescription(const CString &value)
+{
+	return GetValueTitle(value);
+}
+
 #define USE_CHS
 #include "ConfigDescLocale.h"
 

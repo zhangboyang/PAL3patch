@@ -44,8 +44,8 @@ void CleanupD3DEnumeration()
 }
 
 
-
-void EnumDisplayMode(std::vector<std::pair<CString, std::pair<CString, CString> > > &result)
+EnumDisplayMode EnumDisplayModeInstance;
+void EnumDisplayMode::EnumConfigValues(std::vector<CString> &result)
 {
 	unsigned i;
 	std::vector<std::pair<int, int> > dlist;
@@ -59,17 +59,35 @@ void EnumDisplayMode(std::vector<std::pair<CString, std::pair<CString, CString> 
 	dlist.resize(std::unique(dlist.begin(), dlist.end()) - dlist.begin());
 
 	result.clear();
-	result.push_back(std::make_pair(CString(_T("current")), std::make_pair(STRTABLE(IDS_AUTORESOLUTION), STRTABLE(IDS_AUTORESOLUTION_DESC))));
+	result.push_back(CString(_T("current")));
 	for (it = dlist.begin(); it != dlist.end(); it++) {
 		if (it->first >= 800 && it->second >= 600) {
 			CString str;
 			str.Format(_T("%dx%d"), it->first, it->second);
-			result.push_back(std::make_pair(str, std::make_pair(str, EMPTYSTR)));
+			result.push_back(str);
 		}
 	}
 }
+CString EnumDisplayMode::GetValueTitle(const CString &value)
+{
+	if (value == CString(_T("current"))) {
+		return STRTABLE(IDS_AUTORESOLUTION);
+	}
+	return ConfigDescOptionListEnum::GetValueTitle(value);
+}
+CString EnumDisplayMode::GetValueDescription(const CString &value)
+{
+	if (value == CString(_T("current"))) {
+		return STRTABLE(IDS_AUTORESOLUTION_DESC);
+	}
+	CString desc;
+	desc.Format(IDS_RESOLUTION_DESC, (LPCTSTR)value);
+	return desc;
+}
 
-void EnumDepthBuffer(std::vector<std::pair<CString, std::pair<CString, CString> > > &result)
+
+EnumDepthBuffer EnumDepthBufferInstance;
+void EnumDepthBuffer::EnumConfigValues(std::vector<CString> &result)
 {
 	unsigned i, j;
 	D3DFORMAT fmt;
@@ -78,9 +96,9 @@ void EnumDepthBuffer(std::vector<std::pair<CString, std::pair<CString, CString> 
 	D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
 	D3DDeviceCombo *pDeviceComboList;
 	result.clear();
-	result.push_back(std::make_pair(CString(_T("max")), std::make_pair(STRTABLE(IDS_AUTOMAXIMUM), STRTABLE(IDS_AUTOMAXIMUM_DESC))));
-	result.push_back(std::make_pair(CString(_T("16")), std::make_pair(STRTABLE(IDS_AUTOZBUF16), EMPTYSTR)));
-	result.push_back(std::make_pair(CString(_T("24")), std::make_pair(STRTABLE(IDS_AUTOZBUF24), EMPTYSTR)));
+	result.push_back(CString(_T("max")));
+	result.push_back(CString(_T("16")));
+	result.push_back(CString(_T("24")));
 	for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
 		pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
 		for (i = 0; i < pDeviceComboList->pDepthStencilFormatList->Count(); i++) {
@@ -88,34 +106,52 @@ void EnumDepthBuffer(std::vector<std::pair<CString, std::pair<CString, CString> 
 			if (fmtset.insert(fmt).second) {
 				CString str;
 				str.Format(_T("%d"), -fmt);
-				switch (fmt) {
-					case D3DFMT_D16:
-						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D16), EMPTYSTR)));
-						break;
-					case D3DFMT_D15S1:
-						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D15S1), EMPTYSTR)));
-						break;
-					case D3DFMT_D24X8:
-						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D24X8), EMPTYSTR)));
-						break;
-					case D3DFMT_D24S8:
-						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D24S8), EMPTYSTR)));
-						break;
-					case D3DFMT_D24X4S4:
-						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D24X4S4), EMPTYSTR)));
-						break;
-					case D3DFMT_D32:
-						result.push_back(std::make_pair(str, std::make_pair(STRTABLE(IDS_ZBUF_D3DFMT_D32), EMPTYSTR)));
-						break;
-					default:
-						break;
-				}
+				result.push_back(str);
 			}
 		}
 	}
 }
+CString EnumDepthBuffer::GetValueTitle(const CString &value)
+{
+	if (value == CString(_T("max"))) {
+		return STRTABLE(IDS_AUTOMAXIMUM);
+	}
+	if (value == CString(_T("16"))) {
+		return STRTABLE(IDS_AUTOZBUF16);
+	}
+	if (value == CString(_T("24"))) {
+		return STRTABLE(IDS_AUTOZBUF24);
+	}
+	int fmt;
+	if (_stscanf(value, _T("-%d"), &fmt) == 1) {
+		switch (fmt) {
+		case D3DFMT_D16:
+			return STRTABLE(IDS_ZBUF_D3DFMT_D16);
+		case D3DFMT_D15S1:
+			return STRTABLE(IDS_ZBUF_D3DFMT_D15S1);
+		case D3DFMT_D24X8:
+			return STRTABLE(IDS_ZBUF_D3DFMT_D24X8);
+		case D3DFMT_D24S8:
+			return STRTABLE(IDS_ZBUF_D3DFMT_D24S8);
+		case D3DFMT_D24X4S4:
+			return STRTABLE(IDS_ZBUF_D3DFMT_D24X4S4);
+		case D3DFMT_D32:
+			return STRTABLE(IDS_ZBUF_D3DFMT_D32);
+		}
+	}
+	return ConfigDescOptionListEnum::GetValueTitle(value);
+}
+CString EnumDepthBuffer::GetValueDescription(const CString &value)
+{
+	if (value == CString(_T("max"))) {
+		return STRTABLE(IDS_AUTOMAXIMUM_DESC);
+	}
+	return ConfigDescOptionListEnum::GetValueDescription(value);
+}
 
-void EnumMultisample(std::vector<std::pair<CString, std::pair<CString, CString> > > &result)
+
+EnumMultisample EnumMultisampleInstance;
+void EnumMultisample::EnumConfigValues(std::vector<CString> &result)
 {
 	unsigned i, j;
 	int q, maxq;
@@ -124,8 +160,9 @@ void EnumMultisample(std::vector<std::pair<CString, std::pair<CString, CString> 
 	D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
 	D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
 	D3DDeviceCombo *pDeviceComboList;
+	descmap.clear();
 	result.clear();
-	result.push_back(std::make_pair(CString(_T("max,max")), std::make_pair(STRTABLE(IDS_AUTOMAXIMUM), STRTABLE(IDS_AUTOMAXIMUM_DESC))));
+	result.push_back(CString(_T("max,max")));
 	for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
 		pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
 		for (i = 0; i < pDeviceComboList->pMultiSampleTypeList->Count(); i++) {
@@ -133,16 +170,41 @@ void EnumMultisample(std::vector<std::pair<CString, std::pair<CString, CString> 
 			maxq = *(DWORD *) pDeviceComboList->pMultiSampleQualityList->GetPtr(i);
 			if (mtype != D3DMULTISAMPLE_NONMASKABLE && mtypeset.insert(mtype).second) {
 				if (mtype == D3DMULTISAMPLE_NONE) {
-					result.push_back(std::make_pair(CString(_T("0,0")), std::make_pair(STRTABLE(IDS_MSAA_NONE), STRTABLE(IDS_MSAA_NONE_DESC))));
+					result.push_back(CString(_T("0,0")));
 				} else {
 					for (q = 0; q < maxq; q++) {
 						CString key, val;
 						key.Format(IDS_MSAA_FORMAT, mtype, q);
 						val.Format(_T("%d,%d"), mtype, q);
-						result.push_back(std::make_pair(val, std::make_pair(key, EMPTYSTR)));
+						result.push_back(val);
+						descmap.insert(std::make_pair(val, key));
 					}
 				}
 			}
 		}
 	}
+}
+CString EnumMultisample::GetValueTitle(const CString &value)
+{
+	if (value == CString(_T("max,max"))) {
+		return STRTABLE(IDS_AUTOMAXIMUM);
+	}
+	if (value == CString(_T("0,0"))) {
+		return STRTABLE(IDS_MSAA_NONE);
+	}
+	std::map<CString, CString>::iterator it;
+	if ((it = descmap.find(value)) != descmap.end()) {
+		return it->second;
+	}
+	return ConfigDescOptionListEnum::GetValueTitle(value);
+}
+CString EnumMultisample::GetValueDescription(const CString &value)
+{
+	if (value == CString(_T("max,max"))) {
+		return STRTABLE(IDS_AUTOMAXIMUM_DESC);
+	}
+	if (value == CString(_T("0,0"))) {
+		return STRTABLE(IDS_MSAA_NONE_DESC);
+	}
+	return ConfigDescOptionListEnum::GetValueDescription(value);
 }

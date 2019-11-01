@@ -56,6 +56,11 @@
 #define IDS_CANTOPENCONFIGTOOL          53
 #define IDS_CANTOPENCONFIGTOOL_TITLE    54
 #define IDS_CONFIGDESCLIST              55
+#define IDS_FREETYPEFONT                56
+#define IDS_FREETYPEFONT_DESC           57
+#define IDS_GDIFONT_DESC                58
+#define IDS_FREETYPEFONT_FILTER         59
+#define IDS_RESOLUTION_DESC             60
 #define IDD_PATCHCONFIG_DIALOG          102
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129

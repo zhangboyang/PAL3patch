@@ -60,7 +60,7 @@ protected:
 	int m_IsAdvMode;
 	int m_OptDescShowing;
 	int m_LockSelUpdate;
-	std::vector<std::pair<CString, std::pair<CString, CString> > > m_EnumList;
+	std::vector<CString> m_EnumList;
 
 	static void OnMouseMoveCallbackWarpper(void *ptr, int btnid);
 	void SetRadioBtnStyle(int btnid, int bold, int underline);
