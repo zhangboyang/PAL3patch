@@ -14,7 +14,7 @@ struct ConfigDescOptionItem {
 class ConfigDescOptionListEnum {
 public:
 	virtual void EnumConfigValues(std::vector<CString> &result) = 0;
-	virtual bool TranslateSelectedValue(HWND hWnd, CString &value);
+	virtual bool TranslateSelectedValue(CWnd *listWnd, CString &value);
 	virtual bool IsValueEqual(const CString &lstval, const CString &selval);
 	virtual CString GetValueTitle(const CString &value);
 	virtual CString GetValueDescription(const CString &value);

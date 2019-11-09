@@ -244,9 +244,9 @@ BEGIN
     IDS_CANTOPENCONFIGTOOL_TITLE "无法打开"
     IDS_CONFIGDESCLIST      "CHS"
     IDS_FREETYPEFONT        "选择一个外部字体文件 ..."
-    IDS_FREETYPEFONT_DESC   "使用 FreeType 渲染“%s”中的第 %s 个字体"
-    IDS_GDIFONT_DESC        "使用 GDI 渲染字体“%s”"
-    IDS_FREETYPEFONT_FILTER "字体文件 (*.ttf;*.ttc;*.otf)|*.ttf;*.ttc;*.otf|所有文件 (*.*)|*.*||"
+    IDS_FREETYPEFONT_DESC   "使用 FreeType 引擎渲染“%s”中的第 %s 个字体。"
+    IDS_GDIFONT_DESC        "使用 GDI 引擎渲染字体“%s”。"
+    IDS_FREETYPEFONT_FILTER "字体文件 (*.ttf; *.ttc; *.otf)|*.ttf;*.ttc;*.otf|所有文件 (*.*)|*.*||"
     IDS_RESOLUTION_DESC     "游戏将使用“%s”分辨率。"
 END
 

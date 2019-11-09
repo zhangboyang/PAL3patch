@@ -72,7 +72,7 @@ CString EnumFontface::GetValueDescription(const CString &value)
 	desc.Format(STRTABLE(IDS_GDIFONT_DESC), (LPCTSTR) value);
 	return desc;
 }
-bool EnumFontface::TranslateSelectedValue(HWND hWnd, CString &value)
+bool EnumFontface::TranslateSelectedValue(CWnd *listWnd, CString &value)
 {
 	if (value == CString(_T("freetype:"))) {
 		TCHAR curdir[MAXLINE];
@@ -84,7 +84,7 @@ bool EnumFontface::TranslateSelectedValue(HWND hWnd, CString &value)
 		CString filters = STRTABLE(IDS_FREETYPEFONT_FILTER);
 		OutputDebugString(filters);
 
-		CFileDialog fileDlg(TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY, filters);
+		CFileDialog fileDlg(TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, filters, listWnd);
 
 		bool ret = (fileDlg.DoModal() == IDOK);
 		TCHAR *pathName = NULL;

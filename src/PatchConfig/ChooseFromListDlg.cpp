@@ -63,7 +63,7 @@ void CChooseFromListDlg::OnOK()
 	m_Choosen = m_EnumList.GetCurSel();
 	if (m_Choosen >= 0) {
 		m_Result = (*m_pEnumData)[m_Choosen];
-		if (m_pEnumObj->TranslateSelectedValue(m_hWnd, m_Result)) {
+		if (m_pEnumObj->TranslateSelectedValue(this, m_Result)) {
 			CDialog::OnOK();
 		}
 	} else {

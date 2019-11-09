@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 
-bool ConfigDescOptionListEnum::TranslateSelectedValue(HWND hWnd, CString &value)
+bool ConfigDescOptionListEnum::TranslateSelectedValue(CWnd *listWnd, CString &value)
 {
 	return true;
 }
