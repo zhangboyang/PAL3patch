@@ -2,13 +2,13 @@
 #define PAL3PATCHCONFIG_PATCHVERSIONINFO
 
 #ifdef BUILD_FOR_PAL3
-#define PATCH_VERSION_CSTR "v2.0"
+#define PATCH_VERSION_CSTR "v2.1"
 #define PATCH_APPNAME _T("PAL3-PatchConfig")
 #endif
 
 
 #ifdef BUILD_FOR_PAL3A
-#define PATCH_VERSION_CSTR "v2.0"
+#define PATCH_VERSION_CSTR "v2.1"
 #define PATCH_APPNAME _T("PAL3A-PatchConfig")
 #endif
 

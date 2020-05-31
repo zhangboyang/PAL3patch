@@ -167,6 +167,10 @@ void set_pauseresume(int state)
 {
     state = !!state;
     if (pause_state != state) {
+        if (state) {
+            skipupdate_state = 2;
+            state = 1;
+        }
         pause_state = state;
         run_hooks_witharg(HOOKID_GAMEPAUSERESUME, &pause_state, NULL);
     }
@@ -227,8 +231,12 @@ static MAKE_ASMPATCH(gameloop_normal)
 static MAKE_ASMPATCH(gameloop_sleep)
 {
     set_pauseresume(1);
-    call_gameloop_hooks(GAMELOOP_SLEEP, NULL);
-    Sleep(100);
+    if (skipupdate_state == 1) {
+        skipupdate_state = 0;
+    } else {
+        call_gameloop_hooks(GAMELOOP_SLEEP, NULL);
+        Sleep(100);
+    }
 }
 static int (*gbBinkVideo_SFLB_OpenFile)(struct gbBinkVideo *, const char *, HWND, int, int) = NULL;
 static MAKE_THISCALL(int, gbBinkVideo_OpenFile, struct gbBinkVideo *this, const char *szFileName, HWND hWnd, int bChangeScreenMode, int nOpenFlag)

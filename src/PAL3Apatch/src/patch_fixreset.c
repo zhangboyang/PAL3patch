@@ -4,9 +4,15 @@
 static LRESULT WINAPI SendMessageA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     LRESULT ret;
-    if (Msg == 0x590) call_onlostdevice_hooks();
+    if (Msg == 0x590) {
+        call_onlostdevice_hooks();
+        set_pauseresume(1);
+    }
     ret = SendMessageA(hWnd, Msg, wParam, lParam);
-    if (Msg == 0x591) call_onresetdevice_hooks();
+    if (Msg == 0x591) {
+        call_onresetdevice_hooks();
+        set_pauseresume(0);
+    }
     return ret;
 }
 

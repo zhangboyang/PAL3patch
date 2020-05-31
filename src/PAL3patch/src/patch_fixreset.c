@@ -191,6 +191,7 @@ static void OnDeviceLost_hook()
     RenderTarget_OnDeviceLost(pRenderTarget);
     CTrail_OnDeviceLost(pCTrail);
     call_onlostdevice_hooks();
+    set_pauseresume(1);
 }
 static void OnResetDevice_hook()
 {
@@ -198,6 +199,7 @@ static void OnResetDevice_hook()
     CTrail_OnResetDevice(pCTrail);
     UnderWater_OnResetDevice(UnderWater_Inst());
     call_onresetdevice_hooks();
+    set_pauseresume(0);
 }
 
 

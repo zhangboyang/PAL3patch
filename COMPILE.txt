@@ -73,8 +73,8 @@
          在右侧取消选择“在运行时仅生成启动项目和依赖项”，
          然后点击“确定”关闭对话框即可
    附：使用 VC++ 2013 编译 FreeType 库的方法
-    （1）下载 FreeType 2.10.1 源代码（源码包文件名为 freetype-2.10.1.tar.gz）
-    （2）解压缩并打开 C:\freetype-2.10.1\builds\windows\vc2010\freetype.sln
+    （1）下载 FreeType 2.10.2 源代码（源码包文件名为 freetype-2.10.2.tar.gz）
+    （2）解压缩并打开 C:\freetype-2.10.2\builds\windows\vc2010\freetype.sln
     （3）在“解决方案资源管理器”中，选中“freetype”这个工程：
          右键菜单中选择“属性”，在“属性页”窗口中，先在左上角“配置”处选择“所有配置”，右上角“平台”处选择“所有平台”，
          在左侧栏中选择“配置属性——常规”，将右侧“平台工具集”改为带 XP 支持的版本，
@@ -108,7 +108,7 @@
     （1）解压缩 SDK 安装包 dx90updatesdk.exe（注意只需解压缩，无需安装）
     （2）在 VC++ 6.0 中配置好 VC++ 目录（添加 Include 目录的完整路径到引用目录最前面，添加 Lib 目录的完整路径到库目录最前面）
    附：使用 VC++ 6.0 编译 FreeType 库的方法
-    （1）下载 FreeType 2.10.1 源代码（源码包文件名为 freetype-2.10.1.tar.gz）
-    （2）解压缩并打开 C:\freetype-2.10.1\builds\windows\visualc\freetype.dsw 这个工程文件
+    （1）下载 FreeType 2.10.2 源代码（源码包文件名为 freetype-2.10.2.tar.gz）
+    （2）解压缩并打开 C:\freetype-2.10.2\builds\windows\visualc\freetype.dsw 这个工程文件
     （3）修改“Release Static”的工程配置，使之使用静态 C 运行库（LIBCMT.LIB），然后编译即可
 

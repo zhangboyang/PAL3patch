@@ -652,6 +652,32 @@ static void init_window_patch(int flag)
 
 
 
+int skipupdate_state = 0;
+static MAKE_ASMPATCH(check_skipupdate)
+{
+    R_EAX = M_DWORD(0x005833B8);
+    if (skipupdate_state) {
+        skipupdate_state = 1;
+        R_EAX = 0;
+    }
+}
+static MAKE_ASMPATCH(is_editorwindow)
+{
+    if (M_BYTE(0x00BFDA90) == 1) { // testcombat
+        LINK_CALL(0x00513380);
+    } else {
+        R_EAX = 0;
+        LINK_CALL(0x0051338D);
+    }
+}
+static void init_skipupdate_patch()
+{
+    INIT_ASMPATCH(check_skipupdate, 0x00541B7F, 5, "\xA1\xB8\x33\x58\x00");
+    INIT_ASMPATCH(is_editorwindow, 0x00541BA6, 5, "\xE8\xD5\x17\xFD\xFF");
+}
+
+
+
 
 
 double str2scalefactor(const char *str)
@@ -725,6 +751,7 @@ static void init_resolution_and_window_patch()
     // init patches
     init_window_patch(window_cfg);
     patch_resolution_config(resolution_cfg);
+    init_skipupdate_patch();
 }
 
 
