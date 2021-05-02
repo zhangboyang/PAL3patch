@@ -97,6 +97,7 @@ static void init_stage2()
     INIT_PATCHSET(testcombat);
     INIT_PATCHSET(fixacquire);
     INIT_PATCHSET(fixattacksequen);
+    INIT_PATCHSET(commitarchive);
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch

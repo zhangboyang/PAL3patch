@@ -34,6 +34,53 @@ CPatchConfigApp theApp;
 // CPatchConfigApp initialization
 
 
+#ifdef BUILD_FOR_PAL3A
+static void CheckBadFilesForPAL3A()
+{
+	const char *main_exe = "PAL3A.EXE";
+	const char *bad_files[] = {
+		"BugslayerUtil.dll",
+		"CollidePackage.dll",
+		"dbghelp.dll",
+		"MSVCP60.DLL",
+		"MSVCRTD.DLL",
+		"PAL3A.pdb",
+		NULL // EOF
+	};
+	const char **ptr;
+	char buf[MAXLINE];
+	strcpy(buf, "");
+	for (ptr = bad_files; *ptr; ptr++) {
+		if (_access(*ptr, 0) == 0) {
+			strcat(buf, "    ");
+			strcat(buf, *ptr);
+			strcat(buf, "\n");
+		}
+	}
+	if (strlen(buf)) {
+		CString msg;
+		msg.Format(IDS_HAVEBADFILE, buf);
+		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_HAVEBADFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON1) == IDYES) {
+			bool has_error = false;
+			for (ptr = bad_files; *ptr; ptr++) {
+				if (_access(*ptr, 0) == 0) {
+					if (access(main_exe, 0) == 0) {
+						SetFileAttributesA(*ptr, FILE_ATTRIBUTE_NORMAL);
+						DeleteFileA(*ptr);
+					}
+				}
+				if (_access(*ptr, 0) == 0) {
+					has_error = true;
+				}
+			}
+			if (has_error) {
+				GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_CANTDELBADFILE), STRTABLE(IDS_CANTDELBADFILE_TITLE), MB_ICONWARNING);
+			}
+		}
+	}
+}
+#endif
+
 static int VerifyFileSHA1(const char *fn, const char *hash)
 {
 	char hashstr[SHA1_STR_SIZE];
@@ -95,14 +142,20 @@ BOOL CPatchConfigApp::InitInstance()
 
 	LoadConfigDescList(STRTABLE(IDS_CONFIGDESCLIST));
 
-	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGVERIFY)); //Sleep(1000);
+#ifdef BUILD_FOR_PAL3A
+	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGCHECKBADFILES));
+	CheckBadFilesForPAL3A();
+#endif
+
+	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGVERIFY));
 	if (!VerifyPatchFiles()) goto err;
 
-	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGLOADCFG)); //Sleep(1000);
+	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGLOADCFG));
 	if (!LoadConfigData()) goto err;
+
 	InitFolders();
 
-	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGENUMD3D)); //Sleep(1000);
+	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGENUMD3D));
 	InitD3DEnumeration();
 
 	DestroyPleaseWaitDlg();

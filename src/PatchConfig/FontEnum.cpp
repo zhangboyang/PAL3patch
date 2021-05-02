@@ -82,7 +82,6 @@ bool EnumFontface::TranslateSelectedValue(CWnd *listWnd, CString &value)
 		}
 		
 		CString filters = STRTABLE(IDS_FREETYPEFONT_FILTER);
-		OutputDebugString(filters);
 
 		CFileDialog fileDlg(TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, filters, listWnd);
 

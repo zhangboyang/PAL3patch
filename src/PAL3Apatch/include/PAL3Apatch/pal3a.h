@@ -2287,6 +2287,8 @@ struct FindArc;
 // PAL3A functions
 #define pal3amalloc ((malloc_funcptr_t) TOPTR(0x00541A65))
 #define pal3afree ((free_funcptr_t) TOPTR(0x005404C9))
+#define pal3afflush ((int (*)(FILE *)) TOPTR(0x00542ACD))
+#define pal3afclose ((int (*)(FILE *)) TOPTR(0x00541BA4))
 #define PrepareDir ((int (*)(void)) TOPTR(0x00523059))
 #define PAL3_InitGFX ((void (*)(void)) TOPTR(0x00406F01))
 #define PAL3_Create ((void (*)(HINSTANCE)) TOPTR(0x0040673A))

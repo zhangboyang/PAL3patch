@@ -113,6 +113,7 @@ static void init_stage2()
     INIT_PATCHSET(dpiawareness);
     INIT_PATCHSET(testcombat);
     INIT_PATCHSET(reginstalldir);
+    INIT_PATCHSET(commitarchive);
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch

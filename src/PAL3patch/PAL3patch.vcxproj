@@ -39,13 +39,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype-2.10.2\include</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype-2.10.2\objs\Win32\Debug Static</LibraryPath>
+    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype-2.10.4\include</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype-2.10.4\objs\Win32\Debug Static</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)_PAL3\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype-2.10.2\include</IncludePath>
-    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype-2.10.2\objs\Win32\Release Static</LibraryPath>
+    <IncludePath>$(IncludePath);C:\DX90SDK\Include;C:\freetype-2.10.4\include</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\DX90SDK\Lib;C:\freetype-2.10.4\objs\Win32\Release Static</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)_PAL3\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -115,6 +115,7 @@
     <ClCompile Include="src\patch_audiofreq.c" />
     <ClCompile Include="src\patch_cdpatch.c" />
     <ClCompile Include="src\patch_clampuilib.c" />
+    <ClCompile Include="src\patch_commitarchive.c" />
     <ClCompile Include="src\patch_console.c" />
     <ClCompile Include="src\patch_depcompatible.c" />
     <ClCompile Include="src\patch_disableime.c" />

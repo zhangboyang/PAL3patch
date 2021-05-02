@@ -95,7 +95,7 @@ static void save_reg()
     FILE *fp;
     
 retry:
-    fp = fopen(MY_REG_FILE, "w");
+    fp = fopen(MY_REG_FILE, "wc");
     if (fp) {
         fputs(UTF8_BOM_STR, fp);
         fprintf(fp, "; PAL3 registry save file\n");
@@ -111,6 +111,7 @@ retry:
         for (i = 0; i < nr_reg; i++) {
             fprintf(fp, "%-40s%-15s%08X\n", reg[i].key1, reg[i].key2, reg[i].val);
         }
+        fflush(fp);
         fclose(fp);
     } else {
         if (ask_retry) {

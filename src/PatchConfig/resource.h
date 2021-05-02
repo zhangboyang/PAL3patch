@@ -61,6 +61,12 @@
 #define IDS_GDIFONT_DESC                58
 #define IDS_FREETYPEFONT_FILTER         59
 #define IDS_RESOLUTION_DESC             60
+#define IDS_OPENCONFIGTOOLWAITFINISH    61
+#define IDS_HAVEBADFILE                 62
+#define IDS_HAVEBADFILE_TITLE           63
+#define IDS_WAITINGCHECKBADFILES        64
+#define IDS_CANTDELBADFILE              65
+#define IDS_CANTDELBADFILE_TITLE        66
 #define IDD_PATCHCONFIG_DIALOG          102
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129

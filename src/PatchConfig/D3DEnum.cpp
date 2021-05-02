@@ -4,6 +4,8 @@
 static IDirect3D9 *pD3D = NULL;
 static CD3DEnumeration *pD3DEnum = NULL;
 
+typedef IDirect3D9 * (WINAPI *typeofDirect3DCreate9)(UINT SDKVersion);
+
 int CheckDX90SDKVersion()
 {
 	if (D3D_SDK_VERSION != 31) {
@@ -23,7 +25,10 @@ int CheckDX90SDKVersion()
 
 void InitD3DEnumeration()
 {
-	pD3D = Direct3DCreate9(D3D_SDK_VERSION);
+	HMODULE hD3D9 = LoadLibrary(_T("d3d9.dll"));
+	typeofDirect3DCreate9 pDirect3DCreate9 = (typeofDirect3DCreate9) GetProcAddress(hD3D9, "Direct3DCreate9");
+
+	pD3D = pDirect3DCreate9(D3D_SDK_VERSION);
 	pD3DEnum = new CD3DEnumeration;
 	pD3DEnum->ConfirmDeviceCallback = NULL;
 	pD3DEnum->AppUsesDepthBuffer = TRUE;

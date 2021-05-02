@@ -1,6 +1,6 @@
 # freetype
-FREETYPE_INCLUDE_PATH := C:\freetype-2.10.2\include
-FREETYPE_LIBRARY_PATH := C:\freetype-2.10.2\objs\Win32\Release Static
+FREETYPE_INCLUDE_PATH := C:\freetype-2.10.4\include
+FREETYPE_LIBRARY_PATH := C:\freetype-2.10.4\objs\Win32\Release Static
 FREETYPE_LIB := freetype.lib
 
 # dx90sdk

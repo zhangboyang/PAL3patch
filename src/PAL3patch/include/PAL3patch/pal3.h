@@ -1698,6 +1698,8 @@ struct CCBAttackSequen {
 // PAL3 functions
 #define pal3malloc ((malloc_funcptr_t) TOPTR(0x005536A9))
 #define pal3free ((free_funcptr_t) TOPTR(0x00552F55))
+#define pal3fflush ((int (*)(FILE *)) TOPTR(0x0055491D))
+#define pal3fclose ((int (*)(FILE *)) TOPTR(0x0055371D))
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
 #define gbBinkVideo_Width(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C710, int, struct gbBinkVideo *), this)
 #define gbBinkVideo_Height(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0053C720, int, struct gbBinkVideo *), this)

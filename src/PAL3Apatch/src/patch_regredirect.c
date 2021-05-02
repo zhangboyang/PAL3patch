@@ -99,7 +99,7 @@ static void save_reg()
     FILE *fp;
     
 retry:
-    fp = fopen(MY_REG_FILE, "w");
+    fp = fopen(MY_REG_FILE, "wc");
     if (fp) {
         fputs(UTF8_BOM_STR, fp);
         fprintf(fp, "; PAL3A registry save file\n");
@@ -122,6 +122,7 @@ retry:
                 }
             }
         }
+        fflush(fp);
         fclose(fp);
     } else {
         if (ask_retry) {

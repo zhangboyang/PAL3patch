@@ -105,10 +105,11 @@ int TryRebuildConfigFile()
 	void *pData = LockResource(hData);
 	if (!pData) return 0;
 
-	FILE *fp = fopen(CONFIG_FILE, "wb");
+	FILE *fp = fopen(CONFIG_FILE, "wbc");
 	if (!fp) return 0;
 
 	fwrite(pData, 1, datalen, fp);
+	fflush(fp);
 	fclose(fp);
 
 	return 1;
@@ -145,7 +146,7 @@ int TrySaveConfigData()
 
 	std::map<CString, std::pair<int, CString> >::iterator mapit;
 	std::vector<std::pair<int, CString> >::iterator commentsit;
-	FILE *fp = fopen(CONFIG_FILE, "w");
+	FILE *fp = fopen(CONFIG_FILE, "wc");
 	if (!fp) return 0;
 	
 	// < <seq, type>, <key, val> >
@@ -189,6 +190,7 @@ int TrySaveConfigData()
 			fprintf(fp, "%s\n", valbuf_utf8);
 		}
 	}
-	if (fp) fclose(fp);
+	fflush(fp);
+	fclose(fp);
 	return 1;
 }

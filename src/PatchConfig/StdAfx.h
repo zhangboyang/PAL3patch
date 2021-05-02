@@ -34,6 +34,7 @@
 
 #include <wininet.h>
 #include <wincrypt.h>
+#include <io.h>
 
 #include <vector>
 #include <deque>
