@@ -95,6 +95,7 @@ static void save_reg()
     FILE *fp;
     
 retry:
+    SetFileAttributesA(MY_REG_FILE, FILE_ATTRIBUTE_NORMAL);
     fp = fopen(MY_REG_FILE, "wc");
     if (fp) {
         fputs(UTF8_BOM_STR, fp);

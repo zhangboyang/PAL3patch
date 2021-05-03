@@ -186,7 +186,7 @@ BEGIN
     IDS_CORRUPTCONFIG_TITLE "无法加载配置"
     IDS_WAITINGVERIFY       "正在校验补丁文件，请稍候 ..."
     IDS_WAITINGLOADCFG      "正在加载配置文件，请稍候 ..."
-    IDS_WAITINGENUMD3D      "正在枚举图形设备功能，请稍候 ..."
+    IDS_WAITINGENUMD3D      "正在检测图形设备，请稍候 ..."
     IDS_CONFIRMQUIT         "您真的要退出吗？您刚才所作的更改将会丢失。"
     IDS_CONFIRMQUIT_TITLE   "取消"
     IDS_CANTSAVE            "无法写入配置文件，请关闭其他可能正在使用配置文件的程序，然后重试。"
@@ -258,6 +258,8 @@ BEGIN
     IDS_WAITINGCHECKBADFILES "正在检查多余文件，请稍候 ..."
     IDS_CANTDELBADFILE      "删除多余文件时发生错误。"
     IDS_CANTDELBADFILE_TITLE "删除文件时出错"
+    IDS_NOD3D9              "请先安装 DirectX 9.0b 或更高版本。"
+    IDS_NOD3D9_TITLE        "找不到 Direct3D"
 END
 
 #endif    // Chinese (P.R.C.) resources

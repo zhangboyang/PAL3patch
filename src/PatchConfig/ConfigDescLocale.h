@@ -57,8 +57,8 @@ static ConfigDescItem LISTNAME[] = {
 		0, FALSE, TRUE,
 		NULL,
 		_T("常规设置"),
-		_T(""),
-		_T(""),
+		_T("此分类下是一些常规设置。"),
+		_T("请选择一个子项目进行配置。"),
 	},
 	{
 		1, FALSE, TRUE,
@@ -88,8 +88,8 @@ static ConfigDescItem LISTNAME[] = {
 		0, FALSE, TRUE,
 		NULL,
 		_T("图形设置"),
-		_T(""),
-		_T(""),
+		_T("此分类下包含游戏图形显示相关的设置。"),
+		_T("请选择一个子项目进行配置。"),
 	},
 	{
 		1, FALSE, TRUE,
@@ -150,14 +150,14 @@ static ConfigDescItem LISTNAME[] = {
 		NULL,
 		{
 			{ _T("禁用"), _T("禁用此选项后，鼠标可以随意移动。"), _T("0") },
-			{ _T("启用"), _T("启用此选项后，鼠标移动范围仅限游戏区域。\r\n注意：按 F12 键可以暂时禁用鼠标捕获功能。"), _T("1") },
+			{ _T("启用"), _T("启用此选项后，鼠标移动范围仅限游戏区域。\r\n提示：游戏中按 F9 键可以暂时停用鼠标捕获功能。"), _T("1") },
 		}
 	},
 	{
 		1, FALSE, TRUE,
 		_T("reduceinputlatency"),
 		_T("减少延迟"),
-		_T("本选项可以减少输入延迟（即鼠标接收到动作到动作被显示到显示器上的延迟），也有助于减少帧时抖动，但会有少量性能开销。"),
+		_T("本选项可以减少输入延迟（即鼠标接收到动作到动作被显示到显示器上的延迟），也有助于减少细微的不流畅感，但会有少量性能开销。"),
 		NULL,
 		NULL,
 		{
@@ -170,8 +170,8 @@ static ConfigDescItem LISTNAME[] = {
 		0, TRUE, TRUE,
 		NULL,
 		_T("字体设置"),
-		_T(""),
-		_T(""),
+		_T("此分类下包含游戏文字字体相关的设置。"),
+		_T("请选择一个子项目进行配置。"),
 	},
 	{
 		1, TRUE, TRUE,
@@ -226,14 +226,14 @@ static ConfigDescItem LISTNAME[] = {
 		0, TRUE, TRUE,
 		NULL,
 		_T("用户界面设置"),
-		_T(""),
-		_T(""),
+		_T("此分类下包含游戏交互界面相关的设置。"),
+		_T("请选择一个子项目进行配置。"),
 	},
 	{
 		1, TRUE, TRUE,
 		_T("uiscalefactor"),
 		_T("系统界面大小"),
-		_T("此选项可以调整游戏系统界面（如欢迎界面、状态界面、交易界面等）的大小。"),
+		_T("此选项可以调整游戏系统界面（如封面界面、状态界面、交易界面等）的大小。"),
 		NULL,
 		NULL,
 		{
@@ -259,8 +259,8 @@ static ConfigDescItem LISTNAME[] = {
 		1, TRUE, TRUE,
 		NULL,
 		_T("战斗界面设置"),
-		_T(""),
-		_T(""),
+		_T("此小分类下包含战斗界面相关的设置。"),
+		_T("请选择一个子项目进行配置。"),
 	},
 	{
 		2, TRUE, TRUE,
@@ -291,8 +291,8 @@ static ConfigDescItem LISTNAME[] = {
 		1, TRUE, TRUE,
 		NULL,
 		_T("场景界面设置"),
-		_T(""),
-		_T(""),
+		_T("此小分类下包含场景界面相关的设置。"),
+		_T("请选择一个子项目进行配置。"),
 	},
 	{
 		2, TRUE, TRUE,
@@ -349,8 +349,8 @@ static ConfigDescItem LISTNAME[] = {
 		0, TRUE, TRUE,
 		NULL,
 		_T("高级设置"),
-		_T(""),
-		_T(""),
+		_T("此分类下包含一些高级设置。"),
+		_T("请选择一个子项目进行配置。"),
 	},
 #ifdef BUILD_FOR_PAL3A
 	{
@@ -484,8 +484,8 @@ static ConfigDescItem LISTNAME[] = {
 		0, FALSE, TRUE,
 		NULL,
 		_T("实用工具"),
-		_T(""),
-		_T(""),
+		_T("此分类下是一些实用小工具。"),
+		_T("请选择一个子项目进行配置。"),
 	},
 	{
 		1, FALSE, TRUE,

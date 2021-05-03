@@ -23,17 +23,33 @@ int CheckDX90SDKVersion()
 	return 1;
 }
 
-void InitD3DEnumeration()
+int InitD3DEnumeration()
 {
-	HMODULE hD3D9 = LoadLibrary(_T("d3d9.dll"));
-	typeofDirect3DCreate9 pDirect3DCreate9 = (typeofDirect3DCreate9) GetProcAddress(hD3D9, "Direct3DCreate9");
+	HMODULE hD3D9;
+	typeofDirect3DCreate9 pDirect3DCreate9;
 
+	hD3D9 = LoadLibrary(_T("d3d9.dll"));
+	if (!hD3D9) {
+		goto fail;
+	}
+	pDirect3DCreate9 = (typeofDirect3DCreate9) GetProcAddress(hD3D9, "Direct3DCreate9");
+	if (!pDirect3DCreate9) {
+		goto fail;
+	}
 	pD3D = pDirect3DCreate9(D3D_SDK_VERSION);
+	if (!pD3D) {
+		goto fail;
+	}
 	pD3DEnum = new CD3DEnumeration;
 	pD3DEnum->ConfirmDeviceCallback = NULL;
 	pD3DEnum->AppUsesDepthBuffer = TRUE;
 	pD3DEnum->SetD3D(pD3D);
 	pD3DEnum->Enumerate();
+	return 1;
+
+fail:
+	GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_NOD3D9), STRTABLE(IDS_NOD3D9_TITLE), MB_ICONERROR);
+	return 0;
 }
 
 void CleanupD3DEnumeration()

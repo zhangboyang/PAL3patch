@@ -67,6 +67,8 @@
 #define IDS_WAITINGCHECKBADFILES        64
 #define IDS_CANTDELBADFILE              65
 #define IDS_CANTDELBADFILE_TITLE        66
+#define IDS_NOD3D9                      67
+#define IDS_NOD3D9_TITLE                68
 #define IDD_PATCHCONFIG_DIALOG          102
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129

@@ -2,7 +2,7 @@
 #define PAL3PATCHCONFIG_D3DENUM
 
 extern int CheckDX90SDKVersion();
-extern void InitD3DEnumeration();
+extern int InitD3DEnumeration();
 extern void CleanupD3DEnumeration();
 
 extern class EnumDisplayMode : public ConfigDescOptionListEnum {

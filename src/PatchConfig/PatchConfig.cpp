@@ -64,7 +64,7 @@ static void CheckBadFilesForPAL3A()
 			bool has_error = false;
 			for (ptr = bad_files; *ptr; ptr++) {
 				if (_access(*ptr, 0) == 0) {
-					if (access(main_exe, 0) == 0) {
+					if (_access(main_exe, 0) == 0) {
 						SetFileAttributesA(*ptr, FILE_ATTRIBUTE_NORMAL);
 						DeleteFileA(*ptr);
 					}
@@ -120,7 +120,7 @@ static int LoadConfigData()
 static void InitFolders()
 {
 	CreateDirectory(_T("save"), NULL);
-    CreateDirectory(_T("snap"), NULL);
+	CreateDirectory(_T("snap"), NULL);
 }
 
 
@@ -156,7 +156,7 @@ BOOL CPatchConfigApp::InitInstance()
 	InitFolders();
 
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGENUMD3D));
-	InitD3DEnumeration();
+	if (!InitD3DEnumeration()) goto err;
 
 	DestroyPleaseWaitDlg();
 

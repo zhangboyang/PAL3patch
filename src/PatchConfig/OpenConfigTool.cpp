@@ -20,15 +20,15 @@ void OpenConfigTool(CPatchConfigDlg *dlg)
 
 	ShowPleaseWaitDlg(dlg, STRTABLE(IDS_OPENCONFIGTOOLINPROGRESS));
 
-    memset(&si, 0, sizeof(si));
-    si.cb = sizeof(si);
+	memset(&si, 0, sizeof(si));
+	si.cb = sizeof(si);
 	memset(&pi, 0, sizeof(pi));
 
 	if (!CreateProcess(_T("config.exe"), NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
 		GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_CANTOPENCONFIGTOOL), STRTABLE(IDS_CANTOPENCONFIGTOOL_TITLE), MB_ICONERROR);
 	} else {
 		ShowPleaseWaitDlg(dlg, STRTABLE(IDS_OPENCONFIGTOOLWAITFINISH));
-	    while (MsgWaitForMultipleObjects(1, &pi.hProcess, FALSE, 100, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+		while (MsgWaitForMultipleObjects(1, &pi.hProcess, FALSE, 100, QS_ALLEVENTS) != WAIT_OBJECT_0) {
 			MSG msg;
 			while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
 				AfxGetApp()->PumpMessage();
@@ -38,7 +38,7 @@ void OpenConfigTool(CPatchConfigDlg *dlg)
 			}
 		}
 		CloseHandle(pi.hProcess);
-	    CloseHandle(pi.hThread);
+		CloseHandle(pi.hThread);
 	}
 
 	DestroyPleaseWaitDlg();

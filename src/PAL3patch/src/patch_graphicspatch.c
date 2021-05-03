@@ -479,7 +479,7 @@ static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam,
         if (!confirm_quit()) return 0;
     }
 
-    if (Msg == WM_KEYUP && wParam == VK_F12) {
+    if (Msg == WM_KEYUP && wParam == VK_F9) {
         clipcursor_enabled = !clipcursor_enabled;
         try_refresh_clipcursor();
         return 0;
