@@ -28,7 +28,7 @@ void NORETURN __fail(const char *file, int line, const char *func, const wchar_t
     len = strlen(msgbuf);
     vsnprintf(msgbuf + len, sizeof(msgbuf) - len, fmt, ap);
     OutputDebugString(msgbuf); OutputDebugString("\n");
-    FILE *fp = fopen(ERROR_FILE, "w");
+    FILE *fp = robust_fopen(ERROR_FILE, "w");
     if (fp) {
         write_logfile_header(fp);
         
@@ -70,7 +70,7 @@ void __plog(int is_warning, const char *file, int line, const char *func, const 
     OutputDebugString(msgbuf); OutputDebugString("\n");
     plog_lines++;
     if (plog_lines <= MAXLOGLINES) {
-        FILE *fp = fopen(LOG_FILE, plog_lines > 1 ? "a" : "w");
+        FILE *fp = plog_lines > 1 ? fopen(LOG_FILE, "a") : robust_fopen(LOG_FILE, "w");
         if (fp) {
             if (plog_lines == 1) {
                 write_logfile_header(fp);

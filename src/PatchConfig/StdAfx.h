@@ -35,6 +35,7 @@
 #include <wininet.h>
 #include <wincrypt.h>
 #include <io.h>
+#include <errno.h>
 
 #include <vector>
 #include <deque>
@@ -53,6 +54,7 @@ typedef unsigned int uint32_t;
 #include "ConfigDescData.h"
 #include "PatchConfigDlg.h"
 
+#include "BadFiles.h"
 #include "CheckForUpdates.h"
 #include "ChooseFromListDlg.h"
 #include "ConfigData.h"
@@ -67,8 +69,11 @@ typedef unsigned int uint32_t;
 #include "PleaseWaitDlg.h"
 #include "UACVirtualization.h"
 #include "wstr.h"
+#include "fsutil.h"
+#include "wal.h"
 
-#define stricmp _stricmp
+#define strdup _strdup
+#define wcsdup _wcsdup
 
 #define MAXLINE 4096
 

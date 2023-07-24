@@ -16,6 +16,11 @@ int is_spacechar(char ch)
 	return !!strchr(SPACECHAR_LIST, ch);
 }
 
+int is_digitchar(char ch)
+{
+    return '0' <= ch && ch <= '9';
+}
+
 int str2int(const char *valstr)
 {
     int result, ret;
@@ -31,6 +36,15 @@ double str2double(const char *valstr)
     ret = sscanf(valstr, "%lf", &result);
     if (ret != 1) fail("can't parse '%s' to double.", valstr);
     return result;
+}
+
+int str_startswith(const char *a, const char *b)
+{
+    return strncmp(a, b, strlen(b)) == 0;
+}
+int str_istartswith(const char *a, const char *b)
+{
+    return strnicmp(a, b, strlen(b)) == 0;
 }
 
 int str_endswith(const char *a, const char *b)
@@ -90,6 +104,68 @@ char *strtok_r(char *str, const char *delim, char **saveptr)
     return str;
 }
 
+
+char *str_tolower(char *s)
+{
+    char *p;
+    for (p = s; *p; p++) {
+        if ('A' <= *p && *p <= 'Z') {
+            *p += 'a' - 'A';
+        }
+    }
+    return s;
+}
+
+wchar_t *wcs_tolower(wchar_t *s)
+{
+    wchar_t *p;
+    for (p = s; *p; p++) {
+        if ('A' <= *p && *p <= 'Z') {
+            *p += 'a' - 'A';
+        }
+    }
+    return s;
+}
+
+int stricmp_C(const char *a, const char *b)
+{
+    char *la = str_tolower(strdup(a));
+    char *lb = str_tolower(strdup(b));
+    int ret = strcmp(la, lb);
+    free(la);
+    free(lb);
+    return ret;
+}
+
+int wcsicmp_C(const wchar_t *a, const wchar_t *b)
+{
+    wchar_t *la = wcs_tolower(wcsdup(a));
+    wchar_t *lb = wcs_tolower(wcsdup(b));
+    int ret = wcscmp(la, lb);
+    free(la);
+    free(lb);
+    return ret;
+}
+
+int strnicmp_C(const char *a, const char *b, size_t n)
+{
+    char *la = str_tolower(strdup(a));
+    char *lb = str_tolower(strdup(b));
+    int ret = strncmp(la, lb, n);
+    free(la);
+    free(lb);
+    return ret;
+}
+
+int wcsnicmp_C(const wchar_t *a, const wchar_t *b, size_t n)
+{
+    wchar_t *la = wcs_tolower(wcsdup(a));
+    wchar_t *lb = wcs_tolower(wcsdup(b));
+    int ret = wcsncmp(la, lb, n);
+    free(la);
+    free(lb);
+    return ret;
+}
 
 
 int iabs(int x)

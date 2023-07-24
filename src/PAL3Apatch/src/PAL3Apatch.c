@@ -30,10 +30,19 @@ static void self_check()
     PAL3A_STRUCT_SELFCHECK();
 }
 
-static void init_folders()
+static void prepare_fs()
 {
-    CreateDirectoryA("save", NULL);
-    CreateDirectoryA("snap", NULL);
+    create_dir("save");
+    create_dir("snap");
+    
+    create_dir("BaseData");
+    create_dir("BaseData\\ui");
+    create_dir("BaseData\\ui\\task");
+    
+    reset_attrib("Pal3Log.txt");
+    reset_attrib("EngineLog.txt");
+    
+    check_badfiles();
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -59,8 +68,8 @@ static void init_stage1()
 static void init_stage2()
 {
     
-    // init folders
-    init_folders();
+    // prepare filesystem environment
+    prepare_fs();
     
     // init memory allocators
     init_memory_allocators();
@@ -97,7 +106,8 @@ static void init_stage2()
     INIT_PATCHSET(testcombat);
     INIT_PATCHSET(fixacquire);
     INIT_PATCHSET(fixattacksequen);
-    INIT_PATCHSET(commitarchive);
+    INIT_PATCHSET(improvearchive);
+    INIT_PATCHSET(fixloading);
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch

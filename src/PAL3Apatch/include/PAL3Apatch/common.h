@@ -208,8 +208,6 @@
 
 // for InitCommonControlsEx
 #define _WIN32_IE	0x0300
-// for SHA1
-#define _WIN32_WINNT 0x0400
 
 
 // C headers
@@ -222,6 +220,8 @@
 #include <limits.h>
 #include <assert.h>
 #include <io.h>
+#include <errno.h>
+#include <stdint.h>
 
 // windows headers
 #include <windows.h>
@@ -232,11 +232,14 @@
 #include "tiny_d3d9sdk.h"
 
 // patch oldnames
-#define stricmp _stricmp
-#define strnicmp _strnicmp
 #define strdup _strdup
 #define wcsdup _wcsdup
-#define wcsicmp _wcsicmp
+
+// case-insensitive strcmp
+#define stricmp stricmp_C
+#define strnicmp strnicmp_C
+#define wcsicmp wcsicmp_C
+#define wcsnicmp wcsnicmp_C
 
 // make sure '\0' is added when using snprintf family functions
 #define safe_snprintf_helper(func, s, n, format, ...) ((n) > 0 ? ((s)[(n) - 1] = 0, func((s), (n) - 1, format, ##__VA_ARGS__)) : -1)
@@ -305,6 +308,9 @@ extern "C" {
 #include "fsutil.h"
 #include "bytevector.h"
 #include "setpal3path.h"
+#include "sha1.h"
+#include "wal.h"
+#include "badfiles.h"
 
 
 #ifdef __cplusplus

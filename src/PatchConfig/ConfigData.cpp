@@ -1,11 +1,15 @@
 #include "stdafx.h"
 
 #ifdef BUILD_FOR_PAL3
-#define CONFIG_FILE "PAL3patch.conf"
+#define CONFIG_FILE     "PAL3patch.conf"
+#define CONFIG_FILE_WAL "PAL3patch.wal"
+#define CONFIG_FILE_SUM "PAL3patch.sum"
 #endif
 
 #ifdef BUILD_FOR_PAL3A
-#define CONFIG_FILE "PAL3Apatch.conf"
+#define CONFIG_FILE     "PAL3Apatch.conf"
+#define CONFIG_FILE_WAL "PAL3Apatch.wal"
+#define CONFIG_FILE_SUM "PAL3Apatch.sum"
 #endif
 
 static int is_spacechar(char ch)
@@ -27,7 +31,9 @@ static int TryReadConfigFile()
 	cfgcomments.clear();
 	int ret = 0;
 	int seq = 0;
-    FILE *fp = fopen(CONFIG_FILE, "r");
+    FILE *fp = NULL;
+    if (!wal_check1(CONFIG_FILE, CONFIG_FILE_WAL, CONFIG_FILE_SUM)) goto done;
+    fp = robust_fopen(CONFIG_FILE, "r");
     if (!fp) goto done;
     char buf[MAXLINE];
     char *ptr;
@@ -105,12 +111,12 @@ int TryRebuildConfigFile()
 	void *pData = LockResource(hData);
 	if (!pData) return 0;
 
-	FILE *fp = fopen(CONFIG_FILE, "wbc");
+	FILE *fp = robust_fopen(CONFIG_FILE_WAL, "wb");
 	if (!fp) return 0;
-
 	fwrite(pData, 1, datalen, fp);
-	fflush(fp);
 	fclose(fp);
+
+	if (!wal_replace1(CONFIG_FILE, CONFIG_FILE_WAL, CONFIG_FILE_SUM)) return 0;
 
 	return 1;
 }
@@ -146,7 +152,7 @@ int TrySaveConfigData()
 
 	std::map<CString, std::pair<int, CString> >::iterator mapit;
 	std::vector<std::pair<int, CString> >::iterator commentsit;
-	FILE *fp = fopen(CONFIG_FILE, "wc");
+	FILE *fp = robust_fopen(CONFIG_FILE_WAL, "w");
 	if (!fp) return 0;
 	
 	// < <seq, type>, <key, val> >
@@ -190,7 +196,9 @@ int TrySaveConfigData()
 			fprintf(fp, "%s\n", valbuf_utf8);
 		}
 	}
-	fflush(fp);
 	fclose(fp);
+
+	if (!wal_replace1(CONFIG_FILE, CONFIG_FILE_WAL, CONFIG_FILE_SUM)) return 0;
+
 	return 1;
 }

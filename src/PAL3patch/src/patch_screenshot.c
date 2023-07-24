@@ -12,7 +12,7 @@ static void screenshot_hook()
     if (screenshot_flag) {
 
         // create directory
-        CreateDirectory("snap", NULL);
+        create_dir("snap");
         
         // prepare filename
         char buf[MAXLINE];

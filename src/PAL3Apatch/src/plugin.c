@@ -49,7 +49,7 @@ static void make_plugin_log_header()
     if (flag) return;
     flag = 1;
     
-    FILE *fp = fopen(PLUGIN_LOG_FILE, "w");
+    FILE *fp = robust_fopen(PLUGIN_LOG_FILE, "w");
     if (fp) {
         fputs(UTF8_BOM_STR, fp);
         fprintf(fp, "; PAL3Apatch Plugin Host Log File\n");

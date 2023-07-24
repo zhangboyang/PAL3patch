@@ -508,7 +508,7 @@ static LRESULT WINAPI DefWindowProcA_wrapper(HWND hWnd, UINT Msg, WPARAM wParam,
         if (!confirm_quit()) return 0;
     }
 
-    if (Msg == WM_KEYUP && wParam == VK_F9) {
+    if (Msg == WM_KEYUP && wParam == VK_F11) {
         clipcursor_enabled = !clipcursor_enabled;
         try_refresh_clipcursor();
         return 0;
@@ -828,6 +828,16 @@ void pop_drvinfo()
 }
 
 
+static char scursor_flag;
+static char scursor_PAL3_HasCommandLineParam(char *s)
+{
+    return scursor_flag;
+}
+static void init_softcursor_patch()
+{
+    scursor_flag = !!get_int_from_configfile("softcursor");
+    make_call(0x0040821A, scursor_PAL3_HasCommandLineParam);
+}
 
 
 MAKE_PATCHSET(graphicspatch)
@@ -839,4 +849,5 @@ MAKE_PATCHSET(graphicspatch)
     init_scalefactor_table();
     fpslimit_init();
     add_loading_splash();
+    init_softcursor_patch();
 }

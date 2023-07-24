@@ -107,7 +107,6 @@ void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz)
 
 	// generate test data
 	GetLocalTime(&wdata);
-	wdata.wYear = rand();
 
 	// write test file
     wfp = _tfopen(UACTESTFILE, _T("wb"));

@@ -19,9 +19,12 @@ static int config_line_cmp(const void *a, const void *b)
 void read_config_file()
 {
     cfglines = 0;
-    FILE *fp = fopen(CONFIG_FILE, "r");
+    FILE *fp = NULL;
+    if (wal_check1(CONFIG_FILE, CONFIG_FILE_WAL, CONFIG_FILE_SUM)) {
+        fp = robust_fopen(CONFIG_FILE, "r");
+    }
     if (!fp) {
-        fail_with_extra_msg(wstr_nocfgfile_text, wstr_nocfgfile_title, "config file '%s' not found.", CONFIG_FILE);
+        fail_with_extra_msg(wstr_nocfgfile_text, wstr_nocfgfile_title, "can't open config file '%s'.", CONFIG_FILE);
     }
     
     char buf[MAXLINE];

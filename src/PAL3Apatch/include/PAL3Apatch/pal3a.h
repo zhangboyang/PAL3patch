@@ -2248,6 +2248,7 @@ struct PropUI {
 
 struct FindArc;
 
+struct Archive;
 
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
@@ -2280,6 +2281,7 @@ struct FindArc;
 #define gbMatrixStack_Scale(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10026460, void, struct gbMatrixStack *, float, float, float), this, a2, a3, a4)
 #define gbMatrixStack_Translate(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10026430, void, struct gbMatrixStack *, float, float, float), this, a2, a3, a4)
 #define gbMatrixStack_Rotate(this, angle, axis) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10026350, void, struct gbMatrixStack *, float, struct gbVec3D *), this, angle, axis)
+#define gbImage2D_WriteJpegImage(this, filename, quality) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001F0D0, void, struct gbImage2D *, char *, int), this, filename, quality)
 
 
 
@@ -2287,6 +2289,7 @@ struct FindArc;
 // PAL3A functions
 #define pal3amalloc ((malloc_funcptr_t) TOPTR(0x00541A65))
 #define pal3afree ((free_funcptr_t) TOPTR(0x005404C9))
+#define pal3afsopen ((FILE *(*)(const char *, const char *, int)) TOPTR(0x00541DDE))
 #define pal3afflush ((int (*)(FILE *)) TOPTR(0x00542ACD))
 #define pal3afclose ((int (*)(FILE *)) TOPTR(0x00541BA4))
 #define PrepareDir ((int (*)(void)) TOPTR(0x00523059))
@@ -2350,6 +2353,10 @@ struct FindArc;
 #define CG_Entry_GetCGEntry ((struct CG_Entry *(*)(void)) TOPTR(0x0040779C))
 #define PropUI_Create(this, pWnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0046F512, void, struct PropUI *, struct UIWnd *), this, pWnd)
 #define MUIDialog_DoModel(this, havesnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0049B948, void, struct MUIDialog *, bool), this, havesnd)
+#define Archive_Save(this, index) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00523213, BOOL, struct Archive *, int), this, index)
+#define Archive_Load(this, index) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00522A3F, BOOL, struct Archive *, int), this, index)
+#define taskpic_SET_MOVIE_FLAG ((void (*)(int)) TOPTR(0x00454AED))
+#define UpdateLoading ((void (*)(void)) TOPTR(0x0041E824))
 
 
 
@@ -2359,6 +2366,7 @@ struct FindArc;
 #define PAL3_s_flag (*(unsigned *) TOPTR(0x00574D38))
 #define PAL3_s_gamestate (*(int *) TOPTR(0x00C01CE0))
 #define PAL3_s_bActive (*(int *) TOPTR(0x00574D34))
+#define PAL3_m_screenImg (*(struct gbImage2D *) TOPTR(0x008AC168))
 #define xmusic ((PAL3_s_flag & 4) == 0)
 #define ui_tex_color_gbf (*(struct gbRenderEffect **) TOPTR(0x0228F004))
 #define ui_color_blend_tex_gbf (*(struct gbRenderEffect **) TOPTR(0x0228F01C))
@@ -2366,6 +2374,7 @@ struct FindArc;
 #define g_msgbk (*(struct UIStaticFlex *) TOPTR(0x00C01D50))
 #define g_gamefrm (*(struct UIGameFrm *) TOPTR(0x00F79E98))
 #define g_input (*(struct GRPinput *) TOPTR(0x00BFEE30))
+#define g_lastupdateloading (*(DWORD *) TOPTR(0x00C1F70C))
 
 
 

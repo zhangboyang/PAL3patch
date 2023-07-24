@@ -72,6 +72,11 @@ static const wchar_t wstr_pluginreport_namepart_CHS[] = L"%s%hs%hs";
 static const wchar_t wstr_pluginreport_success_CHS[] = L"【成功】 %s\n";
 static const wchar_t wstr_pluginreport_failed_CHS[] = L"【失败】 %s （%s）\n";
 
+static const wchar_t wstr_havebadfile_text_CHS[] = L"游戏目录下存在以下多余文件：\n\n%hs\n这些文件可能影响游戏正常运行，\n是否立即彻底删除这些文件？";
+static const wchar_t wstr_havebadfile_title_CHS[] = L"是否删除多余文件";
+static const wchar_t wstr_cantdelbadfile_text_CHS[] = L"删除以下文件时发生错误：\n\n%hs\n请尝试手动删除这些多余文件。";
+static const wchar_t wstr_cantdelbadfile_title_CHS[] = L"删除多余文件时出错";
+
 
 // CHT
 static const char defaultfont_ftfilename_CHT[] = "mingliu.ttc";
@@ -122,6 +127,11 @@ const wchar_t *wstr_pluginreport_template;
 const wchar_t *wstr_pluginreport_namepart;
 const wchar_t *wstr_pluginreport_success;
 const wchar_t *wstr_pluginreport_failed;
+const wchar_t *wstr_havebadfile_text;
+const wchar_t *wstr_havebadfile_title;
+const wchar_t *wstr_cantdelbadfile_text;
+const wchar_t *wstr_cantdelbadfile_title;
+
 
 
 
@@ -150,6 +160,10 @@ void init_locale_early()
     IMPORT_LOCALE_ITEM(CHS, wstr_badcfgfile_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_badpath_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_badpath_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_havebadfile_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_havebadfile_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_cantdelbadfile_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_cantdelbadfile_title);
     
     if (target_codepage == CODEPAGE_CHT) { // CHT
         // FIXME

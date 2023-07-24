@@ -187,7 +187,7 @@ BEGIN
     IDS_WAITINGVERIFY       "正在校验补丁文件，请稍候 ..."
     IDS_WAITINGLOADCFG      "正在加载配置文件，请稍候 ..."
     IDS_WAITINGENUMD3D      "正在检测图形设备，请稍候 ..."
-    IDS_CONFIRMQUIT         "您真的要退出吗？您刚才所作的更改将会丢失。"
+    IDS_CONFIRMQUIT         "您真的要退出吗？您刚才所作的更改（如有）将会丢失。"
     IDS_CONFIRMQUIT_TITLE   "取消"
     IDS_CANTSAVE            "无法写入配置文件，请关闭其他可能正在使用配置文件的程序，然后重试。"
     IDS_CANTSAVE_TITLE      "写入配置时出错"
@@ -221,7 +221,7 @@ BEGIN
     IDS_CANTOPENGAMEFOLDER_TITLE "无法打开目录"
     IDS_OPENGAMEFOLDERINPROGRESS "正在打开目录“%s”，请稍候 ..."
     IDS_RESTOREDEFAULT_CONFIRM 
-                            "您确定要将所有设置重置为默认值吗？\n您对配置文件所作的所有修改都将立即丢失。"
+                            "您确定要将所有设置重置为默认值吗？\n该操作会将默认配置立即写入磁盘，无法撤销。"
     IDS_RESTOREDEFAULT_TITLE "恢复默认设置"
     IDS_RESTOREDEFAULT_CANCELED "操作已取消。"
     IDS_RESTOREDEFAULT_SUCCEED "所有设置已成功恢复为默认值。"
@@ -249,15 +249,15 @@ BEGIN
     IDS_FREETYPEFONT_FILTER "字体文件 (*.ttf; *.ttc; *.otf)|*.ttf;*.ttc;*.otf|所有文件 (*.*)|*.*||"
     IDS_RESOLUTION_DESC     "游戏将使用“%s”分辨率。"
     IDS_OPENCONFIGTOOLWAITFINISH "等待官方配置工具退出 ..."
-    IDS_HAVEBADFILE         "游戏目录下存在以下多余文件：\n\n%hs\n这些文件可能影响游戏正常运行，是否删除？"
+    IDS_HAVEBADFILE         "游戏目录下存在以下多余文件：\n\n%s\n这些文件可能影响游戏正常运行，\n是否立即彻底删除这些文件？"
     IDS_HAVEBADFILE_TITLE   "是否删除多余文件"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_WAITINGCHECKBADFILES "正在检查多余文件，请稍候 ..."
-    IDS_CANTDELBADFILE      "删除多余文件时发生错误。"
-    IDS_CANTDELBADFILE_TITLE "删除文件时出错"
+    IDS_CANTDELBADFILE      "删除以下文件时发生错误：\n\n%s\n请尝试手动删除这些多余文件。"
+    IDS_CANTDELBADFILE_TITLE "删除多余文件时出错"
     IDS_NOD3D9              "请先安装 DirectX 9.0b 或更高版本。"
     IDS_NOD3D9_TITLE        "找不到 Direct3D"
 END

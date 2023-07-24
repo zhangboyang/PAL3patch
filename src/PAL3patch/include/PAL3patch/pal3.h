@@ -1654,6 +1654,8 @@ struct CCBAttackSequen {
     BYTE m_bLocked;
 };
 
+struct Archive;
+
 // GBENGINE functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
 #define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A190, void, struct gbGfxManager_D3D *), this)
@@ -1694,10 +1696,12 @@ struct CCBAttackSequen {
 #define gbAudioManager_Get3DMasterVolume(this) ((this)->S_3DMasterVol)
 #define gbAudioManager_Set3DMasterVolume(this, a2) ((this)->S_3DMasterVol = (a2))
 #define gbVertPoolMgr_GetDynVertBuf(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021680, struct gbDynVertBuf *, struct gbVertPoolMgr *, unsigned int), this, a2)
+#define gbImage2D_WriteJpegImage(this, filename, quality) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001F5F0, void, struct gbImage2D *, char *, int), this, filename, quality)
 
 // PAL3 functions
 #define pal3malloc ((malloc_funcptr_t) TOPTR(0x005536A9))
 #define pal3free ((free_funcptr_t) TOPTR(0x00552F55))
+#define pal3fsopen ((FILE *(*)(const char *, const char *, int)) TOPTR(0x00553A61))
 #define pal3fflush ((int (*)(FILE *)) TOPTR(0x0055491D))
 #define pal3fclose ((int (*)(FILE *)) TOPTR(0x0055371D))
 #define PrepareDir ((int (*)(void)) TOPTR(0x00538320))
@@ -1764,6 +1768,8 @@ struct CCBAttackSequen {
 #define ui_tex_color_gbf (*(struct gbRenderEffect **) TOPTR(0x01895058))
 #define RenderTarget_Inst ((struct RenderTarget *(*)(void)) TOPTR(0x004BDB10))
 #define CCBRoleState_IsAlive(this, nIndex) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004ED010, bool, struct CCBRoleState *, int), this, nIndex)
+#define Archive_Save(this, index) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00538500, BOOL, struct Archive *, int), this, index)
+#define UpdateLoading ((void (*)(void)) TOPTR(0x0041F9F0))
 
 
 // global variables
@@ -1775,11 +1781,13 @@ struct CCBAttackSequen {
 #define PAL3_s_flag (*(unsigned *) TOPTR(0x005833BC))
 #define PAL3_m_gametime (*(float *) TOPTR(0x00BFDAA0))
 #define PAL3_m_pCBSystem (*(struct CCBSystem **) TOPTR(0x00BFDA74))
+#define PAL3_m_screenImg (*(struct gbImage2D *) TOPTR(0x008ACC10))
 #define g_pVFileSys (*(struct gbVFileSystem **) TOPTR(gboffset + 0x1015D3A8))
 #define g_gamefrm (*(struct UIGameFrm *) TOPTR(0x00DB9FD0))
 #define g_bink (*(struct gbBinkVideo *) TOPTR(0x00A3A7D8))
 #define g_CurrentTime (*(double *) TOPTR(gboffset + 0x1015D338))
 #define g_input (*(struct GRPinput *) TOPTR(0x00BFAD70))
+#define g_lastupdateloading (*(DWORD *) TOPTR(0x00C12B20))
 
 
 

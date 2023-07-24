@@ -40,10 +40,12 @@ static void fix_unpacker_bug()
     make_uint(funcaddr + 0x6B, 0x00000014);
 }
 
-static void init_folders()
+static void prepare_fs()
 {
-    CreateDirectoryA("save", NULL);
-    CreateDirectoryA("snap", NULL);
+    create_dir("save");
+    create_dir("snap");
+    reset_attrib("Pal3Log.txt");
+    reset_attrib("EngineLog.txt");
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -71,8 +73,8 @@ static void init_stage2()
     // fix unpacker bug that would crash game when music is disabled in config.ini
     fix_unpacker_bug();
     
-    // init folders
-    init_folders();
+    // prepare filesystem environment
+    prepare_fs();
     
     // init memory allocators
     init_memory_allocators();
@@ -113,7 +115,8 @@ static void init_stage2()
     INIT_PATCHSET(dpiawareness);
     INIT_PATCHSET(testcombat);
     INIT_PATCHSET(reginstalldir);
-    INIT_PATCHSET(commitarchive);
+    INIT_PATCHSET(improvearchive);
+    INIT_PATCHSET(fixloading);
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch

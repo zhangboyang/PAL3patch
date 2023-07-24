@@ -46,7 +46,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "BUILD_FOR_PAL3A" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "BUILD_FOR_PAL3A" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /FR /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x804 /d "NDEBUG" /d "_AFXDLL"
@@ -101,7 +101,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "BUILD_FOR_PAL3" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "BUILD_FOR_PAL3" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "BUILD_FOR_PAL3" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_UNICODE" /FR /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x804 /d "BUILD_FOR_PAL3" /d "NDEBUG"
@@ -154,6 +154,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\BadFiles.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CheckForUpdates.cpp
 # End Source File
 # Begin Source File
@@ -183,6 +187,10 @@ SOURCE=.\dxutil.cpp
 # Begin Source File
 
 SOURCE=.\FontEnum.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\fsutil.cpp
 # End Source File
 # Begin Source File
 
@@ -231,12 +239,20 @@ SOURCE=.\UACVirtualization.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\wal.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\wstr.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\BadFiles.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\CheckForUpdates.h
@@ -276,6 +292,10 @@ SOURCE=.\dxutil.h
 # Begin Source File
 
 SOURCE=.\FontEnum.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\fsutil.h
 # End Source File
 # Begin Source File
 
@@ -320,6 +340,10 @@ SOURCE=.\StdAfx.h
 # Begin Source File
 
 SOURCE=.\UACVirtualization.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\wal.h
 # End Source File
 # Begin Source File
 

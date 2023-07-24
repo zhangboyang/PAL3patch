@@ -61,6 +61,10 @@ extern const wchar_t *wstr_pluginreport_template;
 extern const wchar_t *wstr_pluginreport_namepart;
 extern const wchar_t *wstr_pluginreport_success;
 extern const wchar_t *wstr_pluginreport_failed;
+extern const wchar_t *wstr_havebadfile_text;
+extern const wchar_t *wstr_havebadfile_title;
+extern const wchar_t *wstr_cantdelbadfile_text;
+extern const wchar_t *wstr_cantdelbadfile_title;
 
 #endif
 #endif

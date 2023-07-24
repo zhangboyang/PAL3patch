@@ -85,7 +85,8 @@ MAKE_PATCHSET(fixacquire);
 MAKE_PATCHSET(preciseresmgr);
 MAKE_PATCHSET(audiofreq);
 MAKE_PATCHSET(reginstalldir);
-MAKE_PATCHSET(commitarchive);
+MAKE_PATCHSET(improvearchive);
+MAKE_PATCHSET(fixloading);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;

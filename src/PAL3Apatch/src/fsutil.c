@@ -78,7 +78,17 @@ int is_relpath(const char *filepath)
     return !(*filepath == '\\' || (filepath[0] && filepath[1] == ':'));
 }
 
-// read file as a string, will skip utf8 bom, return NULL if failed
+char *replace_extension(const char *filepath, const char *new_extension)
+{
+    char *old_extension = strrchr(get_filepart(filepath), '.');
+    size_t old_len = strlen(filepath) - (old_extension ? strlen(old_extension) : 0);
+    char *ret = malloc(old_len + strlen(new_extension) + 1);
+    memcpy(ret, filepath, old_len);
+    strcpy(ret + old_len, new_extension);
+    return ret;
+}
+
+// read file as a string, return NULL if failed
 // will allocate memory, don't forget to free
 char *read_file_as_cstring(const char *filepath)
 {
@@ -118,6 +128,7 @@ static int wfilename_cmp(const void *a, const void *b)
     const wchar_t * const *pb = b;
     return wcsicmp(*pa, *pb);
 }
+
 
 // enum files in given directory
 //  return value is total file count
@@ -191,4 +202,59 @@ done:
 fail:
     sum = -1;
     goto done;
+}
+
+
+int create_dir(const char *dirpath)
+{
+    return !!CreateDirectoryA(dirpath, NULL);
+}
+
+int file_exists(const char *filepath)
+{
+    return GetFileAttributesA(filepath) != 0xffffffff;
+}
+
+int reset_attrib(const char *filepath)
+{
+    return !!SetFileAttributesA(filepath, FILE_ATTRIBUTE_ARCHIVE);
+}
+
+#define ROBUST_MAXTRY 10
+#define ROBUST_WAIT   100
+
+FILE *robust_fopen(const char *filename, const char *mode)
+{
+    FILE *ret;
+    int i;
+    for (i = 0; i < ROBUST_MAXTRY; i++) {
+        if (i) Sleep(ROBUST_WAIT);
+        reset_attrib(filename);
+        ret = fopen(filename, mode);
+        if (ret || errno == ENOENT) break;
+    }
+    return ret;
+}
+
+int safe_fclose(FILE **fp)
+{
+    int ret = 0;
+    if (*fp) {
+        ret = fclose(*fp);
+        *fp = NULL;
+    }
+    return ret;
+}
+
+int robust_unlink(const char *filename)
+{
+    int ret;
+    int i;
+    for (i = 0; i < ROBUST_MAXTRY; i++) {
+        if (i) Sleep(ROBUST_WAIT);
+        reset_attrib(filename);
+        ret = _unlink(filename);
+        if (ret == 0 || errno == ENOENT) break;
+    }
+    return ret;
 }

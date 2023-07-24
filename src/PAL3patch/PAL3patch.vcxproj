@@ -115,7 +115,6 @@
     <ClCompile Include="src\patch_audiofreq.c" />
     <ClCompile Include="src\patch_cdpatch.c" />
     <ClCompile Include="src\patch_clampuilib.c" />
-    <ClCompile Include="src\patch_commitarchive.c" />
     <ClCompile Include="src\patch_console.c" />
     <ClCompile Include="src\patch_depcompatible.c" />
     <ClCompile Include="src\patch_disableime.c" />
@@ -129,6 +128,7 @@
     <ClCompile Include="src\patch_fixfov.c" />
     <ClCompile Include="src\patch_fixhockshopbuy.c" />
     <ClCompile Include="src\patch_fixlineupui.c" />
+    <ClCompile Include="src\patch_fixloading.c" />
     <ClCompile Include="src\patch_fixlongkuiattack.c" />
     <ClCompile Include="src\patch_fixmemfree.c" />
     <ClCompile Include="src\patch_fixortho.c" />
@@ -142,6 +142,7 @@
     <ClCompile Include="src\patch_fixunderwater.c" />
     <ClCompile Include="src\patch_forcesettexture.c" />
     <ClCompile Include="src\patch_graphicspatch.c" />
+    <ClCompile Include="src\patch_improvearchive.c" />
     <ClCompile Include="src\patch_kahantimer.c" />
     <ClCompile Include="src\patch_kfspeed.c" />
     <ClCompile Include="src\patch_nocpk.c" />
@@ -160,12 +161,14 @@
     <ClCompile Include="src\patch_uireplacefont.c" />
     <ClCompile Include="src\patch_uireplacetexf.c" />
     <ClCompile Include="src\plugin.c" />
+    <ClCompile Include="src\sha1.c" />
     <ClCompile Include="src\texturehook.c" />
     <ClCompile Include="src\transform.c" />
     <ClCompile Include="src\unpackerentry.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\wal.c" />
     <ClCompile Include="src\wstr.c" />
   </ItemGroup>
   <ItemGroup>
@@ -189,9 +192,11 @@
     <ClInclude Include="include\PAL3patch\PAL3patch.h" />
     <ClInclude Include="include\PAL3patch\patch_common.h" />
     <ClInclude Include="include\PAL3patch\plugin.h" />
+    <ClInclude Include="include\PAL3patch\sha1.h" />
     <ClInclude Include="include\PAL3patch\texturehook.h" />
     <ClInclude Include="include\PAL3patch\tiny_d3d9sdk.h" />
     <ClInclude Include="include\PAL3patch\transform.h" />
+    <ClInclude Include="include\PAL3patch\wal.h" />
     <ClInclude Include="include\PAL3patch\wstr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
