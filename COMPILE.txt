@@ -91,11 +91,12 @@
     （2）调试较为困难
    环境配置：
     （1）强烈建议使用 Windows XP 操作系统
-    （2）安装 VC++ 6.0，最好打 SP6 补丁
+    （2）安装 VC++ 6.0（并安装 SP6 补丁）
     （3）安装 Dev-C++ 4.9.9.2
     （4）安装 MSYS 1.0.11（安装时需配置好路径，让其使用 Dev-C++ 带有的 GCC 3.4.2，即在 msys 命令行中能够执行 gcc）
-    （5）安装 DirectX 9.0b SDK（具体步骤见后）
-    （6）解压缩并编译 FreeType 库（具体步骤见后）
+    （5）安装 Platform SDK（需要使用 February 2003 版本）
+    （6）安装 DirectX 9.0b SDK（具体步骤见后）
+    （7）解压缩并编译 FreeType 库（具体步骤见后）
    编译方法：
     （1）按实际情况修改 Makefile （如 freetype 库的路径、DirectX SDK 的路径等）
     （2）运行 MSYS，在命令行中切换目录到 src 目录下，执行 make 命令即可编译

@@ -179,7 +179,12 @@ void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 		m_CfgDesc = CString(pItem->description);
 	}
 	if (reload) {
-		m_RunfuncBtn.ShowWindow(!!pItem->runfunc);
+		if (pItem->runfunc) {
+			m_RunfuncBtn.SetWindowText(pItem->btntext ? pItem->btntext : pItem->title);
+			m_RunfuncBtn.ShowWindow(TRUE);
+		} else {
+			m_RunfuncBtn.ShowWindow(FALSE);
+		}
 	}
 
 	m_RadioVal = -1;
@@ -301,7 +306,8 @@ BEGIN_MESSAGE_MAP(CPatchConfigDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_TOGGLEADVOPTS, OnToggleAdvOpts)
-	ON_NOTIFY(TVN_SELCHANGED, IDC_CFGTREE, OnSelchangedCfgtree)
+	ON_NOTIFY(TVN_SELCHANGEDW, IDC_CFGTREE, OnSelchangedCfgtreeW)
+	ON_NOTIFY(TVN_SELCHANGEDA, IDC_CFGTREE, OnSelchangedCfgtreeA)
 	ON_BN_CLICKED(IDC_CHOOSEFROMLIST, OnChoosefromlist)
 	ON_EN_CHANGE(IDC_CFGVAL, OnChangeCfgval)
 	ON_BN_CLICKED(IDC_RADIO1, OnRadioClicked)
@@ -379,10 +385,19 @@ void CPatchConfigDlg::OnToggleAdvOpts()
 	ToggleAdvMode(FALSE);
 }
 
-
-void CPatchConfigDlg::OnSelchangedCfgtree(NMHDR* pNMHDR, LRESULT* pResult) 
+void CPatchConfigDlg::OnSelchangedCfgtreeW(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
+	NM_TREEVIEWW* pNMTreeView = (NM_TREEVIEWW*)pNMHDR;
+	// TODO: Add your control notification handler code here
+	
+	ConfigDescItem *pItem = (ConfigDescItem *) pNMTreeView->itemNew.lParam;
+	SelectConfigItem(pItem);
+
+	*pResult = 0;
+}
+void CPatchConfigDlg::OnSelchangedCfgtreeA(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	NM_TREEVIEWA* pNMTreeView = (NM_TREEVIEWA*)pNMHDR;
 	// TODO: Add your control notification handler code here
 	
 	ConfigDescItem *pItem = (ConfigDescItem *) pNMTreeView->itemNew.lParam;

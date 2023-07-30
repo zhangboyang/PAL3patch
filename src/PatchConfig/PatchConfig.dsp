@@ -56,7 +56,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib wininet.lib delayimp.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386 /delayload:advapi32.dll /delayload:winspool.drv /delayload:comdlg32.dll /delayload:shell32.dll /delayload:wininet.dll
+# ADD LINK32 unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib winmm.lib wininet.lib delayimp.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386 /nodefaultlib:"kernel32.lib" /nodefaultlib:"advapi32.lib" /nodefaultlib:"user32.lib" /nodefaultlib:"gdi32.lib" /nodefaultlib:"shell32.lib" /nodefaultlib:"comdlg32.lib" /nodefaultlib:"version.lib" /nodefaultlib:"mpr.lib" /nodefaultlib:"rasapi32.lib" /nodefaultlib:"winmm.lib" /nodefaultlib:"winspool.lib" /nodefaultlib:"vfw32.lib" /nodefaultlib:"secur32.lib" /nodefaultlib:"oleacc.lib" /nodefaultlib:"oledlg.lib" /nodefaultlib:"sensapi.lib" /delayload:advapi32.dll /delayload:winspool.drv /delayload:comdlg32.dll /delayload:shell32.dll /delayload:wininet.dll
 # SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "PatchConfig - Win32 Debug PAL3A"
@@ -111,7 +111,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib wininet.lib delayimp.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386 /delayload:advapi32.dll /delayload:winspool.drv /delayload:comdlg32.dll /delayload:shell32.dll /delayload:wininet.dll
+# ADD LINK32 unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib winmm.lib wininet.lib delayimp.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386 /nodefaultlib:"kernel32.lib" /nodefaultlib:"advapi32.lib" /nodefaultlib:"user32.lib" /nodefaultlib:"gdi32.lib" /nodefaultlib:"shell32.lib" /nodefaultlib:"comdlg32.lib" /nodefaultlib:"version.lib" /nodefaultlib:"mpr.lib" /nodefaultlib:"rasapi32.lib" /nodefaultlib:"winmm.lib" /nodefaultlib:"winspool.lib" /nodefaultlib:"vfw32.lib" /nodefaultlib:"secur32.lib" /nodefaultlib:"oleacc.lib" /nodefaultlib:"oledlg.lib" /nodefaultlib:"sensapi.lib" /delayload:advapi32.dll /delayload:winspool.drv /delayload:comdlg32.dll /delayload:shell32.dll /delayload:wininet.dll
 # SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "PatchConfig - Win32 Debug PAL3"

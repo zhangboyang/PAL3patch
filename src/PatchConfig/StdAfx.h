@@ -9,6 +9,7 @@
 #define _WIN32_WINNT 0x0501
 #else
 #define _WIN32_WINNT 0x0400
+#define _WIN32_IE 0x0500
 #endif
 
 #if !(defined(BUILD_FOR_PAL3) ^ defined(BUILD_FOR_PAL3A))
@@ -32,8 +33,10 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 
+#include <shlwapi.h>
 #include <wininet.h>
 #include <wincrypt.h>
+
 #include <io.h>
 #include <errno.h>
 

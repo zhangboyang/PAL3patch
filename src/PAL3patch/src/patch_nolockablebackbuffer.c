@@ -487,7 +487,7 @@ MAKE_PATCHSET(nolockablebackbuffer)
     mf_tex_clamp = get_int_from_configfile("clampmovie");
     
     // load screenshot settings
-    ss_enable = get_int_from_configfile("saveimg");
+    ss_enable = !get_int_from_configfile("skipscreenshot");
     
     // lock/unlock hooks
     SIMPLE_PATCH(gboffset + 0x1001A20F, "\xC7\x81\x08\x07\x00\x00\x03\x00\x00\x00", "\xC7\x81\x08\x07\x00\x00\x02\x00\x00\x00", 10);

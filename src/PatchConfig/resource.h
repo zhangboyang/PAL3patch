@@ -18,7 +18,7 @@
 #define IDS_CANTSAVE                    14
 #define IDS_CANTSAVE_TITLE              15
 #define IDS_AUTORESOLUTION              16
-#define IDS_AUTOMAXIMUM                 17
+#define IDS_AUTOSELECT                  17
 #define IDS_AUTOZBUF16                  18
 #define IDS_AUTOZBUF24                  19
 #define IDS_ZBUF_D3DFMT_D16             20
@@ -30,7 +30,7 @@
 #define IDS_MSAA_NONE                   26
 #define IDS_MSAA_FORMAT                 27
 #define IDS_AUTORESOLUTION_DESC         28
-#define IDS_AUTOMAXIMUM_DESC            29
+#define IDS_AUTOSELECT_DESC             29
 #define IDS_MSAA_NONE_DESC              30
 #define IDS_APPTITLE                    31
 #define IDS_DEFAULTFONT                 32
@@ -69,7 +69,10 @@
 #define IDS_CANTDELBADFILE_TITLE        66
 #define IDS_NOD3D9                      67
 #define IDS_NOD3D9_TITLE                68
-#define IDD_PATCHCONFIG_DIALOG          102
+#define IDS_WAITINGCHECKSYSTEM          69
+#define IDS_BADCOMCTL32                 70
+#define IDS_BADCOMCTL32_TITLE           71
+#define IDD_PATCHCONFIG                 102
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129
 #define IDD_PLEASEWAIT                  130

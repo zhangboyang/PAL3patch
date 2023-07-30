@@ -113,7 +113,12 @@ static MAKE_ASMPATCH(zbuf)
 {
     struct CArrayList *this = TOPTR(R_ECX);
     if (zbuf_flag == INT_MAX) {
-        R_EAX = TOUINT(CArrayList_GetPtr(this, this->m_NumEntries - 1));
+        int *result = NULL;
+        if (!result) result = CArrayList_FindInt(this, D3DFMT_D24S8, NULL);
+        if (!result) result = CArrayList_FindInt(this, D3DFMT_D24X8, NULL);
+        if (!result) result = CArrayList_FindInt(this, D3DFMT_D16, NULL);
+        if (!result) result = CArrayList_GetPtr(this, 0);
+        R_EAX = TOUINT(result);
         return;
     } else if (zbuf_flag < 0) {
         zbuf_tmpint = -zbuf_flag;
@@ -126,10 +131,9 @@ static MAKE_ASMPATCH(zbuf)
                 if (!result) result = CArrayList_FindInt(this, D3DFMT_D16, NULL);
                 break;
             case 24:
-                // there no need to use stencil buffer
+                if (!result) result = CArrayList_FindInt(this, D3DFMT_D24S8, NULL);
                 if (!result) result = CArrayList_FindInt(this, D3DFMT_D24X8, NULL);
                 if (!result) result = CArrayList_FindInt(this, D3DFMT_D24X4S4, NULL);
-                if (!result) result = CArrayList_FindInt(this, D3DFMT_D24S8, NULL);
                 break;
             case 32:
                 if (!result) result = CArrayList_FindInt(this, D3DFMT_D32, NULL);
@@ -145,7 +149,7 @@ static MAKE_ASMPATCH(zbuf)
 }
 static void patch_depth_buffer_config(const char *cfgstr)
 {
-    zbuf_flag = (stricmp(cfgstr, "max") == 0) ? INT_MAX : str2int(cfgstr);
+    zbuf_flag = (stricmp(cfgstr, "auto") == 0) ? INT_MAX : str2int(cfgstr);
     if (zbuf_flag) {
         INIT_ASMPATCH(zbuf, gboffset + 0x10019E13, 7, "\x6A\x00\xE8\x96\xD0\xFF\xFF");
         INIT_ASMPATCH(zbuf, gboffset + 0x1001A12E, 7, "\x6A\x00\xE8\x7B\xCD\xFF\xFF");
@@ -188,8 +192,15 @@ static void set_multisample_config(struct CArrayList *tl, struct CArrayList *ql,
     const UINT msTypeArrayCount = sizeof(msTypeArray) / sizeof(msTypeArray[0]);
     int id;
     if (ms_tflag == INT_MAX) {
-        id = tl->m_NumEntries - 1;
-        *tret = *(int *) CArrayList_GetPtr(tl, id);
+        int *pt = NULL;
+        if (!pt) pt = CArrayList_FindInt(tl, D3DMULTISAMPLE_8_SAMPLES, &id);
+        if (!pt) pt = CArrayList_FindInt(tl, D3DMULTISAMPLE_4_SAMPLES, &id);
+        if (!pt) pt = CArrayList_FindInt(tl, D3DMULTISAMPLE_NONE, &id);
+        if (!pt) {
+            id = 0;
+            pt = CArrayList_GetPtr(tl, id);
+        }
+        *tret = *pt;
     } else if (ms_tflag >= (int) msTypeArrayCount) {
         fail("invalid multisample type configuration.");
     } else {
@@ -204,7 +215,7 @@ static void set_multisample_config(struct CArrayList *tl, struct CArrayList *ql,
     }
     int q = *(int *) CArrayList_GetPtr(ql, id);
     if (ms_qflag == INT_MAX) {
-        q = q - 1;
+        q = 0;
     } else if (ms_qflag >= q) {
         warning("multisample quality %d (max %d) not supported, fallback to default configuration.", ms_qflag, q);
         q = 0;
@@ -228,8 +239,8 @@ static void patch_multisample_config(const char *cfgstr)
     char *ptr = strchr(buf, ',');
     if (!ptr) fail("can't parse multiplesample config string.");
     *ptr++ = 0;
-    ms_tflag = (stricmp(buf, "max") == 0) ? INT_MAX : str2int(buf);
-    ms_qflag = (stricmp(ptr, "max") == 0) ? INT_MAX : str2int(ptr);
+    ms_tflag = (stricmp(buf, "auto") == 0) ? INT_MAX : str2int(buf);
+    ms_qflag = (stricmp(ptr, "auto") == 0) ? INT_MAX : str2int(ptr);
     if (ms_tflag || ms_qflag) {
         INIT_ASMPATCH(multisample_windowed, gboffset + 0x10019E2E , 16, "\xC7\x87\x98\x06\x00\x00\x00\x00\x00\x00\x89\x87\x94\x06\x00\x00");
         INIT_ASMPATCH(multisample_fullscreen, gboffset + 0x1001A15B, 12, "\x89\x86\xCC\x06\x00\x00\x89\xBE\xD0\x06\x00\x00");

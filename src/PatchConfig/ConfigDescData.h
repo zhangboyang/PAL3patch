@@ -36,7 +36,7 @@ struct ConfigDescItem {
 	// if this is a "function item"
 	//    here is the function will be invoked when button is clicked
 	void (*runfunc)(CPatchConfigDlg *dlg);
-
+	LPCTSTR btntext;
 
 	// if this is a "option item"
 	//    if item type is "radio", here is the list

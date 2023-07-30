@@ -22,7 +22,7 @@ public:
 
 // Dialog Data
 	//{{AFX_DATA(CPatchConfigDlg)
-	enum { IDD = IDD_PATCHCONFIG_DIALOG };
+	enum { IDD = IDD_PATCHCONFIG };
 	CButton	m_CancelBtn;
 	CButton	m_OKBtn;
 	CButton	m_RunfuncBtn;
@@ -76,7 +76,8 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnToggleAdvOpts();
-	afx_msg void OnSelchangedCfgtree(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSelchangedCfgtreeW(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSelchangedCfgtreeA(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnChoosefromlist();
 	afx_msg void OnChangeCfgval();
 	afx_msg void OnRadioClicked();

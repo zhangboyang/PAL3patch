@@ -34,6 +34,35 @@ CPatchConfigApp theApp;
 // CPatchConfigApp initialization
 
 
+static int CheckCOMCTL32()
+{
+	DWORD dwMajorVersion = 0;
+
+	HMODULE hCOMCTL32 = LoadLibrary(_T("comctl32.dll"));
+	if (hCOMCTL32) {
+		DLLGETVERSIONPROC pDllGetVersion;
+		pDllGetVersion = (DLLGETVERSIONPROC) GetProcAddress(hCOMCTL32, "DllGetVersion");
+		if (pDllGetVersion) {
+			DLLVERSIONINFO dvi;
+			HRESULT hr;
+			memset(&dvi, 0, sizeof(dvi));
+			dvi.cbSize = sizeof(dvi);
+			hr = (*pDllGetVersion)(&dvi);
+			if (SUCCEEDED(hr)) {
+				dwMajorVersion = dvi.dwMajorVersion;
+			}
+		}
+        FreeLibrary(hCOMCTL32);
+	}
+
+	if (dwMajorVersion >= 5) {
+		return 1;
+	} else {
+		GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_BADCOMCTL32), STRTABLE(IDS_BADCOMCTL32_TITLE), MB_ICONERROR);
+		return 0;
+	}
+}
+
 static int VerifyFileSHA1(const char *fn, const char *hash)
 {
 	char hashstr[SHA1_STR_SIZE];
@@ -110,6 +139,9 @@ BOOL CPatchConfigApp::InitInstance()
 
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGENUMD3D));
 	if (!InitD3DEnumeration()) goto err;
+
+	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGCHECKSYSTEM));
+	if (!CheckCOMCTL32()) goto err;
 
 	DestroyPleaseWaitDlg();
 

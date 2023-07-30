@@ -68,16 +68,19 @@ void CleanupD3DEnumeration()
 EnumDisplayMode EnumDisplayModeInstance;
 void EnumDisplayMode::EnumConfigValues(std::vector<CString> &result)
 {
-	unsigned i;
 	std::vector<std::pair<int, int> > dlist;
 	std::vector<std::pair<int, int> >::iterator it;
-	D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
-	for (i = 0; i < pD3DAdapterInfo->pDisplayModeList->Count(); i++) {
-		D3DDISPLAYMODE *pDisplayMode = (D3DDISPLAYMODE *) pD3DAdapterInfo->pDisplayModeList->GetPtr(i);
-		dlist.push_back(std::make_pair(pDisplayMode->Width, pDisplayMode->Height));
+
+	if (pD3DEnum->m_pAdapterInfoList->Count() > 0) {
+		unsigned i;
+		D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
+		for (i = 0; i < pD3DAdapterInfo->pDisplayModeList->Count(); i++) {
+			D3DDISPLAYMODE *pDisplayMode = (D3DDISPLAYMODE *) pD3DAdapterInfo->pDisplayModeList->GetPtr(i);
+			dlist.push_back(std::make_pair(pDisplayMode->Width, pDisplayMode->Height));
+		}
+		std::sort(dlist.begin(), dlist.end(), std::greater<std::pair<int, int> > ());
+		dlist.resize(std::unique(dlist.begin(), dlist.end()) - dlist.begin());
 	}
-	std::sort(dlist.begin(), dlist.end(), std::greater<std::pair<int, int> > ());
-	dlist.resize(std::unique(dlist.begin(), dlist.end()) - dlist.begin());
 
 	result.clear();
 	result.push_back(CString(_T("current")));
@@ -110,32 +113,35 @@ CString EnumDisplayMode::GetValueDescription(const CString &value)
 EnumDepthBuffer EnumDepthBufferInstance;
 void EnumDepthBuffer::EnumConfigValues(std::vector<CString> &result)
 {
-	unsigned i, j;
-	D3DFORMAT fmt;
-	std::set<D3DFORMAT> fmtset;
-	D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
-	D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
-	D3DDeviceCombo *pDeviceComboList;
 	result.clear();
-	result.push_back(CString(_T("max")));
+	result.push_back(CString(_T("auto")));
 	result.push_back(CString(_T("16")));
 	result.push_back(CString(_T("24")));
-	for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
-		pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
-		for (i = 0; i < pDeviceComboList->pDepthStencilFormatList->Count(); i++) {
-			fmt = *(D3DFORMAT *) pDeviceComboList->pDepthStencilFormatList->GetPtr(i);
-			if (fmtset.insert(fmt).second) {
-				CString str;
-				str.Format(_T("%d"), -fmt);
-				result.push_back(str);
+
+	if (pD3DEnum->m_pAdapterInfoList->Count() > 0) {
+		unsigned i, j;
+		D3DFORMAT fmt;
+		std::set<D3DFORMAT> fmtset;
+		D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
+		D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
+		D3DDeviceCombo *pDeviceComboList;
+		for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
+			pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
+			for (i = 0; i < pDeviceComboList->pDepthStencilFormatList->Count(); i++) {
+				fmt = *(D3DFORMAT *) pDeviceComboList->pDepthStencilFormatList->GetPtr(i);
+				if (fmtset.insert(fmt).second) {
+					CString str;
+					str.Format(_T("%d"), -fmt);
+					result.push_back(str);
+				}
 			}
 		}
 	}
 }
 CString EnumDepthBuffer::GetValueTitle(const CString &value)
 {
-	if (value == CString(_T("max"))) {
-		return STRTABLE(IDS_AUTOMAXIMUM);
+	if (value == CString(_T("auto"))) {
+		return STRTABLE(IDS_AUTOSELECT);
 	}
 	if (value == CString(_T("16"))) {
 		return STRTABLE(IDS_AUTOZBUF16);
@@ -164,8 +170,8 @@ CString EnumDepthBuffer::GetValueTitle(const CString &value)
 }
 CString EnumDepthBuffer::GetValueDescription(const CString &value)
 {
-	if (value == CString(_T("max"))) {
-		return STRTABLE(IDS_AUTOMAXIMUM_DESC);
+	if (value == CString(_T("auto"))) {
+		return STRTABLE(IDS_AUTOSELECT_DESC);
 	}
 	return ConfigDescOptionListEnum::GetValueDescription(value);
 }
@@ -174,31 +180,33 @@ CString EnumDepthBuffer::GetValueDescription(const CString &value)
 EnumMultisample EnumMultisampleInstance;
 void EnumMultisample::EnumConfigValues(std::vector<CString> &result)
 {
-	unsigned i, j;
-	int q, maxq;
-	D3DMULTISAMPLE_TYPE mtype;
-	std::set<D3DMULTISAMPLE_TYPE> mtypeset;
-	D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
-	D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
-	D3DDeviceCombo *pDeviceComboList;
 	descmap.clear();
 	result.clear();
-	result.push_back(CString(_T("max,max")));
-	for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
-		pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
-		for (i = 0; i < pDeviceComboList->pMultiSampleTypeList->Count(); i++) {
-			mtype = *(D3DMULTISAMPLE_TYPE *) pDeviceComboList->pMultiSampleTypeList->GetPtr(i);
-			maxq = *(DWORD *) pDeviceComboList->pMultiSampleQualityList->GetPtr(i);
-			if (mtype != D3DMULTISAMPLE_NONMASKABLE && mtypeset.insert(mtype).second) {
-				if (mtype == D3DMULTISAMPLE_NONE) {
-					result.push_back(CString(_T("0,0")));
-				} else {
-					for (q = 0; q < maxq; q++) {
-						CString key, val;
-						key.Format(IDS_MSAA_FORMAT, mtype, q);
-						val.Format(_T("%d,%d"), mtype, q);
-						result.push_back(val);
-						descmap.insert(std::make_pair(val, key));
+	result.push_back(CString(_T("auto,auto")));
+	result.push_back(CString(_T("0,0")));
+
+	if (pD3DEnum->m_pAdapterInfoList->Count() > 0) {
+		unsigned i, j;
+		int q, maxq;
+		D3DMULTISAMPLE_TYPE mtype;
+		std::set<D3DMULTISAMPLE_TYPE> mtypeset;
+		D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
+		D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
+		D3DDeviceCombo *pDeviceComboList;
+		for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
+			pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
+			for (i = 0; i < pDeviceComboList->pMultiSampleTypeList->Count(); i++) {
+				mtype = *(D3DMULTISAMPLE_TYPE *) pDeviceComboList->pMultiSampleTypeList->GetPtr(i);
+				maxq = *(DWORD *) pDeviceComboList->pMultiSampleQualityList->GetPtr(i);
+				if (mtype != D3DMULTISAMPLE_NONMASKABLE && mtypeset.insert(mtype).second) {
+					if (mtype != D3DMULTISAMPLE_NONE) {
+						for (q = 0; q < maxq; q++) {
+							CString key, val;
+							key.Format(IDS_MSAA_FORMAT, mtype, q);
+							val.Format(_T("%d,%d"), mtype, q);
+							result.push_back(val);
+							descmap.insert(std::make_pair(val, key));
+						}
 					}
 				}
 			}
@@ -207,8 +215,8 @@ void EnumMultisample::EnumConfigValues(std::vector<CString> &result)
 }
 CString EnumMultisample::GetValueTitle(const CString &value)
 {
-	if (value == CString(_T("max,max"))) {
-		return STRTABLE(IDS_AUTOMAXIMUM);
+	if (value == CString(_T("auto,auto"))) {
+		return STRTABLE(IDS_AUTOSELECT);
 	}
 	if (value == CString(_T("0,0"))) {
 		return STRTABLE(IDS_MSAA_NONE);
@@ -221,8 +229,8 @@ CString EnumMultisample::GetValueTitle(const CString &value)
 }
 CString EnumMultisample::GetValueDescription(const CString &value)
 {
-	if (value == CString(_T("max,max"))) {
-		return STRTABLE(IDS_AUTOMAXIMUM_DESC);
+	if (value == CString(_T("auto,auto"))) {
+		return STRTABLE(IDS_AUTOSELECT_DESC);
 	}
 	if (value == CString(_T("0,0"))) {
 		return STRTABLE(IDS_MSAA_NONE_DESC);

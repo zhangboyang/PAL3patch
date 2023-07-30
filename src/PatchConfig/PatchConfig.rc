@@ -73,7 +73,7 @@ IDR_MAINFRAME           ICON    DISCARDABLE     "res\\PatchConfig.ico"
 // Dialog
 //
 
-IDD_PATCHCONFIG_DIALOG DIALOGEX 0, 0, 365, 221
+IDD_PATCHCONFIG DIALOGEX 0, 0, 365, 221
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "补丁配置工具"
@@ -93,7 +93,7 @@ BEGIN
                     WS_VISIBLE | WS_TABSTOP,157,93,176,12
     CONTROL         "",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON | NOT 
                     WS_VISIBLE | WS_TABSTOP,157,109,176,12
-    PUSHBUTTON      "执行",IDC_RUNFUNC,214,106,60,20,NOT WS_VISIBLE
+    PUSHBUTTON      "",IDC_RUNFUNC,204,106,82,20,NOT WS_VISIBLE
     EDITTEXT        IDC_CFGVAL,155,129,101,14,ES_AUTOHSCROLL | NOT 
                     WS_VISIBLE
     PUSHBUTTON      "从列表中选择",IDC_CHOOSEFROMLIST,264,129,70,14,NOT 
@@ -134,7 +134,7 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO DISCARDABLE 
 BEGIN
-    IDD_PATCHCONFIG_DIALOG, DIALOG
+    IDD_PATCHCONFIG, DIALOG
     BEGIN
         LEFTMARGIN, 7
         VERTGUIDE, 123
@@ -196,7 +196,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_AUTORESOLUTION      "自动选择当前分辨率"
-    IDS_AUTOMAXIMUM         "自动选择最高配置"
+    IDS_AUTOSELECT          "自动选择合适配置"
     IDS_AUTOZBUF16          "自动选择 16 位深度缓存"
     IDS_AUTOZBUF24          "自动选择 24 位深度缓存"
     IDS_ZBUF_D3DFMT_D16     "仅 16 位深度缓存"
@@ -208,7 +208,7 @@ BEGIN
     IDS_MSAA_NONE           "关闭抗锯齿"
     IDS_MSAA_FORMAT         "%d 级多重采样，质量水平 %d"
     IDS_AUTORESOLUTION_DESC "补丁会在运行时自动检测屏幕分辨率。"
-    IDS_AUTOMAXIMUM_DESC    "补丁会在运行时自动选择最高配置。"
+    IDS_AUTOSELECT_DESC     "补丁会在运行时自动选择合适配置。"
     IDS_MSAA_NONE_DESC      "关闭抗锯齿功能。"
     IDS_APPTITLE            "补丁配置工具"
 END
@@ -260,6 +260,9 @@ BEGIN
     IDS_CANTDELBADFILE_TITLE "删除多余文件时出错"
     IDS_NOD3D9              "请先安装 DirectX 9.0b 或更高版本。"
     IDS_NOD3D9_TITLE        "找不到 Direct3D"
+    IDS_WAITINGCHECKSYSTEM  "正在检查系统环境，请稍候 ..."
+    IDS_BADCOMCTL32         "请先安装 IE 5.0 或更高版本。"
+    IDS_BADCOMCTL32_TITLE   "IE 版本过低"
 END
 
 #endif    // Chinese (P.R.C.) resources
