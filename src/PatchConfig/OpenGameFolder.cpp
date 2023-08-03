@@ -3,6 +3,9 @@
 
 static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR subdir)
 {
+	static TCHAR curdir[MAXLINE];
+	static bool curdir_flag = false;
+
 	TCHAR buf[MAXLINE];
 	LPCTSTR openpath;
 	CString msg;
@@ -11,7 +14,12 @@ static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR subdir)
 	msg.Format(IDS_OPENGAMEFOLDERINPROGRESS, subdir);
 	ShowPleaseWaitDlg(dlg, msg);
 
-	GetUACVirtualizedCurrentDirectory(buf, MAXLINE);
+	if (!curdir_flag) {
+		GetUACVirtualizedCurrentDirectory(curdir, MAXLINE);
+		curdir_flag = true;
+	}
+
+	_tcscpy(buf, curdir);
 	if (_tcslen(buf) + _tcslen(subdir) >= MAXLINE) {
 		openpath = subdir;
 	} else {
@@ -32,10 +40,12 @@ static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR subdir)
 
 void OpenSaveFolder(CPatchConfigDlg *dlg)
 {
+	create_dir("save");
 	OpenGameFolder(dlg, _T("save"));
 }
 
 void OpenSnapFolder(CPatchConfigDlg *dlg)
 {
+	create_dir("snap");
 	OpenGameFolder(dlg, _T("snap"));
 }

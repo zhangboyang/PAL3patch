@@ -32,6 +32,8 @@ void ShowPleaseWaitDlg(CWnd* fawnd, LPCTSTR msg)
 		waitdlg->GetParent()->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_ALLCHILDREN);
 		waitdlg->GetParent()->BeginModalState();
 	}
+
+	DoEvents();
 }
 CPleaseWaitDlg *GetPleaseWaitDlg()
 {

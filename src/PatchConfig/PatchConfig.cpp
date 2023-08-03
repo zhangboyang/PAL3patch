@@ -33,7 +33,6 @@ CPatchConfigApp theApp;
 /////////////////////////////////////////////////////////////////////////////
 // CPatchConfigApp initialization
 
-
 static int CheckCOMCTL32()
 {
 	DWORD dwMajorVersion = 0;
@@ -99,15 +98,6 @@ static int LoadConfigData()
 	return 1;
 }
 
-static void InitFolders()
-{
-	create_dir("save");
-	create_dir("snap");
-}
-
-
-
-
 BOOL CPatchConfigApp::InitInstance()
 {
 	// Standard initialization
@@ -135,8 +125,6 @@ BOOL CPatchConfigApp::InitInstance()
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGLOADCFG));
 	if (!LoadConfigData()) goto err;
 
-	InitFolders();
-
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGENUMD3D));
 	if (!InitD3DEnumeration()) goto err;
 
@@ -163,4 +151,12 @@ err:
 	DestroyPleaseWaitDlg();
 	CleanupD3DEnumeration();
 	return FALSE;
+}
+
+void DoEvents()
+{
+	MSG msg;
+	while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
+		AfxGetApp()->PumpMessage();
+	}
 }

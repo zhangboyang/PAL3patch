@@ -85,7 +85,7 @@ void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz)
 	// get current directory
 	r = GetCurrentDirectory(BUFLEN, curdir);
 	if (r == 0 || r > BUFLEN) goto fail;
-	if (!(_T('A') <= curdir[0] && curdir[0] <= _T('Z')) || (_T('a') <= curdir[0] && curdir[0] <= _T('z'))) goto fail;
+	if (!(_T('A') <= curdir[0] && curdir[0] <= _T('Z')) && !(_T('a') <= curdir[0] && curdir[0] <= _T('z'))) goto fail;
 	if (curdir[1] != _T(':') || curdir[2] != _T('\\')) goto fail;
 
 	// append curdir to storedir, without "X:"

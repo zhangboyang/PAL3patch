@@ -29,10 +29,7 @@ void OpenConfigTool(CPatchConfigDlg *dlg)
 	} else {
 		ShowPleaseWaitDlg(dlg, STRTABLE(IDS_OPENCONFIGTOOLWAITFINISH));
 		while (MsgWaitForMultipleObjects(1, &pi.hProcess, FALSE, 100, QS_ALLEVENTS) != WAIT_OBJECT_0) {
-			MSG msg;
-			while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
-				AfxGetApp()->PumpMessage();
-			}
+			DoEvents();
 			if (GetPleaseWaitDlg()->m_hWnd == GetForegroundWindow()) {
 				EnumWindows(SetForegroundIfMatched, (LPARAM) &pi);
 			}
