@@ -2250,6 +2250,31 @@ struct FindArc;
 
 struct Archive;
 
+struct RoleTaskLine {
+    int nType;
+    int ID;
+    char bFinished;
+    char taskpic[128];
+};
+struct std_vector_RoleTask {
+    char allocator;
+    struct RoleTask *_First;
+    struct RoleTask *_Last;
+    struct RoleTask *_End;
+};
+struct std_vector_RoleTaskLine {
+    char allocator;
+    struct RoleTaskLine *_First;
+    struct RoleTaskLine *_Last;
+    struct RoleTaskLine *_End;
+};
+struct RoleTaskPool {
+    struct std_vector_RoleTask m_TaskData;
+    struct std_vector_RoleTaskLine m_TaskLine;
+    struct TxtFile m_taskFile;
+    char _TaskPicFolder[128];
+};
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -2355,8 +2380,8 @@ struct Archive;
 #define MUIDialog_DoModel(this, havesnd) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0049B948, void, struct MUIDialog *, bool), this, havesnd)
 #define Archive_Save(this, index) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00523213, BOOL, struct Archive *, int), this, index)
 #define Archive_Load(this, index) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00522A3F, BOOL, struct Archive *, int), this, index)
-#define taskpic_SET_MOVIE_FLAG ((void (*)(int)) TOPTR(0x00454AED))
 #define UpdateLoading ((void (*)(void)) TOPTR(0x0041E824))
+#define gbCreateGraphManager ((struct gbGfxManager *(*)(struct gbGfxDriverInfo *)) TOPTR(gboffset + 0x1001DBF0))
 
 
 
@@ -2375,7 +2400,7 @@ struct Archive;
 #define g_gamefrm (*(struct UIGameFrm *) TOPTR(0x00F79E98))
 #define g_input (*(struct GRPinput *) TOPTR(0x00BFEE30))
 #define g_lastupdateloading (*(DWORD *) TOPTR(0x00C1F70C))
-
+#define PlayerMgr_m_RoleTask (*(struct RoleTaskPool *) TOPTR(0x00C10E78))
 
 
 // structure selfcheck
@@ -2504,6 +2529,7 @@ struct Archive;
     assert(sizeof(struct CG_UI) == 0x9A50); \
     assert(sizeof(struct BtnGroup) == 0x2E4); \
     assert(sizeof(struct PropUI) == 0x72C8); \
+    assert(sizeof(struct RoleTaskPool) == 0x2AC); \
 } while (0)
 
 

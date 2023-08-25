@@ -45,6 +45,9 @@ static const wchar_t wstr_cantsavereg_title_CHS[] = L"注册表重定向";
 static const wchar_t wstr_badregfile_text_CHS[] = L"注册表存档文件已损坏，是否继续？\n注意：若继续，前尘忆梦、小游戏的解锁状态可能会丢失。";
 static const wchar_t wstr_badregfile_title_CHS[] = L"注册表重定向";
 
+static const wchar_t wstr_nomutex_text_CHS[] = L"请先关闭正在运行中的游戏（或补丁配置工具）。";
+static const wchar_t wstr_nomutex_title_CHS[] = L"检测到冲突";
+
 static const wchar_t wstr_nocfgfile_text_CHS[] = L"无法读取补丁配置文件。请运行“补丁配置工具”来生成默认配置文件。";
 static const wchar_t wstr_nocfgfile_title_CHS[] = L"无法加载配置";
 
@@ -54,8 +57,17 @@ static const wchar_t wstr_badcfgfile_title_CHS[] = L"无法加载配置";
 static const wchar_t wstr_badpath_text_CHS[] = L"请将游戏文件置于全英文路径下，以防游戏运行出现问题。";
 static const wchar_t wstr_badpath_title_CHS[] = L"提示";
 
+static const wchar_t wstr_badiconv_text_CHS[] = L"文字编码转换测试不通过，游戏内文字可能会乱码。是否仍要进入游戏？";
+static const wchar_t wstr_badiconv_title_CHS[] = L"文字编码转换失败";
+
 static const wchar_t wstr_resetfailed_text_CHS[] = L"无法重置 Direct3D 设备，是否重试？\n\n按【回车】键重试；\n按【ESC】键退出游戏。";
 static const wchar_t wstr_resetfailed_title_CHS[] = L"重置失败";
+
+static const wchar_t wstr_resolutiontoolarge_text_CHS[] = L"将要使用 %dx%d 分辨率进行游戏。\n但该分辨率实在太大，可能导致游戏运行不稳定或无法运行。\n\n建议您使用“补丁配置工具”指定一个低于 %dx%d 的分辨率。\n\n是否仍要使用 %dx%d 分辨率进行游戏？";
+static const wchar_t wstr_resolutiontoolarge_title_CHS[] = L"游戏分辨率过高";
+
+static const wchar_t wstr_nogfxmgr_text_CHS[] = L"游戏初始化失败，请检查显卡驱动程序是否工作正常（或图形设置是否过高）。";
+static const wchar_t wstr_nogfxmgr_title_CHS[] = L"游戏初始化失败";
 
 static const wchar_t wstr_screenshot_msg_CHS[] = L"屏幕截图已保存至“%hs”";
 
@@ -102,14 +114,22 @@ const wchar_t *wstr_cantsavereg_text;
 const wchar_t *wstr_cantsavereg_title;
 const wchar_t *wstr_badregfile_text;
 const wchar_t *wstr_badregfile_title;
+const wchar_t *wstr_nomutex_text;
+const wchar_t *wstr_nomutex_title;
 const wchar_t *wstr_nocfgfile_text;
 const wchar_t *wstr_nocfgfile_title;
 const wchar_t *wstr_badcfgfile_text;
 const wchar_t *wstr_badcfgfile_title;
 const wchar_t *wstr_badpath_text;
 const wchar_t *wstr_badpath_title;
+const wchar_t *wstr_badiconv_text;
+const wchar_t *wstr_badiconv_title;
 const wchar_t *wstr_resetfailed_text;
 const wchar_t *wstr_resetfailed_title;
+const wchar_t *wstr_resolutiontoolarge_text;
+const wchar_t *wstr_resolutiontoolarge_title;
+const wchar_t *wstr_nogfxmgr_text;
+const wchar_t *wstr_nogfxmgr_title;
 const wchar_t *wstr_screenshot_msg;
 const wchar_t *wstr_punctuation_nohead;
 const wchar_t *wstr_punctuation_notail;
@@ -144,12 +164,16 @@ void init_locale_early()
     
     
     // init early strings
+    IMPORT_LOCALE_ITEM(CHS, wstr_nomutex_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_nomutex_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_nocfgfile_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_nocfgfile_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_badcfgfile_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_badcfgfile_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_badpath_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_badpath_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badiconv_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badiconv_title);
     
     if (target_codepage == CODEPAGE_CHT) { // CHT
         // FIXME
@@ -175,6 +199,10 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_badregfile_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_resolutiontoolarge_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_resolutiontoolarge_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_nogfxmgr_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_nogfxmgr_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_screenshot_msg);
     IMPORT_LOCALE_ITEM(CHS, wstr_punctuation_nohead);
     IMPORT_LOCALE_ITEM(CHS, wstr_punctuation_notail);

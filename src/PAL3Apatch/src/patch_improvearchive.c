@@ -1,8 +1,6 @@
 #include "common.h"
 
 #define MAX_TASKPIC_INDEX 1000
-static unsigned char taskpic[MAX_TASKPIC_INDEX];
-
 #define MAX_TASKPIC_SIZE (16 * 1024 * 1024)
 
 static const char taskpic_hdr_magic[8] = "TASKPIC";
@@ -31,8 +29,6 @@ static void load_taskpic(const char *filename)
     create_dir("BaseData\\ui");
     create_dir("BaseData\\ui\\task");
     
-    memset(taskpic, 0, sizeof(taskpic));
-    
     fp = fopen(filename, "rb");
     if (!fp) goto fail;
     
@@ -48,7 +44,6 @@ static void load_taskpic(const char *filename)
         if (pichdr.index < 0 || pichdr.index >= MAX_TASKPIC_INDEX) goto fail;
         if (pichdr.size < -1 || pichdr.size > MAX_TASKPIC_SIZE) goto fail;
         
-        taskpic[pichdr.index] = 1;
         if (pichdr.size < 0) goto skip;
         
         if (pichdr.size > bufsize) {
@@ -61,7 +56,7 @@ static void load_taskpic(const char *filename)
             if (fread(buf, 1, pichdr.size, fp) != (size_t) pichdr.size) goto fail;
         }
         
-        sprintf(picname, "BaseData\\ui\\task\\task%03d.JPG", i);
+        sprintf(picname, "BaseData\\ui\\task\\task%03d.JPG", pichdr.index);
         reset_attrib(picname);
         picfp = fopen(picname, "wb");
         if (!picfp) goto skip;
@@ -77,12 +72,8 @@ static void load_taskpic(const char *filename)
 skip:
         safe_fclose(&picfp);
     }
-
-    //MessageBox(NULL, "OK!", "load_taskpic", MB_OK);
-    goto done;
+    
 fail:
-    memset(taskpic, 1, sizeof(taskpic));
-done:
     safe_fclose(&picfp);
     safe_fclose(&fp);
     free(buf);
@@ -95,7 +86,6 @@ static void save_taskpic(const char *filename)
     int bufsize = 0;
     char *buf = NULL;
     
-    int i;
     struct taskpic_hdr hdr;
 
     fp = robust_fopen(filename, "wb");
@@ -103,20 +93,20 @@ static void save_taskpic(const char *filename)
     
     memset(&hdr, 0, sizeof(hdr));
     if (fwrite(&hdr, sizeof(hdr), 1, fp) != 1) goto fail;
-
+    
     memcpy(hdr.magic, taskpic_hdr_magic, sizeof(taskpic_hdr_magic));
-    for (i = 0; i < MAX_TASKPIC_INDEX; i++) {
+    struct RoleTaskLine *it;
+    for (it = PlayerMgr_m_RoleTask.m_TaskLine._First; it && it != PlayerMgr_m_RoleTask.m_TaskLine._Last; it++) {
         struct taskpic_pichdr pichdr;
         char picname[128];
         long picsize;
 
-        if (!taskpic[i]) continue;
         hdr.count++;
         
         memset(&pichdr, 0, sizeof(pichdr));
-        pichdr.index = i;
+        pichdr.index = it->ID;
         
-        sprintf(picname, "BaseData\\ui\\task\\task%03d.JPG", i);
+        sprintf(picname, "BaseData\\ui\\task\\task%03d.JPG", pichdr.index);
         picfp = fopen(picname, "rb");
         if (!picfp) goto skip;
         
@@ -150,14 +140,14 @@ static void save_taskpic(const char *filename)
 skip:
         safe_fclose(&picfp);
         memset(&pichdr, 0, sizeof(pichdr));
-        pichdr.index = i;
+        pichdr.index = it->ID;
         pichdr.size = -1;
         if (fwrite(&pichdr, sizeof(pichdr), 1, fp) != 1) goto fail;
     }
     
     if (fseek(fp, 0, SEEK_SET) != 0) goto fail;
     if (fwrite(&hdr, sizeof(hdr), 1, fp) != 1) goto fail;
-    //MessageBox(NULL, "OK!", "save_taskpic", MB_OK);
+    
 fail:
     safe_fclose(&picfp);
     safe_fclose(&fp);
@@ -309,24 +299,6 @@ static MAKE_THISCALL(BOOL, Archive_Load_wrapper, struct Archive *this, int index
     return ret;
 }
 
-
-static MAKE_THISCALL(void, taskpic_gbImage2D_WriteJpegImage_wrapper, struct gbImage2D *this, char *filename, int quality)
-{
-    int index;
-    if (sscanf(filename, "BaseData\\ui\\task\\task%d", &index) == 1) {
-        if (0 <= index && index < MAX_TASKPIC_INDEX) {
-            taskpic[index] = 1;
-        }
-    }
-    gbImage2D_WriteJpegImage(this, filename, quality);
-}
-
-static void taskpic_SET_MOVIE_FLAG_wrapper(int index)
-{
-    memset(taskpic, 0, sizeof(taskpic));
-    taskpic_SET_MOVIE_FLAG(index);
-}
-
 static MAKE_THISCALL(BOOL, my_Archive_Delete, struct Archive *this, int index)
 {
     struct arc_wal rm;
@@ -353,11 +325,6 @@ MAKE_PATCHSET(improvearchive)
     SIMPLE_PATCH_NOP(0x004A2676, "\x6A\x64\x50\xFF\x15\x38\x82\x55\x00", 9);
     
     INIT_WRAPPER_CALL(Archive_Load_wrapper, { 0x0045C91A, 0x004A2519 });
-    
-    make_branch(0x0041D82F, 0xE8, taskpic_gbImage2D_WriteJpegImage_wrapper, 6);
-    make_branch(0x0041D787, 0xE8, taskpic_gbImage2D_WriteJpegImage_wrapper, 6);
-    
-    INIT_WRAPPER_CALL(taskpic_SET_MOVIE_FLAG_wrapper, { 0x004549D7 });
     
     make_jmp(0x005236EC, my_Archive_Delete);
 }

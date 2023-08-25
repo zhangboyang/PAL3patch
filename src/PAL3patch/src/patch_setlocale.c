@@ -34,6 +34,36 @@ static void check_badpath()
     }
 }
 
+static void check_iconv()
+{
+    static const char helloworld_chs[] = "\xC4\xE3\xBA\xC3\xCA\xC0\xBD\xE7";
+    static const char helloworld_cht[] = "\xA7\x41\xA6\x6E\xA5\x40\xAC\xC9";
+    static const wchar_t helloworld_wstr[] = { 0x4F60, 0x597D, 0x4E16, 0x754C, 0 };
+    const char *helloworld_cstr;
+    char buf[MAXLINE];
+    wchar_t wbuf[MAXLINE];
+    
+    switch (target_codepage) {
+        case CODEPAGE_CHS: helloworld_cstr = helloworld_chs; break;
+        case CODEPAGE_CHT: helloworld_cstr = helloworld_cht; break;
+        default: return;
+    }
+    
+    memset(wbuf, 0, sizeof(wbuf));
+    if (MultiByteToWideChar(target_codepage, 0, helloworld_cstr, -1, wbuf, MAXLINE) != (int) wcslen(helloworld_wstr) + 1) goto fail;
+    if (wcscmp(wbuf, helloworld_wstr) != 0) goto fail;
+    
+    memset(buf, 0, sizeof(buf));
+    if (WideCharToMultiByte(target_codepage, 0, helloworld_wstr, -1, buf, MAXLINE, NULL, NULL) != (int) strlen(helloworld_cstr) + 1) goto fail;
+    if (strcmp(buf, helloworld_cstr) != 0) goto fail;
+    
+    return;
+fail:
+    if (MessageBoxW(NULL, wstr_badiconv_text, wstr_badiconv_title, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) != IDYES) {
+        die(0);
+    }
+}
+
 MAKE_PATCHSET(setlocale)
 {   
     if (flag == GAME_LOCALE_AUTODETECT) { // auto detect
@@ -48,6 +78,8 @@ MAKE_PATCHSET(setlocale)
     if (flag == GAME_LOCALE_CHS) target_codepage = CODEPAGE_CHS; // CHS
     else if (flag == GAME_LOCALE_CHT) target_codepage = CODEPAGE_CHT; // CHT
     else fail("unknown language flag %d in setlocale.", flag);
+    
+    check_iconv();
     
     if (system_codepage != target_codepage) {
         

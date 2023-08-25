@@ -48,7 +48,7 @@ int InitD3DEnumeration()
 	return 1;
 
 fail:
-	GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_NOD3D9), STRTABLE(IDS_NOD3D9_TITLE), MB_ICONERROR);
+	GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_NOD3D9), STRTABLE(IDS_NOD3D9_TITLE), MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
 	return 0;
 }
 

@@ -290,6 +290,12 @@ static void patch_resolution_config(const char *cfgstr)
         game_height = GAME_HEIGHT_ORG;
     }
     
+    if ((long long) game_width * game_height > GAME_WIDTH_SOFTLIMIT * GAME_HEIGHT_SOFTLIMIT) {
+        if (MessageBoxW_format(NULL, wstr_resolutiontoolarge_text, wstr_resolutiontoolarge_title, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND, game_width, game_height, GAME_WIDTH_SOFTLIMIT, GAME_HEIGHT_SOFTLIMIT, game_width, game_height) != IDYES) {
+            die(0);
+        }
+    }
+    
     /* calc basic game rect */
     set_frect_ltwh(&game_frect, 0, 0, game_width, game_height);
     set_frect_ltwh(&game_frect_original_lt, 0, 0, GAME_WIDTH_ORG, GAME_HEIGHT_ORG);
@@ -851,6 +857,21 @@ static void init_softcursor_patch()
 }
 
 
+static struct gbGfxManager *gbCreateGraphManager_wrapper(struct gbGfxDriverInfo *pinfo)
+{
+    struct gbGfxManager *pgfx = gbCreateGraphManager(pinfo);
+    if (!pgfx) {
+        try_goto_desktop();
+        MessageBoxW(game_hwnd, wstr_nogfxmgr_text, wstr_nogfxmgr_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+    }
+    return pgfx;
+}
+static void init_gfxmgr_checker()
+{
+    make_branch(0x00406F19, 0xE8, gbCreateGraphManager_wrapper, 6);
+}
+
+
 MAKE_PATCHSET(graphicspatch)
 {
     patch_refreshrate_config(get_string_from_configfile("game_refreshrate"));
@@ -861,4 +882,5 @@ MAKE_PATCHSET(graphicspatch)
     fpslimit_init();
     add_loading_splash();
     init_softcursor_patch();
+    init_gfxmgr_checker();
 }

@@ -60,6 +60,9 @@ extern PATCHAPI void print_wstring_end(void);
 #define GAME_WIDTH_ORG 800
 #define GAME_HEIGHT_ORG 600
 
+#define GAME_WIDTH_SOFTLIMIT 4096
+#define GAME_HEIGHT_SOFTLIMIT 4096
+
 // all patchs
 MAKE_PATCHSET(cdpatch);
 MAKE_PATCHSET(regredirect);

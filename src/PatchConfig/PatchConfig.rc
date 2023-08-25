@@ -263,6 +263,8 @@ BEGIN
     IDS_WAITINGCHECKSYSTEM  "正在检查系统环境，请稍候 ..."
     IDS_BADCOMCTL32         "请先安装 IE 5.0 或更高版本。"
     IDS_BADCOMCTL32_TITLE   "IE 版本过低"
+    IDS_NOMUTEX             "请先关闭正在运行中的游戏（或补丁配置工具）。"
+    IDS_NOMUTEX_TITLE       "检测到冲突"
 END
 
 #endif    // Chinese (P.R.C.) resources

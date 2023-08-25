@@ -31,7 +31,7 @@ void CheckBadFilesForPAL3A()
 	if (!buf.IsEmpty()) {
 		CString msg;
 		msg.Format(IDS_HAVEBADFILE, (LPCTSTR) buf);
-		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_HAVEBADFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON1) == IDYES) {
+		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_HAVEBADFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON1 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES) {
 			buf.Empty();
 			for (ptr = bad_files; *ptr; ptr++) {
 				if (robust_unlink(*ptr) != 0 && errno != ENOENT) {
@@ -42,7 +42,7 @@ void CheckBadFilesForPAL3A()
 			}
 			if (!buf.IsEmpty()) {
 				msg.Format(IDS_CANTDELBADFILE, buf);
-				GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CANTDELBADFILE_TITLE), MB_ICONWARNING);
+				GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CANTDELBADFILE_TITLE), MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
 			}
 		}
 	}

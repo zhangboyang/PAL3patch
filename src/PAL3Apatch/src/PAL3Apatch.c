@@ -45,6 +45,23 @@ static void prepare_fs()
     check_badfiles();
 }
 
+static void acquire_game_mutex()
+{
+	HANDLE hMutex;
+	DWORD dwWaitResult;
+
+	hMutex = CreateMutexA(NULL, FALSE, "PAL3Apatch_Mutex");
+	if (hMutex == NULL) goto fail;
+
+	dwWaitResult = WaitForSingleObject(hMutex, 100);
+	if (dwWaitResult != WAIT_OBJECT_0 && dwWaitResult != WAIT_ABANDONED) goto fail;
+
+	return;
+fail:
+	MessageBoxW(NULL, wstr_nomutex_text, wstr_nomutex_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+	die(0);
+}
+
 // init_stage1() should be called before unpacker is executed (if exists)
 static void init_stage1()
 {
@@ -56,6 +73,9 @@ static void init_stage1()
     
     // init early locale
     init_locale_early();
+    
+    // acquire mutex
+    acquire_game_mutex();
     
     // read config
     read_config_file();

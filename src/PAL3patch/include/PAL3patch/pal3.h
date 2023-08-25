@@ -1697,6 +1697,8 @@ struct Archive;
 #define gbAudioManager_Set3DMasterVolume(this, a2) ((this)->S_3DMasterVol = (a2))
 #define gbVertPoolMgr_GetDynVertBuf(this, a2) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10021680, struct gbDynVertBuf *, struct gbVertPoolMgr *, unsigned int), this, a2)
 #define gbImage2D_WriteJpegImage(this, filename, quality) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001F5F0, void, struct gbImage2D *, char *, int), this, filename, quality)
+#define gbCreateGraphManager ((struct gbGfxManager *(*)(struct gbGfxDriverInfo *)) TOPTR(gboffset + 0x1001E0C0))
+
 
 // PAL3 functions
 #define pal3malloc ((malloc_funcptr_t) TOPTR(0x005536A9))

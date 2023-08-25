@@ -72,6 +72,8 @@
 #define IDS_WAITINGCHECKSYSTEM          69
 #define IDS_BADCOMCTL32                 70
 #define IDS_BADCOMCTL32_TITLE           71
+#define IDS_NOMUTEX                     72
+#define IDS_NOMUTEX_TITLE               73
 #define IDD_PATCHCONFIG                 102
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129

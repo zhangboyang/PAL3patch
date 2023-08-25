@@ -12,12 +12,13 @@ void check_badfiles()
 		"PAL3A.pdb",
 		NULL // EOF
 	};
-
+	
+	if (!file_exists(main_exe)) return;
+	
 	struct cstr buf;
 	const char **ptr;
 	cstr_ctor(&buf);
 	
-	if (!file_exists(main_exe)) return;
 	cstr_clear(&buf);
 	for (ptr = bad_files; *ptr; ptr++) {
 		if (file_exists(*ptr)) {
@@ -27,7 +28,7 @@ void check_badfiles()
 		}
 	}
 	if (!cstr_empty(&buf)) {
-		if (MessageBoxW_format(NULL, wstr_havebadfile_text, wstr_havebadfile_title, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON1, cstr_getstr(&buf)) == IDYES) {
+		if (MessageBoxW_format(NULL, wstr_havebadfile_text, wstr_havebadfile_title, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON1 | MB_TOPMOST | MB_SETFOREGROUND, cstr_getstr(&buf)) == IDYES) {
 			cstr_clear(&buf);
 			for (ptr = bad_files; *ptr; ptr++) {
 				if (robust_unlink(*ptr) != 0 && errno != ENOENT) {
@@ -37,8 +38,10 @@ void check_badfiles()
 				}
 			}
 			if (!cstr_empty(&buf)) {
-				MessageBoxW_format(NULL, wstr_cantdelbadfile_text, wstr_cantdelbadfile_title, MB_ICONWARNING, cstr_getstr(&buf));
+				MessageBoxW_format(NULL, wstr_cantdelbadfile_text, wstr_cantdelbadfile_title, MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND, cstr_getstr(&buf));
 			}
 		}
 	}
+	
+	cstr_dtor(&buf);
 }

@@ -33,6 +33,23 @@ CPatchConfigApp theApp;
 /////////////////////////////////////////////////////////////////////////////
 // CPatchConfigApp initialization
 
+static int AcquireGameMutex()
+{
+	HANDLE hMutex;
+	DWORD dwWaitResult;
+
+	hMutex = CreateMutexA(NULL, FALSE, PATCH_MUTEXNAME);
+	if (hMutex == NULL) goto fail;
+
+	dwWaitResult = WaitForSingleObject(hMutex, 100);
+	if (dwWaitResult != WAIT_OBJECT_0 && dwWaitResult != WAIT_ABANDONED) goto fail;
+
+	return 1;
+fail:
+	MessageBox(NULL, STRTABLE(IDS_NOMUTEX), STRTABLE(IDS_NOMUTEX_TITLE), MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+	return 0;
+}
+
 static int CheckCOMCTL32()
 {
 	DWORD dwMajorVersion = 0;
@@ -57,7 +74,7 @@ static int CheckCOMCTL32()
 	if (dwMajorVersion >= 5) {
 		return 1;
 	} else {
-		GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_BADCOMCTL32), STRTABLE(IDS_BADCOMCTL32_TITLE), MB_ICONERROR);
+		GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_BADCOMCTL32), STRTABLE(IDS_BADCOMCTL32_TITLE), MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
 		return 0;
 	}
 }
@@ -68,7 +85,7 @@ static int VerifyFileSHA1(const char *fn, const char *hash)
 	if (!GetFileSHA1(fn, hashstr) || strcmp(hashstr, hash) != 0) {
 		CString msg;
 		msg.Format(IDS_CORRUPTFILE, fn);
-		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CORRUPTFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDNO) {
+		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CORRUPTFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDNO) {
 			return 0;
 		}
 	}
@@ -89,7 +106,7 @@ static int VerifyPatchFiles()
 static int LoadConfigData()
 {
 	while (!TryLoadConfigData()) {
-		if (GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_CORRUPTCONFIG), STRTABLE(IDS_CORRUPTCONFIG_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
+		if (GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_CORRUPTCONFIG), STRTABLE(IDS_CORRUPTCONFIG_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES) {
 			TryRebuildConfigFile();
 		} else {
 			return 0;
@@ -109,6 +126,8 @@ BOOL CPatchConfigApp::InitInstance()
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
+
+	if (!AcquireGameMutex()) goto err;
 
 	if (!CheckDX90SDKVersion()) goto err;
 
