@@ -91,6 +91,8 @@ MAKE_PATCHSET(audiofreq);
 MAKE_PATCHSET(reginstalldir);
 MAKE_PATCHSET(improvearchive);
 MAKE_PATCHSET(fixloading);
+MAKE_PATCHSET(fixbutton);
+MAKE_PATCHSET(fixvolume);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;

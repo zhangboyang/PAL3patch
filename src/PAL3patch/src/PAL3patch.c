@@ -53,7 +53,7 @@ static void acquire_game_mutex()
 	HANDLE hMutex;
 	DWORD dwWaitResult;
 
-	hMutex = CreateMutexA(NULL, FALSE, "PAL3patch_Mutex");
+	hMutex = CreateMutexA(NULL, FALSE, "PAL3patch_GameMutex");
 	if (hMutex == NULL) goto fail;
 
 	dwWaitResult = WaitForSingleObject(hMutex, 100);

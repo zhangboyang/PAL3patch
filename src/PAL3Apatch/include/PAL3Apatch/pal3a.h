@@ -2275,6 +2275,9 @@ struct RoleTaskPool {
     char _TaskPicFolder[128];
 };
 
+struct UIDragBar;
+
+
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
 #define gby2y(gby) ((1.0 - (gby)) * PAL3_s_drvinfo.height / 2.0)
@@ -2382,6 +2385,7 @@ struct RoleTaskPool {
 #define Archive_Load(this, index) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00522A3F, BOOL, struct Archive *, int), this, index)
 #define UpdateLoading ((void (*)(void)) TOPTR(0x0041E824))
 #define gbCreateGraphManager ((struct gbGfxManager *(*)(struct gbGfxDriverInfo *)) TOPTR(gboffset + 0x1001DBF0))
+#define UIDragBar_SetMaxVal(this, val) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00444528, void, struct UIDragBar *, float), this, val)
 
 
 

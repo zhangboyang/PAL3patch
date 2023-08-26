@@ -124,6 +124,7 @@
     <ClCompile Include="src\patch_fixacquire.c" />
     <ClCompile Include="src\patch_fixattacksequen.c" />
     <ClCompile Include="src\patch_fixbigmap.c" />
+    <ClCompile Include="src\patch_fixbutton.c" />
     <ClCompile Include="src\patch_fixcombatui.c" />
     <ClCompile Include="src\patch_fixcompdonateui.c" />
     <ClCompile Include="src\patch_fixcoverfrm.c" />
@@ -141,6 +142,7 @@
     <ClCompile Include="src\patch_fixtrail.c" />
     <ClCompile Include="src\patch_fixui.c" />
     <ClCompile Include="src\patch_fixuistaticex.c" />
+    <ClCompile Include="src\patch_fixvolume.c" />
     <ClCompile Include="src\patch_forcesettexture.c" />
     <ClCompile Include="src\patch_graphicspatch.c" />
     <ClCompile Include="src\patch_improvearchive.c" />

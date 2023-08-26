@@ -245,6 +245,20 @@ static ConfigDescItem LISTNAME[] = {
 		_T("此分类下包含游戏交互界面相关的设置。"),
 		_T("请选择一个子项目进行配置。"),
 	},
+#ifdef BUILD_FOR_PAL3A
+	{
+		1, TRUE, TRUE,
+		_T("fixbutton"),
+		_T("按钮判定模式"),
+		_T("此选项可调整用户界面中对于“按钮是否被按下”的判定模式。"),
+		NULL,
+		NULL, NULL,
+		{
+			{ _T("三外"), _T("选择此项后，不会修改按钮判定模式。"), _T("0") },
+			{ _T("仙三"), _T("选择此项后，将采取类似《仙剑三》中的按钮判定模式。"), _T("1") },
+		}
+	},
+#endif
 	{
 		1, TRUE, TRUE,
 		_T("uiscalefactor"),

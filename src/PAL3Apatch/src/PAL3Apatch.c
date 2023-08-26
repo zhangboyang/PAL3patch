@@ -50,7 +50,7 @@ static void acquire_game_mutex()
 	HANDLE hMutex;
 	DWORD dwWaitResult;
 
-	hMutex = CreateMutexA(NULL, FALSE, "PAL3Apatch_Mutex");
+	hMutex = CreateMutexA(NULL, FALSE, "PAL3Apatch_GameMutex");
 	if (hMutex == NULL) goto fail;
 
 	dwWaitResult = WaitForSingleObject(hMutex, 100);
@@ -128,6 +128,8 @@ static void init_stage2()
     INIT_PATCHSET(fixattacksequen);
     INIT_PATCHSET(improvearchive);
     INIT_PATCHSET(fixloading);
+    INIT_PATCHSET(fixbutton);
+    INIT_PATCHSET(fixvolume);
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch
