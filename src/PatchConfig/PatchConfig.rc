@@ -223,7 +223,6 @@ BEGIN
     IDS_RESTOREDEFAULT_CONFIRM 
                             "您确定要将所有设置重置为默认值吗？\n该操作会将默认配置立即写入磁盘，无法撤销。"
     IDS_RESTOREDEFAULT_TITLE "恢复默认设置"
-    IDS_RESTOREDEFAULT_CANCELED "操作已取消。"
     IDS_RESTOREDEFAULT_SUCCEED "所有设置已成功恢复为默认值。"
     IDS_RESTOREDEFAULT_RETRY "恢复过程中出现错误，是否重试？"
     IDS_WAITCHECKFORUPDATES "正在联网检查新版本，请稍候 ..."
@@ -249,14 +248,14 @@ BEGIN
     IDS_FREETYPEFONT_FILTER "字体文件 (*.ttf; *.ttc; *.otf)|*.ttf;*.ttc;*.otf|所有文件 (*.*)|*.*||"
     IDS_RESOLUTION_DESC     "游戏将使用“%s”分辨率。"
     IDS_OPENCONFIGTOOLWAITFINISH "等待官方配置工具退出 ..."
-    IDS_HAVEBADFILE         "游戏目录下存在以下多余文件：\n\n%s\n这些文件可能影响游戏正常运行，\n是否立即彻底删除这些文件？"
+    IDS_HAVEBADFILE         "游戏目录下存在以下多余文件：\n\n%s\n这些文件可能会影响游戏正常运行，建议您删除这些文件。\n\n是否立即彻底删除这些文件？（该操作无法撤销）"
     IDS_HAVEBADFILE_TITLE   "是否删除多余文件"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_WAITINGCHECKBADFILES "正在检查多余文件，请稍候 ..."
-    IDS_CANTDELBADFILE      "删除以下文件时发生错误：\n\n%s\n请尝试手动删除这些多余文件。"
+    IDS_CANTDELBADFILE      "删除以下文件时发生错误：\n\n%s\n请尝试手工删除这些多余文件。"
     IDS_CANTDELBADFILE_TITLE "删除多余文件时出错"
     IDS_NOD3D9              "请先安装 DirectX 9.0b 或更高版本。"
     IDS_NOD3D9_TITLE        "找不到 Direct3D"

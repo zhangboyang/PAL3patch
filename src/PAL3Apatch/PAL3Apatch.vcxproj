@@ -148,6 +148,7 @@
     <ClCompile Include="src\patch_improvearchive.c" />
     <ClCompile Include="src\patch_nocpk.c" />
     <ClCompile Include="src\patch_nolockablebackbuffer.c" />
+    <ClCompile Include="src\patch_nommapcpk.c" />
     <ClCompile Include="src\patch_preciseresmgr.c" />
     <ClCompile Include="src\patch_reduceinputlatency.c" />
     <ClCompile Include="src\patch_regredirect.c" />

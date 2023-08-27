@@ -84,9 +84,9 @@ static const wchar_t wstr_pluginreport_namepart_CHS[] = L"%s%hs%hs";
 static const wchar_t wstr_pluginreport_success_CHS[] = L"【成功】 %s\n";
 static const wchar_t wstr_pluginreport_failed_CHS[] = L"【失败】 %s （%s）\n";
 
-static const wchar_t wstr_havebadfile_text_CHS[] = L"游戏目录下存在以下多余文件：\n\n%hs\n这些文件可能影响游戏正常运行，\n是否立即彻底删除这些文件？";
+static const wchar_t wstr_havebadfile_text_CHS[] = L"游戏目录下存在以下多余文件：\n\n%hs\n这些文件可能会影响游戏正常运行，建议您删除这些文件。\n\n是否立即彻底删除这些文件？（该操作无法撤销）";
 static const wchar_t wstr_havebadfile_title_CHS[] = L"是否删除多余文件";
-static const wchar_t wstr_cantdelbadfile_text_CHS[] = L"删除以下文件时发生错误：\n\n%hs\n请尝试手动删除这些多余文件。";
+static const wchar_t wstr_cantdelbadfile_text_CHS[] = L"删除以下文件时发生错误：\n\n%hs\n请尝试手工删除这些多余文件。";
 static const wchar_t wstr_cantdelbadfile_title_CHS[] = L"删除多余文件时出错";
 
 
@@ -260,51 +260,33 @@ static int detect_game_locale()
     ULONG key_CRC = 0xCB283888; // equals gbCrc32Compute("datascript\\lang.txt"), but we can't call gbCrc32Compute() at this time
     
     int result = GAME_LOCALE_UNKNOWN;
-
-    HANDLE hFile = INVALID_HANDLE_VALUE;
-    HANDLE hMapFile = NULL;
-    LPVOID lpMapAddress = NULL;
-
-    unsigned i;
-    int left, right, mid;
-    ULONG base, skip;
-    SYSTEM_INFO SysInfo;
-    DWORD dwSysGran;
+    
+    FILE *fp = NULL;
     struct CPKHeader cpkhdr;
-    struct CPKTable *cpktbl;
-    struct CPKTable cpkitem;
-    void *pdata;
+    struct CPKTable *cpktbl = NULL;
+    int left, right, mid;
+    struct CPKTable *cpkitem;
+    void *data = NULL;
     ULONG datasz;
+    unsigned i;
     
-    // create file handle
-    hFile = CreateFile("basedata\\basedata.cpk", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
-    if (hFile == INVALID_HANDLE_VALUE) goto done;
-    
-    // create file mapping handle
-    hMapFile = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
-    if (!hMapFile) goto done;
-    
-    // get memory allocation granularity
-    GetSystemInfo(&SysInfo);
-    dwSysGran = SysInfo.dwAllocationGranularity;
-    
-    // map CPK header
-    lpMapAddress = MapViewOfFile(hMapFile, FILE_MAP_READ, 0, 0, sizeof(struct CPKHeader));
-    if (!lpMapAddress) goto done;
+    // open CPK file
+    fp = fopen("basedata\\basedata.cpk", "rb");
+    if (!fp) goto done;
     
     // read CPK header
-    memcpy(&cpkhdr, lpMapAddress, sizeof(cpkhdr));
+    if (fread(&cpkhdr, sizeof(cpkhdr), 1, fp) != 1) goto done;
+    if (cpkhdr.dwValidTableNum > cpkhdr.dwMaxFileNum) goto done;
     
-    // map CPK index table
-    UnmapViewOfFile(lpMapAddress);
-    lpMapAddress = MapViewOfFile(hMapFile, FILE_MAP_READ, 0, 0, sizeof(struct CPKHeader) + sizeof(struct CPKTable) * cpkhdr.dwMaxFileNum);
-    if (!lpMapAddress) goto done;
-    cpktbl = PTRADD(lpMapAddress, sizeof(struct CPKHeader));
+    // read CPK index table
+    cpktbl = calloc(cpkhdr.dwMaxFileNum, sizeof(struct CPKTable));
+    if (!cpktbl) goto done;
+    if (fread(cpktbl, sizeof(struct CPKTable), cpkhdr.dwMaxFileNum, fp) != cpkhdr.dwMaxFileNum) goto done;
     
     // search CPK table entry
     left = 0;
     right = cpkhdr.dwValidTableNum;
-	while (1) {
+    while (1) {
         if (left == right) goto done;
         mid = left + (right - left) / 2;
         if (cpktbl[mid].dwCRC == key_CRC && (cpktbl[mid].dwFlag & 0x1) && !(cpktbl[mid].dwFlag & 0x10)) {
@@ -317,33 +299,31 @@ static int detect_game_locale()
             right = mid;
         }
     }
-	memcpy(&cpkitem, &cpktbl[mid], sizeof(cpkitem));
-	
-	// map file data
-	base = ROUND_DOWN(cpkitem.dwStartPos, dwSysGran);
-	skip = cpkitem.dwStartPos - base;
-    UnmapViewOfFile(lpMapAddress);
-    lpMapAddress = MapViewOfFile(hMapFile, FILE_MAP_READ, 0, base, skip + cpkitem.dwPackedSize);
-    if (!lpMapAddress) goto done;
-    pdata = PTRADD(lpMapAddress, skip);
-    datasz = cpkitem.dwPackedSize;
-	
-	// process data
-	for (i = 0; i < datasz; i++) {
-        if (i + CHS_magic_len <= datasz && memcmp(PTRADD(pdata, i), CHS_magic, CHS_magic_len) == 0) {
+    cpkitem = &cpktbl[mid];
+    
+    // read file data
+    datasz = cpkitem->dwPackedSize;
+    data = malloc(datasz);
+    if (!data) goto done;
+    if (fseek(fp, cpkitem->dwStartPos, SEEK_SET) != 0) goto done;
+    if (fread(data, 1, datasz, fp) != datasz) goto done;
+    
+    // process data
+    for (i = 0; i < datasz; i++) {
+        if (i + CHS_magic_len <= datasz && memcmp(PTRADD(data, i), CHS_magic, CHS_magic_len) == 0) {
             result = GAME_LOCALE_CHS;
             break;
         }
-        if (i + CHT_magic_len <= datasz && memcmp(PTRADD(pdata, i), CHT_magic, CHT_magic_len) == 0) {
+        if (i + CHT_magic_len <= datasz && memcmp(PTRADD(data, i), CHT_magic, CHT_magic_len) == 0) {
             result = GAME_LOCALE_CHT;
             break;
         }
     }
-	
+    
 done:
-    if (lpMapAddress) UnmapViewOfFile(lpMapAddress);
-    if (hMapFile) CloseHandle(hMapFile);
-    if (hFile != INVALID_HANDLE_VALUE) CloseHandle(hFile);
+    free(data);
+    free(cpktbl);
+    if (fp) fclose(fp);
     
     return result;
 }

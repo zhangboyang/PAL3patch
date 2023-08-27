@@ -130,6 +130,7 @@ static void init_stage2()
     INIT_PATCHSET(fixloading);
     INIT_PATCHSET(fixbutton);
     INIT_PATCHSET(fixvolume);
+    INIT_PATCHSET(nommapcpk);
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch
