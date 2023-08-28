@@ -1,5 +1,10 @@
 #include "common.h"
 
+static VOID WINAPI GetSystemInfo_wrapper(LPSYSTEM_INFO lpSystemInfo)
+{
+    GetSystemInfo(lpSystemInfo);
+    lpSystemInfo->dwAllocationGranularity = 1;
+}
 static HANDLE WINAPI CreateFileMappingA_wrapper(HANDLE hFile, LPSECURITY_ATTRIBUTES lpAttributes, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, LPCSTR lpName)
 {
     return hFile;
@@ -36,6 +41,8 @@ static BOOL WINAPI UnmapViewOfFile_wrapper(LPCVOID lpBaseAddress)
 MAKE_PATCHSET(nommapcpk)
 {
     if (flag == 2 || is_win9x()) {
+        make_branch(gboffset + 0x1002C4D0, 0xE8, GetSystemInfo_wrapper, 6);
+        make_branch(gboffset + 0x1002DA78, 0xE8, GetSystemInfo_wrapper, 6);
         make_branch(gboffset + 0x1002DAF7, 0xE8, CreateFileMappingA_wrapper, 6);
         make_branch(gboffset + 0x1002DB11, 0xE8, CloseHandle_wrapper, 6);
         make_branch(gboffset + 0x1002DB42, 0xE8, MapViewOfFile_wrapper, 6);
