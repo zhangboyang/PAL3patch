@@ -505,7 +505,14 @@ static ConfigDescItem LISTNAME[] = {
 		1, TRUE, TRUE,
 		_T("windowtitle"),
 		_T("窗口标题"),
-		_T("修改游戏窗口标题。某些修改器可能需要将标题设为原始标题（PAL3--SOFTSTAR.sh）才能正常工作。"),
+		_T("修改游戏窗口标题。某些修改器可能需要将标题设为原始标题（")
+#ifdef BUILD_FOR_PAL3
+		_T("PAL3--SOFTSTAR.sh")
+#endif
+#ifdef BUILD_FOR_PAL3A
+		_T("PAL3A--SOFTSTAR.sh")
+#endif
+		_T("）才能正常工作。"),
 		_T("请在文本框内键入您想使用的游戏窗口标题。（长度须少于 128 字节）"),
 	},
 	{
