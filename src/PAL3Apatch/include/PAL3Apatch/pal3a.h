@@ -2310,6 +2310,7 @@ struct UIDragBar;
 #define gbMatrixStack_Translate(this, a2, a3, a4) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10026430, void, struct gbMatrixStack *, float, float, float), this, a2, a3, a4)
 #define gbMatrixStack_Rotate(this, angle, axis) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10026350, void, struct gbMatrixStack *, float, struct gbVec3D *), this, angle, axis)
 #define gbImage2D_WriteJpegImage(this, filename, quality) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001F0D0, void, struct gbImage2D *, char *, int), this, filename, quality)
+#define gbAudioManager_Ctor(this, succeed, pdesc) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x10001110, struct gbAudioManager *, struct gbAudioManager *, int *, struct gbAudioMgrDesc *), this, succeed, pdesc)
 
 
 

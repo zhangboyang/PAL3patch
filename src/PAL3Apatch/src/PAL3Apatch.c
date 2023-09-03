@@ -131,6 +131,7 @@ static void init_stage2()
     INIT_PATCHSET(fixbutton);
     INIT_PATCHSET(fixvolume);
     INIT_PATCHSET(nommapcpk);
+    INIT_PATCHSET(fixnosndcrash);
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch

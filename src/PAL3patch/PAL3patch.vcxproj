@@ -131,6 +131,7 @@
     <ClCompile Include="src\patch_fixloading.c" />
     <ClCompile Include="src\patch_fixlongkuiattack.c" />
     <ClCompile Include="src\patch_fixmemfree.c" />
+    <ClCompile Include="src\patch_fixnosndcrash.c" />
     <ClCompile Include="src\patch_fixortho.c" />
     <ClCompile Include="src\patch_fixpunctuation.c" />
     <ClCompile Include="src\patch_fixreset.c" />

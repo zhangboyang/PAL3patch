@@ -91,6 +91,7 @@ MAKE_PATCHSET(reginstalldir);
 MAKE_PATCHSET(improvearchive);
 MAKE_PATCHSET(fixloading);
 MAKE_PATCHSET(nommapcpk);
+MAKE_PATCHSET(fixnosndcrash);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;

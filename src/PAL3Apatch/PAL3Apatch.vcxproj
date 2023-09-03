@@ -133,6 +133,7 @@
     <ClCompile Include="src\patch_fixjusticebookui.c" />
     <ClCompile Include="src\patch_fixlineupui.c" />
     <ClCompile Include="src\patch_fixloading.c" />
+    <ClCompile Include="src\patch_fixnosndcrash.c" />
     <ClCompile Include="src\patch_fixobjectcamera.c" />
     <ClCompile Include="src\patch_fixortho.c" />
     <ClCompile Include="src\patch_fixpropui.c" />

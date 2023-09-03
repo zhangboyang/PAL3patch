@@ -94,6 +94,7 @@ MAKE_PATCHSET(fixloading);
 MAKE_PATCHSET(fixbutton);
 MAKE_PATCHSET(fixvolume);
 MAKE_PATCHSET(nommapcpk);
+MAKE_PATCHSET(fixnosndcrash);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
