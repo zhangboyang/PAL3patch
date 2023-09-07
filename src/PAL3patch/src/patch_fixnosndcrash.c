@@ -8,5 +8,5 @@ static MAKE_THISCALL(struct gbAudioManager *, gbAudioManager_Ctor_wrapper, struc
 
 MAKE_PATCHSET(fixnosndcrash)
 {
-    make_branch(0x0053DDD7, 0xE8, gbAudioManager_Ctor_wrapper, 6);
+    make_call6(0x0053DDD7, gbAudioManager_Ctor_wrapper);
 }

@@ -180,7 +180,7 @@ BEGIN
     IDS_HIDEADVOPT          "隐藏高级选项"
     IDS_NOCHOOSEN           "请从列表中选择一个选项。"
     IDS_NODESC              "无说明。"
-    IDS_CORRUPTFILE         "文件 %hs 丢失或损坏，很可能造成补丁无法正常工作，是否继续？"
+    IDS_CORRUPTFILE         "检测到以下文件丢失或损坏：\n\n%s\n分辨率补丁很可能无法正常工作，是否继续？"
     IDS_CORRUPTFILE_TITLE   "文件损坏"
     IDS_CORRUPTCONFIG       "补丁配置文件已损坏，是否删除并使用默认配置？"
     IDS_CORRUPTCONFIG_TITLE "无法加载配置"

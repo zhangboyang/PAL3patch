@@ -8,6 +8,7 @@ extern PATCHAPI void make_branch(unsigned addr, unsigned char opcode, const void
 extern PATCHAPI unsigned get_branch_jtarget(unsigned addr, unsigned char opcode);
 extern PATCHAPI void make_jmp(unsigned addr, const void *jtarget);
 extern PATCHAPI void make_call(unsigned addr, const void *jtarget);
+extern PATCHAPI void make_call6(unsigned addr, const void *jtarget);
 extern PATCHAPI void make_wrapper_branch(unsigned addr, const void *jtarget);
 extern PATCHAPI void make_wrapper_branch_batch(unsigned *addr_list, int count, const void *jtarget);
 extern PATCHAPI void make_uint(unsigned addr, unsigned uint);

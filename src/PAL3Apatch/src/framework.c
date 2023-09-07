@@ -5,7 +5,7 @@
 void memcpy_to_process(unsigned dest, const void *src, unsigned size)
 {
     /*// check dest address, debug purpose only
-    // should rebase and make sure GBENGINE.DLL loaded at 0x40000000
+    // should rebase and make sure GBENGINE.DLL loaded at another address
     if (0x10000000 <= dest && dest < 0x1013D000) {
         fail("invalid dest address, dest = %08X, src = %p, size = %08X.", dest, src, size);
     }*/
@@ -42,7 +42,7 @@ void make_branch(unsigned addr, unsigned char opcode, const void *jtarget, unsig
     unsigned jmpimm = (unsigned) jtarget - (addr + 5);
     if (size < 5) fail("size is to small to make a branch instuction");
     unsigned char *instrbuf = malloc(size);
-    memset(instrbuf + 5, 0x90, size - 5);
+    if (size > 5) memset(instrbuf + 5, 0x90, size - 5);
     instrbuf[0] = opcode;
     memcpy(instrbuf + 1, &jmpimm, 4);
     memcpy_to_process(addr, instrbuf, size);
@@ -56,6 +56,10 @@ void make_jmp(unsigned addr, const void *jtarget)
 void make_call(unsigned addr, const void *jtarget)
 {
     make_branch(addr, 0xE8, jtarget, 5);
+}
+void make_call6(unsigned addr, const void *jtarget)
+{
+    make_branch(addr, 0xE8, jtarget, 6);
 }
 void make_wrapper_branch(unsigned addr, const void *jtarget)
 {
@@ -78,7 +82,7 @@ void make_wrapper_branch(unsigned addr, const void *jtarget)
             // decode second byte
             switch ((opcode0 << 8) + opcode1) { // constuct as big-endian for readability
                 // two byte instruction
-                case 0xFF15: make_branch(addr, 0xE8, jtarget, 6); break;
+                case 0xFF15: make_call6(addr, jtarget); break;
 
                 // unknown second byte
                 default: fail("unknown branch opcode %02X %02X.", opcode0, opcode1);

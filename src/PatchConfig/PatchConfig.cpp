@@ -79,24 +79,29 @@ static int CheckCOMCTL32()
 	}
 }
 
-static int VerifyFileSHA1(const char *fn, const char *hash)
-{
-	char hashstr[SHA1_STR_SIZE];
-	if (!GetFileSHA1(fn, hashstr) || strcmp(hashstr, hash) != 0) {
-		CString msg;
-		msg.Format(IDS_CORRUPTFILE, fn);
-		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CORRUPTFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDNO) {
-			return 0;
-		}
-	}
-	return 1;
-}
-
 static int VerifyPatchFiles()
 {
+	const int max_show = 10;
+	int cnt = 0;
+	CString buf;
 	const char **ptr;
 	for (ptr = pFileHash; *ptr; ptr += 2) {
-		if (!VerifyFileSHA1(ptr[0], ptr[1])) {
+		const char *fn = ptr[0];
+		const char *hash = ptr[1];
+		char hashstr[SHA1_STR_SIZE];
+		if (!GetFileSHA1(fn, hashstr) || strcmp(hashstr, hash) != 0) {
+			if (cnt <= max_show) {
+				buf += "  ";
+				buf += cnt < max_show ? fn : "...";
+				buf += "\n";
+			}
+			cnt++;
+		}
+	}
+	if (cnt > 0) {
+		CString msg;
+		msg.Format(IDS_CORRUPTFILE, (LPCTSTR) buf);
+		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CORRUPTFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDNO) {
 			return 0;
 		}
 	}

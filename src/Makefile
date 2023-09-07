@@ -1,19 +1,18 @@
 $(MAKE) := make
 
-.PHONY: all clean pal3 pal3a patchconfig
+.PHONY: all clean pal3 pal3a
 
-all: pal3a pal3 patchconfig
+all: pal3 pal3a
 
 pal3:
 	$(MAKE) -C PAL3patch all
 	$(MAKE) -C PAL3 all
+	$(MAKE) -C PatchConfig pal3
 
 pal3a:
 	$(MAKE) -C PAL3Apatch all
 	$(MAKE) -C PAL3A all
-
-patchconfig:
-	$(MAKE) -C PatchConfig all
+	$(MAKE) -C PatchConfig pal3a
 
 clean:
 	$(MAKE) -C PAL3patch clean

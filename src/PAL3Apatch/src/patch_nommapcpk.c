@@ -41,10 +41,10 @@ static BOOL WINAPI UnmapViewOfFile_wrapper(LPCVOID lpBaseAddress)
 MAKE_PATCHSET(nommapcpk)
 {
     if (flag == 2 || is_win9x()) {
-        make_branch(gboffset + 0x1002B26A, 0xE8, GetSystemInfo_wrapper, 6);
-        make_branch(gboffset + 0x1002B2E6, 0xE8, CreateFileMappingA_wrapper, 6);
-        make_branch(gboffset + 0x1002B304, 0xE8, CloseHandle_wrapper, 6);
-        make_branch(gboffset + 0x1002B332, 0xE8, MapViewOfFile_wrapper, 6);
-        make_branch(gboffset + 0x1002B354, 0xE8, UnmapViewOfFile_wrapper, 6);
+        make_call6(gboffset + 0x1002B26A, GetSystemInfo_wrapper);
+        make_call6(gboffset + 0x1002B2E6, CreateFileMappingA_wrapper);
+        make_call6(gboffset + 0x1002B304, CloseHandle_wrapper);
+        make_call6(gboffset + 0x1002B332, MapViewOfFile_wrapper);
+        make_call6(gboffset + 0x1002B354, UnmapViewOfFile_wrapper);
     }
 }

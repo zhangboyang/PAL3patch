@@ -298,9 +298,9 @@ void add_getcursorpos_hook(void (*funcptr)(void *))
 static void init_getcursorpos_hook()
 {
     make_jmp(0x004022E0, GetCursorPos_wrapper);
-    make_branch(0x00402497, 0xE8, GetCursorPos_wrapper, 6);
-    make_branch(0x004021C1, 0xE8, GetCursorPos_wrapper, 6);
-    make_branch(0x004D6216, 0xE8, GetCursorPos_wrapper, 6);
+    make_call6(0x00402497, GetCursorPos_wrapper);
+    make_call6(0x004021C1, GetCursorPos_wrapper);
+    make_call6(0x004D6216, GetCursorPos_wrapper);
     // NOTE: No need to hook GetCursorPos() for IDirect3DDevice9::SetCursorPosition()
     //       see documentation for details.
 }

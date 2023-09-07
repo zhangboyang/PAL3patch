@@ -5,7 +5,7 @@
 void memcpy_to_process(unsigned dest, const void *src, unsigned size)
 {
     /*// check dest address, debug purpose only
-    // should rebase and make sure GBENGINE.DLL loaded at 0x40000000
+    // should rebase and make sure GBENGINE.DLL loaded at another address
     if (0x10000000 <= dest && dest < 0x10169000) {
         fail("invalid dest address, dest = %08X, src = %p, size = %08X.", dest, src, size);
     }*/
@@ -42,7 +42,7 @@ void make_branch(unsigned addr, unsigned char opcode, const void *jtarget, unsig
     unsigned jmpimm = (unsigned) jtarget - (addr + 5);
     if (size < 5) fail("size is to small to make a branch instuction");
     unsigned char *instrbuf = malloc(size);
-    memset(instrbuf + 5, 0x90, size - 5);
+    if (size > 5) memset(instrbuf + 5, 0x90, size - 5);
     instrbuf[0] = opcode;
     memcpy(instrbuf + 1, &jmpimm, 4);
     memcpy_to_process(addr, instrbuf, size);
@@ -57,14 +57,41 @@ void make_call(unsigned addr, const void *jtarget)
 {
     make_branch(addr, 0xE8, jtarget, 5);
 }
+void make_call6(unsigned addr, const void *jtarget)
+{
+    make_branch(addr, 0xE8, jtarget, 6);
+}
 void make_wrapper_branch(unsigned addr, const void *jtarget)
 {
-    unsigned char opcode;
-    memcpy_from_process(&opcode, addr, 1);
-    switch (opcode) {
+    unsigned char opcode0, opcode1;
+    
+    // fetch first byte
+    memcpy_from_process(&opcode0, addr, 1);
+    
+    // decode first byte
+    switch (opcode0) {
+        // one-byte instruction
         case 0xE9: make_jmp(addr, jtarget); break;
         case 0xE8: make_call(addr, jtarget); break;
-        default: fail("unknown branch opcode %02X.", opcode);
+        
+        // multi-byte instruction
+        case 0xFF:
+            // fetch second byte
+            memcpy_from_process(&opcode1, addr + 1, 1);
+            
+            // decode second byte
+            switch ((opcode0 << 8) + opcode1) { // constuct as big-endian for readability
+                // two byte instruction
+                case 0xFF15: make_call6(addr, jtarget); break;
+
+                // unknown second byte
+                default: fail("unknown branch opcode %02X %02X.", opcode0, opcode1);
+            }
+            
+            break;
+        
+        // unknown first byte
+        default: fail("unknown branch opcode %02X.", opcode0);
     }
 }
 void make_wrapper_branch_batch(unsigned *addr_list, int count, const void *jtarget)
@@ -182,7 +209,46 @@ void *alloc_dyncode_buffer(unsigned size)
     return ret;
 }
 
+// add code to dyncode buffer
+// there must be at least 5 bytes at patchaddr
+void add_dyncode_with_jmpback(unsigned patchaddr, unsigned jmpback, void *code, unsigned size)
+{
+    if (patchaddr < jmpback && jmpback < patchaddr + 5) {
+        fail("no space for patchaddr.");
+    }
+    
+    void *buf = alloc_dyncode_buffer(size + 5);
+    memcpy(buf, code, size);
+    make_jmp(TOUINT(PTRADD(buf, size)), TOPTR(jmpback));
+    flush_instruction_cache(buf, size + 5);
+
+    make_jmp(patchaddr, buf);
+}
+
 void flush_instruction_cache(void *base, unsigned size)
 {
     FlushInstructionCache(GetCurrentProcess(), base, size);
+}
+
+// copy vftable, will alloc memory and dyncode
+void *dup_vftable(void *vftable, unsigned size)
+{
+    assert(size % 4 == 0);
+    size /= 4;
+
+    void **vtbl = malloc(size * 4);
+    
+    unsigned i;
+    for (i = 0; i < size; i++) {
+        void *entry = PTRADD(vftable, i * 4);
+        
+        void *codebuf = alloc_dyncode_buffer(6);
+        memcpy(codebuf, "\xFF\x25", 2);
+        memcpy(PTRADD(codebuf, 2), &entry, 4);
+        flush_instruction_cache(codebuf, 6);
+        
+        vtbl[i] = codebuf;
+    }
+    
+    return vtbl;
 }

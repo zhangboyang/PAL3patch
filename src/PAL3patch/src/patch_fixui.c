@@ -671,7 +671,7 @@ static MAKE_THISCALL(void, gbCamera_SetDimention_wrapper_for_RenderTarget_Begin,
 
 static void fix_RenderTarget_ratio()
 {
-    make_branch(0x004BDCCF, 0xE8, gbCamera_SetDimention_wrapper_for_RenderTarget_Begin, 6);
+    make_call6(0x004BDCCF, gbCamera_SetDimention_wrapper_for_RenderTarget_Begin);
 }
 
 

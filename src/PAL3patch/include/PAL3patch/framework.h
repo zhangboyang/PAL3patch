@@ -8,6 +8,7 @@ extern PATCHAPI void make_branch(unsigned addr, unsigned char opcode, const void
 extern PATCHAPI unsigned get_branch_jtarget(unsigned addr, unsigned char opcode);
 extern PATCHAPI void make_jmp(unsigned addr, const void *jtarget);
 extern PATCHAPI void make_call(unsigned addr, const void *jtarget);
+extern PATCHAPI void make_call6(unsigned addr, const void *jtarget);
 extern PATCHAPI void make_wrapper_branch(unsigned addr, const void *jtarget);
 extern PATCHAPI void make_wrapper_branch_batch(unsigned *addr_list, int count, const void *jtarget);
 extern PATCHAPI void make_uint(unsigned addr, unsigned uint);
@@ -18,7 +19,9 @@ extern PATCHAPI void *get_func_address(const char *dllname, const char *funcname
 extern PATCHAPI void hook_iat(void *iatbase, void *oldptr, void *newptr);
 extern PATCHAPI void *hook_import_table(void *image_base, const char *dllname, const char *funcname, void *newptr);
 extern PATCHAPI void *alloc_dyncode_buffer(unsigned size);
+extern PATCHAPI void add_dyncode_with_jmpback(unsigned patchaddr, unsigned jmpback, void *code, unsigned size);
 extern PATCHAPI void flush_instruction_cache(void *base, unsigned size);
+extern PATCHAPI void *dup_vftable(void *vftable, unsigned size);
 
 #define SIMPLE_PATCH(addr, oldcode, newcode, size) \
     do { \

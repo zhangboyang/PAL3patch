@@ -868,7 +868,7 @@ static struct gbGfxManager *gbCreateGraphManager_wrapper(struct gbGfxDriverInfo 
 }
 static void init_gfxmgr_checker()
 {
-    make_branch(0x00406F19, 0xE8, gbCreateGraphManager_wrapper, 6);
+    make_call6(0x00406F19, gbCreateGraphManager_wrapper);
 }
 
 

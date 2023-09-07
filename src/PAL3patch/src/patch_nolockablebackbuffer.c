@@ -338,8 +338,8 @@ static void hook_gbBinkVideo()
     add_pauseresume_hook(movie_checkpause_hook);
     
     // hook BinkDoFrame() and BinkCopyToBuffer()
-    make_branch(0x0053C544, 0xE8, BinkDoFrame_wrapper, 6);
-    make_branch(0x0053C571, 0xE8, BinkCopyToBuffer_wrapper, 6);
+    make_call6(0x0053C544, BinkDoFrame_wrapper);
+    make_call6(0x0053C571, BinkCopyToBuffer_wrapper);
     
     // hook gbBinkVideo::BinkWait() to release CPU while playing movie
     INIT_WRAPPER_CALL(gbBinkVideo_BinkWait_wrapper, { 0x0053C672 });

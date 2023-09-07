@@ -624,8 +624,8 @@ static void init_window_patch(int flag)
     
 
     // hook CreateWindowEx
-    make_branch(0x004063A7, 0xE8, RegisterClass_wrapper, 6);
-    make_branch(0x00406564, 0xE8, CreateWindowExA_wrapper, 6);
+    make_call6(0x004063A7, RegisterClass_wrapper);
+    make_call6(0x00406564, CreateWindowExA_wrapper);
 
     // modify window title
     char *winname_mbcs = cs2cs_alloc(get_string_from_configfile("windowtitle"), CP_UTF8, CP_ACP);
@@ -652,7 +652,7 @@ static void init_window_patch(int flag)
     make_pointer(0x0040637F + 0x4, WndProc_wrapper);
     
     // hook DefWindowProc
-    make_branch(0x00404F8D, 0xE8, DefWindowProcA_wrapper, 6);
+    make_call6(0x00404F8D, DefWindowProcA_wrapper);
     
     // add early message loop flag resetting function
     add_gameloop_hook(msgloop_gameloop_hook);
@@ -795,7 +795,7 @@ static struct gbGfxManager *gbCreateGraphManager_wrapper(struct gbGfxDriverInfo 
 }
 static void init_gfxmgr_checker()
 {
-    make_branch(0x00405013, 0xE8, gbCreateGraphManager_wrapper, 6);
+    make_call6(0x00405013, gbCreateGraphManager_wrapper);
 }
 
 
