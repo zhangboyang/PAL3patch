@@ -13,8 +13,10 @@ __declspec(naked) void sf_entry(void)
 	}
 }
 
+#ifndef _DEBUG
 #pragma comment(linker, "/entry:dll_entry")
 BOOL WINAPI dll_entry(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
 	return TRUE;
 }
+#endif

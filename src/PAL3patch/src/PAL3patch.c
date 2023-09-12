@@ -4,7 +4,7 @@
 unsigned gboffset;
 
 // self module handle
-HINSTANCE hinstDLL;
+HINSTANCE patch_hinstDLL;
 
 static void self_check()
 {
@@ -83,8 +83,9 @@ static void init_stage1()
     // read config
     read_config_file();
 
-    // must init depcompatible in stage1
+    // init early patchsets in stage1
     INIT_PATCHSET(depcompatible);
+    INIT_PATCHSET(dpiawareness);
 }
 
 // init_stage2() should be called after EXE is unpacked
@@ -132,7 +133,6 @@ static void init_stage2()
     INIT_PATCHSET(audiofreq);
     INIT_PATCHSET(showfps);
     INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
-    INIT_PATCHSET(dpiawareness);
     INIT_PATCHSET(testcombat);
     INIT_PATCHSET(reginstalldir);
     INIT_PATCHSET(improvearchive);
@@ -246,9 +246,10 @@ unsigned sforce_unpacker_init()
     return (unsigned) GetProcAddress(unpacker, (LPCSTR) 1);
 }
 
-BOOL WINAPI DllMain(HINSTANCE _hinstDLL, DWORD fdwReason, LPVOID lpReserved)
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
-    hinstDLL = _hinstDLL;
-    DisableThreadLibraryCalls(hinstDLL);
+    if (fdwReason == DLL_PROCESS_ATTACH) {
+        patch_hinstDLL = hinstDLL;
+    }
     return TRUE;
 }

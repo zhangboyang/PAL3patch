@@ -124,6 +124,8 @@
 #pragma comment(lib, "legacy_stdio_definitions.lib")
 #endif
 
+#pragma comment(lib, "freetype.lib")
+
 #endif
 
 
@@ -131,7 +133,7 @@
 // return address
 #if defined(_MSC_VER)
 #define func_return_address() _ReturnAddress()
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || defined(__TINYC__)
 #define func_return_address() __builtin_return_address(0)
 #else
 #error
@@ -231,6 +233,14 @@
 
 // direct3d headers
 #include "tiny_d3d9sdk.h"
+
+// freetype headers
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_OUTLINE_H
+#include FT_TRUETYPE_DRIVER_H
+#include FT_MODULE_H
+#include FT_BITMAP_H
 
 // patch oldnames
 #define strdup _strdup

@@ -13,26 +13,11 @@ extern PATCHAPI void ftfont_draw(struct ftfont *font, const wchar_t *wstr, int l
 #ifdef PATCHAPI_EXPORTS
 // INTERNAL DEFINITIONS
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_OUTLINE_H
-#include FT_TRUETYPE_DRIVER_H
-#include FT_MODULE_H
-#include FT_BITMAP_H
-
-
 #if FREETYPE_PATCH != 0
 #define FTFONT_VERSTR TOSTR(FREETYPE_MAJOR) TOSTR(FREETYPE_MINOR) TOSTR(FREETYPE_PATCH)
 #else
 #define FTFONT_VERSTR TOSTR(FREETYPE_MAJOR) TOSTR(FREETYPE_MINOR)
 #endif
-
-
-#if defined(_MSC_VER)
-#pragma comment(lib, "freetype.lib")
-#endif
-
-
 
 #define FTFONT_MAXCHARS 0x10000
 #define FTFONT_BITMAP_BOLD_LIMIT 48

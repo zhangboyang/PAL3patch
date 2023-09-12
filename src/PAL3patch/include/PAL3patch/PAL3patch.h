@@ -12,8 +12,6 @@ extern PATCHAPI void sforce_unpacker_entry(void);
 #ifdef PATCHAPI_EXPORTS
 // INTERNAL DEFINITIONS
 
-#define hinstDLL patch_hinstDLL
-
 #define EXTERNAL_UNPACKER "PAL3unpack.dll"
 #define EXTERNAL_UNPACKER_FIXED "PAL3unpack_fixed.dll"
 
