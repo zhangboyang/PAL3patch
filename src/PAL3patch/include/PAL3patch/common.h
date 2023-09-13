@@ -153,55 +153,6 @@
 
 
 
-// common macros
-#define _TOSTR(x) #x
-#define TOSTR(x) _TOSTR(x)
-#define _CONCAT(a, b) a ## b
-#define CONCAT(a, b) _CONCAT(a, b)
-#define CONCAT3(a, b, c) CONCAT(CONCAT(a, b), c)
-#define CONCAT4(a, b, c, d) CONCAT(CONCAT3(a, b, c), d)
-#define CONCAT5(a, b, c, d, e) CONCAT(CONCAT4(a, b, c, d), e)
-#define CONCAT6(a, b, c, d, e, f) CONCAT(CONCAT5(a, b, c, d, e), f)
-#define _WSTR(x) L##x
-#define WSTR(x) _WSTR(x)
-
-// type macros
-#define TOPTR(addr) ((void *)(addr))
-#define TOUINT(x) ((unsigned)(x))
-#define TOUCHAR(x) ((unsigned char)(x))
-
-// pointer macros
-#define PTRADD(ptr, add) ((void *)(((char *)(ptr)) + (add)))
-#define PTRSUB(a, b) (((char *)(a)) - ((char *)(b)))
-
-// round macros
-#define ROUND_UP(x, y) ((((x) + ((y) - 1)) / (y)) * (y))
-#define ROUND_DOWN(x, y) ((x) - ((x) % (y)))
-
-// common constants
-#define NOP 0x90
-#define INT3 0xCC
-
-#define MAXLINE      4096
-#define MAXLINEFMT "%4095s"
-
-#define eps (1e-5)
-#define inf (1e100)
-
-#define UTF8_BOM_STR "\xEF\xBB\xBF"
-#define UTF8_BOM_LEN 3
-
-#define SPACECHAR_LIST " \t\n\v\f\r"
-
-
-
-
-
-
-
-
-
-
 #ifdef PATCHAPI_EXPORTS
 
 #if defined(__GNUC__)
@@ -283,6 +234,53 @@ typedef unsigned char bool;
 #define true 1
 #define false 0
 #endif
+
+
+
+
+
+
+
+
+// common macros
+#define _TOSTR(x) #x
+#define TOSTR(x) _TOSTR(x)
+#define _CONCAT(a, b) a ## b
+#define CONCAT(a, b) _CONCAT(a, b)
+#define CONCAT3(a, b, c) CONCAT(CONCAT(a, b), c)
+#define CONCAT4(a, b, c, d) CONCAT(CONCAT3(a, b, c), d)
+#define CONCAT5(a, b, c, d, e) CONCAT(CONCAT4(a, b, c, d), e)
+#define CONCAT6(a, b, c, d, e, f) CONCAT(CONCAT5(a, b, c, d, e), f)
+
+// type macros
+#define TOPTR(addr) ((void *)(addr))
+#define TOUINT(x) ((unsigned)(x))
+#define TOUCHAR(x) ((unsigned char)(x))
+
+// pointer macros
+#define PTRADD(ptr, add) ((void *)(((char *)(ptr)) + (add)))
+#define PTRSUB(a, b) (((char *)(a)) - ((char *)(b)))
+
+// round macros
+#define ROUND_UP(x, y) ((((x) + ((y) - 1)) / (y)) * (y))
+#define ROUND_DOWN(x, y) ((x) - ((x) % (y)))
+
+// common constants
+#define NOP 0x90
+#define INT3 0xCC
+
+#define MAXLINE      4096
+#define MAXLINEFMT "%4095s"
+
+#define eps (1e-5)
+#define inf (1e100)
+
+#define UTF8_BOM_STR "\xEF\xBB\xBF"
+#define UTF8_BOM_LEN 3
+
+#define SPACECHAR_LIST " \t\n\v\f\r"
+
+
 
 
 

@@ -49,12 +49,12 @@ extern PATCHAPI void print_wstring_end(void);
 
 // patchset based on integer config
 #define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
-#define INIT_PATCHSET(name) (GET_PATCHSET_FLAG(name) ? (MAKE_PATCHSET_NAME(name)(GET_PATCHSET_FLAG(name)), 1) : 0)
-
-
-// patchset based on string config
-#define MAKE_PATCHSET_STRCFG(name) void MAKE_PATCHSET_NAME(name)(const char *cfgstr)
-#define INIT_PATCHSET_STRCFG(name) MAKE_PATCHSET_NAME(name)(GET_PATCHSET_CONFIG_STR(name))
+#define INIT_PATCHSET(name) init_patchset_helper(GET_PATCHSET_FLAG(name), MAKE_PATCHSET_NAME(name))
+static INLINE int init_patchset_helper(int flag, void (*init)(int))
+{
+    if (flag) init(flag);
+    return flag;
+}
 
 
 #define GAME_WIDTH_ORG 800

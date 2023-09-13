@@ -217,13 +217,14 @@ static int try_fix_unpacker()
     const unsigned char newcode[] = "\x59\x58\x5A\x83\xFA\x01\x5A\x51\x75\x0D\x90";
     unsigned char buf[sizeof(oldcode) - 1];
     if (!CopyFile(EXTERNAL_UNPACKER, EXTERNAL_UNPACKER_FIXED, FALSE)) return 0;
-    FILE *fp = fopen(EXTERNAL_UNPACKER_FIXED, "r+b");
+    FILE *fp = fopen(EXTERNAL_UNPACKER_FIXED, "r+bc");
     if (!fp) return 0;
     if (fseek(fp, fileoffset, SEEK_SET) != 0) goto fail;
     if (fread(buf, 1, sizeof(buf), fp) != sizeof(buf)) goto fail;
     if (memcmp(buf, oldcode, sizeof(oldcode) - 1) != 0) goto fail;
     if (fseek(fp, fileoffset, SEEK_SET) != 0) goto fail;
     if (fwrite(newcode, 1, sizeof(newcode) - 1, fp) != sizeof(newcode) - 1) goto fail;
+    if (fflush(fp) != 0) goto fail;
     fclose(fp);
     return 1;
 fail:

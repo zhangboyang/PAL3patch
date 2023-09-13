@@ -16,7 +16,7 @@ static void write_logfile_header(FILE *fp)
     dump_all_config(fp);
 }
 
-void NORETURN __fail(const char *file, int line, const char *func, const wchar_t *extra_msg, const wchar_t *extra_msg_title, const char *fmt, ...)
+void NORETURN fail_impl(const char *file, int line, const char *func, const wchar_t *extra_msg, const wchar_t *extra_msg_title, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -57,7 +57,7 @@ void NORETURN __fail(const char *file, int line, const char *func, const wchar_t
 
 static long long plog_lines = 0;
 static long long plog_msgboxes = 0;
-void __plog(int is_warning, const char *file, int line, const char *func, const char *fmt, ...)
+void plog_impl(int is_warning, const char *file, int line, const char *func, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);

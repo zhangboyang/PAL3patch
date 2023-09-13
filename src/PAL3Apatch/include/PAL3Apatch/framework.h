@@ -30,9 +30,9 @@ extern PATCHAPI void *dup_vftable(void *vftable, unsigned size);
     } while (0)
 #define SIMPLE_PATCH_NOP(addr, oldcode, size) \
     do { \
-        unsigned char __nop[size]; \
-        memset(__nop, NOP, size); \
-        SIMPLE_PATCH(addr, oldcode, __nop, size); \
+        unsigned char nop_[size]; \
+        memset(nop_, NOP, size); \
+        SIMPLE_PATCH(addr, oldcode, nop_, size); \
     } while (0)
 
 
@@ -41,8 +41,8 @@ extern PATCHAPI void *dup_vftable(void *vftable, unsigned size);
 
 #define INIT_WRAPPER_CALL(wrapper_func, ...) \
     do { \
-        unsigned __caller_list[] = __VA_ARGS__; \
-        make_wrapper_branch_batch(__caller_list, sizeof(__caller_list) / sizeof(__caller_list[0]), (wrapper_func)); \
+        unsigned caller_list_[] = __VA_ARGS__; \
+        make_wrapper_branch_batch(caller_list_, sizeof(caller_list_) / sizeof(caller_list_[0]), (wrapper_func)); \
     } while (0)
 #define INIT_WRAPPER_VFPTR(wrapper_func, vfptr_addr) \
     do { \
@@ -50,19 +50,19 @@ extern PATCHAPI void *dup_vftable(void *vftable, unsigned size);
     } while (0)
 #define PATCH_FLOAT_MEMREF_PTR(float_addr, ...) \
     do { \
-        float *__new_value_addr = (float_addr); \
-        unsigned __instr_addr[] = __VA_ARGS__; \
-        int __instr_addr_cnt = sizeof(__instr_addr) / sizeof(__instr_addr[0]); \
-        unsigned *__instr_addr_ptr; \
-        for (__instr_addr_ptr = __instr_addr; __instr_addr_ptr < __instr_addr + __instr_addr_cnt; __instr_addr_ptr++) { \
-            memcpy_to_process(*__instr_addr_ptr + 2, &__new_value_addr, sizeof(__new_value_addr)); \
+        float *new_value_addr_ = (float_addr); \
+        unsigned instr_addr_[] = __VA_ARGS__; \
+        int instr_addr_cnt_ = sizeof(instr_addr_) / sizeof(instr_addr_[0]); \
+        unsigned *instr_addr_ptr_; \
+        for (instr_addr_ptr_ = instr_addr_; instr_addr_ptr_ < instr_addr_ + instr_addr_cnt_; instr_addr_ptr_++) { \
+            memcpy_to_process(*instr_addr_ptr_ + 2, &new_value_addr_, sizeof(new_value_addr_)); \
         } \
     } while (0)
 #define PATCH_FLOAT_MEMREF_EXPR(expr, ...) \
     do { \
-        static float __expr_value; \
-        __expr_value = (expr); \
-        PATCH_FLOAT_MEMREF_PTR(&__expr_value, __VA_ARGS__); \
+        static float expr_value_; \
+        expr_value_ = (expr); \
+        PATCH_FLOAT_MEMREF_PTR(&expr_value_, __VA_ARGS__); \
     } while (0)
 
 #endif // NO_VARIADIC_MACROS
