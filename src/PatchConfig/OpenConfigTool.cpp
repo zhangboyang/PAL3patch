@@ -18,6 +18,7 @@ void OpenConfigTool(CPatchConfigDlg *dlg)
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
 
+	dlg->SetTopMost(false);
 	ShowPleaseWaitDlg(dlg, STRTABLE(IDS_OPENCONFIGTOOLINPROGRESS));
 
 	memset(&si, 0, sizeof(si));
@@ -40,5 +41,6 @@ void OpenConfigTool(CPatchConfigDlg *dlg)
 
 	DestroyPleaseWaitDlg();
 
+	dlg->SetTopMost(true);
 	dlg->SetForegroundWindow();
 }

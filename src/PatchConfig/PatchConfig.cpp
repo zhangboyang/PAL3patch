@@ -124,7 +124,7 @@ BOOL CPatchConfigApp::InitInstance()
 {
 	// Standard initialization
 
-	TrySetUACVirtualization(TRUE);
+	TrySetUACVirtualization(true);
 
 #ifdef _AFXDLL
 	Enable3dControls();			// Call this when using MFC in a shared DLL

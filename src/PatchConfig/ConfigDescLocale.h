@@ -37,7 +37,7 @@
 static ConfigDescItem LISTNAME[] = {
 #undef LISTNAME
 	{
-		0, FALSE, TRUE,
+		0, false, true,
 		NULL,
 		CHS("欢迎") CHT("歡迎") ENG("Welcome"),
 
@@ -54,14 +54,14 @@ static ConfigDescItem LISTNAME[] = {
 		_T("请选择左侧栏中的条目进行操作。"),
 	},
 	{
-		0, FALSE, TRUE,
+		0, false, true,
 		NULL,
 		_T("常规设置"),
 		_T("此分类下是一些常规设置。"),
 		_T("请选择一个子项目进行配置。"),
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		_T("showabout"),
 		_T("显示关于"),
 		_T("是否在游戏程序启动时显示本补丁的“关于”窗口。"),
@@ -73,7 +73,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("showfps"),
 		_T("显示帧率"),
 		_T("本选项可以在游戏界面左上角显示游戏帧率、补丁版本和帧时抖动信息。"),
@@ -85,14 +85,14 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		0, FALSE, TRUE,
+		0, false, true,
 		NULL,
 		_T("图形设置"),
 		_T("此分类下包含游戏图形显示相关的设置。"),
 		_T("请选择一个子项目进行配置。"),
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		_T("game_resolution"),
 		_T("分辨率"),
 		_T("此选项可以调节游戏的分辨率。\r\n")
@@ -106,7 +106,7 @@ static ConfigDescItem LISTNAME[] = {
 		&EnumDisplayModeInstance,
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		_T("game_windowed"),
 		_T("窗口化"),
 		_T("此选项可以使游戏以窗口模式运行。"),
@@ -119,14 +119,14 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("game_refreshrate"),
 		_T("刷新率"),
 		_T("此选项可以调节游戏的刷新率（帧率）。"),
 		_T("请在文本框内键入刷新率数值，若设为 0 则选择系统默认。若指定的分辨率不可用，游戏将自动选择一个最接近的分辨率。"),
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("game_zbufferbits"),
 		_T("深度缓存"),
 		_T("此选项可以调节游戏的深度缓存级别。\r\n格式为：位数 （位数一般为 16 或 24）\r\n注意：由于游戏只使用深度缓存而没有使用模板缓存，因此启用模板缓存没有意义。"),
@@ -136,7 +136,7 @@ static ConfigDescItem LISTNAME[] = {
 		&EnumDepthBufferInstance,
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		_T("game_multisample"),
 		_T("抗锯齿"),
 		_T("此选项可以调节游戏的抗锯齿级别。\r\n格式为：级别,子等级 （子等级一般设为 0）"),
@@ -146,7 +146,7 @@ static ConfigDescItem LISTNAME[] = {
 		&EnumMultisampleInstance,
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		_T("clipcursor"),
 		_T("捕获鼠标"),
 		_T("是否启用鼠标捕获功能。"),
@@ -158,7 +158,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		_T("softcursor"),
 		_T("软件光标"),
 		_T("是否启用软件光标功能。\r\n注意：此设置会覆盖官方配置工具中的软件光标设置。"),
@@ -170,7 +170,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("reduceinputlatency"),
 		_T("减少延迟"),
 		_T("本选项可以减少输入延迟（即鼠标接收到动作到动作被显示到显示器上的延迟），也有助于减少细微的不流畅感，但会有少量性能开销。"),
@@ -183,14 +183,14 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		0, TRUE, TRUE,
+		0, true, true,
 		NULL,
 		_T("字体设置"),
 		_T("此分类下包含游戏文字字体相关的设置。"),
 		_T("请选择一个子项目进行配置。"),
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("uireplacefont_facename"),
 		_T("字体"),
 		_T("指定游戏使用的字体。"),
@@ -200,7 +200,7 @@ static ConfigDescItem LISTNAME[] = {
 		&EnumFontfaceInstance,
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("uireplacefont_bold"),
 		_T("加粗"),
 		_T("指定字体是否要加粗。"),
@@ -213,7 +213,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("uireplacefont_quality"),
 		_T("质量"),
 		_T("指定字体的输出质量。"),
@@ -226,7 +226,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("uireplacefont_preloadfontset"),
 		_T("预加载"),
 		_T("指定是否要预加载字体。"),
@@ -239,7 +239,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		0, TRUE, TRUE,
+		0, true, true,
 		NULL,
 		_T("用户界面设置"),
 		_T("此分类下包含游戏交互界面相关的设置。"),
@@ -247,7 +247,7 @@ static ConfigDescItem LISTNAME[] = {
 	},
 #ifdef BUILD_FOR_PAL3A
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("fixbutton"),
 		_T("按钮判定模式"),
 		_T("此选项可调整用户界面中对于“按钮是否被按下”的判定模式。"),
@@ -260,7 +260,7 @@ static ConfigDescItem LISTNAME[] = {
 	},
 #endif
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("uiscalefactor"),
 		_T("系统界面大小"),
 		_T("此选项可以调整游戏系统界面（如封面界面、状态界面、交易界面等）的大小。"),
@@ -273,7 +273,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("softcursor_scalefactor"),
 		_T("软件光标大小"),
 		_T("此选项可以调整软件光标（鼠标指针）的大小。该选项仅在开启软件光标时有效。"),
@@ -286,14 +286,14 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		NULL,
 		_T("战斗界面设置"),
 		_T("此小分类下包含战斗界面相关的设置。"),
 		_T("请选择一个子项目进行配置。"),
 	},
 	{
-		2, TRUE, TRUE,
+		2, true, true,
 		_T("fixcombatui_scalefactor"),
 		_T("元素大小"),
 		_T("此选项可以调整战斗界面元素（如按钮、列表等）的大小。"),
@@ -306,7 +306,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		2, TRUE, TRUE,
+		2, true, true,
 		_T("fixcombatui_scaletype"),
 		_T("界面范围"),
 		_T("指定战斗界面占用屏幕的范围。"),
@@ -318,14 +318,14 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		NULL,
 		_T("场景界面设置"),
 		_T("此小分类下包含场景界面相关的设置。"),
 		_T("请选择一个子项目进行配置。"),
 	},
 	{
-		2, TRUE, TRUE,
+		2, true, true,
 		_T("fixsceneui_uiscalefactor"),
 		_T("元素大小"),
 		_T("指定场景用户界面元素的大小。"),
@@ -338,7 +338,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		2, TRUE, TRUE,
+		2, true, true,
 		_T("fixsceneui_textscalefactor"),
 		_T("文字大小"),
 		_T("指定场景界面文字（如剧情文字等）的大小。此选项会间接影响剧情对话框的大小。"),
@@ -351,7 +351,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		2, TRUE, TRUE,
+		2, true, true,
 		_T("fixsceneui_iconscalefactor"),
 		_T("图标大小"),
 		_T("指定场景界面图标（如动画表情等）的大小。"),
@@ -364,7 +364,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		2, TRUE, TRUE,
+		2, true, true,
 		_T("fixsceneui_scaletype"),
 		_T("界面范围"),
 		_T("指定场景界面占用屏幕的范围。"),
@@ -376,7 +376,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		0, TRUE, TRUE,
+		0, true, true,
 		NULL,
 		_T("高级设置"),
 		_T("此分类下包含一些高级设置。"),
@@ -384,7 +384,7 @@ static ConfigDescItem LISTNAME[] = {
 	},
 #ifdef BUILD_FOR_PAL3A
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("setpal3path"),
 		_T("仙三安装路径"),
 		_T("设置仙三安装路径，以便继承仙三存档。游戏会从此路径下的“save”文件夹内读取存档。"),
@@ -392,7 +392,7 @@ static ConfigDescItem LISTNAME[] = {
 	},
 #endif
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("cdpatch"),
 		_T("免光盘补丁"),
 		_T("是否启用本补丁内置的免光盘补丁。\r\n如果游戏启动时出现“Please Insert Disc4 to Driver X:”信息，建议启用本选项。"),
@@ -404,7 +404,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("regredirect"),
 		_T("注册表重定向"),
 		_T("注册表重定向功能可以将")
@@ -424,7 +424,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("improvearchive"),
 		_T("改进存档机制"),
 		_T("此选项可以降低断电或系统崩溃时存档损坏的概率")
@@ -447,7 +447,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("nocpk"),
 		_T("免 CPK 补丁"),
 		_T("原始情况下，游戏数据全部是压缩存放于数个 CPK 文件之中。本选项可以让游戏直接从文件系统读取游戏数据，而不是从 CPK 中读取。"),
@@ -459,7 +459,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("console"),
 		_T("调出控制台"),
 		_T("原始情况下，需要输入“")
@@ -478,7 +478,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("skipscreenshot"),
 		_T("跳过截图"),
 		_T("游戏系统内进行特定操作时，需要用到游戏画面的截图，但截图操作速度较慢，会造成一定卡顿。此选项可以控制是否用纯黑图片替代截图，以减少这类卡顿。"),
@@ -490,7 +490,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("testcombat"),
 		_T("战斗编辑器"),
 		_T("是否启用游戏程序内置的战斗编辑器。"),
@@ -502,7 +502,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("windowtitle"),
 		_T("窗口标题"),
 		_T("修改游戏窗口标题。某些修改器可能需要将标题设为原始标题（")
@@ -516,7 +516,7 @@ static ConfigDescItem LISTNAME[] = {
 		_T("请在文本框内键入您想使用的游戏窗口标题。（长度须少于 128 字节）"),
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("setlocale"),
 		_T("区域设置"),
 		_T("本选项可以修改程序运行时的语言区域。如果您在运行游戏时遇到游戏内文字乱码的问题，可以尝试使用此选项。"),
@@ -529,7 +529,7 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		1, TRUE, TRUE,
+		1, true, true,
 		_T("loadplugins"),
 		_T("外部插件"),
 		_T("可以使用此选项控制分辨率补丁是否加载外部插件。启用本功能后，将在“plugins”目录下自动寻找并加载外部插件。通过插件框架，外部插件可以灵活地扩充本分辨率补丁的功能。"),
@@ -541,14 +541,14 @@ static ConfigDescItem LISTNAME[] = {
 		}
 	},
 	{
-		0, FALSE, TRUE,
+		0, false, true,
 		NULL,
 		_T("实用工具"),
 		_T("此分类下是一些实用小工具。"),
 		_T("请选择一个子项目进行配置。"),
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		NULL,
 		_T("恢复默认设置"),
 		_T("此功能可以将所有分辨率补丁配置项全部恢复为默认值。官方配置工具中的配置项不会被改变。"),
@@ -556,7 +556,7 @@ static ConfigDescItem LISTNAME[] = {
 		CPatchConfigDlg::RestoreAllConfigToDefault, NULL
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		NULL,
 		_T("官方配置工具"),
 		_T("此功能可以打开官方编写的游戏配置工具。使用它可以编辑“垂直同步”、“音乐开关”、“音效开关”等选项。\r\n")
@@ -571,7 +571,7 @@ static ConfigDescItem LISTNAME[] = {
 		OpenConfigTool, _T("打开官方配置工具")
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		NULL,
 		_T("打开存档目录"),
 		_T("此功能可以打开游戏的存档目录。"),
@@ -579,7 +579,7 @@ static ConfigDescItem LISTNAME[] = {
 		OpenSaveFolder, NULL
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		NULL,
 		_T("打开截屏目录"),
 		_T("此功能可以打开游戏的截屏目录。"),
@@ -587,7 +587,7 @@ static ConfigDescItem LISTNAME[] = {
 		OpenSnapFolder, NULL
 	},
 	{
-		1, FALSE, TRUE,
+		1, false, true,
 		NULL,
 		_T("检查新版本"),
 		_T("此功能可以联网检查本补丁的新版本。"),

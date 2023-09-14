@@ -8,10 +8,10 @@ typedef BOOL (WINAPI *SetTokenInformation_funcptr_t)(HANDLE TokenHandle, TOKEN_I
 static OpenProcessToken_funcptr_t MyOpenProcessToken = NULL;
 static SetTokenInformation_funcptr_t MySetTokenInformation = NULL;
 
-static int SetUACVirtualization(BOOL enabled)
+static int SetUACVirtualization(bool en)
 {
 	HANDLE token;
-	DWORD dwVal = enabled ? 1 : 0;
+	DWORD dwVal = en ? 1 : 0;
 	int ret = 0;
 
 	if (MyOpenProcessToken(GetCurrentProcess(), MAXIMUM_ALLOWED, &token)) {
@@ -50,10 +50,10 @@ static int InitSetUACVirtualization()
 	}
 }
 
-int TrySetUACVirtualization(BOOL enabled)
+int TrySetUACVirtualization(bool en)
 {
 	if (InitSetUACVirtualization() > 0) {
-		return SetUACVirtualization(enabled);
+		return SetUACVirtualization(en);
 	} else {
 		return 0;
 	}

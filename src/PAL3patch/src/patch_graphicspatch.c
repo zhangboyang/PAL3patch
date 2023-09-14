@@ -388,6 +388,19 @@ void try_goto_desktop()
     }
 }
 
+static int topmost_ms = 0;
+static int topmost_countdown = 0;
+static DWORD topmost_create;
+static void topmost_gameloop_hook(void *arg)
+{
+    if (topmost_countdown) {
+        if (timeGetTime() - topmost_create >= (unsigned) topmost_ms) {
+            SetWindowPos(game_hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+            topmost_countdown = 0;
+        }
+    }
+}
+
 static ATOM WINAPI RegisterClass_wrapper(WNDCLASS *lpWndClass)
 {
     lpWndClass->hIcon = LoadIcon(lpWndClass->hInstance, MAKEINTRESOURCE(101)); // brute force to find this icon ID
@@ -404,7 +417,14 @@ static HWND WINAPI CreateWindowExA_wrapper(DWORD dwExStyle, LPCSTR lpClassName, 
         if (y < 0) y = 0;
     }
     lpWindowName = winname;
+    if (topmost_ms != 0) {
+        dwExStyle |= WS_EX_TOPMOST;
+    }
     game_hwnd = CreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+    if (topmost_ms > 0) {
+        topmost_create = timeGetTime();
+        topmost_countdown = 1;
+    }
     return game_hwnd;
 }
 static void getcursorpos_window_hookfunc(void *arg)
@@ -622,6 +642,14 @@ static void init_window_patch(int flag)
         SIMPLE_PATCH(0x00406559, "\x00\x00\x08\x96", &newstyle, 4);
     }
     
+    // handle topmost
+    if (window_patch_cfg != WINDOW_FULLSCREEN) {
+        topmost_ms = get_int_from_configfile("topmost");
+    }
+    if (topmost_ms != 0) {
+        SIMPLE_PATCH(gboffset + 0x1001A9E2, "\x6A\xFE", "\x6A\xFF", 2);
+        add_gameloop_hook(topmost_gameloop_hook);
+    }
 
     // hook CreateWindowEx
     make_call6(0x004063A7, RegisterClass_wrapper);

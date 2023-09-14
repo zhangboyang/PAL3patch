@@ -325,10 +325,14 @@ BOOL CPatchConfigDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	//SetIcon(m_hIcon, TRUE);			// Set big icon
-	//SetIcon(m_hIcon, FALSE);		// Set small icon
+#if _MSC_VER >= 1800
+	SetIcon(m_hIcon, TRUE);			// Set big icon
+	SetIcon(m_hIcon, FALSE);		// Set small icon
+#endif
 	
 	// TODO: Add extra initialization here
+
+	SetTopMost(true);
 
 	int i;
 	CMouseMsgButton *rbtn[MAX_CONFIGDESC_OPTIONS] = {&m_RadioBtn1, &m_RadioBtn2, &m_RadioBtn3};
@@ -338,7 +342,7 @@ BOOL CPatchConfigDlg::OnInitDialog()
 		rbtn[i]->m_OnMouseMoveCallback = OnMouseMoveCallbackWarpper;
 	}
 
-	ToggleAdvMode(TRUE); // config descriptions will be loaded here
+	ToggleAdvMode(true); // config descriptions will be loaded here
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -382,7 +386,7 @@ HCURSOR CPatchConfigDlg::OnQueryDragIcon()
 
 void CPatchConfigDlg::OnToggleAdvOpts() 
 {
-	ToggleAdvMode(FALSE);
+	ToggleAdvMode(false);
 }
 
 void CPatchConfigDlg::OnSelchangedCfgtreeW(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -504,4 +508,9 @@ void CPatchConfigDlg::RestoreAllConfigToDefault(CPatchConfigDlg *dlg)
 	}
 
 	dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_SUCCEED), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_ICONINFORMATION);
+}
+
+void CPatchConfigDlg::SetTopMost(bool en)
+{
+	SetWindowPos((en ? &wndTopMost : &wndNoTopMost), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 }

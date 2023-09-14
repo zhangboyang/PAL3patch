@@ -49,6 +49,7 @@ public:
 // Implementation
 public:
 	static void RestoreAllConfigToDefault(CPatchConfigDlg *dlg);
+	void SetTopMost(bool en);
 
 protected:
 	HICON m_hIcon;
