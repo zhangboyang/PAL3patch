@@ -40,12 +40,14 @@ static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR subdir)
 
 void OpenSaveFolder(CPatchConfigDlg *dlg)
 {
+	dlg->SetTopMost(false);
 	create_dir("save");
 	OpenGameFolder(dlg, _T("save"));
 }
 
 void OpenSnapFolder(CPatchConfigDlg *dlg)
 {
+	dlg->SetTopMost(false);
 	create_dir("snap");
 	OpenGameFolder(dlg, _T("snap"));
 }

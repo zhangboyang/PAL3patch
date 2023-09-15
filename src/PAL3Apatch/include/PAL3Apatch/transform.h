@@ -2,19 +2,19 @@
 #define PAL3APATCH_TRANSFORM_H
 // PATCHAPI DEFINITIONS
 
-typedef struct _fPOINT { // point
+typedef struct { // point
     double x;
     double y;
 } fPOINT;
 
-typedef struct _fRECT { // rect
+typedef struct { // rect
     double left;
     double top;
     double right;
     double bottom;
 } fRECT;
 
-typedef struct _fSEG { // segment
+typedef struct { // segment
     double start;
     double length;
 } fSEG;

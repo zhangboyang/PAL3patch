@@ -143,7 +143,7 @@ static MAKE_THISCALL(void, UIGameFrm_Create_wrapper, struct UIGameFrm *this)
     ptag = SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT, TR_CENTER, TR_CENTER);
     set_uiwnd_ptag(pUIWND(&this->m_seldlg), ptag);
 
-    ptag = SCENE_PTAG(SF_SCENETEXT, PTR_GAMERECT_ORIGINAL, TR_SCALE_HIGH, TR_SCALE_LOW);
+    ptag = MAKE_PTAG(SF_SCENETEXT, PTR_GAMERECT_ORIGINAL, PTR_GAMERECT_43, TR_SCALE_HIGH, TR_SCALE_LOW);
     set_uiwnd_ptag(pUIWND(&this->m_cap), ptag);
     
     ptag = SCENE_PTAG(SF_SCENEUI, PTR_GAMERECT, TR_LOW, TR_HIGH);
