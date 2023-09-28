@@ -318,6 +318,7 @@ extern "C" {
 #include "bytevector.h"
 #include "sha1.h"
 #include "wal.h"
+#include "badtools.h"
 
 
 #ifdef __cplusplus

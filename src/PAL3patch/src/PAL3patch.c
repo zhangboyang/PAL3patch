@@ -173,6 +173,9 @@ static void init_stage2()
     
     // show_about() must called after init_locale()
     show_about();
+    
+    // check incompatible tools
+    check_badtools();
 }
 
 

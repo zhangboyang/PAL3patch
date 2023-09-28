@@ -320,6 +320,7 @@ extern "C" {
 #include "sha1.h"
 #include "wal.h"
 #include "badfiles.h"
+#include "badtools.h"
 
 
 #ifdef __cplusplus

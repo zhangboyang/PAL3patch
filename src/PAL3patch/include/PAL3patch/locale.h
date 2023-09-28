@@ -56,6 +56,7 @@ extern const wchar_t *wstr_resetfailed_title;
 extern const wchar_t *wstr_resolutiontoolarge_text;
 extern const wchar_t *wstr_resolutiontoolarge_title;
 extern const wchar_t *wstr_nogfxmgr_text;
+extern const wchar_t *wstr_nogfxmgr_badtools_text;
 extern const wchar_t *wstr_nogfxmgr_title;
 extern const wchar_t *wstr_screenshot_msg;
 extern const wchar_t *wstr_punctuation_nohead;
@@ -69,6 +70,9 @@ extern const wchar_t *wstr_pluginreport_template;
 extern const wchar_t *wstr_pluginreport_namepart;
 extern const wchar_t *wstr_pluginreport_success;
 extern const wchar_t *wstr_pluginreport_failed;
+extern const wchar_t *wstr_havebadtool_text;
+extern const wchar_t *wstr_havebadtool_title;
+extern const wchar_t *wstr_badtool_dxwnd;
 
 #endif
 #endif

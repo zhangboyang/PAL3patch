@@ -51,7 +51,7 @@ static const wchar_t wstr_nomutex_title_CHS[] = L"检测到冲突";
 static const wchar_t wstr_nocfgfile_text_CHS[] = L"无法读取补丁配置文件。请运行“补丁配置工具”来生成默认配置文件。";
 static const wchar_t wstr_nocfgfile_title_CHS[] = L"无法加载配置";
 
-static const wchar_t wstr_badcfgfile_text_CHS[] = L"补丁配置文件已损坏。请运行“补丁配置工具”，使用“实用工具——恢复默认设置”功能来重写配置文件。";
+static const wchar_t wstr_badcfgfile_text_CHS[] = L"补丁配置文件已损坏。请运行“补丁配置工具”，使用“实用工具——恢复默认设置”功能来重新生成配置文件。";
 static const wchar_t wstr_badcfgfile_title_CHS[] = L"无法加载配置";
 
 static const wchar_t wstr_badpath_text_CHS[] = L"请将游戏文件置于全英文路径下，以防游戏运行出现问题。";
@@ -66,7 +66,8 @@ static const wchar_t wstr_resetfailed_title_CHS[] = L"重置失败";
 static const wchar_t wstr_resolutiontoolarge_text_CHS[] = L"将要使用 %dx%d 分辨率进行游戏。\n但该分辨率实在太大，可能导致游戏运行不稳定或无法运行。\n\n建议您使用“补丁配置工具”指定一个低于 %dx%d 的分辨率。\n\n是否仍要使用 %dx%d 分辨率进行游戏？";
 static const wchar_t wstr_resolutiontoolarge_title_CHS[] = L"游戏分辨率过高";
 
-static const wchar_t wstr_nogfxmgr_text_CHS[] = L"游戏初始化失败，请检查显卡驱动程序是否工作正常（或图形设置是否过高）。";
+static const wchar_t wstr_nogfxmgr_text_CHS[] = L"显卡设备初始化失败，请检查显卡驱动程序是否工作正常（或图形设置是否合适）。";
+static const wchar_t wstr_nogfxmgr_badtools_text_CHS[] = L"显卡设备初始化失败，这可能是以下工具导致的：\n\n%s\n请关闭或禁用它们，然后再试一次。";
 static const wchar_t wstr_nogfxmgr_title_CHS[] = L"游戏初始化失败";
 
 static const wchar_t wstr_screenshot_msg_CHS[] = L"屏幕截图已保存至“%hs”";
@@ -83,6 +84,10 @@ static const wchar_t wstr_pluginreport_template_CHS[] = L"以下是插件加载情况：\n
 static const wchar_t wstr_pluginreport_namepart_CHS[] = L"%s%hs%hs";
 static const wchar_t wstr_pluginreport_success_CHS[] = L"【成功】 %s\n";
 static const wchar_t wstr_pluginreport_failed_CHS[] = L"【失败】 %s （%s）\n";
+
+static const wchar_t wstr_havebadtool_text_CHS[] = L"检测到以下工具正在运行：\n\n%s\n这些工具可能会影响分辨率补丁正常工作，建议您关闭或禁用它们。\n\n是否仍要进入游戏？";
+static const wchar_t wstr_havebadtool_title_CHS[] = L"检测到不兼容的工具";
+static const wchar_t wstr_badtool_dxwnd_CHS[] = L"DxWnd 窗口化工具";
 
 
 // CHT
@@ -129,6 +134,7 @@ const wchar_t *wstr_resetfailed_title;
 const wchar_t *wstr_resolutiontoolarge_text;
 const wchar_t *wstr_resolutiontoolarge_title;
 const wchar_t *wstr_nogfxmgr_text;
+const wchar_t *wstr_nogfxmgr_badtools_text;
 const wchar_t *wstr_nogfxmgr_title;
 const wchar_t *wstr_screenshot_msg;
 const wchar_t *wstr_punctuation_nohead;
@@ -142,6 +148,9 @@ const wchar_t *wstr_pluginreport_template;
 const wchar_t *wstr_pluginreport_namepart;
 const wchar_t *wstr_pluginreport_success;
 const wchar_t *wstr_pluginreport_failed;
+const wchar_t *wstr_havebadtool_text;
+const wchar_t *wstr_havebadtool_title;
+const wchar_t *wstr_badtool_dxwnd;
 
 
 
@@ -202,6 +211,7 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_resolutiontoolarge_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_resolutiontoolarge_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_nogfxmgr_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_nogfxmgr_badtools_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_nogfxmgr_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_screenshot_msg);
     IMPORT_LOCALE_ITEM(CHS, wstr_punctuation_nohead);
@@ -215,6 +225,9 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_namepart);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_success);
     IMPORT_LOCALE_ITEM(CHS, wstr_pluginreport_failed);
+    IMPORT_LOCALE_ITEM(CHS, wstr_havebadtool_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_havebadtool_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badtool_dxwnd);
 
     if (target_codepage == CODEPAGE_CHT) { // CHT
         IMPORT_LOCALE_ITEM(CHT, defaultfont_ftfilename);

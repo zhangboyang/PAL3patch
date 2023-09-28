@@ -890,7 +890,13 @@ static struct gbGfxManager *gbCreateGraphManager_wrapper(struct gbGfxDriverInfo 
     struct gbGfxManager *pgfx = gbCreateGraphManager(pinfo);
     if (!pgfx) {
         try_goto_desktop();
-        MessageBoxW(game_hwnd, wstr_nogfxmgr_text, wstr_nogfxmgr_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+        
+        const wchar_t *badtools = detect_badtools();
+    	if (badtools) {
+            MessageBoxW_format(game_hwnd, wstr_nogfxmgr_badtools_text, wstr_nogfxmgr_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND, badtools);
+        } else {
+            MessageBoxW(game_hwnd, wstr_nogfxmgr_text, wstr_nogfxmgr_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+        }
     }
     return pgfx;
 }

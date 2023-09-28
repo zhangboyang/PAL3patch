@@ -94,6 +94,7 @@
     </ClCompile>
     <ClCompile Include="src\asmpatch.c" />
     <ClCompile Include="src\badfiles.c" />
+    <ClCompile Include="src\badtools.c" />
     <ClCompile Include="src\bytevector.c" />
     <ClCompile Include="src\cfgreader.c" />
     <ClCompile Include="src\cjktable.c" />
@@ -178,6 +179,7 @@
     <ClInclude Include="include\PAL3Apatch\about.h" />
     <ClInclude Include="include\PAL3Apatch\asmpatch.h" />
     <ClInclude Include="include\PAL3Apatch\badfiles.h" />
+    <ClInclude Include="include\PAL3Apatch\badtools.h" />
     <ClInclude Include="include\PAL3Apatch\bytevector.h" />
     <ClInclude Include="include\PAL3Apatch\cfgreader.h" />
     <ClInclude Include="include\PAL3Apatch\cjktable.h" />
