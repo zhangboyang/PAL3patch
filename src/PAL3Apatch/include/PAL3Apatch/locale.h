@@ -73,6 +73,7 @@ extern const wchar_t *wstr_pluginreport_failed;
 extern const wchar_t *wstr_havebadtool_text;
 extern const wchar_t *wstr_havebadtool_title;
 extern const wchar_t *wstr_badtool_dxwnd;
+extern const wchar_t *wstr_badtool_d3dwindower;
 extern const wchar_t *wstr_havebadfile_text;
 extern const wchar_t *wstr_havebadfile_title;
 extern const wchar_t *wstr_cantdelbadfile_text;

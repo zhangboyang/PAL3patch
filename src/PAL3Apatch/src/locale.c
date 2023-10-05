@@ -85,9 +85,10 @@ static const wchar_t wstr_pluginreport_namepart_CHS[] = L"%s%hs%hs";
 static const wchar_t wstr_pluginreport_success_CHS[] = L"【成功】 %s\n";
 static const wchar_t wstr_pluginreport_failed_CHS[] = L"【失败】 %s （%s）\n";
 
-static const wchar_t wstr_havebadtool_text_CHS[] = L"检测到以下工具正在运行：\n\n%s\n这些工具可能会影响分辨率补丁正常工作，建议您关闭或禁用它们。\n\n是否仍要进入游戏？";
+static const wchar_t wstr_havebadtool_text_CHS[] = L"检测到以下工具似乎正在运行：\n\n%s\n这些工具可能会影响分辨率补丁正常工作，建议您关闭或禁用它们。\n\n如果您已经关闭或禁用了这些工具，可忽略本信息。\n\n是否仍要进入游戏？";
 static const wchar_t wstr_havebadtool_title_CHS[] = L"检测到不兼容的工具";
 static const wchar_t wstr_badtool_dxwnd_CHS[] = L"DxWnd 窗口化工具";
+static const wchar_t wstr_badtool_d3dwindower_CHS[] = L"D3DWindower 窗口化工具";
 
 static const wchar_t wstr_havebadfile_text_CHS[] = L"游戏目录下存在以下多余文件：\n\n%hs\n这些文件可能会影响游戏正常运行，建议您删除这些文件。\n\n是否立即彻底删除这些文件？（该操作无法撤销）";
 static const wchar_t wstr_havebadfile_title_CHS[] = L"是否删除多余文件";
@@ -156,6 +157,7 @@ const wchar_t *wstr_pluginreport_failed;
 const wchar_t *wstr_havebadtool_text;
 const wchar_t *wstr_havebadtool_title;
 const wchar_t *wstr_badtool_dxwnd;
+const wchar_t *wstr_badtool_d3dwindower;
 const wchar_t *wstr_havebadfile_text;
 const wchar_t *wstr_havebadfile_title;
 const wchar_t *wstr_cantdelbadfile_text;
@@ -242,6 +244,7 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_havebadtool_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_havebadtool_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_badtool_dxwnd);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badtool_d3dwindower);
 
     if (target_codepage == CODEPAGE_CHT) { // CHT
         IMPORT_LOCALE_ITEM(CHT, defaultfont_ftfilename);
