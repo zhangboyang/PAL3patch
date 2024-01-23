@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <direct.h>
 #include <errno.h>
+#include <locale.h>
 
 // requirements:
 //   put 'GBENGINE.DLL', 'MSS32.DLL', 'TOPO.DLL', 'IJL15.DLL' with this program
@@ -13,7 +14,7 @@ static void fail(const char *fmt, ...)
     va_start(ap, fmt);
     vprintf(fmt, ap);
     putchar('\n');
-    //system("pause");
+    system("pause");
     exit(1);
     va_end(ap);
 }
@@ -100,6 +101,7 @@ struct CPK {
 
 // helper macros
 #define TOPTR(addr) ((void *)(addr))
+#define TOUINT(x) ((unsigned)(x))
 #define MAKE_THISCALL_FUNCPTR(addr, ret_type, this_type, ...) ((ret_type (__fastcall *)(this_type, int, ##__VA_ARGS__)) TOPTR(addr))
 #define THISCALL_WRAPPER(func, this, ...) func(this, 0, ##__VA_ARGS__)
 
@@ -117,6 +119,7 @@ void *pCPK_GetTableIndexFromCRC;
 void *pCPK_Open;
 void *pCPK_Close;
 void *pCPK_Read;
+char *(*gbsetlocale)(int, const char *);
 
 // dynamic linker
 void dynlink()
@@ -128,6 +131,16 @@ void dynlink()
     pCPK_Open = GetProcAddress_safe(h_gbengine, "?Open@CPK@@QAEPAVCPKFile@@PBD@Z");
     pCPK_Close = GetProcAddress_safe(h_gbengine, "?Close@CPK@@QAE_NPAVCPKFile@@@Z");
     pCPK_Read = GetProcAddress_safe(h_gbengine, "?Read@CPK@@QAE_NPAXKPAVCPKFile@@@Z");
+
+#define P2A(p) (TOUINT(p) - TOUINT(h_gbengine) + 0x10000000)
+#define A2P(a) TOPTR((a) - 0x10000000 + TOUINT(h_gbengine))
+    if (P2A(pCPK_ctor) == 0x1002c4b0 && P2A(pCPK_Load) == 0x1002c660 && P2A(pCPK_GetTableIndexFromCRC) == 0x1002da00 && P2A(pCPK_Open) == 0x1002cc50 && P2A(pCPK_Close) == 0x1002d1a0 && P2A(pCPK_Read) == 0x1002d270) {
+        gbsetlocale = A2P(0x100e6b41); // PAL3
+    }
+    if (P2A(pCPK_ctor) == 0x1002a2e0 && P2A(pCPK_Load) == 0x1002a450 && P2A(pCPK_GetTableIndexFromCRC) == 0x1002b1e0 && P2A(pCPK_Open) == 0x1002a800 && P2A(pCPK_Close) == 0x1002ac10 && P2A(pCPK_Read) == 0x1002acf0) {
+        gbsetlocale = A2P(0x100c7dc7); // PAL3A
+    }
+    if (!gbsetlocale) fail("address of setlocale() is unknown.");
 }
 
 
@@ -265,14 +278,30 @@ int str_iendwith(const char *a, const char *b)
     return lena >= lenb && stricmp(a + lena - lenb, b) == 0;
 }
 
+int rankcmp(const void *pa, const void *pb)
+{
+    DWORD a = cpk.m_CPKTable[*(const int *)pa].dwStartPos;
+    DWORD b = cpk.m_CPKTable[*(const int *)pb].dwStartPos;
+    return a == b ? 0 : (a < b ? -1 : 1);
+}
+
 void extract_files()
 {
     int extract_cnt = 0;
     printf("extracting files ...\n");
     
-    int i;
+    int i, j;
+    
+    static int r[0x8000];
     for (i = 0; i < cpk.m_CPKHeader.dwValidTableNum; i++) {
-        if (i % 1000 == 0) printf("  progress %d/%d ...\n", i, (int) cpk.m_CPKHeader.dwValidTableNum);
+        r[i] = i;
+    }
+    qsort(r, cpk.m_CPKHeader.dwValidTableNum, sizeof(int), rankcmp);
+    
+    for (j = 0; j < cpk.m_CPKHeader.dwValidTableNum; j++) {
+        if (j % 1000 == 0) printf("  progress %d/%d ...\n", j, (int) cpk.m_CPKHeader.dwValidTableNum);
+        i = r[j];
+        
         if (!is_valid(i)) continue;
         if (is_dir(i)) continue;
         
@@ -294,7 +323,7 @@ void extract_files()
         snprintf(target_path, sizeof(target_path), "%s\\%s", prefix, path);
         //printf("target file = %s\n", target_path);
         FILE *fp = fopen(target_path, "wb");
-        if (!fp) fail("can't open '%s'.", target_path);
+        if (!fp) fail("can't open '%s' for writing.", target_path);
         if (fwrite(buf, 1, size, fp) != size) fail("write to '%s' failed.", target_path);
         fclose(fp);
         
@@ -310,6 +339,8 @@ void extract_files()
 int main(int argc, char *argv[])
 {
     dynlink();
+    
+    gbsetlocale(LC_ALL, "");
 
     if (argc != 3) {
         fail("usage: uncpk CPK_NAME DIR_PREFIX");
