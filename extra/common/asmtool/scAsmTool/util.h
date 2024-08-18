@@ -12,5 +12,3 @@ extern int _safe_fseek(FILE *stream, long offset, int whence, const char *msg);
 #define safe_fseek(stream, offset, whence) _safe_fseek(stream, offset, whence, "fseek(" #stream ", " #offset ", " #whence ")")
 
 extern const char *getpathfilepart(const char *path);
-
-#define quote_escape '|'

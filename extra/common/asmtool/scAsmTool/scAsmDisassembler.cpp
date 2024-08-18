@@ -101,20 +101,28 @@ std::vector<char> scAsmDisassembler::scScriptBlock::get_string()
 
 std::string scAsmDisassembler::scScriptBlock::escape_string(const std::vector<char> &str)
 {
+	bool bad = !str.empty() && MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, str.data(), str.size(), NULL, 0) == 0;
 	bool zero = false;
 	bool nonzero_after_zero = false;
 
 	std::string ret;
 	std::string part1, part2;
 	
+	//FILE *fp = fopen("strdump.txt", "ab");
 	for (char ch: str) {
 		if (!zero) {
+			//if (!bad) fputc(ch, fp);
 			if (ch == 0) {
 				zero = true;
 			} else {
-				assert(ch != quote_escape);
-				if (ch == '\"') ch = quote_escape;
-				part1.push_back(ch);
+				if (bad || ch == '\n' || ch == '\"' || ch == '#') {
+					unsigned char uch = ch;
+					char buf[4];
+					sprintf(buf, "#%02X", (unsigned)uch);
+					part1 += buf;
+				} else {
+					part1.push_back(ch);
+				}
 			}
 		}
 		if (zero) {
@@ -130,6 +138,7 @@ std::string scAsmDisassembler::scScriptBlock::escape_string(const std::vector<ch
 
 		}
 	}
+	//fclose(fp);
 	
 	
 	assert(zero);

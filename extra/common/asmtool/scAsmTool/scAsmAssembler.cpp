@@ -14,7 +14,7 @@ bool scAsmAssembler::AsmLexer::IsSpecial(int p)
 bool scAsmAssembler::AsmLexer::IsSpace(int p)
 {
 	assert(p <= (int)text[ln].length());
-	return text[ln][p] == ',' || isspace(text[ln][p]);
+	return text[ln][p] == ',' || isspace((unsigned char)text[ln][p]);
 }
 bool scAsmAssembler::AsmLexer::IsLineComment(int p)
 {
@@ -139,10 +139,31 @@ void scAsmAssembler::AsmToken::PostProcess()
 		break;
 	}
 	case RAWTOK_STR: {
-		assert(svalue.length() >= 2 && svalue.front() == '\"' && svalue.back() == '\"');
 		type = TOK_STR;
-		svalue = svalue.substr(1, svalue.length() - 2);
-		std::replace(svalue.begin(), svalue.end(), quote_escape, '\"');
+		if (svalue.length() < 2 || svalue.front() != '\"' || svalue.back() != '\"') {
+			scAsmAssembler::Instance()->ReportError(LVL_ERROR, *this, "无效的字符串");
+			break;
+		}
+		std::string s = svalue.substr(1, svalue.length() - 2);
+		svalue.clear();
+		for (auto it = s.begin(); it != s.end(); it++) {
+			if (*it != '#') {
+				svalue += *it;
+				continue;
+			}
+			if (s.end() - it >= 3) {
+				char buf[3];
+				buf[0] = *++it;
+				buf[1] = *++it;
+				buf[2] = 0;
+				unsigned ch;
+				if (sscanf(buf, "%x", &ch) == 1) {
+					svalue += (char)ch;
+					continue;
+				}
+			}
+			scAsmAssembler::Instance()->ReportError(LVL_ERROR, *this, "无效的字符串转义序列");
+		}
 		break;
 	}
 	}
@@ -201,7 +222,7 @@ scAsmAssembler::AsmToken scAsmAssembler::AsmLexer::NextToken(TOKENTYPE expect)
 		
 	case '\"':
 		type = RAWTOK_STR;
-		for (ecol++; line[ecol] != '\"'; ecol++);
+		for (ecol++; ecol < line.length() && line[ecol] != '\"'; ecol++);
 		break;
 	}
 
