@@ -30,6 +30,7 @@ extern BVECAPI void bvec_ctor(struct bvec *v); // constructor
 extern BVECAPI void bvec_bctor(struct bvec *v, const void *data, size_t size); // copy constructor
 extern BVECAPI void bvec_cctor(struct bvec *v, const struct bvec *src); // copy constructor
 extern BVECAPI void bvec_dtor(struct bvec *v); // destructor
+extern BVECAPI void *bvec_mdtor(struct bvec *v); // move destructor
 extern BVECAPI void bvec_clear(struct bvec *v);
 extern BVECAPI void bvec_fclear(struct bvec *v);
 extern BVECAPI void bvec_copy(struct bvec *dst, const struct bvec *src);
@@ -51,6 +52,7 @@ extern BVECAPI void bvec_bpop(struct bvec *v, size_t size);
 // typed helper
 
 #define bvec_tctor(v, base, nmemb, type) bvec_bctor((v), (base), (nmemb) * sizeof(type))
+#define bvec_tmdtor(v, type) ((bvec_typeof(type) *) bvec_mdtor(v))
 #define bvec_tdata(v, type) ((bvec_typeof(type) *) bvec_bdata(v))
 #define bvec_tbegin(v, type) ((bvec_typeof(type) *) bvec_bbegin(v))
 #define bvec_tend(v, type) ((bvec_typeof(type) *) bvec_bend(v))
@@ -88,6 +90,7 @@ extern BVECAPI void bvec_push_ptr(struct bvec *v, void *val);
     extern BVECAPI void CONCAT3(clsname, _, cctor)(struct clsname *s, const struct clsname *src); \
     extern BVECAPI void CONCAT3(clsname, _, sctor)(struct clsname *s, const tchar *str); \
     extern BVECAPI void CONCAT3(clsname, _, dtor)(struct clsname *s); \
+    extern BVECAPI tchar *CONCAT3(clsname, _, mdtor)(struct clsname *s); \
     extern BVECAPI void CONCAT3(clsname, _, clear)(struct clsname *s); \
     extern BVECAPI void CONCAT3(clsname, _, fclear)(struct clsname *s); \
     extern BVECAPI void CONCAT3(clsname, _, copy)(struct clsname *dst, const struct clsname *src); \

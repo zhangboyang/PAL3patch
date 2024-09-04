@@ -79,18 +79,20 @@ MAKE_PATCHSET(setlocale)
     else if (flag == GAME_LOCALE_CHT) target_codepage = CODEPAGE_CHT; // CHT
     else fail("unknown language flag %d in setlocale.", flag);
     
-    check_iconv();
-    
     if (system_codepage != target_codepage) {
         
         check_badpath();
         
-        // hook GBENGINE.DLL's IAT
-        make_pointer(gboffset + 0x100D6098, My_MultiByteToWideChar);
-        make_pointer(gboffset + 0x100D60DC, My_WideCharToMultiByte);
-        // hook PAL3A.EXE's IAT
-        make_pointer(0x00558088, My_MultiByteToWideChar);
-        make_pointer(0x00558120, My_WideCharToMultiByte);
+        if (GET_PATCHSET_FLAG(testcombat) || GET_PATCHSET_FLAG(uireplacefont) != 1) {
+            check_iconv();
+            
+            // hook GBENGINE.DLL's IAT
+            make_pointer(gboffset + 0x100D6098, My_MultiByteToWideChar);
+            make_pointer(gboffset + 0x100D60DC, My_WideCharToMultiByte);
+            // hook PAL3A.EXE's IAT
+            make_pointer(0x00558088, My_MultiByteToWideChar);
+            make_pointer(0x00558120, My_WideCharToMultiByte);
+        }
         
         if (GET_PATCHSET_FLAG(testcombat)) {
             // patch IAT by replacing known function address (address returned by GetProcAddress())

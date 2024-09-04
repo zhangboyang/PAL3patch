@@ -373,6 +373,15 @@ static void d3dxfont_onresetdevice()
     }
 }
 
+static wchar_t *convert_gamestring(const char *str)
+{
+    switch (target_codepage) {
+    case CODEPAGE_CHS: return chinese_to_unicode(str, gbktable);
+    case CODEPAGE_CHT: return chinese_to_unicode(str, big5table);
+    default: return cs2wcs_alloc(str, target_codepage);
+    }
+}
+
 struct d3dxfont_strnode {
     int fontid;
     wchar_t *wstr;
@@ -392,7 +401,7 @@ static MAKE_THISCALL(void, gbPrintFont_UNICODE_PrintString, struct gbPrintFont_U
     // make a node
     struct d3dxfont_strnode *node = malloc(sizeof(struct d3dxfont_strnode));
     node->fontid = d3dxfont_selectbysize(this->fontsize);
-    node->wstr = cs2wcs_alloc(str, target_codepage);
+    node->wstr = convert_gamestring(str);
     node->color = this->curColor.Color; // FIXME: should we check gbColorQuad::ColorQuadFmt ?
 
     // calc coord

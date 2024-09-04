@@ -50,6 +50,10 @@ void bvec_dtor(struct bvec *v)
     memset(v, BVEC_FILLBYTE, sizeof(struct bvec));
 #endif
 }
+void *bvec_mdtor(struct bvec *v)
+{
+    return v->begin;
+}
 void bvec_clear(struct bvec *v)
 {
     v->end = v->begin;
@@ -236,6 +240,10 @@ void CONCAT3(clsname, _, sctor)(struct clsname *s, const tchar *str) \
 void CONCAT3(clsname, _, dtor)(struct clsname *s) \
 { \
     bvec_dtor(&s->v); \
+} \
+tchar *CONCAT3(clsname, _, mdtor)(struct clsname *s) \
+{ \
+    return bvec_mdtor(&s->v); \
 } \
 void CONCAT3(clsname, _, clear)(struct clsname *s) \
 { \
