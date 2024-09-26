@@ -14,6 +14,11 @@ extern PATCHAPI void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, v
 extern PATCHAPI void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color);
 extern PATCHAPI void set_d3dxfont_matrices(IDirect3DDevice9 *pd3dDevice);
 
+struct rawcpk;
+extern PATCHAPI struct rawcpk *rawcpk_open(const char *cpkpath);
+extern PATCHAPI void rawcpk_close(struct rawcpk *rcpk);
+extern PATCHAPI void *rawcpk_read(struct rawcpk *rcpk, unsigned keycrc, unsigned *packedsize);
+extern PATCHAPI char *rawcpk_hash(struct rawcpk *rcpk, unsigned keycrc, char *buf);
 
 
 #ifdef USE_PAL3A_DEFINITIONS

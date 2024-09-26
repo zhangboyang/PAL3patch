@@ -10,6 +10,12 @@ extern PATCHAPI void copy_bits(void *dst, int dst_pitch, int dst_x, int dst_y, v
 extern PATCHAPI void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color);
 extern PATCHAPI void set_d3dxfont_matrices(IDirect3DDevice9 *pd3dDevice);
 
+struct rawcpk;
+extern PATCHAPI struct rawcpk *rawcpk_open(const char *cpkpath);
+extern PATCHAPI void rawcpk_close(struct rawcpk *rcpk);
+extern PATCHAPI void *rawcpk_read(struct rawcpk *rcpk, unsigned keycrc, unsigned *packedsize);
+extern PATCHAPI char *rawcpk_hash(struct rawcpk *rcpk, unsigned keycrc, char *buf);
+
 
 #ifdef USE_PAL3_DEFINITIONS
 
@@ -1837,11 +1843,8 @@ struct Archive;
     assert(sizeof(struct gbPrintFont_UNICODE) == 0xC4); \
 } while (0)
 
+
 #endif
-
-
-
-
 
 
 #ifdef PATCHAPI_EXPORTS
@@ -1853,7 +1856,6 @@ extern int gbGfxManager_D3D_GetBackBufferBitCount(struct gbGfxManager_D3D *this)
 extern void gbGfxManager_D3D_EnsureCooperativeLevel(struct gbGfxManager_D3D *this, int requirefocus);
 extern void *vfs_readfile(const char *filepath, unsigned *length, const struct memory_allocator *mem_allocator);
 extern const char *vfs_cpkname(void);
-
 
 #endif
 #endif

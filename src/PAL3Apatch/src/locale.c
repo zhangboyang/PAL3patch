@@ -273,56 +273,20 @@ static int detect_game_locale()
     const char *CHT_magic = "\x41\x70\x70\x4E\x61\x6D\x65\x09\x09\x24\xA5\x50\xBC\x43\xA9\x5F\xAB\x4C\xB6\xC7\x33\x26";
     size_t CHS_magic_len = strlen(CHS_magic);
     size_t CHT_magic_len = strlen(CHT_magic);
-    ULONG key_CRC = 0xCB283888; // equals gbCrc32Compute("datascript\\lang.txt"), but we can't call gbCrc32Compute() at this time
+    unsigned key_CRC = 0xCB283888; // equals gbCrc32Compute("datascript\\lang.txt"), but we can't call gbCrc32Compute() at this time
     
     int result = GAME_LOCALE_UNKNOWN;
     
-    FILE *fp = NULL;
-    struct CPKHeader cpkhdr;
-    struct CPKTable *cpktbl = NULL;
-    int left, right, mid;
-    struct CPKTable *cpkitem;
-    void *data = NULL;
-    ULONG datasz;
     unsigned i;
+    struct rawcpk *rcpk = NULL;
+    void *data = NULL;
+    unsigned datasz;
     
-    // open CPK file
-    fp = fopen("basedata\\basedata.cpk", "rb");
-    if (!fp) goto done;
+    rcpk = rawcpk_open("basedata\\basedata.cpk");
+    if (!rcpk) goto done;
     
-    // read CPK header
-    if (fread(&cpkhdr, sizeof(cpkhdr), 1, fp) != 1) goto done;
-    if (cpkhdr.dwValidTableNum > cpkhdr.dwMaxFileNum) goto done;
-    
-    // read CPK index table
-    cpktbl = calloc(cpkhdr.dwMaxFileNum, sizeof(struct CPKTable));
-    if (!cpktbl) goto done;
-    if (fread(cpktbl, sizeof(struct CPKTable), cpkhdr.dwMaxFileNum, fp) != cpkhdr.dwMaxFileNum) goto done;
-    
-    // search CPK table entry
-    left = 0;
-    right = cpkhdr.dwValidTableNum;
-    while (1) {
-        if (left == right) goto done;
-        mid = left + (right - left) / 2;
-        if (cpktbl[mid].dwCRC == key_CRC && (cpktbl[mid].dwFlag & 0x1) && !(cpktbl[mid].dwFlag & 0x10)) {
-            break;
-        }
-        if (left + 1 == right) goto done;
-        if (key_CRC >= cpktbl[mid].dwCRC) {
-            left = mid;
-        } else {
-            right = mid;
-        }
-    }
-    cpkitem = &cpktbl[mid];
-    
-    // read file data
-    datasz = cpkitem->dwPackedSize;
-    data = malloc(datasz);
+    data = rawcpk_read(rcpk, key_CRC, &datasz);
     if (!data) goto done;
-    if (fseek(fp, cpkitem->dwStartPos, SEEK_SET) != 0) goto done;
-    if (fread(data, 1, datasz, fp) != datasz) goto done;
     
     // process data
     for (i = 0; i < datasz; i++) {
@@ -338,8 +302,7 @@ static int detect_game_locale()
     
 done:
     free(data);
-    free(cpktbl);
-    if (fp) fclose(fp);
+    if (rcpk) rawcpk_close(rcpk);
     
     return result;
 }

@@ -250,3 +250,81 @@ void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color)
     D3DXVECTOR4 vcolor = (D3DXVECTOR4) { r, g, b, a };
     D3DXFillTexture(tex, fill_texture_callback, &vcolor);
 }
+
+
+// read raw compressed file from cpk
+struct rawcpk {
+    FILE *fp;
+    struct CPKHeader hdr;
+    struct CPKTable tbl[0x8000];
+};
+struct rawcpk *rawcpk_open(const char *cpkpath)
+{
+    struct rawcpk *rcpk = malloc(sizeof(struct rawcpk));
+    if (!rcpk) return NULL;
+    memset(rcpk, 0, sizeof(struct rawcpk));
+    rcpk->fp = fopen(cpkpath, "rb");
+    if (!rcpk->fp) goto fail;
+    if (fread(&rcpk->hdr, sizeof(rcpk->hdr), 1, rcpk->fp) != 1) goto fail;
+    if (rcpk->hdr.dwMaxFileNum > sizeof(rcpk->tbl) / sizeof(rcpk->tbl[0])) goto fail;
+    if (rcpk->hdr.dwValidTableNum > rcpk->hdr.dwMaxFileNum) goto fail;
+    if (fread(rcpk->tbl, sizeof(struct CPKTable), rcpk->hdr.dwValidTableNum, rcpk->fp) != rcpk->hdr.dwValidTableNum) goto fail;
+    return rcpk;
+fail:
+    if (rcpk->fp) fclose(rcpk->fp);
+    free(rcpk);
+    return NULL;
+}
+void rawcpk_close(struct rawcpk *rcpk)
+{
+    fclose(rcpk->fp);
+    free(rcpk);
+}
+void *rawcpk_read(struct rawcpk *rcpk, unsigned keycrc, unsigned *packedsize)
+{
+    struct CPKTable *cpkitem;
+    int left, right, mid;
+    left = 0;
+    right = rcpk->hdr.dwValidTableNum;
+    while (1) {
+        if (left == right) return NULL;
+        mid = left + (right - left) / 2;
+        cpkitem = &rcpk->tbl[mid];
+        if (cpkitem->dwCRC == keycrc && (cpkitem->dwFlag & 0x1) && !(cpkitem->dwFlag & 0x10)) {
+            break;
+        }
+        if (left + 1 == right) return NULL;
+        if (keycrc >= cpkitem->dwCRC) {
+            left = mid;
+        } else {
+            right = mid;
+        }
+    }
+    void *rawdata = NULL;
+    if (fseek(rcpk->fp, cpkitem->dwStartPos, SEEK_SET) != 0) goto fail;
+    rawdata = malloc(cpkitem->dwPackedSize);
+    if (!rawdata) goto fail;
+    if (fread(rawdata, 1, cpkitem->dwPackedSize, rcpk->fp) != cpkitem->dwPackedSize) goto fail;
+    *packedsize = cpkitem->dwPackedSize;
+    return rawdata;
+fail:
+    free(rawdata);
+    return NULL;
+}
+char *rawcpk_hash(struct rawcpk *rcpk, unsigned keycrc, char *buf)
+{
+    unsigned packedsize;
+    void *rawdata = rawcpk_read(rcpk, keycrc, &packedsize);
+    if (!rawdata) return NULL;
+	unsigned char digest[20];
+	SHA1_CTX ctx;
+	SHA1Init(&ctx);
+	SHA1Update(&ctx, rawdata, packedsize);
+	SHA1Final(digest, &ctx);
+    free(rawdata);
+	unsigned i;
+	for (i = 0; i < sizeof(digest); i++) {
+		sprintf(buf + i * 2, "%02x", (unsigned) digest[i]);
+	}
+    return buf;
+}
