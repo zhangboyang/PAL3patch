@@ -1,6 +1,10 @@
 #include "common.h"
 
 static int showver_flag;
+static char vstr[MAXLINE];
+
+static int showdev_flag;
+static wchar_t dstr[MAXLINE];
 
 static ID3DXFont *pFPSFont = NULL;
 static ID3DXSprite *pFPSSprite = NULL;
@@ -94,14 +98,8 @@ static void showfps_onendscene()
         }
     }
     
-    char vstr[MAXLINE];
-    vstr[0] = '\0';
-    if (showver_flag) {
-        snprintf(vstr, sizeof(vstr), "PAL3Apatch %s\n%s\n", patch_version, build_info);
-    }
-    
     wchar_t buf[MAXLINE];
-    snwprintf(buf, sizeof(buf) / sizeof(wchar_t), L"%hsFPS = %.3f\n\n%hs", vstr, fps, jstr);
+    snwprintf(buf, sizeof(buf) / sizeof(wchar_t), L"%hs%sFPS = %.3f\n\n%hs", vstr, dstr, fps, jstr);
 
     
     IDirect3DStateBlock9_Capture(pFPSStateBlock);
@@ -165,10 +163,33 @@ static void showfps_initfont()
     if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &pFPSStateBlock))) {
         fail("can't create state block for showing FPS.");
     }
+    
+    if (showver_flag) {
+        snprintf(vstr, sizeof(vstr), "PAL3Apatch %s\n%s\n", patch_version, build_info);
+    }
+    
+    if (showdev_flag) {
+        D3DDEVICE_CREATION_PARAMETERS Parameters;
+        if (IDirect3DDevice9_GetCreationParameters(GB_GfxMgr->m_pd3dDevice, &Parameters) == D3D_OK) {
+            IDirect3D9 *pD3D9;
+            if (IDirect3DDevice9_GetDirect3D(GB_GfxMgr->m_pd3dDevice, &pD3D9) == D3D_OK) {
+                D3DADAPTER_IDENTIFIER9 Identifier;
+                if (IDirect3D9_GetAdapterIdentifier(pD3D9, Parameters.AdapterOrdinal, 0, &Identifier) == D3D_OK) {
+                    wchar_t *s = cs2wcs_alloc(Identifier.Description, CP_ACP);
+                    if (s) {
+                        snwprintf(dstr, sizeof(dstr) / sizeof(wchar_t), L"%s\n\n", s);
+                        free(s);
+                    }
+                }
+                IDirect3DDevice9_Release(pD3D9);
+            }
+        }
+    }
 }
 MAKE_PATCHSET(showfps)
 {
     showver_flag = get_int_from_configfile("showfps_showversion");
+    showdev_flag = get_int_from_configfile("showfps_showdevice");
 
     const char *jitter_cfgstr = get_string_from_configfile("showfps_showjitter");
     if (sscanf(jitter_cfgstr, "%lf,%lf,%lf", &jitter_limit, &standard_fps1, &standard_fps2) != 3) {
