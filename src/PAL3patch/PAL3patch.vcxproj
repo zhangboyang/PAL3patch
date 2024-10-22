@@ -115,6 +115,7 @@
     <ClCompile Include="src\PAL3patch.c" />
     <ClCompile Include="src\patch_audiofreq.c" />
     <ClCompile Include="src\patch_cdpatch.c" />
+    <ClCompile Include="src\patch_checkgamever.c" />
     <ClCompile Include="src\patch_clampuilib.c" />
     <ClCompile Include="src\patch_console.c" />
     <ClCompile Include="src\patch_depcompatible.c" />

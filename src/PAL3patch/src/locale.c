@@ -90,6 +90,9 @@ static const wchar_t wstr_havebadtool_title_CHS[] = L"检测到不兼容的工具";
 static const wchar_t wstr_badtool_dxwnd_CHS[] = L"DxWnd 窗口化工具";
 static const wchar_t wstr_badtool_d3dwindower_CHS[] = L"D3DWindower 窗口化工具";
 
+static const wchar_t wstr_badgamever_text_CHS[] = L"检测到 1.04 补丁未正确安装。请运行“补丁配置工具”，使用“实用工具——修复游戏数据”功能来修复游戏数据。\n\n如果您正在使用其它第三方 MOD，可忽略本信息。\n\n是否仍要进入游戏？";
+static const wchar_t wstr_badgamever_title_CHS[] = L"游戏版本不正确";
+
 
 // CHT
 static const char defaultfont_ftfilename_CHT[] = "mingliu.ttc";
@@ -153,6 +156,8 @@ const wchar_t *wstr_havebadtool_text;
 const wchar_t *wstr_havebadtool_title;
 const wchar_t *wstr_badtool_dxwnd;
 const wchar_t *wstr_badtool_d3dwindower;
+const wchar_t *wstr_badgamever_text;
+const wchar_t *wstr_badgamever_title;
 
 
 
@@ -231,6 +236,8 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_havebadtool_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_badtool_dxwnd);
     IMPORT_LOCALE_ITEM(CHS, wstr_badtool_d3dwindower);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badgamever_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badgamever_title);
 
     if (target_codepage == CODEPAGE_CHT) { // CHT
         IMPORT_LOCALE_ITEM(CHT, defaultfont_ftfilename);

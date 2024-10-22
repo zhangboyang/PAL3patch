@@ -181,7 +181,7 @@ static void showfps_initfont()
                         free(s);
                     }
                 }
-                IDirect3DDevice9_Release(pD3D9);
+                IDirect3D9_Release(pD3D9);
             }
         }
     }

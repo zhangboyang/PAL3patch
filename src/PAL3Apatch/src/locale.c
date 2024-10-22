@@ -90,6 +90,9 @@ static const wchar_t wstr_havebadtool_title_CHS[] = L"检测到不兼容的工具";
 static const wchar_t wstr_badtool_dxwnd_CHS[] = L"DxWnd 窗口化工具";
 static const wchar_t wstr_badtool_d3dwindower_CHS[] = L"D3DWindower 窗口化工具";
 
+static const wchar_t wstr_badgamever_text_CHS[] = L"检测到 1.21 补丁未正确安装。请运行“补丁配置工具”，使用“实用工具——修复游戏数据”功能来修复游戏数据。\n\n如果您正在使用其它第三方 MOD，可忽略本信息。\n\n是否仍要进入游戏？";
+static const wchar_t wstr_badgamever_title_CHS[] = L"游戏版本不正确";
+
 static const wchar_t wstr_havebadfile_text_CHS[] = L"游戏目录下存在以下多余文件：\n\n%hs\n这些文件可能会影响游戏正常运行，建议您删除这些文件。\n\n是否立即彻底删除这些文件？（该操作无法撤销）";
 static const wchar_t wstr_havebadfile_title_CHS[] = L"是否删除多余文件";
 static const wchar_t wstr_cantdelbadfile_text_CHS[] = L"删除以下文件时发生错误：\n\n%hs\n请尝试手工删除这些多余文件。";
@@ -158,6 +161,8 @@ const wchar_t *wstr_havebadtool_text;
 const wchar_t *wstr_havebadtool_title;
 const wchar_t *wstr_badtool_dxwnd;
 const wchar_t *wstr_badtool_d3dwindower;
+const wchar_t *wstr_badgamever_text;
+const wchar_t *wstr_badgamever_title;
 const wchar_t *wstr_havebadfile_text;
 const wchar_t *wstr_havebadfile_title;
 const wchar_t *wstr_cantdelbadfile_text;
@@ -245,6 +250,8 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_havebadtool_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_badtool_dxwnd);
     IMPORT_LOCALE_ITEM(CHS, wstr_badtool_d3dwindower);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badgamever_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badgamever_title);
 
     if (target_codepage == CODEPAGE_CHT) { // CHT
         IMPORT_LOCALE_ITEM(CHT, defaultfont_ftfilename);

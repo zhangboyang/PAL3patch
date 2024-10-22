@@ -75,9 +75,15 @@ MAKE_PATCHSET(setlocale)
         }
     }
     
-    if (flag == GAME_LOCALE_CHS) target_codepage = CODEPAGE_CHS; // CHS
-    else if (flag == GAME_LOCALE_CHT) target_codepage = CODEPAGE_CHT; // CHT
-    else fail("unknown language flag %d in setlocale.", flag);
+    if (flag == GAME_LOCALE_CHS) {
+        target_codepage = CODEPAGE_CHS;
+        game_locale = GAME_LOCALE_CHS;
+    } else if (flag == GAME_LOCALE_CHT) {
+        target_codepage = CODEPAGE_CHT;
+        game_locale = GAME_LOCALE_CHT;
+    } else {
+        fail("unknown language flag %d in setlocale.", flag);
+    }
     
     if (system_codepage != target_codepage) {
         

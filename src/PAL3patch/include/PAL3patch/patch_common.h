@@ -92,6 +92,7 @@ MAKE_PATCHSET(improvearchive);
 MAKE_PATCHSET(fixloading);
 MAKE_PATCHSET(nommapcpk);
 MAKE_PATCHSET(fixnosndcrash);
+MAKE_PATCHSET(checkgamever);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;
