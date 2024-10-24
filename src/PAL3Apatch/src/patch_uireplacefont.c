@@ -174,13 +174,18 @@ static void d3dxfont_preload_frequentlyused(struct d3dxfont_desc *font)
 {
     d3dxfont_preload_asciiprintable(font);
     
-    const static wchar_t pal3table[] = {
-        0x5EFB, // Hui
-        0 // EOF
-    };
-
-    d3dxfont_preload_string(font, cjktable);
-    d3dxfont_preload_string(font, pal3table);
+    switch (target_codepage) {
+    case CODEPAGE_CHS:
+        d3dxfont_preload_string(font, chrtable_CHS);
+        break;
+    case CODEPAGE_CHT:
+        d3dxfont_preload_string(font, chrtable_CHT);
+        break;
+    default:
+        d3dxfont_preload_string(font, chrtable_CHS);
+        d3dxfont_preload_string(font, chrtable_CHT);
+        break;
+    }
 }
 static void d3dxfont_preload_fullcjk(struct d3dxfont_desc *font)
 {

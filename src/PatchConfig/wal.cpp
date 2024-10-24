@@ -5,12 +5,13 @@
 #define DATABUF_SIZE 4096
 
 struct wal_checksum {
-    unsigned char digest[20];
+    char sha1[40];
 };
 static int calc_file_checksum(FILE *fp, struct wal_checksum *csum)
 {
 	int success = 1;
 	unsigned char databuf[DATABUF_SIZE];
+	unsigned char digest[20];
 	size_t datalen;
 	SHA1_CTX ctx;
 
@@ -25,7 +26,15 @@ static int calc_file_checksum(FILE *fp, struct wal_checksum *csum)
     		SHA1Update(&ctx, databuf, datalen);
         }
 	}
-	SHA1Final(csum->digest, &ctx);
+	SHA1Final(digest, &ctx);
+
+    unsigned i;
+    for (i = 0; i < sizeof(digest); i++) {
+        char buf[3];
+        sprintf(buf, "%02x", (unsigned) digest[i]);
+        csum->sha1[i * 2] = buf[0];
+        csum->sha1[i * 2 + 1] = buf[1];
+    }
 
     return success;
 }

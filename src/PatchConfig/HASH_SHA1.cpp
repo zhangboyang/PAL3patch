@@ -222,3 +222,33 @@ done:
 	return ret;
 }
 
+SHA1Hash SHA1Hash::hash(const void *buffer, size_t length)
+{
+	SHA1Hash ret;
+	SHA1_CTX ctx;
+	SHA1Init(&ctx);
+	if (length) SHA1Update(&ctx, (const unsigned char *) buffer, length);
+	SHA1Final(ret.digest, &ctx);
+	return ret;
+}
+SHA1Hash SHA1Hash::hash_of_hashes(const SHA1Hash hashes[], size_t n)
+{
+	return hash(hashes, sizeof(SHA1Hash) * n);
+}
+SHA1Hash SHA1Hash::fromhex(const char *hexstr)
+{
+	SHA1Hash ret;
+	size_t i;
+	char buf[3];
+	buf[2] = 0;
+	for (i = 0; i < sizeof(ret.digest); i++) {
+		buf[0] = hexstr[i * 2];
+		buf[1] = hexstr[i * 2 + 1];
+		ret.digest[i] = strtoul(buf, NULL, 16);
+	}
+	return ret;
+}
+bool SHA1Hash::operator==(const SHA1Hash &other) const
+{
+	return memcmp(digest, other.digest, sizeof(digest)) == 0;
+}

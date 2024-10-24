@@ -18,12 +18,16 @@ class CPleaseWaitDlg : public CDialog
 {
 // Construction
 public:
+	bool (*cancelfunc)();
 	CPleaseWaitDlg(CWnd* pParent = NULL);   // standard constructor
 
 // Dialog Data
 	//{{AFX_DATA(CPleaseWaitDlg)
 	enum { IDD = IDD_PLEASEWAIT };
-	CString	m_WaitMessage;
+	CStatic	m_WaitMessage2;
+	CStatic	m_WaitMessage1;
+	CButton	m_CancelBtn;
+	CProgressCtrl	m_WaitProgress;
 	//}}AFX_DATA
 
 
@@ -36,7 +40,6 @@ public:
 
 // Implementation
 protected:
-
 	
 	virtual void CPleaseWaitDlg::OnOK();
 	virtual void CPleaseWaitDlg::OnCancel();
@@ -48,7 +51,7 @@ protected:
 };
 
 
-extern void ShowPleaseWaitDlg(CWnd *fawnd, LPCTSTR msg);
+extern void ShowPleaseWaitDlg(CWnd* fawnd, LPCTSTR msg, float progress = -1.0f, bool (*cancelfunc)() = NULL, bool redraw = true);
 extern CPleaseWaitDlg *GetPleaseWaitDlg();
 extern void DestroyPleaseWaitDlg();
 

@@ -62,6 +62,7 @@ protected:
 	int m_OptDescShowing;
 	int m_LockSelUpdate;
 	std::vector<CString> m_EnumList;
+	bool m_Dirty;
 
 	static void OnMouseMoveCallbackWarpper(void *ptr, int btnid);
 	void SetRadioBtnStyle(int btnid, int bold, int underline);
@@ -69,7 +70,7 @@ protected:
 	void ToggleAdvMode(bool reset);
 	void LoadConfigDescription(bool reset_expand);
 	void SelectConfigItem(ConfigDescItem *pItem);
-	void UpdateConfigItem();
+	void UpdateConfigItem(const CString &new_value);
 	
 	// Generated message map functions
 	//{{AFX_MSG(CPatchConfigDlg)

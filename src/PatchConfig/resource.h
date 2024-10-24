@@ -73,6 +73,8 @@
 #define IDS_BADCOMCTL32_TITLE           71
 #define IDS_NOMUTEX                     72
 #define IDS_NOMUTEX_TITLE               73
+#define IDS_MSAA_NONMASKABLE_FORMAT     74
+#define IDS_RESTOREDEFAULT_FAILED       75
 #define IDD_PATCHCONFIG                 102
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129
@@ -90,7 +92,12 @@
 #define IDC_TOGGLEADVOPTS               1014
 #define IDC_ENUMLIST                    1015
 #define IDC_WAITMESSAGE                 1016
+#define IDC_WAITMESSAGE2                1016
 #define IDC_RUNFUNC                     1018
+#define IDC_PROGRESS1                   1019
+#define IDC_WAITPROGRESS                1019
+#define IDC_BUTTON1                     1020
+#define IDC_WAITMESSAGE1                1021
 
 // Next default values for new objects
 // 
@@ -98,7 +105,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1019
+#define _APS_NEXT_CONTROL_VALUE         1022
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

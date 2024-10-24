@@ -40,12 +40,14 @@
 #include <io.h>
 #include <errno.h>
 
+#include <cassert>
 #include <vector>
 #include <deque>
 #include <map>
 #include <set>
 #include <functional>
 #include <algorithm>
+#include <string>
 
 #if _MSC_VER < 1800
 typedef unsigned int uint32_t;
@@ -67,6 +69,10 @@ typedef unsigned int uint32_t;
 #include "MouseMsgButton.h"
 #include "OpenConfigTool.h"
 #include "OpenGameFolder.h"
+#include "ReadWriter.h"
+#include "ProgressObject.h"
+#include "XorRepair.h"
+#include "RepairGameData.h"
 #include "PatchConfig.h"
 #include "PatchVersionInfo.h"
 #include "PleaseWaitDlg.h"
@@ -80,12 +86,16 @@ typedef unsigned int uint32_t;
 
 #define MAXLINE 4096
 
+#define PTRADD(ptr, add) ((void *)(((char *)(ptr)) + (add)))
+
 #define _TOSTR(x) #x
 #define TOSTR(x) _TOSTR(x)
 
 // load CString from StringTable
 #define STRTABLE(x) (CString(MAKEINTRESOURCE((x))))
 #define EMPTYSTR (CString(_T("")))
+
+#define die(status) do { TerminateProcess(GetCurrentProcess(), (status)); while (1); } while (0)
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

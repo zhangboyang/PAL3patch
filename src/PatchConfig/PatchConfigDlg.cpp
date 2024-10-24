@@ -252,8 +252,12 @@ void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 	UpdateData(FALSE);
 }
 
-void CPatchConfigDlg::UpdateConfigItem()
+void CPatchConfigDlg::UpdateConfigItem(const CString &new_value)
 {
+	if (*m_ItemSelected->pvalue != new_value) {
+		*m_ItemSelected->pvalue = new_value;
+		m_Dirty = true;
+	}
 	SelectConfigItem(m_ItemSelected);
 }
 /////////////////////////////////////////////////////////////////////////////
@@ -268,6 +272,7 @@ CPatchConfigDlg::CPatchConfigDlg(CWnd* pParent /*=NULL*/)
 	m_IsAdvMode = 0;
 	m_OptDescShowing = -1;
 	m_LockSelUpdate = 0;
+	m_Dirty = false;
 	
 
 	//{{AFX_DATA_INIT(CPatchConfigDlg)
@@ -428,8 +433,7 @@ void CPatchConfigDlg::OnChoosefromlist()
 	}
 	int nResponse = enumdlg.DoModal();
 	if (nResponse == IDOK) {
-		*m_ItemSelected->pvalue = enumdlg.m_Result;
-		UpdateConfigItem();
+		UpdateConfigItem(enumdlg.m_Result);
 	}
 }
 
@@ -442,8 +446,7 @@ void CPatchConfigDlg::OnChangeCfgval()
 	
 	// TODO: Add your control notification handler code here
 	UpdateData(TRUE);
-	*m_ItemSelected->pvalue = m_CfgVal;
-	UpdateConfigItem();
+	UpdateConfigItem(m_CfgVal);
 }
 
 void CPatchConfigDlg::OnRadioClicked() 
@@ -451,8 +454,7 @@ void CPatchConfigDlg::OnRadioClicked()
 	// TODO: Add your control notification handler code here
 	UpdateData(TRUE);
 	if (m_RadioVal >= 0 && m_ItemSelected->optlist[m_RadioVal].description) {
-		*m_ItemSelected->pvalue = CString(m_ItemSelected->optlist[m_RadioVal].value);
-		UpdateConfigItem();
+		UpdateConfigItem(CString(m_ItemSelected->optlist[m_RadioVal].value));
 	}
 }
 
@@ -467,7 +469,7 @@ void CPatchConfigDlg::OnMouseMove(UINT nFlags, CPoint point)
 void CPatchConfigDlg::OnCancel() 
 {
 	// TODO: Add extra cleanup here
-	if (MessageBox(STRTABLE(IDS_CONFIRMQUIT), STRTABLE(IDS_CONFIRMQUIT_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
+	if (!m_Dirty || MessageBox(STRTABLE(IDS_CONFIRMQUIT), STRTABLE(IDS_CONFIRMQUIT_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
 		CDialog::OnCancel();
 	}
 }
@@ -479,10 +481,12 @@ void CPatchConfigDlg::OnOK()
 	// TODO: Add extra validation here
 	CWnd *pWnd = GetFocus();
 	if (pWnd == GetDlgItem(IDOK)) {
-		while (!TrySaveConfigData()) {
-			int ret = MessageBox(STRTABLE(IDS_CANTSAVE), STRTABLE(IDS_CANTSAVE_TITLE), MB_ICONWARNING | MB_RETRYCANCEL);
-			if (ret == IDCANCEL) {
-				break;
+		if (m_Dirty) {
+			while (!TrySaveConfigData()) {
+				int ret = MessageBox(STRTABLE(IDS_CANTSAVE), STRTABLE(IDS_CANTSAVE_TITLE), MB_ICONWARNING | MB_RETRYCANCEL);
+				if (ret == IDCANCEL) {
+					return;
+				}
 			}
 		}
 		CDialog::OnOK();
@@ -503,9 +507,11 @@ void CPatchConfigDlg::RestoreAllConfigToDefault(CPatchConfigDlg *dlg)
 
 	while (!(TryRebuildConfigFile() && TryLoadConfigData())) {
 		if (dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_RETRY), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_RETRYCANCEL | MB_ICONWARNING) == IDCANCEL) {
-			return;
+			dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_FAILED), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_ICONERROR);
+			die(1);
 		}
 	}
+	dlg->m_Dirty = false;
 
 	dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_SUCCEED), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_ICONINFORMATION);
 }

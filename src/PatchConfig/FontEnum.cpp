@@ -13,6 +13,7 @@ static int CALLBACK EnumFontfaceHelper(ENUMLOGFONTEX *lpelfe, NEWTEXTMETRICEX *l
 void EnumFontface::EnumConfigValues(std::vector<CString> &result)
 {
 	std::vector<CString>::iterator it;
+	TCHAR ch;
 	buf.clear();
 	LOGFONT lf;
 	lf.lfCharSet = DEFAULT_CHARSET;
@@ -22,18 +23,20 @@ void EnumFontface::EnumConfigValues(std::vector<CString> &result)
 	std::sort(buf.begin(), buf.end());
 	buf.erase(std::unique(buf.begin(), buf.end()), buf.end());
 	result.clear();
+	result.push_back(CString(_T("default")));
+	result.push_back(CString(_T("freetype:")));
 	for (it = buf.begin(); it != buf.end(); it++) {
-		if (*it >= CString(_T("\x80"))) {
-			result.push_back(*it);
-		}
+		ch = *(LPCTSTR)*it;
+		if (ch >= 0x80) result.push_back(*it);
 	}
 	for (it = buf.begin(); it != buf.end(); it++) {
-		if (*it < CString(_T("\x80"))) {
-			result.push_back(*it);
-		}
+		ch = *(LPCTSTR)*it;
+		if (ch < 0x80 && ch != '@') result.push_back(*it);
 	}
-	result.insert(result.begin(), CString(_T("freetype:")));
-	result.insert(result.begin(), CString(_T("default")));
+	for (it = buf.begin(); it != buf.end(); it++) {
+		ch = *(LPCTSTR)*it;
+		if (ch < 0x80 && ch == '@') result.push_back(*it);
+	}
 }
 CString EnumFontface::GetValueTitle(const CString &value)
 {

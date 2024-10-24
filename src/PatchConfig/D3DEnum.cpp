@@ -124,15 +124,17 @@ void EnumDepthBuffer::EnumConfigValues(std::vector<CString> &result)
 		std::set<D3DFORMAT> fmtset;
 		D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
 		D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
-		D3DDeviceCombo *pDeviceComboList;
-		for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
-			pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
-			for (i = 0; i < pDeviceComboList->pDepthStencilFormatList->Count(); i++) {
-				fmt = *(D3DFORMAT *) pDeviceComboList->pDepthStencilFormatList->GetPtr(i);
-				if (fmtset.insert(fmt).second) {
-					CString str;
-					str.Format(_T("%d"), -fmt);
-					result.push_back(str);
+		if (pD3DDeviceInfo->DevType == D3DDEVTYPE_HAL) {
+			D3DDeviceCombo *pDeviceComboList;
+			for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
+				pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
+				for (i = 0; i < pDeviceComboList->pDepthStencilFormatList->Count(); i++) {
+					fmt = *(D3DFORMAT *) pDeviceComboList->pDepthStencilFormatList->GetPtr(i);
+					if (fmtset.insert(fmt).second) {
+						CString str;
+						str.Format(_T("%d"), -fmt);
+						result.push_back(str);
+					}
 				}
 			}
 		}
@@ -187,27 +189,36 @@ void EnumMultisample::EnumConfigValues(std::vector<CString> &result)
 
 	if (pD3DEnum->m_pAdapterInfoList->Count() > 0) {
 		unsigned i, j;
-		int q, maxq;
 		D3DMULTISAMPLE_TYPE mtype;
-		std::set<D3DMULTISAMPLE_TYPE> mtypeset;
+		int q, maxq;
+		std::map<D3DMULTISAMPLE_TYPE, int> m;
 		D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
 		D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
-		D3DDeviceCombo *pDeviceComboList;
-		for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
-			pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
-			for (i = 0; i < pDeviceComboList->pMultiSampleTypeList->Count(); i++) {
-				mtype = *(D3DMULTISAMPLE_TYPE *) pDeviceComboList->pMultiSampleTypeList->GetPtr(i);
-				maxq = *(DWORD *) pDeviceComboList->pMultiSampleQualityList->GetPtr(i);
-				if (mtype != D3DMULTISAMPLE_NONMASKABLE && mtypeset.insert(mtype).second) {
-					if (mtype != D3DMULTISAMPLE_NONE) {
-						for (q = 0; q < maxq; q++) {
-							CString key, val;
-							key.Format(IDS_MSAA_FORMAT, mtype, q);
-							val.Format(_T("%d,%d"), mtype, q);
-							result.push_back(val);
-							descmap.insert(std::make_pair(val, key));
-						}
+		if (pD3DDeviceInfo->DevType == D3DDEVTYPE_HAL) {
+			D3DDeviceCombo *pDeviceComboList;
+			for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
+				pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
+				for (i = 0; i < pDeviceComboList->pMultiSampleTypeList->Count(); i++) {
+					mtype = *(D3DMULTISAMPLE_TYPE *) pDeviceComboList->pMultiSampleTypeList->GetPtr(i);
+					maxq = *(DWORD *) pDeviceComboList->pMultiSampleQualityList->GetPtr(i);
+					if (maxq > m[mtype]) m[mtype] = maxq;
+				}
+			}
+			std::map<D3DMULTISAMPLE_TYPE, int>::reverse_iterator it;
+			for (it = m.rbegin(); it != m.rend(); it++) {
+				mtype = it->first;
+				maxq = it->second;
+				if (mtype == D3DMULTISAMPLE_NONE) continue;
+				for (q = 0; q < maxq; q++) {
+					CString key, val;
+					if (mtype == D3DMULTISAMPLE_NONMASKABLE) {
+						key.Format(IDS_MSAA_NONMASKABLE_FORMAT, q);
+					} else {
+						key.Format(IDS_MSAA_FORMAT, mtype, q);
 					}
+					val.Format(_T("%d,%d"), mtype, q);
+					result.push_back(val);
+					descmap.insert(std::make_pair(val, key));
 				}
 			}
 		}

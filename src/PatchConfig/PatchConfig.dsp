@@ -230,6 +230,18 @@ SOURCE=.\PleaseWaitDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ProgressObject.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ReadWriter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\RepairGameData.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -244,6 +256,10 @@ SOURCE=.\wal.cpp
 # Begin Source File
 
 SOURCE=.\wstr.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\XorRepair.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -331,6 +347,18 @@ SOURCE=.\PleaseWaitDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ProgressObject.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ReadWriter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\RepairGameData.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
@@ -348,6 +376,10 @@ SOURCE=.\wal.h
 # Begin Source File
 
 SOURCE=.\wstr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\XorRepair.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
