@@ -72,6 +72,8 @@ typedef unsigned int uint32_t;
 #include "ReadWriter.h"
 #include "ProgressObject.h"
 #include "XorRepair.h"
+#include "BufferReader.h"
+#include "CPKFixer.h"
 #include "RepairGameData.h"
 #include "PatchConfig.h"
 #include "PatchVersionInfo.h"

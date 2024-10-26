@@ -158,6 +158,10 @@ SOURCE=.\BadFiles.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\BufferReader.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CheckForUpdates.cpp
 # End Source File
 # Begin Source File
@@ -171,6 +175,10 @@ SOURCE=.\ConfigData.cpp
 # Begin Source File
 
 SOURCE=.\ConfigDescData.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CPKFixer.cpp
 # End Source File
 # Begin Source File
 
@@ -271,6 +279,10 @@ SOURCE=.\BadFiles.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\BufferReader.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\CheckForUpdates.h
 # End Source File
 # Begin Source File
@@ -288,6 +300,10 @@ SOURCE=.\ConfigDescData.h
 # Begin Source File
 
 SOURCE=.\ConfigDescLocale.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\CPKFixer.h
 # End Source File
 # Begin Source File
 

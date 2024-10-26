@@ -67,7 +67,22 @@ bool FileRW::reopen(bool readwrite)
 {
 	close();
 	rw = readwrite;
-	return open();
+	if (rw) {
+#define REOPEN_READWRITE_MAXTRY 10
+#define REOPEN_READWRITE_WAIT   100
+		int i;
+		for (i = 0; i < REOPEN_READWRITE_MAXTRY; i++) {
+			if (i) {
+				Sleep(REOPEN_READWRITE_WAIT);
+				close();
+			}
+			reset_attrib(path.c_str());
+			if (open()) return true;
+		}
+		return false;
+	} else {
+		return open();
+	}
 }
 void FileRW::resize(unsigned filesize)
 {
