@@ -497,7 +497,7 @@ bool CPKFixer::fix_cpk()
 		if (!fp->write(tbl, sizeof(hdr), sizeof(tbl))) return false;
 	}
 	if (xr) {
-		if (!xr->write()) return false;
+		if (!xr->save()) return false;
 	}
 	for (i = 0; i < fixers.size(); i++) {
 		if (!fixers[i]->flush()) {

@@ -6,23 +6,28 @@ private:
 	ReadWriter *fp;
 	unsigned bs;
 	size_t n;
-	SHA1Hash *hash;
-	unsigned long *buf;
-	unsigned long *sum;
 	SHA1Hash cksum;
+	unsigned long *sum;
+	unsigned long *cbuf;
+	unsigned long *buf;
+	SHA1Hash *hash;
 	size_t idx;
+	size_t cidx;
+	bool cret;
+	bool precise;
 	bool bad;
-	bool hint;
+	bool shift;
 	ProgressObject *po;
 private:
-	void blkxor(unsigned long *dst, const unsigned long *src);
-	bool tryfix();
+	bool cache(size_t blk);
+	void blkxor(unsigned long *c, const unsigned long *a, const unsigned long *b, size_t w);
+	bool tryfix(bool half);
 public:
 	XorRepair(ReadWriter *io, const SHA1Hash &checksum, const void *xorsum, size_t blksize, ProgressObject *progress);
 	~XorRepair();
 	bool check();
 	bool fix();
-	bool write();
+	bool save();
 };
 
 #endif
