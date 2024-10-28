@@ -31,7 +31,7 @@ struct tagCPKTable {
 	bool operator<(const tagCPKTable &other) const;
 };
 
-class CPKExtraFixer : public ReadWriter {
+class CPKExtraFixer : virtual public ReferenceCounter {
 protected:
 	ReadWriter *fp;
 	unsigned base;
@@ -41,17 +41,14 @@ private:
 	const char *str;
 	int state;
 public:
-	bool read(void *buffer, unsigned offset, size_t length);
-	bool write(const void *buffer, unsigned offset, size_t length);
-	unsigned size();
-public:
 	virtual bool check();
 	virtual bool flush();
 public:
 	CPKExtraFixer(ReadWriter *io, DWORD dwStartPos, DWORD dwPackedSize, DWORD dwExtraInfoSize, const char *filename);
 	~CPKExtraFixer();
 };
-class CPKFileFixer : public CPKExtraFixer {
+
+class CPKFileFixer : public ReadWriter, public CPKExtraFixer {
 public:
 	bool read(void *buffer, unsigned offset, size_t length);
 	bool write(const void *buffer, unsigned offset, size_t length);
@@ -59,6 +56,7 @@ public:
 public:
 	CPKFileFixer(ReadWriter *io, DWORD dwStartPos, DWORD dwPackedSize, DWORD dwExtraInfoSize, const char *filename);
 };
+
 class CPKSpecialFixer : public CPKExtraFixer {
 private:
 	const void *raw;
@@ -70,16 +68,14 @@ public:
 };
 
 class CPKFixer {
-public:
-	const char *cpkfile;
+private:
+	const char *cpkpath;
 	unsigned blksize;
 	const void *xorsum;
 	SHA1Hash checksum;
 	std::vector<tagCPKTable> files;
 	std::vector<const char *> names;
 	std::vector<std::pair<tagCPKTable, const void *> > special_files;
-
-	bool rebuild;
 
 	FileRW *fp;
 	tagCPKHeader hdr;
@@ -89,14 +85,15 @@ public:
 	XorRepair *xr;
 	std::vector<CPKExtraFixer *> fixers;
 
+	void load_repair(BufferReader &r);
+	void reset();
 	bool check_tbl();
 public:
-	CPKFixer();
+	CPKFixer::CPKFixer(const char *cpk, BufferReader &r);
 	~CPKFixer();
-	void load_repair(BufferReader &r);
-	bool load_cpk();
-	int check_cpk(ProgressObject *progress);
-	bool fix_cpk();
+	bool load(bool rebuild);
+	int check(ProgressObject *progress);
+	bool fix();
 };
 
 #endif

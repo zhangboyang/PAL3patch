@@ -20,6 +20,18 @@ SubProgress *ProgressGroup::sub()
 	ch.push_back(ret);
 	return ret;
 }
+void ProgressGroup::reset()
+{
+	std::vector<SubProgress *>::iterator it;
+	for (it = ch.begin(); it != ch.end(); it++) {
+		delete *it;
+	}
+	ch.clear();
+	sum_curv = 0;
+	sum_maxv = 0;
+	set_progress(0);
+	set_maximum(0);
+}
 
 SubProgress::SubProgress(ProgressGroup *group) : grp(group), curv(0), maxv(0)
 {

@@ -69,6 +69,7 @@ typedef unsigned int uint32_t;
 #include "MouseMsgButton.h"
 #include "OpenConfigTool.h"
 #include "OpenGameFolder.h"
+#include "ReferenceCounter.h"
 #include "ReadWriter.h"
 #include "ProgressObject.h"
 #include "XorRepair.h"

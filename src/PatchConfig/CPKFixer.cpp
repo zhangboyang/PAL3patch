@@ -75,7 +75,6 @@ void CPKFixer::load_repair(BufferReader &r)
 {
 	int i, j;
 
-	cpkfile = r.str();
 	blksize = r.u32();
 	
 	int num_files = r.u16();
@@ -186,20 +185,19 @@ bool tagCPKTable::operator<(const tagCPKTable &other) const
 	return !valid() && other.valid();
 }
 
-CPKFixer::CPKFixer() : fp(NULL), xr(NULL), dirty(false), rebuild(false)
+CPKFixer::CPKFixer(const char *cpk, BufferReader &r)
 {
 	assert(sizeof(hdr) == 0x80);
 	assert(sizeof(tbl) == 0xe0000);
+	cpkpath = cpk;
+	load_repair(r);
+	fp = NULL;
+	xr = NULL;
 }
 
 CPKFixer::~CPKFixer()
 {
-	int i;
-	if (xr) delete xr;
-	for (i = 0; i < fixers.size(); i++) {
-		fixers[i]->dec();
-	}
-	if (fp) fp->dec();
+	reset();
 }
 
 #define CHECK_ASSIGN(a, b) do { if (a != b) { dirty = true; a = b; } } while (0)
@@ -296,9 +294,29 @@ bool CPKFixer::check_tbl()
 	return true;
 }
 
-bool CPKFixer::load_cpk()
+void CPKFixer::reset()
 {
-	fp = new FileRW(cpkfile, sizeof(hdr) + sizeof(tbl));
+	if (xr) {
+		delete xr;
+		xr = NULL;
+	}
+	int i;
+	for (i = 0; i < fixers.size(); i++) {
+		fixers[i]->dec();
+	}
+	fixers.clear();
+	if (fp) {
+		fp->dec();
+		fp = NULL;
+	}
+	dirty = false;
+}
+
+bool CPKFixer::load(bool rebuild)
+{
+	reset();
+
+	fp = new FileRW(cpkpath, sizeof(hdr) + sizeof(tbl));
 	fp->inc();
 
 	if (fp->realsize() < sizeof(hdr) + sizeof(tbl)) return false;
@@ -346,7 +364,8 @@ bool CPKFixer::load_cpk()
 
 CPKExtraFixer::CPKExtraFixer(ReadWriter *io, DWORD dwStartPos, DWORD dwPackedSize, DWORD dwExtraInfoSize, const char *filename)
 {
-	fp = io->inc();
+	fp = io;
+	fp->inc();
 	base = dwStartPos;
 	sz = dwPackedSize;
 	extra = dwExtraInfoSize;
@@ -356,21 +375,6 @@ CPKExtraFixer::CPKExtraFixer(ReadWriter *io, DWORD dwStartPos, DWORD dwPackedSiz
 CPKExtraFixer::~CPKExtraFixer()
 {
 	fp->dec();
-}
-bool CPKExtraFixer::read(void *buffer, unsigned offset, size_t length)
-{
-	assert(0);
-	return false;
-}
-bool CPKExtraFixer::write(const void *buffer, unsigned offset, size_t length)
-{
-	assert(0);
-	return false;
-}
-unsigned CPKExtraFixer::size()
-{
-	assert(0);
-	return 0;
 }
 bool CPKExtraFixer::check()
 {
@@ -441,7 +445,7 @@ bool CPKSpecialFixer::flush()
 	return state > 0 && CPKExtraFixer::flush();
 }
 
-int CPKFixer::check_cpk(ProgressObject *progress)
+int CPKFixer::check(ProgressObject *progress)
 {
 	int i;
 	std::map<DWORD, int> rank;
@@ -488,10 +492,10 @@ int CPKFixer::check_cpk(ProgressObject *progress)
 	}
 }
 
-bool CPKFixer::fix_cpk()
+bool CPKFixer::fix()
 {
 	int i;
-	if (!fp->reopen(true)) return false;
+	//if (!fp->reopen(true)) return false;
 	if (dirty) {
 		if (!fp->write(&hdr, 0, sizeof(hdr))) return false;
 		if (!fp->write(tbl, sizeof(hdr), sizeof(tbl))) return false;

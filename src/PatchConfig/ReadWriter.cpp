@@ -1,24 +1,5 @@
 #include "stdafx.h"
 
-ReadWriter::ReadWriter()
-{
-	ref = 0;
-}
-ReadWriter::~ReadWriter()
-{
-	assert(!ref);
-}
-ReadWriter *ReadWriter::inc()
-{
-	ref++;
-	return this;
-}
-void ReadWriter::dec()
-{
-	assert(ref);
-	if (!--ref) delete this;
-}
-
 HANDLE FileRW::handle = INVALID_HANDLE_VALUE;
 FileRW *FileRW::owner = NULL;
 FileRW::FileRW(const std::string &filepath, unsigned filesize)
@@ -124,7 +105,8 @@ unsigned FileRW::size()
 
 RangeRW::RangeRW(ReadWriter *io, unsigned rangebase, unsigned rangesize)
 {
-	fp = io->inc();
+	fp = io;
+	fp->inc();
 	base = rangebase;
 	sz = rangesize;
 }
@@ -180,7 +162,8 @@ ConcatRW::~ConcatRW()
 }
 void ConcatRW::append(ReadWriter *io)
 {
-	fp.push_back(io->inc());
+	fp.push_back(io);
+	fp.back()->inc();
 	tbl.push_back(tbl.back() + fp.back()->size());
 }
 bool ConcatRW::readwrite(void *rbuffer, const void *wbuffer, unsigned offset, size_t length)
@@ -221,7 +204,8 @@ unsigned ConcatRW::size()
 
 PaddingRW::PaddingRW(ReadWriter *io, unsigned alignment)
 {
-	fp = io->inc();
+	fp = io;
+	fp->inc();
 	realsz = fp->size();
 	sz = realsz + (alignment - realsz % alignment) % alignment;
 }

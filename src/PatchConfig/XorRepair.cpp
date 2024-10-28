@@ -8,7 +8,8 @@ XorRepair::XorRepair(ReadWriter *io, const SHA1Hash &checksum, const void *xorsu
 	assert(bw % 2 == 0);
 
 	if (io->size() % bs) io = new PaddingRW(io, bs);
-	fp = io->inc();
+	fp = io;
+	fp->inc();
 	unsigned sz = fp->size();
 	n = sz / bs;
 	assert(sz % bs == 0);

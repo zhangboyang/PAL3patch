@@ -11,7 +11,7 @@ public:
 
 class SubProgress;
 
-class ProgressGroup : public ProgressObject {
+class ProgressGroup : private ProgressObject {
 	friend SubProgress;
 private:
 	unsigned sum_curv, sum_maxv;
@@ -20,6 +20,7 @@ public:
 	ProgressGroup();
 	~ProgressGroup();
 	SubProgress *sub();
+	void reset();
 };
 
 class SubProgress : public ProgressObject {

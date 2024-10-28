@@ -175,10 +175,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BadFiles.cpp" />
+    <ClCompile Include="BufferReader.cpp" />
     <ClCompile Include="CheckForUpdates.cpp" />
     <ClCompile Include="ChooseFromListDlg.cpp" />
     <ClCompile Include="ConfigData.cpp" />
     <ClCompile Include="ConfigDescData.cpp" />
+    <ClCompile Include="CPKFixer.cpp" />
     <ClCompile Include="D3DEnum.cpp" />
     <ClCompile Include="d3denumeration.cpp" />
     <ClCompile Include="dxutil.cpp" />
@@ -194,6 +196,7 @@
     <ClCompile Include="PleaseWaitDlg.cpp" />
     <ClCompile Include="ProgressObject.cpp" />
     <ClCompile Include="ReadWriter.cpp" />
+    <ClCompile Include="ReferenceCounter.cpp" />
     <ClCompile Include="RepairGameData.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_PAL3|Win32'">Create</PrecompiledHeader>
@@ -211,11 +214,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BadFiles.h" />
+    <ClInclude Include="BufferReader.h" />
     <ClInclude Include="CheckForUpdates.h" />
     <ClInclude Include="ChooseFromListDlg.h" />
     <ClInclude Include="ConfigData.h" />
     <ClInclude Include="ConfigDescData.h" />
     <ClInclude Include="ConfigDescLocale.h" />
+    <ClInclude Include="CPKFixer.h" />
     <ClInclude Include="D3DEnum.h" />
     <ClInclude Include="d3denumeration.h" />
     <ClInclude Include="dxstdafx.h" />
@@ -232,6 +237,7 @@
     <ClInclude Include="PleaseWaitDlg.h" />
     <ClInclude Include="ProgressObject.h" />
     <ClInclude Include="ReadWriter.h" />
+    <ClInclude Include="ReferenceCounter.h" />
     <ClInclude Include="RepairGameData.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />

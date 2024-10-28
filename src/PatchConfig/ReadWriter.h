@@ -1,14 +1,8 @@
 #ifndef PAL3PATCHCONFIG_READWRITER
 #define PAL3PATCHCONFIG_READWRITER
 
-class ReadWriter {
-private:
-	size_t ref;
+class ReadWriter : public virtual ReferenceCounter {
 public:
-	ReadWriter();
-	virtual ~ReadWriter();
-	ReadWriter *inc();
-	void dec();
 	virtual bool read(void *buffer, unsigned offset, size_t length) = 0;
 	virtual bool write(const void *buffer, unsigned offset, size_t length) = 0;
 	virtual unsigned size() = 0;

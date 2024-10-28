@@ -246,6 +246,10 @@ SOURCE=.\ReadWriter.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ReferenceCounter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\RepairGameData.cpp
 # End Source File
 # Begin Source File
@@ -368,6 +372,10 @@ SOURCE=.\ProgressObject.h
 # Begin Source File
 
 SOURCE=.\ReadWriter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ReferenceCounter.h
 # End Source File
 # Begin Source File
 
