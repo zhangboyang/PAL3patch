@@ -27,7 +27,7 @@ public:
 	~XorRepair();
 	bool check();
 	bool fix();
-	bool save();
+	bool commit();
 };
 
 #endif

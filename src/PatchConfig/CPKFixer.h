@@ -67,7 +67,7 @@ public:
 	bool flush();
 };
 
-class CPKFixer {
+class CPKFixer : public RepairCommitter {
 private:
 	const char *cpkpath;
 	unsigned blksize;
@@ -85,15 +85,17 @@ private:
 	XorRepair *xr;
 	std::vector<CPKExtraFixer *> fixers;
 
-	void load_repair(BufferReader &r);
+	void init(BufferReader &r);
 	void reset();
 	bool check_tbl();
+	void rebuild_tbl();
+	bool load(bool rebuild);
+	int check(ProgressObject *progress);
 public:
 	CPKFixer::CPKFixer(const char *cpk, BufferReader &r);
 	~CPKFixer();
-	bool load(bool rebuild);
-	int check(ProgressObject *progress);
-	bool fix();
+	int repair(ProgressObject *progress);
+	bool commit();
 };
 
 #endif

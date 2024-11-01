@@ -139,7 +139,7 @@ bool XorRepair::fix()
 	}
 }
 
-bool XorRepair::save()
+bool XorRepair::commit()
 {
 	if (!shift) {
 		return fp->write(buf, idx * bs, bs);

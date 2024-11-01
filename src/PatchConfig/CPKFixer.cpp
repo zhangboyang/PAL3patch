@@ -71,7 +71,7 @@ static unsigned cpk_crc32(const char *path)
 	return ret;
 }
 
-void CPKFixer::load_repair(BufferReader &r)
+void CPKFixer::init(BufferReader &r)
 {
 	int i, j;
 
@@ -190,7 +190,7 @@ CPKFixer::CPKFixer(const char *cpk, BufferReader &r)
 	assert(sizeof(hdr) == 0x80);
 	assert(sizeof(tbl) == 0xe0000);
 	cpkpath = cpk;
-	load_repair(r);
+	init(r);
 	fp = NULL;
 	xr = NULL;
 }
@@ -294,6 +294,27 @@ bool CPKFixer::check_tbl()
 	return true;
 }
 
+void CPKFixer::rebuild_tbl()
+{
+	dirty = true;
+	int num_files = files.size();
+	int num_special = special_files.size();
+	hdr.dwValidTableNum = hdr.dwFileNum = num_files + num_special;
+	hdr.dwFragmentNum = 0;
+	int i, j;
+	for (i = 0; i < num_files; i++) {
+		tbl[i] = files[i];
+	}
+	hdr.dwPackageSize = files.back().dwStartPos + files.back().dwPackedSize + files.back().dwExtraInfoSize;
+	for (i = 0; i < num_special; i++) {
+		j = num_files + i;
+		tbl[j] = special_files[i].first;
+		tbl[j].dwStartPos = hdr.dwPackageSize;
+		hdr.dwPackageSize += tbl[j].dwPackedSize + tbl[j].dwExtraInfoSize;
+	}
+	std::sort(tbl, tbl + hdr.dwValidTableNum);
+}
+
 void CPKFixer::reset()
 {
 	if (xr) {
@@ -318,13 +339,14 @@ bool CPKFixer::load(bool rebuild)
 
 	fp = new FileRW(cpkpath, sizeof(hdr) + sizeof(tbl));
 	fp->inc();
-
 	if (fp->realsize() < sizeof(hdr) + sizeof(tbl)) return false;
 
-	if (!fp->read(&hdr, 0, sizeof(hdr))) {
+	if (!rebuild) {
+		if (!fp->read(&hdr, 0, sizeof(hdr))) return false;
+	} else {
+		dirty = true;
 		memset(&hdr, 0, sizeof(hdr));
 	}
-
     CHECK_ASSIGN(hdr.dwLable, 0x1a545352);
     CHECK_ASSIGN(hdr.dwVersion, 0x00000001);
     CHECK_ASSIGN(hdr.dwTableStart, 0x00000080);
@@ -335,24 +357,10 @@ bool CPKFixer::load(bool rebuild)
     CHECK_ASSIGN(hdr.dwMaxTableNum, 0x00008000);
 	memset(hdr.dwReserved, 0, sizeof(hdr.dwReserved));
 
-	if (rebuild || !fp->read(tbl, sizeof(hdr), sizeof(tbl)) || !check_tbl()) {
-		dirty = true;
-		int num_files = files.size();
-		int num_special = special_files.size();
-		hdr.dwValidTableNum = hdr.dwFileNum = num_files + num_special;
-		hdr.dwFragmentNum = 0;
-		int i, j;
-		for (i = 0; i < num_files; i++) {
-			tbl[i] = files[i];
-		}
-		hdr.dwPackageSize = files.back().dwStartPos + files.back().dwPackedSize + files.back().dwExtraInfoSize;
-		for (i = 0; i < num_special; i++) {
-			j = num_files + i;
-			tbl[j] = special_files[i].first;
-			tbl[j].dwStartPos = hdr.dwPackageSize;
-			hdr.dwPackageSize += tbl[j].dwPackedSize + tbl[j].dwExtraInfoSize;
-		}
-		std::sort(tbl, tbl + hdr.dwValidTableNum);
+	if (!rebuild) {
+		if (!fp->read(tbl, sizeof(hdr), sizeof(tbl)) || !check_tbl()) return false;
+	} else {
+		rebuild_tbl();
 	}
 	if (hdr.dwValidTableNum < hdr.dwMaxTableNum) {
 		memset(tbl + hdr.dwValidTableNum, 0, sizeof(tbl) - hdr.dwValidTableNum * sizeof(tagCPKTable));
@@ -492,7 +500,16 @@ int CPKFixer::check(ProgressObject *progress)
 	}
 }
 
-bool CPKFixer::fix()
+int CPKFixer::repair(ProgressObject *progress)
+{
+	int state;
+	if ((load(false) && (state = check(progress)) >= 0) || (load(true) && (state = check(progress)) >= 0)) {
+		return state;
+	}
+	return -1;
+}
+
+bool CPKFixer::commit()
 {
 	int i;
 	//if (!fp->reopen(true)) return false;
@@ -501,7 +518,7 @@ bool CPKFixer::fix()
 		if (!fp->write(tbl, sizeof(hdr), sizeof(tbl))) return false;
 	}
 	if (xr) {
-		if (!xr->save()) return false;
+		if (!xr->commit()) return false;
 	}
 	for (i = 0; i < fixers.size(); i++) {
 		if (!fixers[i]->flush()) {
