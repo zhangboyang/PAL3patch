@@ -478,8 +478,9 @@ int CPKFixer::check(ProgressObject *progress)
 		sf->inc();
 		fixers.push_back(sf);
 	}
-	xr = new XorRepair(cat, checksum, xorsum, blksize, progress);
-	if (xr->check()) {
+	xr = new XorRepair(cat, checksum, xorsum, blksize);
+	int xr_state = xr->repair(progress);
+	if (xr_state == 0) {
 		delete xr;
 		xr = NULL;
 		if (dirty) {
@@ -492,18 +493,14 @@ int CPKFixer::check(ProgressObject *progress)
 		}
 		return 0;
 	} else {
-		if (xr->fix()) {
-			return 1;
-		} else {
-			return -1;
-		}
+		return xr_state;
 	}
 }
 
 int CPKFixer::repair(ProgressObject *progress)
 {
 	int state;
-	if ((load(false) && (state = check(progress)) >= 0) || (load(true) && (state = check(progress)) >= 0)) {
+	if ((load(false) && (state = check(progress)) >= 0) || (!progress->is_cancelled() && load(true) && (state = check(progress)) >= 0)) {
 		return state;
 	}
 	return -1;

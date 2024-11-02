@@ -1,7 +1,7 @@
 #ifndef PAL3PATCHCONFIG_XORREPAIR
 #define PAL3PATCHCONFIG_XORREPAIR
 
-class XorRepair {
+class XorRepair : public RepairCommitter {
 private:
 	ReadWriter *fp;
 	unsigned bs;
@@ -17,16 +17,16 @@ private:
 	bool precise;
 	bool bad;
 	bool shift;
-	ProgressObject *po;
 private:
 	bool cache(size_t blk);
 	void blkxor(unsigned long *c, const unsigned long *a, const unsigned long *b, size_t w);
 	bool tryfix(bool half);
+	bool check(ProgressObject *progress);
+	bool fix(ProgressObject *progress);
 public:
-	XorRepair(ReadWriter *io, const SHA1Hash &checksum, const void *xorsum, size_t blksize, ProgressObject *progress);
+	XorRepair(ReadWriter *io, const SHA1Hash &checksum, const void *xorsum, size_t blksize);
 	~XorRepair();
-	bool check();
-	bool fix();
+	int repair(ProgressObject *progress);
 	bool commit();
 };
 

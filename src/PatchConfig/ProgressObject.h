@@ -42,11 +42,13 @@ private:
 	T* v;
 	unsigned f;
 public:
-	ProgressBinder(ProgressObject *progress, T *value, unsigned factor)
+	ProgressBinder(ProgressObject *progress, T *value, T maxvalue, unsigned factor)
 	{
 		po = progress;
 		v = value;
 		f = factor;
+		po->set_progress(0);
+		po->set_maximum(maxvalue * f);
 	}
 	~ProgressBinder()
 	{

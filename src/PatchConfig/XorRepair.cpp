@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-XorRepair::XorRepair(ReadWriter *io, const SHA1Hash &checksum, const void *xorsum, size_t blksize, ProgressObject *progress) : po(progress)
+XorRepair::XorRepair(ReadWriter *io, const SHA1Hash &checksum, const void *xorsum, size_t blksize)
 {
 	bs = blksize;
 #define bw (bs / sizeof(unsigned long))
@@ -28,8 +28,6 @@ XorRepair::XorRepair(ReadWriter *io, const SHA1Hash &checksum, const void *xorsu
 
 	buf = new unsigned long[bw * 2];
 	hash = new SHA1Hash[n];
-
-	po->set_maximum(sz);
 }
 
 XorRepair::~XorRepair()
@@ -55,10 +53,10 @@ void XorRepair::blkxor(unsigned long *c, const unsigned long *a, const unsigned 
 	while (w--) *c++ = *a++ ^ *b++;
 }
 
-bool XorRepair::check()
+bool XorRepair::check(ProgressObject *progress)
 {
 	size_t i;
-	ProgressBinder<size_t> pb(po, &i, bs);
+	ProgressBinder<size_t> pb(progress, &i, n, bs);
 	idx = -1;
 	bad = false;
 	for (i = 0; i < n; i++) {
@@ -115,7 +113,7 @@ bool XorRepair::tryfix(bool half)
 	return false;
 }
 
-bool XorRepair::fix()
+bool XorRepair::fix(ProgressObject *progress)
 {
 	if (bad) return false;
 	if (idx != -1) {
@@ -127,7 +125,7 @@ bool XorRepair::fix()
 			return tryfix(true);
 		}
 	} else {
-		ProgressBinder<size_t> pb(po, &idx, bs);
+		ProgressBinder<size_t> pb(progress, &idx, n, bs);
 		for (idx = 0; idx < n; idx++) {
 			if (!pb.update()) return false;
 			if (tryfix(false)) {
@@ -137,6 +135,13 @@ bool XorRepair::fix()
 		}
 		return false;
 	}
+}
+
+int XorRepair::repair(ProgressObject *progress)
+{
+ 	if (check(progress)) return 0;
+	if (progress->is_cancelled()) return -1;
+	return fix(progress) ? 1 : -1;
 }
 
 bool XorRepair::commit()
