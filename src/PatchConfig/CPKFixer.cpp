@@ -509,7 +509,6 @@ int CPKFixer::repair(ProgressObject *progress)
 bool CPKFixer::commit()
 {
 	int i;
-	//if (!fp->reopen(true)) return false;
 	if (dirty) {
 		if (!fp->write(&hdr, 0, sizeof(hdr))) return false;
 		if (!fp->write(tbl, sizeof(hdr), sizeof(tbl))) return false;
@@ -522,6 +521,5 @@ bool CPKFixer::commit()
 			return false;
 		}
 	}
-	if (!fp->truncate()) return false;
-	return true;
+	return fp->commit();
 }

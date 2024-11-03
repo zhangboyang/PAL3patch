@@ -194,6 +194,10 @@ SOURCE=.\dxutil.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\FileFixer.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\FontEnum.cpp
 # End Source File
 # Begin Source File
@@ -324,6 +328,10 @@ SOURCE=.\dxstdafx.h
 # Begin Source File
 
 SOURCE=.\dxutil.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\FileFixer.h
 # End Source File
 # Begin Source File
 

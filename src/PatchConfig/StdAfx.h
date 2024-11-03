@@ -76,6 +76,7 @@ typedef unsigned int uint32_t;
 #include "XorRepair.h"
 #include "BufferReader.h"
 #include "CPKFixer.h"
+#include "FileFixer.h"
 #include "PatchConfig.h"
 #include "PatchVersionInfo.h"
 #include "PleaseWaitDlg.h"

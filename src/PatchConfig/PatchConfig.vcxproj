@@ -184,6 +184,7 @@
     <ClCompile Include="D3DEnum.cpp" />
     <ClCompile Include="d3denumeration.cpp" />
     <ClCompile Include="dxutil.cpp" />
+    <ClCompile Include="FileFixer.cpp" />
     <ClCompile Include="FontEnum.cpp" />
     <ClCompile Include="fsutil.cpp" />
     <ClCompile Include="HASH_SHA1.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="d3denumeration.h" />
     <ClInclude Include="dxstdafx.h" />
     <ClInclude Include="dxutil.h" />
+    <ClInclude Include="FileFixer.h" />
     <ClInclude Include="FontEnum.h" />
     <ClInclude Include="fsutil.h" />
     <ClInclude Include="HASH_SHA1.h" />
