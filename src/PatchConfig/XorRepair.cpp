@@ -140,7 +140,7 @@ bool XorRepair::fix(ProgressObject *progress)
 int XorRepair::repair(ProgressObject *progress)
 {
  	if (check(progress)) return 0;
-	if (progress->is_cancelled()) return -1;
+	if (progress->cancelled()) return -1;
 	return fix(progress) ? 1 : -1;
 }
 

@@ -3,6 +3,7 @@
 
 class RepairCommitter {
 public:
+	virtual ~RepairCommitter();
 	virtual int repair(ProgressObject *progress) = 0;
 	virtual bool commit() = 0;
 };

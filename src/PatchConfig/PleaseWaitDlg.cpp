@@ -19,7 +19,7 @@ void ShowPleaseWaitDlg(CWnd* fawnd, LPCTSTR msg, float progress, bool (*cancelfu
 	if (!waitdlg) {
 		waitdlg = new CPleaseWaitDlg;
 		waitdlg->Create(IDD_PLEASEWAIT, fawnd);
-		waitdlg->m_WaitProgress.SetRange32(0, 10000);
+		waitdlg->m_WaitProgress.SetRange32(0, 1 << 24);
 		first = true;
 	}
 
@@ -34,7 +34,7 @@ void ShowPleaseWaitDlg(CWnd* fawnd, LPCTSTR msg, float progress, bool (*cancelfu
 	}
 
 	if (progress >= 0) {
-		waitdlg->m_WaitProgress.SetPos(progress * 10000);
+		waitdlg->m_WaitProgress.SetPos(progress * (1 << 24));
 		waitdlg->m_WaitProgress.ShowWindow(SW_SHOW);
 	} else {
 		waitdlg->m_WaitProgress.ShowWindow(SW_HIDE);

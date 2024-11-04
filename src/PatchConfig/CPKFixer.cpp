@@ -500,7 +500,7 @@ int CPKFixer::check(ProgressObject *progress)
 int CPKFixer::repair(ProgressObject *progress)
 {
 	int state;
-	if ((load(false) && (state = check(progress)) >= 0) || (!progress->is_cancelled() && load(true) && (state = check(progress)) >= 0)) {
+	if ((load(false) && (state = check(progress)) >= 0) || (!progress->cancelled() && load(true) && (state = check(progress)) >= 0)) {
 		return state;
 	}
 	return -1;

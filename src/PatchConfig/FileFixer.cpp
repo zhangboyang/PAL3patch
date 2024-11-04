@@ -32,14 +32,22 @@ FileRawFixer::FileRawFixer(BufferReader &r) : FileFixer(r)
 int FileRawFixer::repair(ProgressObject *progress)
 {
 	int i;
+	unsigned sum = 0;
+	for (i = 0; i < fp.size(); i++) {
+		sum += fp[i]->size();
+	}
+	unsigned cur = 0;
 	bool dirty = false;
 	bad.reserve(fp.size());
+	ProgressBinder<unsigned> pb(progress, &cur, sum, 1);
 	for (i = 0; i < fp.size(); i++) {
+		if (!pb.update()) return -1;
 		unsigned sz = fp[i]->size();
 		void *buf = malloc(sz);
 		bad.push_back(fp[i]->realsize() != sz || !fp[i]->read(buf, 0, sz) || memcmp(buf, data[i], sz) != 0);
 		free(buf);
 		dirty = dirty || bad.back();
+		cur += sz;
 	}
 	return dirty ? 1 : 0;
 }
