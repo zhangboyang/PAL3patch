@@ -4,16 +4,17 @@
 #define FILERW_OPENRW_WAIT   100
 HANDLE FileRW::handle = INVALID_HANDLE_VALUE;
 FileRW *FileRW::owner = NULL;
-FileRW::FileRW(const std::string &filepath, unsigned filesize)
+FileRW::FileRW(const char *filepath, unsigned filesize)
 {
 	assert(filesize != 0);
-	path = filepath;
+	path = utf8_to_utf16(filepath);
 	sz = filesize;
 	rw = false;
 }
 FileRW::~FileRW()
 {
 	close();
+	free(path);
 }
 bool FileRW::open()
 {
@@ -24,14 +25,20 @@ bool FileRW::open()
 		owner = this;
 		if (rw) {
 			int i;
+			wchar_t *sep;
 			for (i = 0; i < FILERW_OPENRW_MAXTRY; i++) {
 				if (i) Sleep(FILERW_OPENRW_WAIT);
-				reset_attrib(path.c_str());
-				handle = CreateFileA(path.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+				for (sep = path; sep = wcschr(sep, '\\'); sep++) {
+					*sep = 0;
+					CreateDirectoryW(path, NULL);
+					*sep = '\\';
+				}
+				SetFileAttributesW(path, FILE_ATTRIBUTE_ARCHIVE);
+				handle = CreateFileW(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 				if (handle != INVALID_HANDLE_VALUE) break;
 			}
 		} else {
-			handle = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			handle = CreateFileW(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		}
 	}
 	return handle != INVALID_HANDLE_VALUE;

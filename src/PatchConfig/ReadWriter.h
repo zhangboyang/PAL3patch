@@ -16,7 +16,7 @@ private:
 	void close();
 	bool seek(unsigned offset);
 private:
-	std::string path;
+	wchar_t *path;
 	unsigned sz;
 	bool rw;
 public:
@@ -24,7 +24,7 @@ public:
 	bool write(const void *buffer, unsigned offset, size_t length);
 	unsigned size();
 public:
-	FileRW(const std::string &filepath, unsigned filesize);
+	FileRW(const char *filepath, unsigned filesize);
 	~FileRW();
 	void enablewrite();
 	void resize(unsigned filesize);
