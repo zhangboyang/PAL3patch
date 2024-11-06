@@ -6,10 +6,11 @@ protected:
 	std::vector<FileRW *> fp;
 protected:
 	FileFixer(BufferReader &r);
+public:
 	~FileFixer();
 };
 
-class FileRawFixer : private FileFixer {
+class FileRawFixer : public FileFixer {
 private:
 	std::vector<const void *> data;
 	std::vector<bool> bad;
@@ -19,7 +20,7 @@ public:
 	bool commit();
 };
 
-class FileXorFixer : private FileFixer {
+class FileXorFixer : public FileFixer {
 private:
 	size_t blksize;
 	const void *xorsum;

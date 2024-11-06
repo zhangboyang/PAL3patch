@@ -224,7 +224,7 @@ bool CompareRW::read(void *buffer, unsigned offset, size_t length)
 bool CompareRW::write(const void *buffer, unsigned offset, size_t length)
 {
 	if (length == 0) return true;
-	void *rbuffer = malloc(length);
+	void *rbuffer = Malloc(length);
 	bool same = fp->read(rbuffer, offset, length) && memcmp(rbuffer, buffer, length) == 0;
 	free(rbuffer);
 	return same || fp->write(buffer, offset, length);

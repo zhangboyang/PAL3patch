@@ -1,5 +1,9 @@
 #include "stdafx.h"
 
+BufferReader::BufferReader()
+{
+}
+
 BufferReader::BufferReader(const void *buf) : ptr(buf)
 {
 }

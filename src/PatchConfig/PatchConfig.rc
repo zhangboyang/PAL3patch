@@ -271,6 +271,43 @@ BEGIN
     IDS_NOMUTEX_TITLE       "检测到冲突"
     IDS_MSAA_NONMASKABLE_FORMAT "不可掩码的多重采样，质量水平 %d"
     IDS_RESTOREDEFAULT_FAILED "恢复过程中出现错误，程序退出。"
+    IDS_REPAIRGAMEDATA      "修复游戏数据"
+    IDS_LOADREPAIRPACK      "正在加载修复数据包 ..."
+    IDS_BADREPAIRPACK       "修复数据包丢失或损坏。"
+    IDS_SELECTLOCALE        "无法自动判断游戏语言版本。\n请手动选择：\n“简体中文”请点击“是”；\n“繁体中文”请点击“否”。"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_SELECTLOCALE_TITLE  "请选择游戏语言版本"
+    IDS_REPAIRCORE          "游戏核心文件"
+    IDS_REPAIRCORE_FILE     "检查游戏文件 ..."
+    IDS_REPAIRCORE_CPK      "检查文件包: %hs (%d/%d)"
+    IDS_REPAIRMUSIC         "游戏音频文件"
+    IDS_REPAIRMUSIC_MUSIC   "检查音乐文件 ..."
+    IDS_REPAIRMUSIC_SOUND   "检查音效文件 ..."
+    IDS_REPAIRMOVIE         "游戏视频文件"
+    IDS_REPAIRMOVIE_CPK     "检查视频包: %hs (%d/%d)"
+    IDS_REPAIRMISC          "游戏杂项文件"
+    IDS_REPAIRMISC_FILE     "检查杂项文件 ..."
+    IDS_REPAIR_NEEDFIX      "检测到以下组件轻微损坏，可以修复："
+    IDS_REPAIR_CANTFIX      "检测到以下组件严重损坏，无法修复："
+    IDS_REPAIR_ASKFIX       "要执行修复吗？"
+    IDS_REPAIR_GOOD         "游戏数据完好，无需修复。"
+    IDS_REPAIR_REPORT       "检测报告"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_REPAIR_COMMITOK     "修复成功。"
+    IDS_REPAIR_COMMITPART   "部分修复成功，以下组件仍然损坏："
+    IDS_REPAIR_COMMITERROR  "修复失败，以下组件仍然损坏："
+    IDS_REPAIR_COMMITABORT  "已放弃修复，以下组件仍然损坏："
+    IDS_REPAIR_COMMITREPORT "修复报告"
+    IDS_REPAIR_BADCOMMIT    "无法将修复好的“%s”写入磁盘。"
+    IDS_REPAIR_BADCOMMIT_TITLE "修复失败"
+    IDS_REPAIR_CHECKDONE    "游戏数据检查完毕 ..."
+    IDS_REPAIR_COMMIT       "正在执行修复 ..."
 END
 
 #endif    // Chinese (P.R.C.) resources

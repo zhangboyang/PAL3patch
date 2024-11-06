@@ -32,7 +32,7 @@ char *utf16_to_utf8(const wchar_t *s)
         }
     }
     size_t l = v.size();
-    char *buf = (char *) malloc(l + 1);
+    char *buf = (char *) Malloc(l + 1);
     size_t i;
     for (i = 0; i < l; i++) {
         buf[i] = v[i];
@@ -87,7 +87,7 @@ wchar_t *utf8_to_utf16(const char *s)
         }
     }
     size_t l = v.size();
-    wchar_t *buf = (wchar_t *) malloc((l + 1) * sizeof(wchar_t));
+    wchar_t *buf = (wchar_t *) Malloc((l + 1) * sizeof(wchar_t));
     size_t i;
     for (i = 0; i < l; i++) {
         buf[i] = v[i];

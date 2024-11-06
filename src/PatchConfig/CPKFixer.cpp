@@ -389,7 +389,7 @@ bool CPKExtraFixer::check()
 	if (!state) {
 		char *lwr = chinese_strlwr(strdup(str));
 		size_t bufsz = strlen(lwr) + 2;
-		char *buf = (char *) malloc(bufsz);
+		char *buf = (char *) Malloc(bufsz);
 		state = fp->read(buf, base + sz, bufsz) && buf[bufsz - 1] == 0 && memcmp(chinese_strlwr(buf), lwr, bufsz - 1) == 0 ? 1 : -1;
 		free(buf);
 		free(lwr);
@@ -400,7 +400,7 @@ bool CPKExtraFixer::flush()
 {
 	if (!state) check();
 	if (state < 0) {
-		char *buf = (char *) malloc(extra);
+		char *buf = (char *) Malloc(extra);
 		strncpy(buf, str, extra);
 		state = fp->write(buf, base + sz, extra) ? 1 : -1;
 		free(buf);
@@ -438,7 +438,7 @@ CPKSpecialFixer::CPKSpecialFixer(ReadWriter *io, DWORD dwStartPos, DWORD dwPacke
 bool CPKSpecialFixer::check()
 {
 	if (!state) {
-		void *buf = malloc(sz);
+		void *buf = Malloc(sz);
 		state = fp->read(buf, base, sz) && memcmp(buf, raw, sz) == 0 ? 1 : -1;
 		free(buf);
 	}

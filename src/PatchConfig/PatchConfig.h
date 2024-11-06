@@ -40,6 +40,8 @@ public:
 
 extern void DoEvents();
 
+extern void *Malloc(size_t n);
+
 /////////////////////////////////////////////////////////////////////////////
 
 //{{AFX_INSERT_LOCATION}}

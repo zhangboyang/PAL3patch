@@ -5,6 +5,7 @@ class BufferReader {
 private:
 	const void *ptr;
 public:
+	BufferReader();
 	BufferReader(const void *buf);
 	const void *adv(size_t n);
 	void *cpy(void *dst, size_t n);

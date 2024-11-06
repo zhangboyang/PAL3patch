@@ -184,3 +184,12 @@ void DoEvents()
 		AfxGetApp()->PumpMessage();
 	}
 }
+
+void *Malloc(size_t n)
+{
+	void *ret = malloc(n);
+	if (!ret) {
+		die(1);
+	}
+	return ret;
+}
