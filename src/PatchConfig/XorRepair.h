@@ -4,23 +4,24 @@
 class XorRepair : public RepairCommitter {
 private:
 	ReadWriter *fp;
-	unsigned bs;
-	size_t n;
+	size_t bw;
+	unsigned n;
 	SHA1Hash cksum;
 	unsigned long *sum;
-	unsigned long *cbuf;
+	unsigned long *blk;
 	unsigned long *buf;
 	SHA1Hash *hash;
-	size_t idx;
-	size_t cidx;
+	unsigned idx;
+	unsigned cidx;
 	bool cret;
 	bool precise;
 	bool bad;
-	bool shift;
+	unsigned char shift;
 private:
-	bool cache(size_t blk);
-	void blkxor(unsigned long *c, const unsigned long *a, const unsigned long *b, size_t w);
-	bool tryfix(bool half);
+	bool loadblk(unsigned i);
+	void xorw(unsigned long *c, const unsigned long *a, const unsigned long *b, size_t w);
+	void xorw(unsigned long *b, const unsigned long *a, size_t w);
+	bool tryfix(bool skip);
 	bool check(ProgressObject *progress);
 	bool fix(ProgressObject *progress);
 public:

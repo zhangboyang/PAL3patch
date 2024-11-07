@@ -463,10 +463,11 @@ int CPKFixer::check(ProgressObject *progress)
 	int num_files = files.size();
 	int num_special = special_files.size();
 	fixers.reserve(num_files + num_special);
+	CacheRW *cache = new CacheRW(fp);
 	ConcatRW *cat = new ConcatRW();
 	for (i = 0; i < num_files; i++) {
 		tagCPKTable &cur = tbl[rank[files[i].dwCRC]];
-		CPKFileFixer *ff = new CPKFileFixer(fp, cur.dwStartPos, cur.dwPackedSize, cur.dwExtraInfoSize, names[i]);
+		CPKFileFixer *ff = new CPKFileFixer(cache, cur.dwStartPos, cur.dwPackedSize, cur.dwExtraInfoSize, names[i]);
 		ff->inc();
 		fixers.push_back(ff);
 		cat->append(ff);
@@ -474,7 +475,7 @@ int CPKFixer::check(ProgressObject *progress)
 	for (i = 0; i < num_special; i++) {
 		std::pair<tagCPKTable, const void *> &item = special_files[i];
 		tagCPKTable &cur = tbl[rank[item.first.dwCRC]];
-		CPKSpecialFixer *sf = new CPKSpecialFixer(fp, cur.dwStartPos, cur.dwPackedSize, cur.dwExtraInfoSize, item.second);
+		CPKSpecialFixer *sf = new CPKSpecialFixer(cache, cur.dwStartPos, cur.dwPackedSize, cur.dwExtraInfoSize, item.second);
 		sf->inc();
 		fixers.push_back(sf);
 	}

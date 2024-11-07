@@ -76,4 +76,19 @@ public:
 	~CompareRW();
 };
 
+class CacheRW : public ReadWriter {
+private:
+	void *cache;
+	unsigned base;
+	size_t count;
+	ReadWriter *fp;
+public:
+	bool read(void *buffer, unsigned offset, size_t length);
+	bool write(const void *buffer, unsigned offset, size_t length);
+	unsigned size();
+public:
+	CacheRW(ReadWriter *io);
+	~CacheRW();
+};
+
 #endif

@@ -1,11 +1,13 @@
 #include "stdafx.h"
 
+#define NUM_SHIFT 16
+
 XorRepair::XorRepair(ReadWriter *io, const SHA1Hash &checksum, const void *xorsum, size_t blksize)
 {
-	bs = blksize;
-#define bw (bs / sizeof(unsigned long))
-	assert(bs % sizeof(unsigned long) == 0);
-	assert(bw % 2 == 0);
+	bw = blksize / sizeof(unsigned long);
+	assert(blksize % sizeof(unsigned long) == 0);
+	assert(bw % NUM_SHIFT == 0);
+#define bs (bw * sizeof(unsigned long))
 
 	if (io->size() % bs) io = new PaddingRW(io, bs);
 	fp = io;
@@ -23,7 +25,7 @@ XorRepair::XorRepair(ReadWriter *io, const SHA1Hash &checksum, const void *xorsu
 		memset(sum, 0, bs);
 	}
 
-	cbuf = new unsigned long[bw];
+	blk = new unsigned long[bw];
 	cidx = -1;
 
 	buf = new unsigned long[bw * 2];
@@ -34,34 +36,39 @@ XorRepair::~XorRepair()
 {
 	delete[] hash;
 	delete[] buf;
-	delete[] cbuf;
+	delete[] blk;
 	delete[] sum;
 	fp->dec();
 }
 
-bool XorRepair::cache(size_t blk)
+bool XorRepair::loadblk(unsigned i)
 {
-	if (cidx != blk) {
-		cidx = blk;
-		cret = fp->read(cbuf, blk * bs, bs);
+	if (cidx != i) {
+		cidx = i;
+		cret = fp->read(blk, i * bs, bs);
 	}
 	return cret;
 }
 
-void XorRepair::blkxor(unsigned long *c, const unsigned long *a, const unsigned long *b, size_t w)
+void XorRepair::xorw(unsigned long *c, const unsigned long *a, const unsigned long *b, size_t w)
 {
 	while (w--) *c++ = *a++ ^ *b++;
 }
 
+void XorRepair::xorw(unsigned long *b, const unsigned long *a, size_t w)
+{
+	while (w--) *b++ ^= *a++;
+}
+
 bool XorRepair::check(ProgressObject *progress)
 {
-	size_t i;
-	ProgressBinder<size_t> pb(progress, &i, n, bs);
+	unsigned i;
+	ProgressBinder<unsigned> pb(progress, &i, n, bs);
 	idx = -1;
 	bad = false;
 	for (i = 0; i < n; i++) {
 		if (!pb.update()) return false;
-		if (!cache(i)) {
+		if (!loadblk(i)) {
 			if (idx == -1) {
 				idx = i;
 				precise = false;
@@ -77,36 +84,41 @@ bool XorRepair::check(ProgressObject *progress)
 				precise = true;
 			}
 		}
-		hash[i] = SHA1Hash::hash(cbuf, bs);
-		blkxor(sum, sum, cbuf, bw);
+		hash[i] = SHA1Hash::hash(blk, bs);
+		xorw(sum, blk, bw);
 	}
 	return idx == -1 && SHA1Hash::hash_of_hashes(hash, n) == cksum;
 }
 
-bool XorRepair::tryfix(bool half)
+bool XorRepair::tryfix(bool skip)
 {
 	SHA1Hash bak = hash[idx];
-	cache(idx);
-	if (!half) {
-		blkxor(buf, cbuf, sum, bw);
+	loadblk(idx);
+	xorw(buf, blk, sum, bw);
+	if (!skip) {
 		hash[idx] = SHA1Hash::hash(buf, bs);
 		if (SHA1Hash::hash_of_hashes(hash, n) == cksum) {
-			shift = false;
+			shift = 0;
 			return true;
 		}
 	}
-	size_t idx1 = idx < n - 1 ? idx + 1 : 0;
+	unsigned idx1 = idx < n - 1 ? idx + 1 : 0;
 	SHA1Hash bak1 = hash[idx1];
-	memcpy(buf, cbuf, bs / 2);
-	blkxor(buf + bw / 2, cbuf + bw / 2, sum + bw / 2, bw / 2);
-	hash[idx] = SHA1Hash::hash(buf, bs);
-	cache(idx1);
-	blkxor(buf + bw, cbuf, sum, bw / 2);
-	memcpy(buf + bw + bw / 2, cbuf + bw / 2, bs / 2);
-	hash[idx1] = SHA1Hash::hash(buf + bw, bs);
-	if (SHA1Hash::hash_of_hashes(hash, n) == cksum) {
-		shift = true;
-		return true;
+	loadblk(idx1);
+	memcpy(buf + bw, blk, bs);
+	for (shift = 1; shift < NUM_SHIFT; shift++) {
+		size_t w = bw / NUM_SHIFT;
+		size_t sw = shift * w;
+		unsigned long *l = buf + (sw - w);
+		unsigned long *r = buf + bw + (sw - w);
+		unsigned long *s = sum + (sw - w);
+		xorw(l, s, w);
+		xorw(r, s, w);
+		hash[idx] = SHA1Hash::hash(buf, bs);
+		hash[idx1] = SHA1Hash::hash(buf + bw, bs);
+		if (SHA1Hash::hash_of_hashes(hash, n) == cksum) {
+			return true;
+		}
 	}
 	hash[idx] = bak;
 	hash[idx1] = bak1;
@@ -125,7 +137,7 @@ bool XorRepair::fix(ProgressObject *progress)
 			return tryfix(true);
 		}
 	} else {
-		ProgressBinder<size_t> pb(progress, &idx, n, bs);
+		ProgressBinder<unsigned> pb(progress, &idx, n, bs);
 		for (idx = 0; idx < n; idx++) {
 			if (!pb.update()) return false;
 			if (tryfix(false)) {
@@ -149,10 +161,12 @@ bool XorRepair::commit()
 	if (!shift) {
 		return fp->write(buf, idx * bs, bs);
 	} else {
+		size_t sw = shift * (bw / NUM_SHIFT);
+		size_t ss = shift * (bs / NUM_SHIFT);
 		if (idx != n - 1) {
-			return fp->write(buf + bw / 2, idx * bs + bs / 2, bs);
+			return fp->write(buf + sw, idx * bs + ss, bs);
 		} else {
-			return fp->write(buf + bw / 2, idx * bs + bs / 2, bs / 2) && fp->write(buf + bw, 0, bs / 2);
+			return fp->write(buf + sw, idx * bs + ss, bs - ss) && fp->write(buf + bw, 0, ss);
 		}
 	}
 }

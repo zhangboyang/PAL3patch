@@ -308,6 +308,7 @@ BEGIN
     IDS_REPAIR_BADCOMMIT_TITLE "修复失败"
     IDS_REPAIR_CHECKDONE    "游戏数据检查完毕 ..."
     IDS_REPAIR_COMMIT       "正在执行修复 ..."
+    IDS_ASKCANCELREPAIR     "要取消修复吗？"
 END
 
 #endif    // Chinese (P.R.C.) resources

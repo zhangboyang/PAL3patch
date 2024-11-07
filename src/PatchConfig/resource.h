@@ -105,6 +105,7 @@
 #define IDS_REPAIR_BADCOMMIT_TITLE      102
 #define IDS_REPAIR_CHECKDONE            103
 #define IDS_REPAIR_COMMIT               104
+#define IDS_ASKCANCELREPAIR             105
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129
 #define IDD_PLEASEWAIT                  130

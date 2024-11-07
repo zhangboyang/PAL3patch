@@ -233,3 +233,55 @@ unsigned CompareRW::size()
 {
 	return fp->size();
 }
+
+#define CACHERW_PREFETCH 4096
+CacheRW::CacheRW(ReadWriter *io)
+{
+	fp = io;
+	fp->inc();
+	cache = Malloc(CACHERW_PREFETCH);
+	count = 0;
+}
+CacheRW::~CacheRW()
+{
+	free(cache);
+	fp->dec();
+}
+bool CacheRW::read(void *buffer, unsigned offset, size_t length)
+{
+	assert(offset + length <= fp->size());
+	if (!length) return true;
+	if (length >= CACHERW_PREFETCH)	return fp->read(buffer, offset, length);
+	if (count && base <= offset) {
+		if (offset + length <= base + count) {
+			memcpy(buffer, PTRADD(cache, offset - base), length);
+			return true;
+		}
+		if (offset < base + count) {
+			size_t hit = base + count - offset;
+			memcpy(buffer, PTRADD(cache, offset - base), hit);
+			buffer = PTRADD(buffer, hit);
+			offset += hit;
+			length -= hit;
+		}
+	}
+	unsigned sz = fp->size();
+	base = offset;
+	count = CACHERW_PREFETCH < sz - base ? CACHERW_PREFETCH : sz - base;
+	if (fp->read(cache, base, count)) {
+		memcpy(buffer, cache, length);
+		return true;
+	} else {
+		count = 0;
+		return fp->read(buffer, offset, length);
+	}
+}
+bool CacheRW::write(const void *buffer, unsigned offset, size_t length)
+{
+	count = 0;
+	return fp->write(buffer, offset, length);
+}
+unsigned CacheRW::size()
+{
+	return fp->size();
+}

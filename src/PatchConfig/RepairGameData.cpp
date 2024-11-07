@@ -85,9 +85,11 @@ class RepairProgress : public ProgressObject {
 	static bool cancelfunc()
 	{
 		if (!instance->cancel) {
-			instance->cancel = true;
+			if (GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_ASKCANCELREPAIR), STRTABLE(IDS_REPAIRGAMEDATA), MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
+				instance->cancel = true;
+			}
 		}
-		return true;
+		return instance->cancel;
 	}
 public:
 	RepairProgress(CWnd *fa) : curv(0), maxv(0), cancel(false), fawnd(fa)
@@ -248,10 +250,10 @@ static void run_repair(RepairProgress *rp, BufferReader &r, int gl)
 	repair_music(rp, r, gl);
 	repair_movie(rp, r, gl);
 	repair_misc(rp, r, gl);
-	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_REPAIR_CHECKDONE));
 	std::vector<std::pair<CString, std::vector<RepairCommitter *> > >::iterator i;
 	std::vector<RepairCommitter *>::iterator j;
 	if (!rp->cancelled()) {
+		ShowPleaseWaitDlg(NULL, STRTABLE(IDS_REPAIR_CHECKDONE));
 		CString fix, bad, msg;
 		for (i = transactions.begin(); i != transactions.end(); i++) {
 			if (i->second.empty()) {
@@ -331,16 +333,44 @@ static const struct {
     "PAL3Arepair.bin", 12870839, "b074fbc903fb6f119872816e3232003ec3f30138"
 #endif
 };
+static void *load_repair(RepairProgress *rp)
+{
+	void *buf = Malloc(RepairPack.filesize);
+	void *ret = NULL;
+	FileRW *fp = new FileRW(RepairPack.filename, RepairPack.filesize);
+	fp->inc();
+	rp->reset(RepairPack.filesize);
+	if (fp->realsize() == RepairPack.filesize) {
+		SHA1_CTX ctx;
+		SHA1Init(&ctx);
+		unsigned offset = 0;
+		ProgressBinder<unsigned> pb(rp, &offset, RepairPack.filesize, 1);
+		while (offset < RepairPack.filesize) {
+			if (!pb.update()) break;
+			size_t count = 4096;
+			count = count < RepairPack.filesize - offset ? count : RepairPack.filesize - offset;
+			if (!fp->read(PTRADD(buf, offset), offset, count)) break;
+			SHA1Update(&ctx, (const unsigned char *) PTRADD(buf, offset), count);
+			offset += count;
+		}
+		if (offset == RepairPack.filesize && pb.update()) {
+			SHA1Hash hash;
+			SHA1Final(hash.digest, &ctx);
+			if (hash == SHA1Hash::fromhex(RepairPack.filehash)) {
+				ret = buf;
+			}
+		}
+	}
+	if (!ret) free(buf);
+	fp->dec();
+	return ret;
+}
 void RepairGameData(CPatchConfigDlg *dlg)
 {
 	RepairProgress *rp = new RepairProgress(dlg);
 	rp->update(STRTABLE(IDS_LOADREPAIRPACK));
-	FileRW *fp = new FileRW(RepairPack.filename, RepairPack.filesize);
-	fp->inc();
-	void *buf = Malloc(RepairPack.filesize);
-	rp->reset(1);
-	if (fp->realsize() == RepairPack.filesize && fp->read(buf, 0, RepairPack.filesize) && SHA1Hash::hash(buf, RepairPack.filesize) == SHA1Hash::fromhex(RepairPack.filehash)) {
-		rp->progress(1);
+	void *buf = load_repair(rp);
+	if (buf) {
 		int gl = detect_game_locale();
 		if (gl < 0) {
 			switch (GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_SELECTLOCALE), STRTABLE(IDS_SELECTLOCALE_TITLE), MB_ICONWARNING | MB_YESNOCANCEL | MB_DEFBUTTON3)) {
@@ -354,10 +384,9 @@ void RepairGameData(CPatchConfigDlg *dlg)
 			run_repair(rp, r, gl);
 		}
 	} else {
-		GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_BADREPAIRPACK), STRTABLE(IDS_REPAIRGAMEDATA), MB_ICONERROR);
+		if (!rp->cancelled()) GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_BADREPAIRPACK), STRTABLE(IDS_REPAIRGAMEDATA), MB_ICONERROR);
 	}
 	free(buf);
-	fp->dec();
 	DestroyPleaseWaitDlg();
 	delete rp;
 }
