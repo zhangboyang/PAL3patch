@@ -20,19 +20,15 @@ void SHA1Init(SHA1_CTX* context);
 void SHA1Update(SHA1_CTX* context, const unsigned char* data, uint32_t len);
 void SHA1Final(unsigned char digest[20], SHA1_CTX* context);
 
-
-
-#define SHA1_BYTE 20
-#define SHA1_STR_SIZE (SHA1_BYTE * 2 + 1)
-extern int GetFileSHA1(const char *fn, char *buf);
-
 struct SHA1Hash {
-	unsigned char digest[SHA1_BYTE];
+	unsigned char digest[20];
 
 	static SHA1Hash hash(const void *buffer, size_t length);
 	static SHA1Hash hash_of_hashes(const SHA1Hash hashes[], size_t n);
 	static SHA1Hash fromhex(const char *hexstr);
 	bool operator==(const SHA1Hash &other) const;
 };
+
+int GetFileSHA1(const char *filename, SHA1Hash *filehash);
 
 #endif

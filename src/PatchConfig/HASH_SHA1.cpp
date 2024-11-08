@@ -193,28 +193,23 @@ void SHA1Final(unsigned char digest[20], SHA1_CTX* context)
 /* ================ end of sha1.c ================ */
 
 
-int GetFileSHA1(const char *fn, char *buf)
+int GetFileSHA1(const char *filename, SHA1Hash *filehash)
 {
 #define BUFSIZE 4096
 	int ret = 0;
 	unsigned char databuf[BUFSIZE];
-	int datalen;
-	unsigned char digest[SHA1_BYTE];
 	SHA1_CTX ctx;
-	FILE *fp = fopen(fn, "rb");
+	FILE *fp = fopen(filename, "rb");
 
 	if (!fp) goto done;
 
 	SHA1Init(&ctx);
-	while ((datalen = fread(databuf, 1, sizeof(databuf), fp))) {
-		SHA1Update(&ctx, databuf, datalen);
+	while (!feof(fp)) {
+		int datalen = fread(databuf, 1, sizeof(databuf), fp);
+		if (ferror(fp)) goto done;
+		if (datalen > 0) SHA1Update(&ctx, databuf, datalen);
 	}
-	SHA1Final(digest, &ctx);
-
-	int i;
-	for (i = 0; i < SHA1_BYTE; i++) {
-		sprintf(buf + i * 2, "%02x", (unsigned) digest[i]);
-	}
+	SHA1Final(filehash->digest, &ctx);
 
 	ret = 1;
 done:

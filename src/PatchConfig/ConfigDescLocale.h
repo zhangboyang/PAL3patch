@@ -571,7 +571,7 @@ static ConfigDescItem LISTNAME[] = {
 		NULL,
 		_T("实用工具"),
 		_T("此分类下是一些实用小工具。"),
-		_T("请选择一个子项目进行配置。"),
+		_T("请选择一个子项目。"),
 	},
 	{
 		1, false, true,
@@ -616,7 +616,14 @@ static ConfigDescItem LISTNAME[] = {
 		1, false, true,
 		NULL,
 		_T("修复游戏数据"),
-		_T("此功能可以检查游戏数据的完整性。若发现较少损坏，还可以进行修复。"),
+		_T("此功能可以检查游戏数据以及 ")
+#ifdef BUILD_FOR_PAL3
+		_T("1.04")
+#endif
+#ifdef BUILD_FOR_PAL3A
+		_T("1.21")
+#endif
+		_T(" 补丁的完整性。若发现较少损坏，还可以进行修复。此功能对分辨率补丁自身的损坏无效。"),
 		_T("如果您安装了其它第三方 MOD，请谨慎使用该功能（因为可能误认为是损坏从而导致 MOD 失效）。"),
 		RepairGameData, _T("开始检查")
 	},
@@ -630,4 +637,3 @@ static ConfigDescItem LISTNAME[] = {
 	},
 	{ -1 } // EOF
 };
-

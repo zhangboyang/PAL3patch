@@ -251,7 +251,6 @@ bool CacheRW::read(void *buffer, unsigned offset, size_t length)
 {
 	assert(offset + length <= fp->size());
 	if (!length) return true;
-	if (length >= CACHERW_PREFETCH)	return fp->read(buffer, offset, length);
 	if (count && base <= offset) {
 		if (offset + length <= base + count) {
 			memcpy(buffer, PTRADD(cache, offset - base), length);
@@ -265,6 +264,7 @@ bool CacheRW::read(void *buffer, unsigned offset, size_t length)
 			length -= hit;
 		}
 	}
+	if (length >= CACHERW_PREFETCH)	return fp->read(buffer, offset, length);
 	unsigned sz = fp->size();
 	base = offset;
 	count = CACHERW_PREFETCH < sz - base ? CACHERW_PREFETCH : sz - base;

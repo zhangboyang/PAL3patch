@@ -5,4 +5,3 @@ extern int TrySetUACVirtualization(bool en);
 extern void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz);
 
 #endif
-
