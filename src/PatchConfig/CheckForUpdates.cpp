@@ -112,7 +112,7 @@ done:
 
 	if (retry) goto retry;
 
-	DestroyPleaseWaitDlg();
+	DestroyPleaseWaitDlg(dlg);
 	return;
 
 fail:

@@ -13,13 +13,13 @@ static char THIS_FILE[] = __FILE__;
 // CPleaseWaitDlg dialog
 
 static CPleaseWaitDlg *waitdlg = NULL;
-void ShowPleaseWaitDlg(CWnd* fawnd, LPCTSTR msg, float progress, bool (*cancelfunc)(), bool redraw)
+void ShowPleaseWaitDlg(CWnd *fawnd, LPCTSTR msg, bool busy, float progress, bool (*cancelfunc)(), bool redraw)
 {
 	bool first = false;
 	if (!waitdlg) {
 		waitdlg = new CPleaseWaitDlg;
 		waitdlg->Create(IDD_PLEASEWAIT, fawnd);
-		waitdlg->m_WaitProgress.SetRange32(0, 1 << 24);
+		waitdlg->m_WaitProgress.SetRange32(0, (1 << 24));
 		first = true;
 	}
 
@@ -48,33 +48,49 @@ void ShowPleaseWaitDlg(CWnd* fawnd, LPCTSTR msg, float progress, bool (*cancelfu
 	
 	if (first) {
 		waitdlg->ShowWindow(SW_SHOW);
-		waitdlg->BeginWaitCursor();
+		if (waitdlg->GetParent()) {
+			waitdlg->GetParent()->BeginModalState();
+		}
 	}
 
-	if (redraw) waitdlg->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_ALLCHILDREN);
-	if (waitdlg->GetParent()) {
-		if (redraw) waitdlg->GetParent()->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_ALLCHILDREN);
-		waitdlg->GetParent()->BeginModalState();
+	if (waitdlg->busy != busy) {
+		if (busy) {
+			waitdlg->BeginWaitCursor();
+		} else {
+			waitdlg->EndWaitCursor();
+		}
+		waitdlg->busy = busy;
+	}
+
+	if (redraw) {
+		waitdlg->RedrawWindow(NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
 	}
 
 	DoEvents();
-	if (!cancelfunc) waitdlg->RestoreWaitCursor();
+
+	if (busy) {
+		waitdlg->RestoreWaitCursor();
+	}
 }
 CPleaseWaitDlg *GetPleaseWaitDlg()
 {
 	return waitdlg;
 }
-void DestroyPleaseWaitDlg()
+void DestroyPleaseWaitDlg(CWnd *fawnd)
 {
 	if (waitdlg) {
-		waitdlg->EndWaitCursor();
+		if (waitdlg->busy) {
+			waitdlg->EndWaitCursor();
+		}
 		if (waitdlg->GetParent()) {
 			waitdlg->GetParent()->EndModalState();
-			waitdlg->GetParent()->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_ALLCHILDREN);
 		}
 		waitdlg->DestroyWindow();
 		delete waitdlg;
 		waitdlg = NULL;
+		if (fawnd) {
+			fawnd->RedrawWindow(NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
+		}
 	}
 }
 
@@ -85,6 +101,7 @@ CPleaseWaitDlg::CPleaseWaitDlg(CWnd* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(CPleaseWaitDlg)
 	//}}AFX_DATA_INIT
 	cancelfunc = NULL;
+	busy = false;
 }
 
 

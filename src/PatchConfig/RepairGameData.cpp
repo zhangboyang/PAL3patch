@@ -106,7 +106,7 @@ public:
 	{
 		assert(curv <= maxv);
 		float progress = maxv ? (double)curv / maxv : 0;
-		ShowPleaseWaitDlg(fawnd, msg, progress, cancelfunc, msg != NULL);
+		ShowPleaseWaitDlg(fawnd, msg, false, progress, cancelfunc, msg != NULL);
 	}
 	void reset(unsigned maxvalue)
 	{
@@ -253,7 +253,7 @@ static void run_repair(RepairProgress *rp, BufferReader &r, int gl)
 	std::vector<std::pair<CString, std::vector<RepairCommitter *> > >::iterator i;
 	std::vector<RepairCommitter *>::iterator j;
 	if (!rp->cancelled()) {
-		ShowPleaseWaitDlg(NULL, STRTABLE(IDS_REPAIR_CHECKDONE));
+		ShowPleaseWaitDlg(NULL, STRTABLE(IDS_REPAIR_CHECKDONE), false);
 		CString fix, bad, msg;
 		for (i = transactions.begin(); i != transactions.end(); i++) {
 			if (i->second.empty()) {
@@ -387,6 +387,6 @@ void RepairGameData(CPatchConfigDlg *dlg)
 		if (!rp->cancelled()) GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_BADREPAIRPACK), STRTABLE(IDS_REPAIRGAMEDATA), MB_ICONERROR);
 	}
 	free(buf);
-	DestroyPleaseWaitDlg();
+	DestroyPleaseWaitDlg(dlg);
 	delete rp;
 }

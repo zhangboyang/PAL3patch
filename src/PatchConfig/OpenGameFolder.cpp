@@ -33,7 +33,7 @@ static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR subdir)
 		GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CANTOPENGAMEFOLDER_TITLE), MB_ICONERROR);
 	}
 
-	DestroyPleaseWaitDlg();
+	DestroyPleaseWaitDlg(dlg);
 }
 
 
