@@ -1,6 +1,6 @@
 #define PLUGIN_INTERNAL_NAME "TCCHOST"
 #define PLUGIN_FRIENDLY_NAME "TCC ²å¼þ"
-#define PLUGIN_VERSION       "v1.1" 
+#define PLUGIN_VERSION       "v1.2"
 
 #ifdef BUILD_FOR_PAL3
 #define USE_PAL3_DEFINITIONS
@@ -59,6 +59,7 @@ int cpi_add_c_source(struct cpi *self, const char *filepath)
     wchar_t *wincpath_filepart;
     int ret = 0;
     char *origtext = NULL;
+    wchar_t *wsrctext = NULL;
     char *srctext = NULL;
     int r;
     UINT cp;
@@ -95,7 +96,14 @@ int cpi_add_c_source(struct cpi *self, const char *filepath)
     }
 
     cp = str_remove_utf8_bom(origtext) ? CP_UTF8 : tccplugin_default_codepage;
-    cs2cs_managed(origtext, cp, CP_UTF8, &srctext);
+    if (cp == 936) {
+        wsrctext = chinese_to_unicode(origtext, gbktable);
+    } else if (cp == 950) {
+        wsrctext = chinese_to_unicode(origtext, big5table);
+    } else {
+        wsrctext = cs2wcs_alloc(origtext, cp);
+    }
+    srctext = utf16_to_utf8(wsrctext);
     
     // add file path to include path
     if (utf8_filepath_to_wstr_fullpath(filepath, wstr_getbuffer(&wincpath, MAXLINE), MAXLINE, &wincpath_filepart)) {
@@ -129,6 +137,7 @@ done:
     wstr_dtor(&wincpath);
     cstr_dtor(&incpath);
     patch_free(origtext);
+    patch_free(wsrctext);
     patch_free(srctext);
     return ret;
 fail:

@@ -321,6 +321,7 @@ extern "C" {
 #include "wal.h"
 #include "badfiles.h"
 #include "badtools.h"
+#include "gameversion.h"
 
 
 #ifdef __cplusplus

@@ -542,7 +542,7 @@ static ConfigDescItem LISTNAME[] = {
 	},
 	{
 		1, true, true,
-		_T("checkgamever"),
+		_T("checkgameversion"),
 		_T("检查游戏版本"),
 		_T("启用此选项后，游戏在启动时将检查 ")
 #ifdef BUILD_FOR_PAL3
@@ -551,7 +551,7 @@ static ConfigDescItem LISTNAME[] = {
 #ifdef BUILD_FOR_PAL3A
 		_T("1.21")
 #endif
-		_T(" 补丁是否正确安装。如果您安装了其它第三方 MOD，可能需要禁用该选项。"),
+		_T(" 补丁是否正确安装。如果您正在同时使用其它 MOD，可能需要禁用该选项。"),
 		NULL,
 		NULL, NULL,
 		{
@@ -624,7 +624,7 @@ static ConfigDescItem LISTNAME[] = {
 		_T("1.21")
 #endif
 		_T(" 补丁的完整性。若发现较少损坏，还可以进行修复。此功能对分辨率补丁自身的损坏无效。"),
-		_T("如果您安装了其它第三方 MOD，请谨慎使用该功能（因为可能误认为是损坏从而导致 MOD 失效）。"),
+		_T("如果您正在同时使用其它 MOD，请谨慎使用该功能（因为可能误认为是损坏从而导致 MOD 失效）。"),
 		RepairGameData, _T("开始检查")
 	},
 	{

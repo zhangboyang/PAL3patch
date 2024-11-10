@@ -1,14 +1,12 @@
 // misc functions
 #include "common.h"
 
-
 int is_win9x()
 {
     OSVERSIONINFO osvi;
     memset(&osvi, 0, sizeof(osvi));
     osvi.dwOSVersionInfoSize = sizeof(osvi);
-    GetVersionEx(&osvi);
-    return osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS;
+    return GetVersionEx(&osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS;
 }
 
 int is_spacechar(char ch)

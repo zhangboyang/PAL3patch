@@ -37,7 +37,7 @@ static const DWORD defaultfont_charset_CHS = GB2312_CHARSET;
 static const int defaultfont_bold_CHS = 48;
 
 static const wchar_t wstr_defaultfont_CHS[] = L"宋体";
-static const wchar_t wstr_gameloading_CHS[] = L"游戏加载中，请稍候……";  // 少女祈祷中
+static const wchar_t wstr_gameloading_CHS[] = L"游戏加载中，请稍候……";
 
 static const wchar_t wstr_cantsavereg_text_CHS[] = L"无法保存注册表存档文件，请确认游戏对存档文件有写入权限，是否重试？\n注意：若取消，前尘忆梦、小游戏的解锁状态可能会丢失。";
 static const wchar_t wstr_cantsavereg_title_CHS[] = L"注册表重定向";
@@ -90,7 +90,7 @@ static const wchar_t wstr_havebadtool_title_CHS[] = L"检测到不兼容的工具";
 static const wchar_t wstr_badtool_dxwnd_CHS[] = L"DxWnd 窗口化工具";
 static const wchar_t wstr_badtool_d3dwindower_CHS[] = L"D3DWindower 窗口化工具";
 
-static const wchar_t wstr_badgamever_text_CHS[] = L"检测到 1.04 补丁未正确安装。请运行“补丁配置工具”，使用“实用工具——修复游戏数据”功能来修复游戏数据。\n\n如果您正在使用其它第三方 MOD，可忽略本信息。\n\n是否仍要进入游戏？";
+static const wchar_t wstr_badgamever_text_CHS[] = L"检测到 1.04 补丁未正确安装。\n\n请运行“补丁配置工具”，使用“实用工具——修复游戏数据”功能来解决此问题。\n\n如果您正在同时使用其它 MOD，可忽略本信息。\n\n是否仍要进入游戏？";
 static const wchar_t wstr_badgamever_title_CHS[] = L"游戏版本不正确";
 
 
@@ -165,7 +165,7 @@ const wchar_t *wstr_badgamever_title;
 
 
 
-static int detect_game_locale();
+static int detect_game_locale(void);
 
 #define IMPORT_LOCALE_ITEM(lang, symbol) ((symbol) = (CONCAT3(symbol, _, lang)))
 
@@ -257,7 +257,7 @@ void init_locale()
 
 
 
-static int detect_game_locale()
+static int detect_game_locale(void)
 {
     // read compressed data of "basedata.cpk\datascript\lang.txt"
     // and use magic string to determine game locale

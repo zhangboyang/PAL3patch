@@ -107,6 +107,7 @@
     <ClCompile Include="src\fsutil.c" />
     <ClCompile Include="src\ftcharhack.c" />
     <ClCompile Include="src\ftfont.c" />
+    <ClCompile Include="src\gameversion.c" />
     <ClCompile Include="src\hook.c" />
     <ClCompile Include="src\locale.c" />
     <ClCompile Include="src\logger.c" />
@@ -116,7 +117,6 @@
     <ClCompile Include="src\PAL3Apatch.c" />
     <ClCompile Include="src\patch_audiofreq.c" />
     <ClCompile Include="src\patch_cdpatch.c" />
-    <ClCompile Include="src\patch_checkgamever.c" />
     <ClCompile Include="src\patch_clampuilib.c" />
     <ClCompile Include="src\patch_console.c" />
     <ClCompile Include="src\patch_depcompatible.c" />
@@ -190,6 +190,7 @@
     <ClInclude Include="include\PAL3Apatch\fsutil.h" />
     <ClInclude Include="include\PAL3Apatch\ftcharhack.h" />
     <ClInclude Include="include\PAL3Apatch\ftfont.h" />
+    <ClInclude Include="include\PAL3Apatch\gameversion.h" />
     <ClInclude Include="include\PAL3Apatch\hook.h" />
     <ClInclude Include="include\PAL3Apatch\locale.h" />
     <ClInclude Include="include\PAL3Apatch\logger.h" />

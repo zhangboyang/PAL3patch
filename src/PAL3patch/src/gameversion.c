@@ -1,5 +1,11 @@
 #include "common.h"
 
+static int gameversion_check_disabled = 0;
+void disable_gameversion_check(void)
+{
+    gameversion_check_disabled = 1;
+}
+
 struct gamever_item {
     const char *cpkpath;
     unsigned keycrc;
@@ -7,7 +13,7 @@ struct gamever_item {
     unsigned mask;
 };
 
-struct gamever_item gamever_CHS[] = {
+static struct gamever_item gamever_CHS[] = {
     { "basedata\\basedata.cpk", 0xb27328d6, "509b64527a50d492f783d346530c8a6f84f40763", 0x1e }, // cbdata\PAL3_Softstar.gdb
     { NULL                    , 0         , "5a6a9d788e4b4f353e34bcd30b636d47e9c37f33", 0x01 },
     { NULL                    , 0x31d9c350, "1577f9d696c960851e4f33c384b8138617cc0dd0", 0x1e }, // ui\GameMainUI\Sword\Data\J131Dst.tga
@@ -38,7 +44,7 @@ struct gamever_item gamever_CHS[] = {
     { NULL                    , 0         , NULL                                      , 0    }  // EOF
 };
 
-struct gamever_item gamever_CHT[] = {
+static struct gamever_item gamever_CHT[] = {
     { "basedata\\basedata.cpk", 0xb27328d6, "66f1143b62c6fc254d1e065567ae5194d79ebb21", 0x1e }, // cbdata\PAL3_Softstar.gdb
     { NULL                    , 0         , "2f42d67b478d39581d8ce080c5ba45b16d6fa138", 0x01 },
     { NULL                    , 0xfe15f0ff, "b3c4321596606b8bdf995d4bd63956fe52ceefd6", 0x1e }, // gbdata\unicode20.tft
@@ -69,8 +75,11 @@ struct gamever_item gamever_CHT[] = {
     { NULL                    , 0         , NULL                                      , 0    }  // EOF
 };
 
-MAKE_PATCHSET(checkgamever)
+void check_gameversion(void)
 {
+    if (gameversion_check_disabled) return;
+    if (!get_int_from_configfile("checkgameversion")) return;
+    
     struct gamever_item *gamever;
     
     switch (game_locale) {
@@ -114,7 +123,7 @@ MAKE_PATCHSET(checkgamever)
         if ((mask & (1 << i))) ver = i;
     }
     
-    if (ver != -1 && ver != 4) {
+    if (ver != 4) {
         if (MessageBoxW(NULL, wstr_badgamever_text, wstr_badgamever_title, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) != IDYES) {
             die(0);
 		}

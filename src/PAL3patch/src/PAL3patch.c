@@ -139,7 +139,6 @@ static void init_stage2()
     INIT_PATCHSET(fixloading);
     INIT_PATCHSET(nommapcpk);
     INIT_PATCHSET(fixnosndcrash);
-    INIT_PATCHSET(checkgamever);
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch
@@ -172,11 +171,14 @@ static void init_stage2()
     // load external plugins
     init_plugins();
     
-    // show_about() must called after init_locale()
-    show_about();
+    // check game version
+    check_gameversion();
     
     // check incompatible tools
     check_badtools();
+    
+    // show_about() must called after init_locale()
+    show_about();
 }
 
 

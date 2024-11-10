@@ -3,7 +3,7 @@
 #ifdef PATCHAPI_EXPORTS
 // INTERNAL DEFINITIONS
 
-extern void check_badfiles();
+extern void check_badfiles(void);
 
 #endif
 #endif

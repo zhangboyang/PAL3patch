@@ -43,7 +43,12 @@ extern TCCPLUGINAPI void search_cplugins(const char *dirpath, struct cstr *filel
 
 #if defined(TCCPLUGINAPI_EXPORTS) || defined(USE_TCCPLUGIN_DEFINITIONS)
 
+#ifdef BUILD_FOR_PAL3
 #define TCCPLUGIN_MSGBOX_TITLE "TCC Plugin for PAL3patch"
+#endif
+#ifdef BUILD_FOR_PAL3A
+#define TCCPLUGIN_MSGBOX_TITLE "TCC Plugin for PAL3Apatch"
+#endif
 #define TCCPLUGIN_INSTALL_PATH "plugins\\tcc"
 
 #endif

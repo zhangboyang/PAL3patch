@@ -1,6 +1,6 @@
 #define PLUGIN_INTERNAL_NAME "DISPTEXT"
 #define PLUGIN_FRIENDLY_NAME "отй╬ндвж"
-#define PLUGIN_VERSION "v1.1"
+#define PLUGIN_VERSION "v1.2"
 #ifdef BUILD_FOR_PAL3
 #define USE_PAL3_DEFINITIONS
 #include "PAL3patch.h"
