@@ -2,6 +2,7 @@
 #define PAL3PATCHCONFIG_FSUTIL
 
 extern int create_dir(const char *dirpath);
+extern int dir_exists(const char *dirpath);
 extern int file_exists(const char *filepath);
 extern int reset_attrib(const char *filepath);
 extern FILE *robust_fopen(const char *filename, const char *mode);

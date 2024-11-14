@@ -11,6 +11,7 @@ extern PATCHAPI char *replace_extension(const char *filepath, const char *new_ex
 extern PATCHAPI char *read_file_as_cstring(const char *filepath);
 extern PATCHAPI int enum_files(const char *dirpath, const char *pattern, void (*func)(const char *filepath, void *arg), void *arg);
 extern PATCHAPI int create_dir(const char *dirpath);
+extern PATCHAPI int dir_exists(const char *dirpath);
 extern PATCHAPI int file_exists(const char *filepath);
 extern PATCHAPI int reset_attrib(const char *filepath);
 

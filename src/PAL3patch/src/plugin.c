@@ -458,13 +458,13 @@ void search_plugins(const char *dirpath)
 void init_plugins()
 {
     int flag = get_int_from_configfile("loadplugins");
-    if (flag) {
+    if (flag && dir_exists("plugins")) {
         wstr_ctor(&plugin_report_body);
         
         search_plugins("plugins");
         pplog("total %d plugin%s loaded at game startup time.", total_plugins, total_plugins > 1 ? "s" : "");
 
-        if (flag == 1 && wstr_at(&plugin_report_body, 0)) {
+        if (flag == 1 && !wstr_empty(&plugin_report_body)) {
             struct wstr report;
             wstr_ctor(&report);
             wstr_format(&report, wstr_pluginreport_template, wstr_getwcs(&plugin_report_body), total_plugins);

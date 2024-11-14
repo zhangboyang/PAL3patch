@@ -5,6 +5,12 @@ int create_dir(const char *dirpath)
     return !!CreateDirectoryA(dirpath, NULL);
 }
 
+int dir_exists(const char *dirpath)
+{
+    DWORD dwAttrs = GetFileAttributesA(dirpath);
+    return dwAttrs != 0xffffffff && (dwAttrs & FILE_ATTRIBUTE_DIRECTORY);
+}
+
 int file_exists(const char *filepath)
 {
     return GetFileAttributesA(filepath) != 0xffffffff;

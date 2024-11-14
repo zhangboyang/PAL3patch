@@ -249,7 +249,7 @@ void CONCAT3(clsname, _, clear)(struct clsname *s) \
 { \
     tchar t = 0; \
     bvec_clear(&s->v); \
-    bvec_tpush(&s->v, &t, 1, tchar); \
+    bvec_tpushback(&s->v, &t, tchar); \
 } \
 void CONCAT3(clsname, _, fclear)(struct clsname *s) \
 { \
@@ -267,7 +267,7 @@ void CONCAT3(clsname, _, move)(struct clsname *dst, struct clsname *src) \
     if (dst != src) { \
         tchar t = 0; \
         bvec_move(&dst->v, &src->v); \
-        bvec_tpush(&src->v, &t, 1, tchar); \
+        bvec_tpushback(&src->v, &t, tchar); \
     } \
 } \
 void CONCAT3(clsname, _, swap)(struct clsname *a, struct clsname *b) \
@@ -332,7 +332,7 @@ void CONCAT3(clsname, _, push)(struct clsname *s, const tchar *str, size_t n) \
         tchar t = 0; \
         bvec_tpopback(&s->v, tchar); \
         bvec_tpush(&s->v, str, n, tchar); \
-        bvec_tpush(&s->v, &t, 1, tchar); \
+        bvec_tpushback(&s->v, &t, tchar); \
     } \
 } \
 void CONCAT3(clsname, _, pop)(struct clsname *s, size_t n) \
@@ -352,13 +352,13 @@ void CONCAT3(clsname, _, trunc)(struct clsname *s, size_t n) \
 { \
     tchar t = 0; \
     bvec_tresize(&s->v, n, tchar); \
-    bvec_tpush(&s->v, &t, 1, tchar); \
+    bvec_tpushback(&s->v, &t, tchar); \
 } \
 void CONCAT3(clsname, _, pushback)(struct clsname *s, tchar c) \
 { \
     tchar t = 0; \
     *CONCAT3(clsname, _, end)(s) = c; \
-    bvec_tpush(&s->v, &t, 1, tchar); \
+    bvec_tpushback(&s->v, &t, tchar); \
 } \
 void CONCAT3(clsname, _, popback)(struct clsname *s) \
 { \

@@ -7,7 +7,16 @@ static BOOL CALLBACK SetForegroundIfMatched(HWND hwnd, LPARAM lParam)
 	DWORD pid;
 	GetWindowThreadProcessId(hwnd, &pid);
 	if (pid == pi->dwProcessId && !GetWindow(hwnd, GW_OWNER) && IsWindowVisible(hwnd)) {
-		SetForegroundWindow(hwnd);
+		if (SetForegroundWindow(hwnd)) {
+			FLASHWINFO fwi;
+			fwi.cbSize = sizeof(fwi);
+			fwi.hwnd = hwnd;
+			fwi.dwFlags = FLASHW_CAPTION;
+			fwi.uCount = 3;
+			fwi.dwTimeout = 80;
+			FlashWindowEx(&fwi);
+			MessageBeep(MB_OK);
+		}
 		return FALSE;
 	}
 	return TRUE;
