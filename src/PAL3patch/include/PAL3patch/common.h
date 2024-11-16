@@ -115,7 +115,8 @@
 #pragma comment(lib, "comctl32.lib")
 
 #ifdef _DEBUG
-#pragma comment(lib, "d3dx9d.lib")
+#pragma comment(lib, "d3dx9dt.lib")
+#define USE_D3DX9D
 #else
 #pragma comment(lib, "d3dx9.lib")
 #endif
@@ -296,6 +297,8 @@ extern "C" {
 // PAL3patch headers
 #include "memallocator.h"
 #include "pal3.h"
+#include "d3d9wrapper.h"
+#include "d3dx9wrapper.h"
 #include "hook.h"
 #include "asmpatch.h"
 #include "about.h"

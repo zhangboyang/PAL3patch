@@ -105,7 +105,7 @@ void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height,
     IDirect3DSurface9 *suf = NULL;
     void *bits = NULL;
     
-    if (FAILED(D3DXGetImageInfoFromFileInMemory(filedata, filelen, &img_info))) goto fail;
+    if (FAILED(myD3DXGetImageInfoFromFileInMemory(filedata, filelen, &img_info))) goto fail;
     *width = img_info.Width;
     *height = img_info.Height;
     *bitcount = 32; // FIXME: detect if alpha exists
@@ -119,7 +119,7 @@ void *load_image_bits(void *filedata, unsigned filelen, int *width, int *height,
         suf = NULL;
         goto fail;
     }
-    if (FAILED(D3DXLoadSurfaceFromFileInMemory(suf, NULL, NULL, filedata, filelen, NULL, D3DX_DEFAULT, 0, NULL))) goto fail;
+    if (FAILED(myD3DXLoadSurfaceFromFileInMemory(suf, NULL, NULL, filedata, filelen, NULL, D3DX_DEFAULT, 0, NULL))) goto fail;
     if (FAILED(IDirect3DSurface9_LockRect(suf, &lrc, NULL, 0))) goto fail;
     bits = mem_allocator->malloc(img_info.Width * img_info.Height * (*bitcount / 8));
     int i;
@@ -248,7 +248,7 @@ void fill_texture(IDirect3DTexture9 *tex, D3DCOLOR color)
     float b = ((color >> 16) & 0xFF) / 255.0f;
     float a = ((color >> 24) & 0xFF) / 255.0f;
     D3DXVECTOR4 vcolor = (D3DXVECTOR4) { r, g, b, a };
-    D3DXFillTexture(tex, fill_texture_callback, &vcolor);
+    myD3DXFillTexture(tex, fill_texture_callback, &vcolor);
 }
 
 

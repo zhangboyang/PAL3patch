@@ -107,7 +107,7 @@ static MAKE_ASMPATCH(hook_D3DXCreateEffect)
     
     free(old_eff);
     
-    LINK_CALL(gboffset + 0x10031BA2);
+    LINK_CALL(gbD3DXCreateEffect);
 }
 
 void init_effect_hooks()

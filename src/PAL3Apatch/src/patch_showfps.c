@@ -120,30 +120,30 @@ static void showfps_onendscene()
     set_d3dxfont_matrices(GB_GfxMgr->m_pd3dDevice);
     
     // draw chars
-    ID3DXSprite_Begin(pFPSSprite, D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+    myID3DXSprite_Begin(pFPSSprite, D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
     
     RECT rc;
     set_rect(&rc, 10, 10, 0, 0);
-    ID3DXFont_DrawTextW(pFPSFont, pFPSSprite, buf, -1, &rc, DT_NOCLIP, 0xFFFFFFFF);
-    ID3DXSprite_End(pFPSSprite);
+    myID3DXFont_DrawTextW(pFPSFont, pFPSSprite, buf, -1, &rc, DT_NOCLIP, 0xFFFFFFFF);
+    myID3DXSprite_End(pFPSSprite);
     
     IDirect3DStateBlock9_Apply(pFPSStateBlock);
 }
 static void showfps_onlostdevice()
 {
     if (!pFPSFont) return;
-    ID3DXFont_OnLostDevice(pFPSFont);
-    ID3DXSprite_OnLostDevice(pFPSSprite);
+    myID3DXFont_OnLostDevice(pFPSFont);
+    myID3DXSprite_OnLostDevice(pFPSSprite);
     IDirect3DStateBlock9_Release(pFPSStateBlock);
 }
 static void showfps_onresetdevice()
 {
     if (!pFPSFont) return;
-    ID3DXFont_OnResetDevice(pFPSFont);
-    ID3DXSprite_OnResetDevice(pFPSSprite);
+    myID3DXFont_OnResetDevice(pFPSFont);
+    myID3DXSprite_OnResetDevice(pFPSSprite);
     
     if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &pFPSStateBlock))) {
         fail("can't create state block for showing FPS.");
@@ -151,12 +151,12 @@ static void showfps_onresetdevice()
 }
 static void showfps_initfont()
 {
-    if (FAILED(D3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, 12, 0, 0, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, PROOF_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Fixedsys", &pFPSFont))) {
+    if (FAILED(myD3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, 12, 0, 0, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, PROOF_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Fixedsys", &pFPSFont))) {
         warning("can't create font for showing FPS.");
         pFPSFont = NULL;
     }
     
-    if (FAILED(D3DXCreateSprite(GB_GfxMgr->m_pd3dDevice, &pFPSSprite))) {
+    if (FAILED(myD3DXCreateSprite(GB_GfxMgr->m_pd3dDevice, &pFPSSprite))) {
         fail("can't create sprite for showing FPS.");
     }
     

@@ -9,6 +9,14 @@ int is_win9x()
     return GetVersionEx(&osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS;
 }
 
+int is_laa()
+{
+    void *image_base = GetModuleHandle(NULL);
+    PIMAGE_DOS_HEADER pdoshdr = image_base;
+    PIMAGE_NT_HEADERS pnthdr = PTRADD(image_base, pdoshdr->e_lfanew);
+    return !!(pnthdr->FileHeader.Characteristics & IMAGE_FILE_LARGE_ADDRESS_AWARE);
+}
+
 int is_spacechar(char ch)
 {
 	return !!strchr(SPACECHAR_LIST, ch);

@@ -395,7 +395,7 @@ static int ftfont_draw_char(struct ftfont *font, wchar_t c, int left, int top, D
         left += ch->l;
         top -= ch->t;
         D3DXVECTOR3 pos = { left, top, 0.0f };
-        ID3DXSprite_Draw(sprite, ch->tex->tex, &rc, NULL, &pos, color);
+        myID3DXSprite_Draw(sprite, ch->tex->tex, &rc, NULL, &pos, color);
     }
     return adv;
 }

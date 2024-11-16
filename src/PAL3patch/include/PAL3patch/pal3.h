@@ -351,13 +351,13 @@ struct UIWnd {
     int m_bfocus;
 };
 struct UIWndVtbl {
-    MAKE_THISCALL(void, *ShowWindow, struct UIWnd *this, int);
-    MAKE_THISCALL(void, *Render, struct UIWnd *this);
-    MAKE_THISCALL(int, *Update, struct UIWnd *this, float, int);
-    MAKE_THISCALL(void, *Destroy, struct UIWnd *this);
-    MAKE_THISCALL(void, *Create, struct UIWnd *this, unsigned int, RECT *, struct UIWnd *, char);
+    MAKE_THISCALL(void, *ShowWindow, struct UIWnd *, int);
+    MAKE_THISCALL(void, *Render, struct UIWnd *);
+    MAKE_THISCALL(int, *Update, struct UIWnd *, float, int);
+    MAKE_THISCALL(void, *Destroy, struct UIWnd *);
+    MAKE_THISCALL(void, *Create, struct UIWnd *, unsigned int, RECT *, struct UIWnd *, char);
     void *scalar_deleting_destructor;
-    MAKE_THISCALL(int, *OnMessage, struct UIWnd *this, unsigned int, unsigned int, unsigned int);
+    MAKE_THISCALL(int, *OnMessage, struct UIWnd *, unsigned int, unsigned int, unsigned int);
 };
 #define UIWnd_vfptr_Render(this) THISCALL_WRAPPER((this)->vfptr->Render, this)
 #define UIWnd_vfptr_Update(this, deltatime, haveinput) THISCALL_WRAPPER((this)->vfptr->Update, this, deltatime, haveinput)
@@ -523,12 +523,12 @@ struct gbPrintFont {
     struct gbRenderEffect *pEffect[2];
 };
 struct gbPrintFontVtbl {
-    MAKE_THISCALL(int, *Init, struct gbPrintFont *this);
-    MAKE_THISCALL(void, *Release, struct gbPrintFont *this);
-    MAKE_THISCALL(void, *Flush, struct gbPrintFont *this);
-    MAKE_THISCALL(void, *Flush3D, struct gbPrintFont *this);
-    MAKE_THISCALL(void, *PrintString, struct gbPrintFont *this, char *, float, float, float, float);
-    MAKE_THISCALL(void, *Print3DString, struct gbPrintFont *this, char *, float, float, float);
+    MAKE_THISCALL(int, *Init, struct gbPrintFont *);
+    MAKE_THISCALL(void, *Release, struct gbPrintFont *);
+    MAKE_THISCALL(void, *Flush, struct gbPrintFont *);
+    MAKE_THISCALL(void, *Flush3D, struct gbPrintFont *);
+    MAKE_THISCALL(void, *PrintString, struct gbPrintFont *, char *, float, float, float, float);
+    MAKE_THISCALL(void, *Print3DString, struct gbPrintFont *, char *, float, float, float);
 };
 #define gbPrintFont_vfptr_Flush(this) THISCALL_WRAPPER((this)->vfptr->Flush, this)
 

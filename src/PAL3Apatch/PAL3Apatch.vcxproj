@@ -102,6 +102,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\d3d9wrapper.c" />
+    <ClCompile Include="src\d3dx9wrapper.c" />
     <ClCompile Include="src\effecthook.c" />
     <ClCompile Include="src\framework.c" />
     <ClCompile Include="src\fsutil.c" />
@@ -185,6 +187,8 @@
     <ClInclude Include="include\PAL3Apatch\cfgreader.h" />
     <ClInclude Include="include\PAL3Apatch\cjktable.h" />
     <ClInclude Include="include\PAL3Apatch\common.h" />
+    <ClInclude Include="include\PAL3Apatch\d3d9wrapper.h" />
+    <ClInclude Include="include\PAL3Apatch\d3dx9wrapper.h" />
     <ClInclude Include="include\PAL3Apatch\effecthook.h" />
     <ClInclude Include="include\PAL3Apatch\framework.h" />
     <ClInclude Include="include\PAL3Apatch\fsutil.h" />

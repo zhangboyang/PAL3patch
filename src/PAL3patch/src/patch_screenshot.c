@@ -23,7 +23,7 @@ static void screenshot_hook()
         // save image
         IDirect3DSurface9 *suf = NULL;
         if (SUCCEEDED(IDirect3DDevice9_GetBackBuffer(GB_GfxMgr->m_pd3dDevice, 0, 0, D3DBACKBUFFER_TYPE_MONO, &suf))) {
-            if (SUCCEEDED(D3DXSaveSurfaceToFileA(buf, D3DXIFF_BMP, suf, NULL, NULL))) {
+            if (SUCCEEDED(myD3DXSaveSurfaceToFileA(buf, D3DXIFF_BMP, suf, NULL, NULL))) {
                 snwprintf(screenshot_msg, sizeof(screenshot_msg) / sizeof(wchar_t), wstr_screenshot_msg, buf);
                 screenshot_msg_time = timeGetTime();
                 screenshot_msg_enable = 1;

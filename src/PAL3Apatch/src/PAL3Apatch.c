@@ -88,12 +88,15 @@ static void init_stage1()
 // init_stage2() should be called after EXE is unpacked
 static void init_stage2()
 {
-    
     // prepare filesystem environment
     prepare_fs();
     
     // init memory allocators
     init_memory_allocators();
+    
+    // init direct3d wrapper
+    init_d3d9_wrapper();
+    init_d3dx9_wrapper();
     
     // init hook framework
     init_hooks();

@@ -4,13 +4,13 @@
 
 
 extern PATCHAPI void add_effect_hook(const char *eff_file, const char *old_str, const char *new_str);
-extern PATCHAPI void init_effect_hooks(void);
 
 
 #ifdef PATCHAPI_EXPORTS
 // INTERNAL DEFINITIONS
 
 #define MAX_EFFECTHOOKS 100
+extern PATCHAPI void init_effect_hooks(void);
 
 #endif
 #endif

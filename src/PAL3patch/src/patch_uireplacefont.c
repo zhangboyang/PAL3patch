@@ -136,7 +136,7 @@ static void d3dxfont_insertfont(int fontsize, int boldflag, int preload)
             case FTFONT_AA: fdwQuality = 4; break; // ANTIALIASED_QUALITY
             case FTFONT_AUTO: fdwQuality = 5; break; // CLEARTYPE_QUALITY
         }
-        if (FAILED(D3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, fdwQuality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
+        if (FAILED(myD3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, fontsize, 0, (boldflag ? FW_BOLD : 0), 0, FALSE, d3dxfont_charset, OUT_DEFAULT_PRECIS, fdwQuality, DEFAULT_PITCH | FF_DONTCARE, d3dxfont_facename, &key.pfont))) {
             fail("can't create ID3DXFont for size '%d'.", fontsize);
         }
     }
@@ -152,7 +152,7 @@ static void d3dxfont_preload_range(struct d3dxfont_desc *font, wchar_t low, wcha
     if (font->use_ftfont) {
         ftfont_preload_range(font->pftfont, low, high);
     } else {
-        ID3DXFont_PreloadCharacters(font->pfont, low, high);
+        myID3DXFont_PreloadCharacters(font->pfont, low, high);
     }
 }
 
@@ -161,7 +161,7 @@ static void d3dxfont_preload_string(struct d3dxfont_desc *font, const wchar_t *w
     if (font->use_ftfont) {
         ftfont_preload_string(font->pftfont, wstr);
     } else {
-        ID3DXFont_PreloadTextW(font->pfont, wstr, wcslen(wstr));
+        myID3DXFont_PreloadTextW(font->pfont, wstr, wcslen(wstr));
     }
 }
 
@@ -287,7 +287,7 @@ static void d3dxfont_init()
     // do preload
     d3dxfont_preload(get_int_from_configfile("uireplacefont_preloadcharset"));
     
-    if (FAILED(D3DXCreateSprite(GB_GfxMgr->m_pd3dDevice, &d3dxfont_sprite))) {
+    if (FAILED(myD3DXCreateSprite(GB_GfxMgr->m_pd3dDevice, &d3dxfont_sprite))) {
         fail("can't create sprite for font replacing.");
     }
     
@@ -316,7 +316,7 @@ void print_wstring_begin()
     set_d3dxfont_matrices(GB_GfxMgr->m_pd3dDevice);
 
     // prepare for drawing strings
-    ID3DXSprite_Begin(d3dxfont_sprite, D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
+    myID3DXSprite_Begin(d3dxfont_sprite, D3DXSPRITE_ALPHABLEND | D3DXSPRITE_OBJECTSPACE | D3DXSPRITE_DONOTSAVESTATE);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
     IDirect3DDevice9_SetSamplerState(GB_GfxMgr->m_pd3dDevice, 0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
@@ -334,7 +334,7 @@ void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color)
     } else {
         RECT rc;
         set_rect(&rc, left, top, 0, 0);
-        ID3DXFont_DrawTextW(font->pfont, sprite, wstr, -1, &rc, DT_NOCLIP, color);
+        myID3DXFont_DrawTextW(font->pfont, sprite, wstr, -1, &rc, DT_NOCLIP, color);
     }
 }
 void print_wstring_end()
@@ -342,7 +342,7 @@ void print_wstring_end()
     if (!d3dxfont_initflag) return;
     
     // end drawing strings
-    ID3DXSprite_End(d3dxfont_sprite);
+    myID3DXSprite_End(d3dxfont_sprite);
     
     // restore device state
     IDirect3DStateBlock9_Apply(d3dxfont_stateblock);
@@ -358,10 +358,10 @@ static void d3dxfont_onlostdevice()
     int i;
     for (i = 0; i < PRINTWSTR_COUNT; i++) {
         if (!d3dxfont_fontlist[i].use_ftfont) {
-            ID3DXFont_OnLostDevice(d3dxfont_fontlist[i].pfont);
+            myID3DXFont_OnLostDevice(d3dxfont_fontlist[i].pfont);
         }
     }
-    ID3DXSprite_OnLostDevice(d3dxfont_sprite);
+    myID3DXSprite_OnLostDevice(d3dxfont_sprite);
     IDirect3DStateBlock9_Release(d3dxfont_stateblock);
 }
 static void d3dxfont_onresetdevice()
@@ -369,10 +369,10 @@ static void d3dxfont_onresetdevice()
     int i;
     for (i = 0; i < PRINTWSTR_COUNT; i++) {
         if (!d3dxfont_fontlist[i].use_ftfont) {
-            ID3DXFont_OnResetDevice(d3dxfont_fontlist[i].pfont);
+            myID3DXFont_OnResetDevice(d3dxfont_fontlist[i].pfont);
         }
     }
-    ID3DXSprite_OnResetDevice(d3dxfont_sprite);
+    myID3DXSprite_OnResetDevice(d3dxfont_sprite);
     if (FAILED(IDirect3DDevice9_CreateStateBlock(GB_GfxMgr->m_pd3dDevice, D3DSBT_ALL, &d3dxfont_stateblock))) {
         fail("can't create state block for font replacing.");
     }

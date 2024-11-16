@@ -788,15 +788,15 @@ static void loading_splash()
     
     int fontsize = floor(16 * game_scalefactor + eps);
     ID3DXFont *pFont;
-    if (FAILED(D3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, fontsize, 0, FW_BOLD, 0, FALSE, defaultfont_charset, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, wstr_defaultfont, &pFont))) {
+    if (FAILED(myD3DXCreateFontW(GB_GfxMgr->m_pd3dDevice, fontsize, 0, FW_BOLD, 0, FALSE, defaultfont_charset, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, wstr_defaultfont, &pFont))) {
         pFont = NULL;
     }
     if (pFont) {
         RECT rc;
         int padding = floor(20 * game_scalefactor + eps);
         set_rect(&rc, 0, PAL3_s_drvinfo.height - padding - fontsize, PAL3_s_drvinfo.width - padding, 0);
-        ID3DXFont_DrawTextW(pFont, NULL, wstr_gameloading, -1, &rc, DT_NOCLIP | DT_RIGHT, 0xFFFFFFFF);
-        ID3DXFont_Release(pFont);
+        myID3DXFont_DrawTextW(pFont, NULL, wstr_gameloading, -1, &rc, DT_NOCLIP | DT_RIGHT, 0xFFFFFFFF);
+        myID3DXFont_Release(pFont);
         pFont = NULL;
     }
     

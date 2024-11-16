@@ -32,7 +32,6 @@ typedef struct _DIMOUSESTATE2 {
 
 // D3DX
 
-
 #ifdef HAVE_D3D9SDK
 // include d3dx9.h only, do not include d3d9.h here
 // d3dx9.h will include d3d9.h automaticly
@@ -214,35 +213,9 @@ DECLARE_INTERFACE_(ID3DXSprite, IUnknown)
 //    memory resources.  After Reset(), the call OnResetDevice().
 //////////////////////////////////////////////////////////////////////////////
 
-typedef struct _D3DXFONT_DESCA
-{
-    UINT Height;
-    UINT Width;
-    UINT Weight;
-    UINT MipLevels;
-    BOOL Italic;
-    BYTE CharSet;
-    BYTE OutputPrecision;
-    BYTE Quality;
-    BYTE PitchAndFamily;
-    CHAR FaceName[LF_FACESIZE];
+typedef struct _D3DXFONT_DESCA D3DXFONT_DESCA, *LPD3DXFONT_DESCA;
 
-} D3DXFONT_DESCA, *LPD3DXFONT_DESCA;
-
-typedef struct _D3DXFONT_DESCW
-{
-    UINT Height;
-    UINT Width;
-    UINT Weight;
-    UINT MipLevels;
-    BOOL Italic;
-    BYTE CharSet;
-    BYTE OutputPrecision;
-    BYTE Quality;
-    BYTE PitchAndFamily;
-    WCHAR FaceName[LF_FACESIZE];
-
-} D3DXFONT_DESCW, *LPD3DXFONT_DESCW;
+typedef struct _D3DXFONT_DESCW D3DXFONT_DESCW, *LPD3DXFONT_DESCW;
 
 typedef D3DXFONT_DESCW D3DXFONT_DESC;
 typedef LPD3DXFONT_DESCW LPD3DXFONT_DESC;
@@ -285,18 +258,31 @@ DECLARE_INTERFACE_(ID3DXFont, IUnknown)
 };
 
 
+typedef struct _D3DXMACRO D3DXMACRO, *LPD3DXMACRO;
+typedef interface ID3DXEffectPool ID3DXEffectPool;
+typedef interface ID3DXEffectPool *LPD3DXEFFECTPOOL;
+typedef interface ID3DXInclude ID3DXInclude;
+typedef interface ID3DXInclude *LPD3DXINCLUDE;
+typedef interface ID3DXEffect ID3DXEffect;
+typedef interface ID3DXEffect *LPD3DXEFFECT;
+typedef interface ID3DXBuffer ID3DXBuffer;
+typedef interface ID3DXBuffer *LPD3DXBUFFER;
+
+
+typedef LPCSTR D3DXHANDLE;
+typedef D3DXHANDLE *LPD3DXHANDLE;
+typedef struct _D3DXEFFECT_DESC D3DXEFFECT_DESC;
+typedef struct _D3DXPARAMETER_DESC D3DXPARAMETER_DESC;
+typedef struct _D3DXTECHNIQUE_DESC D3DXTECHNIQUE_DESC;
+typedef struct _D3DXPASS_DESC D3DXPASS_DESC;
+typedef struct _D3DXFUNCTION_DESC D3DXFUNCTION_DESC;
+typedef interface ID3DXEffectStateManager ID3DXEffectStateManager;
+typedef interface ID3DXEffectStateManager *LPD3DXEFFECTSTATEMANAGER;
+
 
 typedef VOID (WINAPI *LPD3DXFILL2D)(D3DXVECTOR4 *pOut, 
     CONST D3DXVECTOR2 *pTexCoord, CONST D3DXVECTOR2 *pTexelSize, LPVOID pData);
 
-
-#endif /* HAVE_D3D9SDK */
-
-
-
-
-
-#if !defined(HAVE_D3D9SDK)
 
 // functions for D3DX9
 BOOL WINAPI D3DXCheckVersion(UINT D3DSdkVersion, UINT D3DXSdkVersion);
@@ -348,14 +334,202 @@ HRESULT WINAPI D3DXSaveSurfaceToFileA(
     const RECT *pSrcRect
 );
 
+#endif /* HAVE_D3D9SDK */
+
+
+
+
+// d3dx9_43
+#ifdef PATCHAPI_EXPORTS
+
+//////////////////////////////////////////////////////////////////////////////
+// ID3DXFont:
+// ----------
+
+typedef interface ID3DXFont43 ID3DXFont43;
+typedef interface ID3DXFont43 *LPD3DXFONT43;
+
+
+// {D79DBB70-5F21-4d36-BBC2-FF525C213CDC}
+DEFINE_GUID(IID_ID3DXFont43, 
+0xd79dbb70, 0x5f21, 0x4d36, 0xbb, 0xc2, 0xff, 0x52, 0x5c, 0x21, 0x3c, 0xdc);
+
+
+#undef INTERFACE
+#define INTERFACE ID3DXFont43
+
+DECLARE_INTERFACE_(ID3DXFont43, IUnknown)
+{
+    // IUnknown
+    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
+    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
+    STDMETHOD_(ULONG, Release)(THIS) PURE;
+
+    // ID3DXFont
+    STDMETHOD(GetDevice)(THIS_ LPDIRECT3DDEVICE9 *ppDevice) PURE;
+    STDMETHOD(GetDescA)(THIS_ D3DXFONT_DESCA *pDesc) PURE;
+    STDMETHOD(GetDescW)(THIS_ D3DXFONT_DESCW *pDesc) PURE;
+    STDMETHOD_(BOOL, GetTextMetricsA)(THIS_ TEXTMETRICA *pTextMetrics) PURE;
+    STDMETHOD_(BOOL, GetTextMetricsW)(THIS_ TEXTMETRICW *pTextMetrics) PURE;
+
+    STDMETHOD_(HDC, GetDC)(THIS) PURE;
+    STDMETHOD(GetGlyphData)(THIS_ UINT Glyph, LPDIRECT3DTEXTURE9 *ppTexture, RECT *pBlackBox, POINT *pCellInc) PURE;
+
+    STDMETHOD(PreloadCharacters)(THIS_ UINT First, UINT Last) PURE;
+    STDMETHOD(PreloadGlyphs)(THIS_ UINT First, UINT Last) PURE;
+    STDMETHOD(PreloadTextA)(THIS_ LPCSTR pString, INT Count) PURE;
+    STDMETHOD(PreloadTextW)(THIS_ LPCWSTR pString, INT Count) PURE;
+
+    STDMETHOD_(INT, DrawTextA)(THIS_ LPD3DXSPRITE pSprite, LPCSTR pString, INT Count, LPRECT pRect, DWORD Format, D3DCOLOR Color) PURE;
+    STDMETHOD_(INT, DrawTextW)(THIS_ LPD3DXSPRITE pSprite, LPCWSTR pString, INT Count, LPRECT pRect, DWORD Format, D3DCOLOR Color) PURE;
+
+    STDMETHOD(OnLostDevice)(THIS) PURE;
+    STDMETHOD(OnResetDevice)(THIS) PURE;
+
+};
+
+//////////////////////////////////////////////////////////////////////////////
+// ID3DXEffect ///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+typedef interface ID3DXEffect43 ID3DXEffect43;
+typedef interface ID3DXEffect43 *LPD3DXEFFECT43;
+
+// {F6CEB4B3-4E4C-40dd-B883-8D8DE5EA0CD5}
+DEFINE_GUID(IID_ID3DXEffect43, 
+0xf6ceb4b3, 0x4e4c, 0x40dd, 0xb8, 0x83, 0x8d, 0x8d, 0xe5, 0xea, 0xc, 0xd5);
+
+#undef INTERFACE
+#define INTERFACE ID3DXEffect43
+
+DECLARE_INTERFACE_(ID3DXEffect43, ID3DXBaseEffect43)
+{
+    // ID3DXBaseEffect
+    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
+    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
+    STDMETHOD_(ULONG, Release)(THIS) PURE;
+
+    // Descs
+    STDMETHOD(GetDesc)(THIS_ D3DXEFFECT_DESC* pDesc) PURE;
+    STDMETHOD(GetParameterDesc)(THIS_ D3DXHANDLE hParameter, D3DXPARAMETER_DESC* pDesc) PURE;
+    STDMETHOD(GetTechniqueDesc)(THIS_ D3DXHANDLE hTechnique, D3DXTECHNIQUE_DESC* pDesc) PURE;
+    STDMETHOD(GetPassDesc)(THIS_ D3DXHANDLE hPass, D3DXPASS_DESC* pDesc) PURE;
+    STDMETHOD(GetFunctionDesc)(THIS_ D3DXHANDLE hShader, D3DXFUNCTION_DESC* pDesc) PURE;
+
+    // Handle operations
+    STDMETHOD_(D3DXHANDLE, GetParameter)(THIS_ D3DXHANDLE hParameter, UINT Index) PURE;
+    STDMETHOD_(D3DXHANDLE, GetParameterByName)(THIS_ D3DXHANDLE hParameter, LPCSTR pName) PURE;
+    STDMETHOD_(D3DXHANDLE, GetParameterBySemantic)(THIS_ D3DXHANDLE hParameter, LPCSTR pSemantic) PURE;
+    STDMETHOD_(D3DXHANDLE, GetParameterElement)(THIS_ D3DXHANDLE hParameter, UINT Index) PURE;
+    STDMETHOD_(D3DXHANDLE, GetTechnique)(THIS_ UINT Index) PURE;
+    STDMETHOD_(D3DXHANDLE, GetTechniqueByName)(THIS_ LPCSTR pName) PURE;
+    STDMETHOD_(D3DXHANDLE, GetPass)(THIS_ D3DXHANDLE hTechnique, UINT Index) PURE;
+    STDMETHOD_(D3DXHANDLE, GetPassByName)(THIS_ D3DXHANDLE hTechnique, LPCSTR pName) PURE;
+    STDMETHOD_(D3DXHANDLE, GetFunction)(THIS_ UINT Index) PURE;
+    STDMETHOD_(D3DXHANDLE, GetFunctionByName)(THIS_ LPCSTR pName) PURE;
+    STDMETHOD_(D3DXHANDLE, GetAnnotation)(THIS_ D3DXHANDLE hObject, UINT Index) PURE;
+    STDMETHOD_(D3DXHANDLE, GetAnnotationByName)(THIS_ D3DXHANDLE hObject, LPCSTR pName) PURE;
+
+    // Get/Set Parameters
+    STDMETHOD(SetValue)(THIS_ D3DXHANDLE hParameter, LPCVOID pData, UINT Bytes) PURE;
+    STDMETHOD(GetValue)(THIS_ D3DXHANDLE hParameter, LPVOID pData, UINT Bytes) PURE;
+    STDMETHOD(SetBool)(THIS_ D3DXHANDLE hParameter, BOOL b) PURE;
+    STDMETHOD(GetBool)(THIS_ D3DXHANDLE hParameter, BOOL* pb) PURE;
+    STDMETHOD(SetBoolArray)(THIS_ D3DXHANDLE hParameter, CONST BOOL* pb, UINT Count) PURE;
+    STDMETHOD(GetBoolArray)(THIS_ D3DXHANDLE hParameter, BOOL* pb, UINT Count) PURE;
+    STDMETHOD(SetInt)(THIS_ D3DXHANDLE hParameter, INT n) PURE;
+    STDMETHOD(GetInt)(THIS_ D3DXHANDLE hParameter, INT* pn) PURE;
+    STDMETHOD(SetIntArray)(THIS_ D3DXHANDLE hParameter, CONST INT* pn, UINT Count) PURE;
+    STDMETHOD(GetIntArray)(THIS_ D3DXHANDLE hParameter, INT* pn, UINT Count) PURE;
+    STDMETHOD(SetFloat)(THIS_ D3DXHANDLE hParameter, FLOAT f) PURE;
+    STDMETHOD(GetFloat)(THIS_ D3DXHANDLE hParameter, FLOAT* pf) PURE;
+    STDMETHOD(SetFloatArray)(THIS_ D3DXHANDLE hParameter, CONST FLOAT* pf, UINT Count) PURE;
+    STDMETHOD(GetFloatArray)(THIS_ D3DXHANDLE hParameter, FLOAT* pf, UINT Count) PURE;
+    STDMETHOD(SetVector)(THIS_ D3DXHANDLE hParameter, CONST D3DXVECTOR4* pVector) PURE;
+    STDMETHOD(GetVector)(THIS_ D3DXHANDLE hParameter, D3DXVECTOR4* pVector) PURE;
+    STDMETHOD(SetVectorArray)(THIS_ D3DXHANDLE hParameter, CONST D3DXVECTOR4* pVector, UINT Count) PURE;
+    STDMETHOD(GetVectorArray)(THIS_ D3DXHANDLE hParameter, D3DXVECTOR4* pVector, UINT Count) PURE;
+    STDMETHOD(SetMatrix)(THIS_ D3DXHANDLE hParameter, CONST D3DXMATRIX* pMatrix) PURE;
+    STDMETHOD(GetMatrix)(THIS_ D3DXHANDLE hParameter, D3DXMATRIX* pMatrix) PURE;
+    STDMETHOD(SetMatrixArray)(THIS_ D3DXHANDLE hParameter, CONST D3DXMATRIX* pMatrix, UINT Count) PURE;
+    STDMETHOD(GetMatrixArray)(THIS_ D3DXHANDLE hParameter, D3DXMATRIX* pMatrix, UINT Count) PURE;
+    STDMETHOD(SetMatrixPointerArray)(THIS_ D3DXHANDLE hParameter, CONST D3DXMATRIX** ppMatrix, UINT Count) PURE;
+    STDMETHOD(GetMatrixPointerArray)(THIS_ D3DXHANDLE hParameter, D3DXMATRIX** ppMatrix, UINT Count) PURE;
+    STDMETHOD(SetMatrixTranspose)(THIS_ D3DXHANDLE hParameter, CONST D3DXMATRIX* pMatrix) PURE;
+    STDMETHOD(GetMatrixTranspose)(THIS_ D3DXHANDLE hParameter, D3DXMATRIX* pMatrix) PURE;
+    STDMETHOD(SetMatrixTransposeArray)(THIS_ D3DXHANDLE hParameter, CONST D3DXMATRIX* pMatrix, UINT Count) PURE;
+    STDMETHOD(GetMatrixTransposeArray)(THIS_ D3DXHANDLE hParameter, D3DXMATRIX* pMatrix, UINT Count) PURE;
+    STDMETHOD(SetMatrixTransposePointerArray)(THIS_ D3DXHANDLE hParameter, CONST D3DXMATRIX** ppMatrix, UINT Count) PURE;
+    STDMETHOD(GetMatrixTransposePointerArray)(THIS_ D3DXHANDLE hParameter, D3DXMATRIX** ppMatrix, UINT Count) PURE;
+    STDMETHOD(SetString)(THIS_ D3DXHANDLE hParameter, LPCSTR pString) PURE;
+    STDMETHOD(GetString)(THIS_ D3DXHANDLE hParameter, LPCSTR* ppString) PURE;
+    STDMETHOD(SetTexture)(THIS_ D3DXHANDLE hParameter, LPDIRECT3DBASETEXTURE9 pTexture) PURE;
+    STDMETHOD(GetTexture)(THIS_ D3DXHANDLE hParameter, LPDIRECT3DBASETEXTURE9 *ppTexture) PURE;
+    STDMETHOD(GetPixelShader)(THIS_ D3DXHANDLE hParameter, LPDIRECT3DPIXELSHADER9 *ppPShader) PURE;
+    STDMETHOD(GetVertexShader)(THIS_ D3DXHANDLE hParameter, LPDIRECT3DVERTEXSHADER9 *ppVShader) PURE;
+
+	//Set Range of an Array to pass to device
+	//Usefull for sending only a subrange of an array down to the device
+	STDMETHOD(SetArrayRange)(THIS_ D3DXHANDLE hParameter, UINT uStart, UINT uEnd) PURE; 
+	// ID3DXBaseEffect
+    
+    
+    // Pool
+    STDMETHOD(GetPool)(THIS_ LPD3DXEFFECTPOOL* ppPool) PURE;
+
+    // Selecting and setting a technique
+    STDMETHOD(SetTechnique)(THIS_ D3DXHANDLE hTechnique) PURE;
+    STDMETHOD_(D3DXHANDLE, GetCurrentTechnique)(THIS) PURE;
+    STDMETHOD(ValidateTechnique)(THIS_ D3DXHANDLE hTechnique) PURE;
+    STDMETHOD(FindNextValidTechnique)(THIS_ D3DXHANDLE hTechnique, D3DXHANDLE *pTechnique) PURE;
+    STDMETHOD_(BOOL, IsParameterUsed)(THIS_ D3DXHANDLE hParameter, D3DXHANDLE hTechnique) PURE;
+
+    // Using current technique
+    // Begin           starts active technique
+    // BeginPass       begins a pass
+    // CommitChanges   updates changes to any set calls in the pass. This should be called before
+    //                 any DrawPrimitive call to d3d
+    // EndPass         ends a pass
+    // End             ends active technique
+    STDMETHOD(Begin)(THIS_ UINT *pPasses, DWORD Flags) PURE;
+    STDMETHOD(BeginPass)(THIS_ UINT Pass) PURE;
+    STDMETHOD(CommitChanges)(THIS) PURE;
+    STDMETHOD(EndPass)(THIS) PURE;
+    STDMETHOD(End)(THIS) PURE;
+
+    // Managing D3D Device
+    STDMETHOD(GetDevice)(THIS_ LPDIRECT3DDEVICE9* ppDevice) PURE;
+    STDMETHOD(OnLostDevice)(THIS) PURE;
+    STDMETHOD(OnResetDevice)(THIS) PURE;
+
+    // Logging device calls
+    STDMETHOD(SetStateManager)(THIS_ LPD3DXEFFECTSTATEMANAGER pManager) PURE;
+    STDMETHOD(GetStateManager)(THIS_ LPD3DXEFFECTSTATEMANAGER *ppManager) PURE;
+
+    // Parameter blocks
+    STDMETHOD(BeginParameterBlock)(THIS) PURE;
+    STDMETHOD_(D3DXHANDLE, EndParameterBlock)(THIS) PURE;
+    STDMETHOD(ApplyParameterBlock)(THIS_ D3DXHANDLE hParameterBlock) PURE;
+    STDMETHOD(DeleteParameterBlock)(THIS_ D3DXHANDLE hParameterBlock) PURE;
+
+    // Cloning
+    STDMETHOD(CloneEffect)(THIS_ LPDIRECT3DDEVICE9 pDevice, LPD3DXEFFECT43* ppEffect) PURE;
+    
+    // Fast path for setting variables directly in ID3DXEffect
+    STDMETHOD(SetRawValue)(THIS_ D3DXHANDLE hParameter, LPCVOID pData, UINT ByteOffset, UINT Bytes) PURE;
+};
+
+#define D3DXFX43_NOT_CLONEABLE          (1 << 11)
+#define D3DXFX43_LARGEADDRESSAWARE      (1 << 17)
+
 #endif
+
+
+
 
 // method macros
 
 #define ID3DXSprite_Release(p) (p)->lpVtbl->Release(p)
-#define ID3DXSprite_SetTransform(p,a) (p)->lpVtbl->SetTransform(p,a)
-#define ID3DXSprite_SetWorldViewRH(p,a,b) (p)->lpVtbl->SetWorldViewRH(p,a,b)
-#define ID3DXSprite_SetWorldViewLH(p,a,b) (p)->lpVtbl->SetWorldViewLH(p,a,b)
 #define ID3DXSprite_Draw(p,a,b,c,d,e) (p)->lpVtbl->Draw(p,a,b,c,d,e)
 #define ID3DXSprite_Begin(p,a) (p)->lpVtbl->Begin(p,a)
 #define ID3DXSprite_End(p) (p)->lpVtbl->End(p)
@@ -363,12 +537,23 @@ HRESULT WINAPI D3DXSaveSurfaceToFileA(
 #define ID3DXSprite_OnResetDevice(p) (p)->lpVtbl->OnResetDevice(p)
 
 #define ID3DXFont_Release(p) (p)->lpVtbl->Release(p)
-#define ID3DXFont_DrawTextA(p,a,b,c,d,e,f) (p)->lpVtbl->DrawTextA(p,a,b,c,d,e,f)
 #define ID3DXFont_DrawTextW(p,a,b,c,d,e,f) (p)->lpVtbl->DrawTextW(p,a,b,c,d,e,f)
 #define ID3DXFont_PreloadCharacters(p,a,b) (p)->lpVtbl->PreloadCharacters(p,a,b)
 #define ID3DXFont_PreloadTextW(p,a,b) (p)->lpVtbl->PreloadTextW(p,a,b)
 #define ID3DXFont_OnLostDevice(p) (p)->lpVtbl->OnLostDevice(p)
 #define ID3DXFont_OnResetDevice(p) (p)->lpVtbl->OnResetDevice(p)
+
+#define ID3DXEffect_Release(p) (p)->lpVtbl->Release(p)
+#define ID3DXEffect_Begin(p,a,b) (p)->lpVtbl->Begin(p,a,b)
+#define ID3DXEffect_End(p) (p)->lpVtbl->End(p)
+#define ID3DXEffect_BeginPass(p,a) (p)->lpVtbl->BeginPass(p,a)
+#define ID3DXEffect_EndPass(p) (p)->lpVtbl->EndPass(p)
+#define ID3DXEffect_CommitChanges(p) (p)->lpVtbl->CommitChanges(p)
+#define ID3DXEffect_GetParameterByName(p,a,b) (p)->lpVtbl->GetParameterByName(p,a,b)
+#define ID3DXEffect_SetValue(p,a,b,c) (p)->lpVtbl->SetValue(p,a,b,c)
+#define ID3DXEffect_GetValue(p,a,b,c) (p)->lpVtbl->GetValue(p,a,b,c)
+#define ID3DXEffect_OnLostDevice(p) (p)->lpVtbl->OnLostDevice(p)
+#define ID3DXEffect_OnResetDevice(p) (p)->lpVtbl->OnResetDevice(p)
 
 
 #endif
