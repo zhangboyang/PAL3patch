@@ -9,6 +9,14 @@ int is_win9x()
     return GetVersionEx(&osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS;
 }
 
+int is_winxp_or_later()
+{
+    OSVERSIONINFO osvi;
+    memset(&osvi, 0, sizeof(osvi));
+    osvi.dwOSVersionInfoSize = sizeof(osvi);
+    return GetVersionEx(&osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && (osvi.dwMajorVersion > 5 || (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion >= 1));
+}
+
 int is_laa()
 {
     void *image_base = GetModuleHandle(NULL);

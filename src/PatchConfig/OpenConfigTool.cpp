@@ -1,5 +1,12 @@
 #include "stdafx.h"
 
+static bool is_win9x()
+{
+    OSVERSIONINFO osvi;
+    memset(&osvi, 0, sizeof(osvi));
+    osvi.dwOSVersionInfoSize = sizeof(osvi);
+    return GetVersionEx(&osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS;
+}
 
 static BOOL CALLBACK SetForegroundIfMatched(HWND hwnd, LPARAM lParam)
 {
@@ -8,13 +15,15 @@ static BOOL CALLBACK SetForegroundIfMatched(HWND hwnd, LPARAM lParam)
 	GetWindowThreadProcessId(hwnd, &pid);
 	if (pid == pi->dwProcessId && !GetWindow(hwnd, GW_OWNER) && IsWindowVisible(hwnd)) {
 		if (SetForegroundWindow(hwnd)) {
-			FLASHWINFO fwi;
-			fwi.cbSize = sizeof(fwi);
-			fwi.hwnd = hwnd;
-			fwi.dwFlags = FLASHW_CAPTION;
-			fwi.uCount = 3;
-			fwi.dwTimeout = 80;
-			FlashWindowEx(&fwi);
+			if (!is_win9x()) {
+				FLASHWINFO fwi;
+				fwi.cbSize = sizeof(fwi);
+				fwi.hwnd = hwnd;
+				fwi.dwFlags = FLASHW_CAPTION;
+				fwi.uCount = 3;
+				fwi.dwTimeout = 80;
+				FlashWindowEx(&fwi);
+			}
 			MessageBeep(MB_OK);
 		}
 		return FALSE;

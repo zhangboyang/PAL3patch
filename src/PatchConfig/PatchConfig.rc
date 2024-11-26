@@ -274,7 +274,7 @@ BEGIN
     IDS_REPAIRGAMEDATA      "修复游戏数据"
     IDS_LOADREPAIRPACK      "正在加载修复数据包 ..."
     IDS_BADREPAIRPACK       "修复数据包丢失或损坏。"
-    IDS_SELECTLOCALE        "无法自动判断游戏语言版本。\n请手动选择：\n“简体中文”请点击“是”；\n“繁体中文”请点击“否”。"
+    IDS_SELECTLOCALE        "无法自动判断游戏语言版本。\n请手动指定：\n    “简体版”请点击“是”；\n    “繁体版”请点击“否”。"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -309,6 +309,7 @@ BEGIN
     IDS_REPAIR_CHECKDONE    "游戏数据检查完毕 ..."
     IDS_REPAIR_COMMIT       "正在执行修复 ..."
     IDS_ASKCANCELREPAIR     "要取消修复吗？"
+    IDS_REPAIR_NOTFIX       "游戏数据仍存在损坏。"
 END
 
 #endif    // Chinese (P.R.C.) resources

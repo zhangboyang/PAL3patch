@@ -8,12 +8,12 @@ int create_dir(const char *dirpath)
 int dir_exists(const char *dirpath)
 {
     DWORD dwAttrs = GetFileAttributesA(dirpath);
-    return dwAttrs != 0xffffffff && (dwAttrs & FILE_ATTRIBUTE_DIRECTORY);
+    return dwAttrs != INVALID_FILE_ATTRIBUTES && (dwAttrs & FILE_ATTRIBUTE_DIRECTORY);
 }
 
 int file_exists(const char *filepath)
 {
-    return GetFileAttributesA(filepath) != 0xffffffff;
+    return GetFileAttributesA(filepath) != INVALID_FILE_ATTRIBUTES;
 }
 
 int reset_attrib(const char *filepath)

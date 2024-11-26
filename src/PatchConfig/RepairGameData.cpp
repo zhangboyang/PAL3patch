@@ -264,7 +264,7 @@ static void run_repair(RepairProgress *rp, BufferReader &r, int gl)
 		}
 		if (!fix.IsEmpty()) {
 			if (!bad.IsEmpty()) {
-				msg = STRTABLE(IDS_REPAIR_NEEDFIX) + fix + _T("\n\n") + STRTABLE(IDS_REPAIR_CANTFIX) + bad + _T("\n\n") + STRTABLE(IDS_REPAIR_ASKFIX);
+				msg = STRTABLE(IDS_REPAIR_NEEDFIX) + _T("\n") + fix + _T("\n\n") + STRTABLE(IDS_REPAIR_CANTFIX) + _T("\n") + bad + _T("\n\n") + STRTABLE(IDS_REPAIR_ASKFIX);
 			} else {
 				msg = STRTABLE(IDS_REPAIR_NEEDFIX) + _T("\n") + fix + _T("\n\n") + STRTABLE(IDS_REPAIR_ASKFIX);
 			}
@@ -290,9 +290,9 @@ static void run_repair(RepairProgress *rp, BufferReader &r, int gl)
 				}
 				if (!bad.IsEmpty()) {
 					if (!success) {
-						msg = STRTABLE(IDS_REPAIR_COMMITERROR) + bad;
+						msg = STRTABLE(IDS_REPAIR_COMMITERROR) + _T("\n") + bad + _T("\n\n") + STRTABLE(IDS_REPAIR_NOTFIX);
 					} else {
-						msg = STRTABLE(IDS_REPAIR_COMMITPART) + bad;
+						msg = STRTABLE(IDS_REPAIR_COMMITPART) + _T("\n") + bad + _T("\n\n") + STRTABLE(IDS_REPAIR_NOTFIX);
 					}
 					GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_REPAIR_COMMITREPORT), MB_ICONWARNING);
 				} else {
@@ -303,7 +303,7 @@ static void run_repair(RepairProgress *rp, BufferReader &r, int gl)
 				for (i = transactions.begin(); i != transactions.end(); i++) {
 					bad += _T("\n    ") + i->first;
 				}
-				msg = STRTABLE(IDS_REPAIR_COMMITABORT) + bad;
+				msg = STRTABLE(IDS_REPAIR_COMMITABORT) + _T("\n") + bad + _T("\n\n") + STRTABLE(IDS_REPAIR_NOTFIX);
 				GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_REPAIR_COMMITREPORT), MB_ICONWARNING);
 			}
 		} else if (!bad.IsEmpty()) {
