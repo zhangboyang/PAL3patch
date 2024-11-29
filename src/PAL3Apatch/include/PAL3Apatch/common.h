@@ -297,8 +297,7 @@ extern "C" {
 // PAL3Apatch headers
 #include "memallocator.h"
 #include "pal3a.h"
-#include "d3d9wrapper.h"
-#include "d3dx9wrapper.h"
+#include "d3d9alt.h"
 #include "hook.h"
 #include "asmpatch.h"
 #include "about.h"

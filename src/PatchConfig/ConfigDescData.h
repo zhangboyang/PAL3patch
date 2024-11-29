@@ -18,6 +18,7 @@ public:
 	virtual bool IsValueEqual(const CString &lstval, const CString &selval);
 	virtual CString GetValueTitle(const CString &value);
 	virtual CString GetValueDescription(const CString &value);
+	virtual CString GetFallbackValue();
 };
 
 class CPatchConfigDlg;
@@ -48,6 +49,12 @@ struct ConfigDescItem {
 	//    if item type is "choose from list", here is the enum function
 	ConfigDescOptionListEnum *enumobj;
 
+	// called when value about to change
+	//    return false to reject current change
+	bool (*onchange)(CPatchConfigDlg *dlg, const CString &oldvalue, const CString &newvalue);
+
+	// where to register current item
+	ConfigDescItem **slot;
 
 	// run-time data
 	CString *pvalue; // current config value
@@ -60,6 +67,7 @@ struct ConfigDescListIndex {
 };
 
 extern ConfigDescItem *ConfigDescList;
+extern bool ConfigDirty;
 
 void LoadConfigDescList(LPCTSTR name);
 

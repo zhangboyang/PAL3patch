@@ -101,8 +101,19 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\d3d9wrapper.c" />
-    <ClCompile Include="src\d3dx9wrapper.c" />
+    <ClCompile Include="src\d3d9alt.c" />
+    <ClCompile Include="src\d3denum.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\d3denumeration.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\dxutil.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\effecthook.c" />
     <ClCompile Include="src\framework.c" />
     <ClCompile Include="src\fsutil.c" />
@@ -185,8 +196,7 @@
     <ClInclude Include="include\PAL3patch\cfgreader.h" />
     <ClInclude Include="include\PAL3patch\cjktable.h" />
     <ClInclude Include="include\PAL3patch\common.h" />
-    <ClInclude Include="include\PAL3patch\d3d9wrapper.h" />
-    <ClInclude Include="include\PAL3patch\d3dx9wrapper.h" />
+    <ClInclude Include="include\PAL3patch\d3d9alt.h" />
     <ClInclude Include="include\PAL3patch\effecthook.h" />
     <ClInclude Include="include\PAL3patch\framework.h" />
     <ClInclude Include="include\PAL3patch\fsutil.h" />
@@ -208,6 +218,9 @@
     <ClInclude Include="include\PAL3patch\transform.h" />
     <ClInclude Include="include\PAL3patch\wal.h" />
     <ClInclude Include="include\PAL3patch\wstr.h" />
+    <ClInclude Include="src\d3denumeration.h" />
+    <ClInclude Include="src\dxstdafx.h" />
+    <ClInclude Include="src\dxutil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,96 +1,117 @@
 #include "stdafx.h"
-#include "dxstdafx.h"
+#include <d3d9.h>
 
-static IDirect3D9 *pD3D = NULL;
-static CD3DEnumeration *pD3DEnum = NULL;
+ConfigDescItem *p3DAPIConfigItem;
 
-typedef IDirect3D9 * (WINAPI *typeofDirect3DCreate9)(UINT SDKVersion);
+struct D3DEnumeration {
+	std::string d3d9cfg;
+	std::vector<CString> displaymode, depthstencil, multisample;
+};
 
-int CheckDX90SDKVersion()
+static D3DEnumeration d3denum;
+
+static bool D3DEnumerationWriter(FILE *fp)
 {
-	if (D3D_SDK_VERSION != 31) {
-        MessageBox(NULL, _T("wrong D3D_SDK_VERSION."), NULL, MB_ICONERROR);
-		return 0;
-    }
-    /* // uncomment this if linked with d3dx9.lib
-	if (D3DX_SDK_VERSION != 21) {
-        MessageBox(NULL, _T("wrong D3DX_SDK_VERSION."), NULL, MB_ICONERROR);
-		return 0;
-    }
-	if (!D3DXCheckVersion(D3D_SDK_VERSION, D3DX_SDK_VERSION)) {
-        return 0;
-    }*/
-	return 1;
+	fprintf(fp, "d3denum %s\n", d3denum.d3d9cfg.c_str());
+	return true;
 }
 
-int InitD3DEnumeration()
+static bool D3DEnumerationReader(FILE *fp)
 {
-	HMODULE hD3D9;
-	typeofDirect3DCreate9 pDirect3DCreate9;
-
-	hD3D9 = LoadLibrary(_T("d3d9.dll"));
-	if (!hD3D9) {
-		goto fail;
+	static wchar_t *wbuf = NULL;
+	char buf[MAXLINE];
+	char ch;
+	std::vector<CString> *vec = NULL;
+	std::set<std::vector<CString> *> vset;
+	while (fscanf(fp, MAXLINEFMT "%c", buf, &ch) == 2) {
+		if (!vec) {
+			if (strcmp(buf, "displaymode") == 0) {
+				vec = &d3denum.displaymode;
+			} else if (strcmp(buf, "depthstencil") == 0) {
+				vec = &d3denum.depthstencil;
+			} else if (strcmp(buf, "multisample") == 0) {
+				vec = &d3denum.multisample;
+			} else {
+				return false;
+			}
+			if (vset.find(vec) == vset.end()) {
+				vset.insert(vec);
+			} else {
+				return false;
+			}
+		} else {
+			vec->push_back(CString(cs2wcs_managed(buf, CP_UTF8, &wbuf)));
+		}
+		switch (ch) {
+		case '\n': vec = NULL; break;
+		case ' ': break;
+		default: return false;
+		}
 	}
-	pDirect3DCreate9 = (typeofDirect3DCreate9) GetProcAddress(hD3D9, "Direct3DCreate9");
-	if (!pDirect3DCreate9) {
-		goto fail;
-	}
-	pD3D = pDirect3DCreate9(D3D_SDK_VERSION);
-	if (!pD3D) {
-		goto fail;
-	}
-	pD3DEnum = new CD3DEnumeration;
-	pD3DEnum->ConfirmDeviceCallback = NULL;
-	pD3DEnum->AppUsesDepthBuffer = TRUE;
-	pD3DEnum->SetD3D(pD3D);
-	pD3DEnum->Enumerate();
-	return 1;
-
-fail:
-	GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_NOD3D9), STRTABLE(IDS_NOD3D9_TITLE), MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
-	return 0;
+	return vset.size() == 3;
 }
 
-void CleanupD3DEnumeration()
+static bool ReloadD3DEnumeration(CWnd *fawnd, LPCTSTR d3d9cfg, bool backup)
 {
-	if (pD3DEnum) {
-		delete pD3DEnum;
-		pD3DEnum = NULL;
+	static char *buf = NULL;
+	D3DEnumeration d3denum_bak = d3denum;
+	d3denum.d3d9cfg = wcs2cs_managed(d3d9cfg, CP_UTF8, &buf);
+	d3denum.displaymode.clear();
+	d3denum.depthstencil.clear();
+	d3denum.multisample.clear();
+	if (!backup) {
+		d3denum_bak = d3denum;
 	}
-	if (pD3D) {
-		pD3D->Release();
-		pD3D = NULL;
+	if (InvokeTempCommand(fawnd, D3DEnumerationWriter, D3DEnumerationReader)) {
+		return true;
+	} else {
+		d3denum = d3denum_bak;
+		return false;
 	}
 }
 
+void FirstD3DEnumeration()
+{
+	if (!ReloadD3DEnumeration(GetPleaseWaitDlg(), *p3DAPIConfigItem->pvalue, false)) {
+		GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_NOD3DENUM), STRTABLE(IDS_NOD3DENUM_TITLE), MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
+	} else {
+		if (FallbackConfigData(true) > 0) {
+			if (GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_D3DENUM_ASKFALLBACK), STRTABLE(IDS_D3DENUM_ASKFALLBACK_TITLE), MB_ICONWARNING | MB_YESNO) == IDYES) {
+				FallbackConfigData(false);
+			}
+		}
+	}
+}
+
+bool On3DAPIConfigChange(CPatchConfigDlg *dlg, const CString &oldvalue, const CString &newvalue)
+{
+	dlg->SetTopMost(false);
+	ShowPleaseWaitDlg(dlg, STRTABLE(IDS_WAITINGENUMD3D));
+	bool success = ReloadD3DEnumeration(GetPleaseWaitDlg(), newvalue, true);
+	if (!success) {
+		GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_NO3DAPI), STRTABLE(IDS_NO3DAPI_TITLE), MB_ICONERROR);
+	} else {
+		if (FallbackConfigData(true) > 0) {
+			if (GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_3DAPICHG_ASKFALLBACK), STRTABLE(IDS_3DAPICHG_ASKFALLBACK_TITLE), MB_ICONWARNING | MB_OKCANCEL) == IDOK) {
+				FallbackConfigData(false);
+			} else {
+				success = false;
+			}
+		}
+	}
+	DestroyPleaseWaitDlg(dlg);
+	dlg->SetTopMost(true);
+	dlg->SetForegroundWindow();
+	return success;
+}
 
 EnumDisplayMode EnumDisplayModeInstance;
 void EnumDisplayMode::EnumConfigValues(std::vector<CString> &result)
 {
-	std::vector<std::pair<int, int> > dlist;
-	std::vector<std::pair<int, int> >::iterator it;
-
-	if (pD3DEnum->m_pAdapterInfoList->Count() > 0) {
-		unsigned i;
-		D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
-		for (i = 0; i < pD3DAdapterInfo->pDisplayModeList->Count(); i++) {
-			D3DDISPLAYMODE *pDisplayMode = (D3DDISPLAYMODE *) pD3DAdapterInfo->pDisplayModeList->GetPtr(i);
-			dlist.push_back(std::make_pair(pDisplayMode->Width, pDisplayMode->Height));
-		}
-		std::sort(dlist.begin(), dlist.end(), std::greater<std::pair<int, int> > ());
-		dlist.resize(std::unique(dlist.begin(), dlist.end()) - dlist.begin());
-	}
-
 	result.clear();
 	result.push_back(CString(_T("current")));
-	for (it = dlist.begin(); it != dlist.end(); it++) {
-		if (it->first >= 800 && it->second >= 600) {
-			CString str;
-			str.Format(_T("%dx%d"), it->first, it->second);
-			result.push_back(str);
-		}
-	}
+	result.insert(result.end(), d3denum.displaymode.begin(), d3denum.displaymode.end());
+	result.push_back(CString(_T("800x600")));
 }
 CString EnumDisplayMode::GetValueTitle(const CString &value)
 {
@@ -110,37 +131,20 @@ CString EnumDisplayMode::GetValueDescription(const CString &value)
 }
 
 
-EnumDepthBuffer EnumDepthBufferInstance;
-void EnumDepthBuffer::EnumConfigValues(std::vector<CString> &result)
+EnumDepthStencil EnumDepthStencilInstance;
+void EnumDepthStencil::EnumConfigValues(std::vector<CString> &result)
 {
 	result.clear();
 	result.push_back(CString(_T("auto")));
 	result.push_back(CString(_T("16")));
 	result.push_back(CString(_T("24")));
-
-	if (pD3DEnum->m_pAdapterInfoList->Count() > 0) {
-		unsigned i, j;
-		D3DFORMAT fmt;
-		std::set<D3DFORMAT> fmtset;
-		D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
-		D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
-		if (pD3DDeviceInfo->DevType == D3DDEVTYPE_HAL) {
-			D3DDeviceCombo *pDeviceComboList;
-			for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
-				pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
-				for (i = 0; i < pDeviceComboList->pDepthStencilFormatList->Count(); i++) {
-					fmt = *(D3DFORMAT *) pDeviceComboList->pDepthStencilFormatList->GetPtr(i);
-					if (fmtset.insert(fmt).second) {
-						CString str;
-						str.Format(_T("%d"), -fmt);
-						result.push_back(str);
-					}
-				}
-			}
-		}
-	}
+	result.insert(result.end(), d3denum.depthstencil.begin(), d3denum.depthstencil.end());
 }
-CString EnumDepthBuffer::GetValueTitle(const CString &value)
+CString EnumDepthStencil::GetFallbackValue()
+{
+	return CString(_T("auto"));
+}
+CString EnumDepthStencil::GetValueTitle(const CString &value)
 {
 	if (value == CString(_T("auto"))) {
 		return STRTABLE(IDS_AUTOSELECT);
@@ -170,7 +174,7 @@ CString EnumDepthBuffer::GetValueTitle(const CString &value)
 	}
 	return ConfigDescOptionListEnum::GetValueTitle(value);
 }
-CString EnumDepthBuffer::GetValueDescription(const CString &value)
+CString EnumDepthStencil::GetValueDescription(const CString &value)
 {
 	if (value == CString(_T("auto"))) {
 		return STRTABLE(IDS_AUTOSELECT_DESC);
@@ -182,47 +186,14 @@ CString EnumDepthBuffer::GetValueDescription(const CString &value)
 EnumMultisample EnumMultisampleInstance;
 void EnumMultisample::EnumConfigValues(std::vector<CString> &result)
 {
-	descmap.clear();
 	result.clear();
 	result.push_back(CString(_T("auto,auto")));
 	result.push_back(CString(_T("0,0")));
-
-	if (pD3DEnum->m_pAdapterInfoList->Count() > 0) {
-		unsigned i, j;
-		D3DMULTISAMPLE_TYPE mtype;
-		int q, maxq;
-		std::map<D3DMULTISAMPLE_TYPE, int> m;
-		D3DAdapterInfo *pD3DAdapterInfo = (D3DAdapterInfo *) pD3DEnum->m_pAdapterInfoList->GetPtr(0); // First Adapter
-		D3DDeviceInfo *pD3DDeviceInfo = (D3DDeviceInfo *) pD3DAdapterInfo->pDeviceInfoList->GetPtr(0); // HAL
-		if (pD3DDeviceInfo->DevType == D3DDEVTYPE_HAL) {
-			D3DDeviceCombo *pDeviceComboList;
-			for (j = 0; j < pD3DDeviceInfo->pDeviceComboList->Count(); j++) {
-				pDeviceComboList = (D3DDeviceCombo *) pD3DDeviceInfo->pDeviceComboList->GetPtr(j);
-				for (i = 0; i < pDeviceComboList->pMultiSampleTypeList->Count(); i++) {
-					mtype = *(D3DMULTISAMPLE_TYPE *) pDeviceComboList->pMultiSampleTypeList->GetPtr(i);
-					maxq = *(DWORD *) pDeviceComboList->pMultiSampleQualityList->GetPtr(i);
-					if (maxq > m[mtype]) m[mtype] = maxq;
-				}
-			}
-			std::map<D3DMULTISAMPLE_TYPE, int>::reverse_iterator it;
-			for (it = m.rbegin(); it != m.rend(); it++) {
-				mtype = it->first;
-				maxq = it->second;
-				if (mtype == D3DMULTISAMPLE_NONE) continue;
-				for (q = 0; q < maxq; q++) {
-					CString key, val;
-					if (mtype == D3DMULTISAMPLE_NONMASKABLE) {
-						key.Format(IDS_MSAA_NONMASKABLE_FORMAT, q);
-					} else {
-						key.Format(IDS_MSAA_FORMAT, mtype, q);
-					}
-					val.Format(_T("%d,%d"), mtype, q);
-					result.push_back(val);
-					descmap.insert(std::make_pair(val, key));
-				}
-			}
-		}
-	}
+	result.insert(result.end(), d3denum.multisample.begin(), d3denum.multisample.end());
+}
+CString EnumMultisample::GetFallbackValue()
+{
+	return CString(_T("0,0"));
 }
 CString EnumMultisample::GetValueTitle(const CString &value)
 {
@@ -232,9 +203,15 @@ CString EnumMultisample::GetValueTitle(const CString &value)
 	if (value == CString(_T("0,0"))) {
 		return STRTABLE(IDS_MSAA_NONE);
 	}
-	std::map<CString, CString>::iterator it;
-	if ((it = descmap.find(value)) != descmap.end()) {
-		return it->second;
+	int mtype, q;
+	if (_stscanf(value, _T("%d,%d"), &mtype, &q) == 2) {
+		CString str;
+		if (mtype == D3DMULTISAMPLE_NONMASKABLE) {
+			str.Format(IDS_MSAA_NONMASKABLE_FORMAT, q);
+		} else {
+			str.Format(IDS_MSAA_FORMAT, mtype, q);
+		}
+		return str;
 	}
 	return ConfigDescOptionListEnum::GetValueTitle(value);
 }

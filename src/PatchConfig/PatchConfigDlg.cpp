@@ -211,14 +211,13 @@ void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 			if (reload) rbtn->ShowWindow(SW_HIDE);
 		}
 	}
-	
 
-	CWnd *txtinput = GetDlgItem(IDC_CFGVAL);
 	if (pItem->key && (m_IsAdvMode || invflag == 0)) {
 		m_CfgVal = *pItem->pvalue;
-		if (reload) txtinput->ShowWindow(SW_SHOW);
+		if (reload) m_CfgValEdit.SetReadOnly(!!pItem->onchange);
+		if (reload) m_CfgValEdit.ShowWindow(SW_SHOW);
 	} else {
-		if (reload) txtinput->ShowWindow(SW_HIDE);
+		if (reload) m_CfgValEdit.ShowWindow(SW_HIDE);
 	}
 
 	if (pItem->enumobj) {
@@ -255,8 +254,10 @@ void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 void CPatchConfigDlg::UpdateConfigItem(const CString &new_value)
 {
 	if (*m_ItemSelected->pvalue != new_value) {
-		*m_ItemSelected->pvalue = new_value;
-		m_Dirty = true;
+		if (!m_ItemSelected->onchange || m_ItemSelected->onchange(this, *m_ItemSelected->pvalue, new_value)) {
+			*m_ItemSelected->pvalue = new_value;
+			ConfigDirty = true;
+		}
 	}
 	SelectConfigItem(m_ItemSelected);
 }
@@ -272,8 +273,6 @@ CPatchConfigDlg::CPatchConfigDlg(CWnd* pParent /*=NULL*/)
 	m_IsAdvMode = 0;
 	m_OptDescShowing = -1;
 	m_LockSelUpdate = 0;
-	m_Dirty = false;
-	
 
 	//{{AFX_DATA_INIT(CPatchConfigDlg)
 	m_CfgTitle = _T("");
@@ -289,6 +288,7 @@ void CPatchConfigDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CPatchConfigDlg)
+	DDX_Control(pDX, IDC_CFGVAL, m_CfgValEdit);
 	DDX_Control(pDX, IDCANCEL, m_CancelBtn);
 	DDX_Control(pDX, IDOK, m_OKBtn);
 	DDX_Control(pDX, IDC_RUNFUNC, m_RunfuncBtn);
@@ -469,7 +469,7 @@ void CPatchConfigDlg::OnMouseMove(UINT nFlags, CPoint point)
 void CPatchConfigDlg::OnCancel() 
 {
 	// TODO: Add extra cleanup here
-	if (!m_Dirty || MessageBox(STRTABLE(IDS_CONFIRMQUIT), STRTABLE(IDS_CONFIRMQUIT_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
+	if (!ConfigDirty || MessageBox(STRTABLE(IDS_CONFIRMQUIT), STRTABLE(IDS_CONFIRMQUIT_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
 		CDialog::OnCancel();
 	}
 }
@@ -481,7 +481,7 @@ void CPatchConfigDlg::OnOK()
 	// TODO: Add extra validation here
 	CWnd *pWnd = GetFocus();
 	if (pWnd == GetDlgItem(IDOK)) {
-		if (m_Dirty) {
+		if (ConfigDirty) {
 			while (!TrySaveConfigData()) {
 				int ret = MessageBox(STRTABLE(IDS_CANTSAVE), STRTABLE(IDS_CANTSAVE_TITLE), MB_ICONWARNING | MB_RETRYCANCEL);
 				if (ret == IDCANCEL) {
@@ -508,10 +508,9 @@ void CPatchConfigDlg::RestoreAllConfigToDefault(CPatchConfigDlg *dlg)
 	while (!(TryRebuildConfigFile() && TryLoadConfigData())) {
 		if (dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_RETRY), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_RETRYCANCEL | MB_ICONWARNING) == IDCANCEL) {
 			dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_FAILED), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_ICONERROR);
-			die(1);
+			die(0);
 		}
 	}
-	dlg->m_Dirty = false;
 
 	dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_SUCCEED), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_ICONINFORMATION);
 }

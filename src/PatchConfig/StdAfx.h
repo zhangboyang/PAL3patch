@@ -81,6 +81,8 @@ typedef unsigned int uint32_t;
 #include "PatchVersionInfo.h"
 #include "PleaseWaitDlg.h"
 #include "UACVirtualization.h"
+#include "TempCommand.h"
+#include "misc.h"
 #include "wstr.h"
 #include "fsutil.h"
 #include "wal.h"
@@ -89,6 +91,7 @@ typedef unsigned int uint32_t;
 #define wcsdup _wcsdup
 
 #define MAXLINE 4096
+#define MAXLINEFMT "%4095s"
 
 #define PTRADD(ptr, add) ((void *)(((char *)(ptr)) + (add)))
 
@@ -98,8 +101,6 @@ typedef unsigned int uint32_t;
 // load CString from StringTable
 #define STRTABLE(x) (CString(MAKEINTRESOURCE((x))))
 #define EMPTYSTR (CString(_T("")))
-
-#define die(status) do { TerminateProcess(GetCurrentProcess(), (status)); while (1); } while (0)
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

@@ -101,7 +101,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>winmm.lib;d3d9.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
@@ -121,7 +121,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>winmm.lib;d3d9.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
@@ -145,7 +145,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>winmm.lib;d3d9.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
@@ -169,7 +169,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>winmm.lib;d3d9.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
@@ -182,12 +182,11 @@
     <ClCompile Include="ConfigDescData.cpp" />
     <ClCompile Include="CPKFixer.cpp" />
     <ClCompile Include="D3DEnum.cpp" />
-    <ClCompile Include="d3denumeration.cpp" />
-    <ClCompile Include="dxutil.cpp" />
     <ClCompile Include="FileFixer.cpp" />
     <ClCompile Include="FontEnum.cpp" />
     <ClCompile Include="fsutil.cpp" />
     <ClCompile Include="HASH_SHA1.cpp" />
+    <ClCompile Include="misc.cpp" />
     <ClCompile Include="MouseMsgButton.cpp" />
     <ClCompile Include="OpenConfigTool.cpp" />
     <ClCompile Include="OpenGameFolder.cpp" />
@@ -205,6 +204,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_PAL3|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_PAL3A|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TempCommand.cpp" />
     <ClCompile Include="UACVirtualization.cpp" />
     <ClCompile Include="wal.cpp" />
     <ClCompile Include="wstr.cpp" />
@@ -223,13 +223,11 @@
     <ClInclude Include="ConfigDescLocale.h" />
     <ClInclude Include="CPKFixer.h" />
     <ClInclude Include="D3DEnum.h" />
-    <ClInclude Include="d3denumeration.h" />
-    <ClInclude Include="dxstdafx.h" />
-    <ClInclude Include="dxutil.h" />
     <ClInclude Include="FileFixer.h" />
     <ClInclude Include="FontEnum.h" />
     <ClInclude Include="fsutil.h" />
     <ClInclude Include="HASH_SHA1.h" />
+    <ClInclude Include="misc.h" />
     <ClInclude Include="MouseMsgButton.h" />
     <ClInclude Include="OpenConfigTool.h" />
     <ClInclude Include="OpenGameFolder.h" />
@@ -243,6 +241,7 @@
     <ClInclude Include="RepairGameData.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="TempCommand.h" />
     <ClInclude Include="UACVirtualization.h" />
     <ClInclude Include="wal.h" />
     <ClInclude Include="wstr.h" />

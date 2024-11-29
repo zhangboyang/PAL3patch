@@ -3,8 +3,6 @@
 
 extern class EnumFontface : public ConfigDescOptionListEnum {
 public:
-	std::vector<CString> buf;
-
 	virtual void EnumConfigValues(std::vector<CString> &result);
 	virtual bool TranslateSelectedValue(CWnd *listWnd, CString &value);
 	virtual bool IsValueEqual(const CString &lstval, const CString &selval);

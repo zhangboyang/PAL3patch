@@ -12,6 +12,7 @@ const char *pFileHash[] = {
 #ifdef BUILD_FOR_PAL3
 	// PAL3 executables
 	"PAL3.EXE",          "05e1cbd148957dfb635d291c13f19105133ba875",
+	"PAL3_LAA.EXE",      "70011d0a0b8bea69faf0433bffd86999b8bd5ef4",
 	"GBENGINE.DLL",      "ead9bba8ce18fb68f111c1cb1edbf30ddb78b367",
 	"PAL3UNPACK.DLL",    "7b04cded42cd388f7e4493fa8588c885dc6e3d4b",
 
@@ -20,8 +21,9 @@ const char *pFileHash[] = {
 #endif
 
 #ifdef BUILD_FOR_PAL3A
-	// PAL3 executables
+	// PAL3A executables
 	"PAL3A.EXE",         "4a55f5e61c4caf227c7f72f9b9ce85eb1b3f1c83",
+	"PAL3A_LAA.EXE",     "67f2ef8f6e86b81f9ea31ef6c969d63c796f069c",
 	"GBENGINE.DLL",      "d9a754d11f8e4ad6a8c09a94d3703ed3e8e97af9",
 	"PAL3AUNPACK.DLL",   "b2895792b3e148c22c2a66d1a5fba2d3421bcd5a",
 

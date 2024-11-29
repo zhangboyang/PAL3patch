@@ -14,7 +14,7 @@ static struct punc_node *make_punc_list(const wchar_t *wstr)
     wchar_t buf[2];
     buf[1] = 0;
     
-    struct punc_node *head = NULL, *tail, *node;
+    struct punc_node *head = NULL, *tail = NULL, *node;
     while (*wstr) {
         buf[0] = *wstr++;
         

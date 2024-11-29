@@ -2,6 +2,7 @@
 #define PAL3PATCH_D3DX9WRAPPER_H
 // PATCHAPI DEFINITIONS
 
+extern PATCHAPI int d3d_sdk_version;
 extern PATCHAPI HMODULE d3dx9_43;
 
 
@@ -17,8 +18,11 @@ extern HRESULT (WINAPI *myD3DXSaveSurfaceToFileA)(LPCTSTR, D3DXIMAGE_FILEFORMAT,
 
 extern unsigned gbD3DXCreateEffect;
 
-extern void fuse_d3dx9_wrapper(void);
-extern void init_d3dx9_wrapper(void);
+extern int prepare_d3denum(const char *config);
+extern int run_d3denum(FILE *fp);
+
+extern void prepare_d3d9_alternative(void);
+extern void init_d3d9_alternative(void);
 
 // no ID3DXSprite vftable changes between d3dx9_21 and d3dx9_43
 #define myID3DXSprite_Release(p)        ID3DXSprite_Release(p)

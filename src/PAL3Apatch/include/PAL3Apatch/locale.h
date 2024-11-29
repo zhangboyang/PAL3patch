@@ -41,6 +41,8 @@ extern const wchar_t *wstr_cantsavereg_text;
 extern const wchar_t *wstr_cantsavereg_title;
 extern const wchar_t *wstr_badregfile_text;
 extern const wchar_t *wstr_badregfile_title;
+extern const wchar_t *wstr_cantdeltemp_text;
+extern const wchar_t *wstr_cantdeltemp_title;
 extern const wchar_t *wstr_nomutex_text;
 extern const wchar_t *wstr_nomutex_title;
 extern const wchar_t *wstr_nocfgfile_text;

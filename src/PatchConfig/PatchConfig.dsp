@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /machine:I386
+# ADD BASE LINK32 winmm.lib /nologo /subsystem:windows /machine:I386
 # ADD LINK32 unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib winmm.lib wininet.lib delayimp.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386 /nodefaultlib:"kernel32.lib" /nodefaultlib:"advapi32.lib" /nodefaultlib:"user32.lib" /nodefaultlib:"gdi32.lib" /nodefaultlib:"shell32.lib" /nodefaultlib:"comdlg32.lib" /nodefaultlib:"version.lib" /nodefaultlib:"mpr.lib" /nodefaultlib:"rasapi32.lib" /nodefaultlib:"winmm.lib" /nodefaultlib:"winspool.lib" /nodefaultlib:"vfw32.lib" /nodefaultlib:"secur32.lib" /nodefaultlib:"oleacc.lib" /nodefaultlib:"oledlg.lib" /nodefaultlib:"sensapi.lib" /delayload:advapi32.dll /delayload:winspool.drv /delayload:comdlg32.dll /delayload:shell32.dll /delayload:wininet.dll
 # SUBTRACT LINK32 /pdb:none
 
@@ -83,7 +83,7 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 winmm.lib d3d9.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD BASE LINK32 winmm.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 winmm.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "PatchConfig - Win32 Release PAL3"
@@ -110,7 +110,7 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
+# ADD BASE LINK32 winmm.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
 # ADD LINK32 unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib winmm.lib wininet.lib delayimp.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386 /nodefaultlib:"kernel32.lib" /nodefaultlib:"advapi32.lib" /nodefaultlib:"user32.lib" /nodefaultlib:"gdi32.lib" /nodefaultlib:"shell32.lib" /nodefaultlib:"comdlg32.lib" /nodefaultlib:"version.lib" /nodefaultlib:"mpr.lib" /nodefaultlib:"rasapi32.lib" /nodefaultlib:"winmm.lib" /nodefaultlib:"winspool.lib" /nodefaultlib:"vfw32.lib" /nodefaultlib:"secur32.lib" /nodefaultlib:"oleacc.lib" /nodefaultlib:"oledlg.lib" /nodefaultlib:"sensapi.lib" /delayload:advapi32.dll /delayload:winspool.drv /delayload:comdlg32.dll /delayload:shell32.dll /delayload:wininet.dll
 # SUBTRACT LINK32 /pdb:none
 
@@ -138,7 +138,7 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 winmm.lib d3d9.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD BASE LINK32 winmm.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 winmm.lib wininet.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
 !ENDIF 
@@ -186,14 +186,6 @@ SOURCE=.\D3DEnum.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\d3denumeration.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\dxutil.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\FileFixer.cpp
 # End Source File
 # Begin Source File
@@ -207,6 +199,10 @@ SOURCE=.\fsutil.cpp
 # Begin Source File
 
 SOURCE=.\HASH_SHA1.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc.cpp
 # End Source File
 # Begin Source File
 
@@ -260,6 +256,10 @@ SOURCE=.\RepairGameData.cpp
 
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\TempCommand.cpp
 # End Source File
 # Begin Source File
 
@@ -319,18 +319,6 @@ SOURCE=.\D3DEnum.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\d3denumeration.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\dxstdafx.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\dxutil.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\FileFixer.h
 # End Source File
 # Begin Source File
@@ -344,6 +332,10 @@ SOURCE=.\fsutil.h
 # Begin Source File
 
 SOURCE=.\HASH_SHA1.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc.h
 # End Source File
 # Begin Source File
 
@@ -396,6 +388,10 @@ SOURCE=.\Resource.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TempCommand.h
 # End Source File
 # Begin Source File
 

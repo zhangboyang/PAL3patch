@@ -3,6 +3,7 @@
 
 extern int TryRebuildConfigFile();
 extern int TryLoadConfigData();
+extern int FallbackConfigData(bool dry_run);
 extern int TrySaveConfigData();
 
 #endif

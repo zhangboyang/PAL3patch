@@ -67,7 +67,9 @@
 #define IDS_CANTDELBADFILE              65
 #define IDS_CANTDELBADFILE_TITLE        66
 #define IDS_NOD3D9                      67
+#define IDS_NOD3DENUM                   67
 #define IDS_NOD3D9_TITLE                68
+#define IDS_NOD3DENUM_TITLE             68
 #define IDS_WAITINGCHECKSYSTEM          69
 #define IDS_BADCOMCTL32                 70
 #define IDS_BADCOMCTL32_TITLE           71
@@ -107,6 +109,14 @@
 #define IDS_REPAIR_COMMIT               104
 #define IDS_ASKCANCELREPAIR             105
 #define IDS_REPAIR_NOTFIX               106
+#define IDS_TEMP_NOMUTEX                107
+#define IDS_TEMP_NOMUTEX_TITLE          108
+#define IDS_NO3DAPI                     109
+#define IDS_NO3DAPI_TITLE               110
+#define IDS_3DAPICHG_ASKFALLBACK        111
+#define IDS_3DAPICHG_ASKFALLBACK_TITLE  112
+#define IDS_D3DENUM_ASKFALLBACK         113
+#define IDS_D3DENUM_ASKFALLBACK_TITLE   114
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129
 #define IDD_PLEASEWAIT                  130

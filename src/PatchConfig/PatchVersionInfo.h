@@ -4,14 +4,22 @@
 #ifdef BUILD_FOR_PAL3
 #define PATCH_VERSION_CSTR "v4.0"
 #define PATCH_APPNAME _T("PAL3-PatchConfig")
-#define PATCH_MUTEXNAME "PAL3patch_GameMutex"
+#define PATCH_GAME_MUTEX "PAL3patch_GameMutex"
+#define PATCH_TEMP_MUTEX "PAL3patch_TempMutex"
+#define PATCH_TEMP_IN "PAL3patch.in"
+#define PATCH_TEMP_OUT "PAL3patch.out"
+#define GAME_EXE _T("PAL3.exe")
 #endif
 
 
 #ifdef BUILD_FOR_PAL3A
 #define PATCH_VERSION_CSTR "v4.0"
 #define PATCH_APPNAME _T("PAL3A-PatchConfig")
-#define PATCH_MUTEXNAME "PAL3Apatch_GameMutex"
+#define PATCH_GAME_MUTEX "PAL3Apatch_GameMutex"
+#define PATCH_TEMP_MUTEX "PAL3Apatch_TempMutex"
+#define PATCH_TEMP_IN "PAL3Apatch.in"
+#define PATCH_TEMP_OUT "PAL3Apatch.out"
+#define GAME_EXE _T("PAL3A.exe")
 #endif
 
 

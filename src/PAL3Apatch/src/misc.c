@@ -3,18 +3,14 @@
 
 int is_win9x()
 {
-    OSVERSIONINFO osvi;
-    memset(&osvi, 0, sizeof(osvi));
-    osvi.dwOSVersionInfoSize = sizeof(osvi);
-    return GetVersionEx(&osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS;
+    LPOSVERSIONINFO osvi = GetVersionEx_cached();
+    return osvi && osvi->dwPlatformId == VER_PLATFORM_WIN32_WINDOWS;
 }
 
 int is_winxp_or_later()
 {
-    OSVERSIONINFO osvi;
-    memset(&osvi, 0, sizeof(osvi));
-    osvi.dwOSVersionInfoSize = sizeof(osvi);
-    return GetVersionEx(&osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && (osvi.dwMajorVersion > 5 || (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion >= 1));
+    LPOSVERSIONINFO osvi = GetVersionEx_cached();
+    return osvi && osvi->dwPlatformId == VER_PLATFORM_WIN32_NT && (osvi->dwMajorVersion > 5 || (osvi->dwMajorVersion == 5 && osvi->dwMinorVersion >= 1));
 }
 
 int is_laa()
@@ -209,16 +205,68 @@ int fcmp(double a, double b)
     return d > 0 ? 1 : -1;
 }
 
+HANDLE acquire_mutex(LPCSTR lpName, DWORD dwMilliseconds)
+{
+	HANDLE hMutex;
+	DWORD dwWaitResult;
+
+	hMutex = CreateMutexA(NULL, FALSE, lpName);
+	if (hMutex == NULL) goto fail;
+
+	dwWaitResult = WaitForSingleObject(hMutex, dwMilliseconds);
+	if (dwWaitResult != WAIT_OBJECT_0 && dwWaitResult != WAIT_ABANDONED) goto fail;
+
+	return hMutex;
+
+fail:
+    if (hMutex) CloseHandle(hMutex);
+    return NULL;
+}
+
+void release_mutex(HANDLE hMutex)
+{
+    ReleaseMutex(hMutex);
+    CloseHandle(hMutex);
+}
+
+LPOSVERSIONINFO GetVersionEx_cached()
+{
+    static OSVERSIONINFO osvi;
+    static BOOL ret = 0;
+    if (!ret) {
+        memset(&osvi, 0, sizeof(osvi));
+        osvi.dwOSVersionInfoSize = sizeof(osvi);
+        ret = GetVersionEx(&osvi);
+    }
+    return ret ? &osvi : NULL;
+}
+
+HMODULE GetModuleHandle_utf8(const char *lpModuleName)
+{
+    wchar_t *s = utf8_to_utf16(lpModuleName);
+    HMODULE ret = GetModuleHandleW(s);
+    free(s);
+    return ret;
+}
+
+HMODULE LoadLibrary_utf8(const char *lpFileName)
+{
+    wchar_t *s = utf8_to_utf16(lpFileName);
+    HMODULE ret = LoadLibraryW(s);
+    free(s);
+    return ret;
+}
+
 HMODULE GetModuleHandle_check(LPCSTR lpModuleName)
 {
-    HMODULE ret = LoadLibrary(lpModuleName);
+    HMODULE ret = GetModuleHandleA(lpModuleName);
     if (!ret) fail("can't find library '%s'.", lpModuleName);
     return ret;
 }
 
 HMODULE LoadLibrary_check(LPCSTR lpFileName)
 {
-    HMODULE ret = LoadLibrary(lpFileName);
+    HMODULE ret = LoadLibraryA(lpFileName);
     if (!ret) fail("can't load library '%s'.", lpFileName);
     return ret;
 }

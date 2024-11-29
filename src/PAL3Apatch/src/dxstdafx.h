@@ -11,10 +11,7 @@
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 
-#ifndef STRICT
 #define STRICT
-#endif
-
 #include <windows.h>
 #include <windowsx.h>
 #include <mmsystem.h>

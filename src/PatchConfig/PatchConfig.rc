@@ -251,7 +251,7 @@ BEGIN
     IDS_FREETYPEFONT_DESC   "使用 FreeType 引擎渲染“%s”中的第 %s 个字体。"
     IDS_GDIFONT_DESC        "使用 GDI 引擎渲染字体“%s”。"
     IDS_FREETYPEFONT_FILTER "字体文件 (*.ttf; *.ttc; *.otf)|*.ttf;*.ttc;*.otf|所有文件 (*.*)|*.*||"
-    IDS_RESOLUTION_DESC     "游戏将使用“%s”分辨率。"
+    IDS_RESOLUTION_DESC     "游戏将使用“%s”分辨率运行。"
     IDS_OPENCONFIGTOOLWAITFINISH "等待官方配置工具退出 ..."
     IDS_HAVEBADFILE         "游戏目录下存在以下多余文件：\n\n%s\n这些文件可能会影响游戏正常运行，建议您删除这些文件。\n\n是否立即彻底删除这些文件？（该操作无法撤销）"
     IDS_HAVEBADFILE_TITLE   "是否删除多余文件"
@@ -262,8 +262,8 @@ BEGIN
     IDS_WAITINGCHECKBADFILES "正在检查多余文件，请稍候 ..."
     IDS_CANTDELBADFILE      "删除以下文件时发生错误：\n\n%s\n请尝试手工删除这些多余文件。"
     IDS_CANTDELBADFILE_TITLE "删除多余文件时出错"
-    IDS_NOD3D9              "请先安装 DirectX 9.0b 或更高版本。"
-    IDS_NOD3D9_TITLE        "找不到 Direct3D"
+    IDS_NOD3DENUM           "检测图形设备时发生错误，部分图形设置选项将不可用。\n\n请确认指定的图形接口可正常使用，并且后台没有正在运行的游戏进程。"
+    IDS_NOD3DENUM_TITLE     "无法检测图形设备"
     IDS_WAITINGCHECKSYSTEM  "正在检查系统环境，请稍候 ..."
     IDS_BADCOMCTL32         "COMCTL32.DLL 版本过低，安装 IE 5.0 或更高版本可解决此问题。"
     IDS_BADCOMCTL32_TITLE   "公共控件库版本过低"
@@ -310,6 +310,19 @@ BEGIN
     IDS_REPAIR_COMMIT       "正在执行修复 ..."
     IDS_ASKCANCELREPAIR     "要取消修复吗？"
     IDS_REPAIR_NOTFIX       "游戏数据仍存在损坏。"
+    IDS_TEMP_NOMUTEX        "无法取得临时文件对应的互斥体，请确认后台没有正在运行的游戏进程。"
+    IDS_TEMP_NOMUTEX_TITLE  "无法取得互斥体"
+    IDS_NO3DAPI             "使用该图形接口检测图形设备时出错，请检查相关驱动程序及运行库是否工作正常。"
+    IDS_NO3DAPI_TITLE       "无法使用该图形接口"
+    IDS_3DAPICHG_ASKFALLBACK 
+                            "由于图形接口发生变更，部分图形设置需要恢复默认值。\n您确定要变更图形接口吗？"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_3DAPICHG_ASKFALLBACK_TITLE "需要重置部分图形设置"
+    IDS_D3DENUM_ASKFALLBACK "当前计算机不支持之前保存的部分图形设置，是否将这部分设置恢复为默认值？"
+    IDS_D3DENUM_ASKFALLBACK_TITLE "图形设备环境发生变化"
 END
 
 #endif    // Chinese (P.R.C.) resources

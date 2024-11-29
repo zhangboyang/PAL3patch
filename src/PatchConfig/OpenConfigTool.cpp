@@ -1,13 +1,5 @@
 #include "stdafx.h"
 
-static bool is_win9x()
-{
-    OSVERSIONINFO osvi;
-    memset(&osvi, 0, sizeof(osvi));
-    osvi.dwOSVersionInfoSize = sizeof(osvi);
-    return GetVersionEx(&osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS;
-}
-
 static BOOL CALLBACK SetForegroundIfMatched(HWND hwnd, LPARAM lParam)
 {
 	PROCESS_INFORMATION *pi = (PROCESS_INFORMATION *) lParam;
@@ -58,7 +50,6 @@ void OpenConfigTool(CPatchConfigDlg *dlg)
 	}
 
 	DestroyPleaseWaitDlg(dlg);
-
 	dlg->SetTopMost(true);
 	dlg->SetForegroundWindow();
 }

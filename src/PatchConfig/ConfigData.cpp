@@ -130,17 +130,42 @@ static int TryMatchConfigData()
 			// no need to free 'pItem->pvalue', automaticly freed by std::map
 			if ((it = cfgdata.find(CString(pItem->key))) != cfgdata.end()) {
 				pItem->pvalue = &it->second.second;
+				if (pItem->slot) *pItem->slot = pItem;
 			} else {
 				return 0;
 			}
 		}
 	}
+	ConfigDirty = false;
 	return 1;
 }
 
 int TryLoadConfigData()
 {
 	return TryReadConfigFile() && TryMatchConfigData();
+}
+
+int FallbackConfigData(bool dry_run)
+{
+	int cnt = 0;
+	ConfigDescItem *pItem;
+	for (pItem = ConfigDescList; pItem->level >= 0; pItem++) {
+		if (pItem->key && pItem->enumobj) {
+			CString fallback = pItem->enumobj->GetFallbackValue();
+			if (!fallback.IsEmpty()) {
+				std::vector<CString> result;
+				pItem->enumobj->EnumConfigValues(result);
+				if (std::find(result.begin(), result.end(), *pItem->pvalue) == result.end()) {
+					if (!dry_run) {
+						*pItem->pvalue = fallback;
+						ConfigDirty = true;
+					}
+					cnt++;
+				}
+			}
+		}
+	}
+	return cnt;
 }
 
 int TrySaveConfigData()

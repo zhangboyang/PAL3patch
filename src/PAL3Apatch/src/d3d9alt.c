@@ -1,5 +1,8 @@
 #include "common.h"
 
+int d3d_sdk_version;
+HMODULE d3dx9_43 = NULL;
+
 typedef struct {
     const void *const *vtbl;
     ID3DXEffect43 *p;
@@ -141,8 +144,6 @@ static HRESULT WINAPI proxyD3DXCreateEffect(LPDIRECT3DDEVICE9 pDevice, LPCVOID p
     return D3D_OK;
 }
 
-HMODULE d3dx9_43 = NULL;
-
 HRESULT (WINAPI *myD3DXCreateFontW)(LPDIRECT3DDEVICE9, UINT, UINT, UINT, UINT, BOOL, DWORD, DWORD, DWORD, DWORD, LPCWSTR, LPD3DXFONT *);
 HRESULT (WINAPI *myD3DXCreateSprite)(LPDIRECT3DDEVICE9, LPD3DXSPRITE *);
 HRESULT (WINAPI *myD3DXGetImageInfoFromFileInMemory)(LPCVOID, UINT, D3DXIMAGE_INFO *);
@@ -198,25 +199,92 @@ static void fuse_builtin_d3dx9()
     gbD3DXCreateEffect = gboffset + 0x10031BA2;
 }
 
-void fuse_d3dx9_wrapper()
+static void fuse_d3dx9()
 {
     if (d3dx9_43) {
-        d3d_sdk_version = 32;
         fuse_d3dx9_43();
     } else {
         fuse_builtin_d3dx9();
     }
 }
 
-void init_d3dx9_wrapper()
+static int load_d3dx9(int silent)
 {
-    if (is_laa()) {
+    if (d3d_sdk_version >= 32 && !d3dx9_43) {
         HMODULE hD3DX9 = LoadLibraryA(D3DX9_43_DLL);
         if (hD3DX9 && LoadLibraryA(D3DCOMPILER_43_DLL)) {
             d3dx9_43 = hD3DX9;
         } else {
-            if (hD3DX9) FreeLibrary(hD3DX9);
-            warning("LargeAddressAware enabled, but failed to load both '" D3DX9_43_DLL "' and '" D3DCOMPILER_43_DLL "', game may crash.");
+            if (!silent) fail("failed to load both '" D3DX9_43_DLL "' and '" D3DCOMPILER_43_DLL "'.");
+            return 0;
         }
     }
+    return 1;
+}
+
+static IDirect3D9 *(WINAPI *pDirect3DCreate9)(UINT) = NULL;
+
+static IDirect3D9 *WINAPI myDirect3DCreate9(UINT SDKVersion)
+{
+    load_d3dx9(0);
+    fuse_d3dx9();
+    return pDirect3DCreate9(d3d_sdk_version);
+}
+
+static int parse_d3d9_config(const char *config, int *laa, int *ver, const char **dll)
+{
+    const char *x = config;
+    const char *y = strchr(x, ',');
+    if (!y) return 0;
+    y++;
+    const char *z = strchr(y, ',');
+    if (!z) return 0;
+    z++;
+    if (sscanf(x, "%d", laa) != 1) return 0;
+    if (sscanf(y, "%d", ver) != 1) return 0;
+    *dll = z;
+    return 1;
+}
+static int load_d3d9(const char *config, int silent)
+{
+    int laa;
+    const char *dll;
+    if (!parse_d3d9_config(config, &laa, &d3d_sdk_version, &dll)) {
+        if (!silent) fail("can't parse d3d9 config.");
+        return 0;
+    }
+    if (laa && d3d_sdk_version < 32) {
+        if (!silent) fail("Direct3D 9.0b is not compatible with LargeAddressAware.");
+        return 0;
+    }
+    fork_laa(laa);
+    HMODULE hD3D9 = LoadLibrary_utf8(dll);
+    if (hD3D9) {
+        pDirect3DCreate9 = TOPTR(GetProcAddress(hD3D9, "Direct3DCreate9"));
+    } else {
+        if (!silent) fail("can't import Direct3DCreate9 from '%s'.", dll);
+        return 0;
+    }
+    return load_d3dx9(silent);
+}
+
+int prepare_d3denum(const char *config)
+{
+    return load_d3d9(config, 1);
+}
+int run_d3denum(FILE *fp)
+{
+    IDirect3D9 *pD3D = pDirect3DCreate9(d3d_sdk_version);
+    if (!pD3D) return 0;
+    extern int d3denum(FILE *fp, IDirect3D9 *pD3D);
+    return d3denum(fp, pD3D);
+}
+
+void prepare_d3d9_alternative()
+{
+    load_d3d9(get_string_from_configfile("d3d9"), 0);
+}
+void init_d3d9_alternative()
+{
+    make_jmp(gboffset + 0x10030510, myDirect3DCreate9);
 }

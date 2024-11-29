@@ -92,6 +92,22 @@ static ConfigDescItem LISTNAME[] = {
 		_T("请选择一个子项目进行配置。"),
 	},
 	{
+		1, true, true,
+		_T("d3d9"),
+		_T("图形接口"),
+		_T("本选项可以指定游戏使用的图形接口。"),
+		NULL,
+		NULL, NULL,
+		{
+			{ _T("Direct3D 9.0b"), _T("选择此选项后，游戏将使用 Direct3D 9.0b 图形接口绘制游戏画面。"), _T("0,31,d3d9.dll") },
+			{ _T("Direct3D 9.0c"), _T("选择此选项后，游戏将使用 Direct3D 9.0c 图形接口绘制游戏画面。需要 Windows XP 或更高版本操作系统。"), _T("0,32,d3d9.dll") },
+			{ _T("Direct3D 9.0c (LAA)"), _T("选择此选项后，游戏将使用 Direct3D 9.0c 图形接口绘制游戏画面，并启用大地址空间支持。需要 Windows XP 或更高版本操作系统。"), _T("1,32,d3d9.dll") },
+		},
+		NULL,
+		On3DAPIConfigChange,
+		&p3DAPIConfigItem,
+	},
+	{
 		1, false, true,
 		_T("game_resolution"),
 		_T("分辨率"),
@@ -133,7 +149,7 @@ static ConfigDescItem LISTNAME[] = {
 		NULL,
 		NULL, NULL,
 		{ { NULL } },
-		&EnumDepthBufferInstance,
+		&EnumDepthStencilInstance,
 	},
 	{
 		1, false, true,

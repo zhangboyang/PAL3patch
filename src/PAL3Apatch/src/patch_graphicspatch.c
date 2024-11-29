@@ -685,9 +685,8 @@ static void init_window_patch(int flag)
 
     // modify window title
     char *winname_mbcs = cs2cs_alloc(get_string_from_configfile("windowtitle"), CP_UTF8, CP_ACP);
-    strncpy(winname, winname_mbcs, sizeof(winname));
+    strncpy(winname, winname_mbcs, sizeof(winname)); winname[sizeof(winname) - 1] = 0;
     free(winname_mbcs);
-    winname[sizeof(winname) - 1] = 0;
     INIT_WRAPPER_CALL(FindWindowA_wrapper, { 0x0052B920 });
     
     // cursor hook

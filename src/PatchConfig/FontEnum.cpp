@@ -5,37 +5,44 @@ EnumFontface EnumFontfaceInstance;
 
 static int CALLBACK EnumFontfaceHelper(ENUMLOGFONTEX *lpelfe, NEWTEXTMETRICEX *lpntme, DWORD FontType, LPARAM lParam)
 {
-	EnumFontface *arg = (EnumFontface *) lParam;
-	arg->buf.push_back(CString(lpelfe->elfLogFont.lfFaceName));
+	std::vector<CString> *buf = (std::vector<CString> *) lParam;
+	buf->push_back(CString(lpelfe->elfLogFont.lfFaceName));
 	return 1;
 }
 
 void EnumFontface::EnumConfigValues(std::vector<CString> &result)
 {
+	std::vector<CString> buf;
 	std::vector<CString>::iterator it;
-	TCHAR ch;
-	buf.clear();
+	LPCTSTR s;
 	LOGFONT lf;
 	lf.lfCharSet = DEFAULT_CHARSET;
 	lf.lfFaceName[0] = '\0';
 	lf.lfPitchAndFamily = 0;
-	EnumFontFamiliesEx(GetDC(NULL), &lf, (FONTENUMPROC) EnumFontfaceHelper, (LPARAM) this, 0);
+	EnumFontFamiliesEx(GetDC(NULL), &lf, (FONTENUMPROC) EnumFontfaceHelper, (LPARAM) &buf, 0);
 	std::sort(buf.begin(), buf.end());
 	buf.erase(std::unique(buf.begin(), buf.end()), buf.end());
 	result.clear();
 	result.push_back(CString(_T("default")));
 	result.push_back(CString(_T("freetype:")));
-	for (it = buf.begin(); it != buf.end(); it++) {
-		ch = *(LPCTSTR)*it;
-		if (ch >= 0x80) result.push_back(*it);
+	for (it = result.begin(); it != result.end(); it++) {
+		buf.erase(std::remove(buf.begin(), buf.end(), *it), buf.end());
 	}
 	for (it = buf.begin(); it != buf.end(); it++) {
-		ch = *(LPCTSTR)*it;
-		if (ch < 0x80 && ch != '@') result.push_back(*it);
+		s = *it;
+		if (s[0] >= 0x80) result.push_back(*it);
 	}
 	for (it = buf.begin(); it != buf.end(); it++) {
-		ch = *(LPCTSTR)*it;
-		if (ch < 0x80 && ch == '@') result.push_back(*it);
+		s = *it;
+		if (s[0] < 0x80 && s[0] != '@') result.push_back(*it);
+	}
+	for (it = buf.begin(); it != buf.end(); it++) {
+		s = *it;
+		if (s[0] == '@' && s[1] >= 0x80) result.push_back(*it);
+	}
+	for (it = buf.begin(); it != buf.end(); it++) {
+		s = *it;
+		if (s[0] == '@' && s[1] < 0x80) result.push_back(*it);
 	}
 }
 CString EnumFontface::GetValueTitle(const CString &value)

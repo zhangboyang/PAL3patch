@@ -657,9 +657,8 @@ static void init_window_patch(int flag)
 
     // modify window title
     char *winname_mbcs = cs2cs_alloc(get_string_from_configfile("windowtitle"), CP_UTF8, CP_ACP);
-    strncpy(winname, winname_mbcs, sizeof(winname));
+    strncpy(winname, winname_mbcs, sizeof(winname)); winname[sizeof(winname) - 1] = 0;
     free(winname_mbcs);
-    winname[sizeof(winname) - 1] = 0;
     unsigned titleaddr = TOUINT(winname);
     SIMPLE_PATCH(0x00541925, "\xC4\x39\x58\x00", &titleaddr, 4);
     

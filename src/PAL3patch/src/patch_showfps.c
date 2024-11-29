@@ -177,7 +177,7 @@ static void showfps_initfont()
                 if (IDirect3D9_GetAdapterIdentifier(pD3D9, Parameters.AdapterOrdinal, 0, &Identifier) == D3D_OK) {
                     wchar_t *s = cs2wcs_alloc(Identifier.Description, CP_ACP);
                     if (s) {
-                        snwprintf(dstr, sizeof(dstr) / sizeof(wchar_t), L"%s\n\n", s);
+                        snwprintf(dstr, sizeof(dstr) / sizeof(wchar_t), L"(%d%hs) %s\n\n", d3d_sdk_version, (is_laa() ? "L" : ""), s);
                         free(s);
                     }
                 }

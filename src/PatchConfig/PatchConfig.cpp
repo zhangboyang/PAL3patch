@@ -33,24 +33,15 @@ CPatchConfigApp theApp;
 /////////////////////////////////////////////////////////////////////////////
 // CPatchConfigApp initialization
 
-static int AcquireGameMutex()
+static void AcquireGameMutex()
 {
-	HANDLE hMutex;
-	DWORD dwWaitResult;
-
-	hMutex = CreateMutexA(NULL, FALSE, PATCH_MUTEXNAME);
-	if (hMutex == NULL) goto fail;
-
-	dwWaitResult = WaitForSingleObject(hMutex, 100);
-	if (dwWaitResult != WAIT_OBJECT_0 && dwWaitResult != WAIT_ABANDONED) goto fail;
-
-	return 1;
-fail:
-	MessageBox(NULL, STRTABLE(IDS_NOMUTEX), STRTABLE(IDS_NOMUTEX_TITLE), MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
-	return 0;
+	if (!acquire_mutex(PATCH_GAME_MUTEX, 100)) {
+		MessageBox(NULL, STRTABLE(IDS_NOMUTEX), STRTABLE(IDS_NOMUTEX_TITLE), MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+		die(0);
+	}
 }
 
-static int CheckCOMCTL32()
+static void CheckCOMCTL32()
 {
 	DWORD dwMajorVersion = 0;
 
@@ -71,15 +62,13 @@ static int CheckCOMCTL32()
         FreeLibrary(hCOMCTL32);
 	}
 
-	if (dwMajorVersion >= 5) {
-		return 1;
-	} else {
+	if (dwMajorVersion < 5) {
 		GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_BADCOMCTL32), STRTABLE(IDS_BADCOMCTL32_TITLE), MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
-		return 0;
+		die(0);
 	}
 }
 
-static int VerifyPatchFiles()
+static void VerifyPatchFiles()
 {
 	const int max_show = 10;
 	int cnt = 0;
@@ -103,22 +92,20 @@ static int VerifyPatchFiles()
 		CString msg;
 		msg.Format(IDS_CORRUPTFILE, (LPCTSTR) buf);
 		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CORRUPTFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDNO) {
-			return 0;
+			die(0);
 		}
 	}
-	return 1;
 }
 
-static int LoadConfigData()
+static void LoadConfigData()
 {
 	while (!TryLoadConfigData()) {
 		if (GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_CORRUPTCONFIG), STRTABLE(IDS_CORRUPTCONFIG_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES) {
 			TryRebuildConfigFile();
 		} else {
-			return 0;
+			die(0);
 		}
 	}
-	return 1;
 }
 
 BOOL CPatchConfigApp::InitInstance()
@@ -133,9 +120,7 @@ BOOL CPatchConfigApp::InitInstance()
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
 
-	if (!AcquireGameMutex()) goto err;
-
-	if (!CheckDX90SDKVersion()) goto err;
+	AcquireGameMutex();
 
 	LoadConfigDescList(STRTABLE(IDS_CONFIGDESCLIST));
 
@@ -145,16 +130,16 @@ BOOL CPatchConfigApp::InitInstance()
 #endif
 
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGVERIFY));
-	if (!VerifyPatchFiles()) goto err;
+	VerifyPatchFiles();
 
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGLOADCFG));
-	if (!LoadConfigData()) goto err;
+	LoadConfigData();
 
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGENUMD3D));
-	if (!InitD3DEnumeration()) goto err;
+	FirstD3DEnumeration();
 
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGCHECKSYSTEM));
-	if (!CheckCOMCTL32()) goto err;
+	CheckCOMCTL32();
 
 	DestroyPleaseWaitDlg();
 
@@ -165,32 +150,8 @@ BOOL CPatchConfigApp::InitInstance()
 		//m_pMainWnd = &dlg;
 		dlg.DoModal();
 
-		CleanupD3DEnumeration();
-
 		// Since the dialog has been closed, return FALSE so that we exit the
 		//  application, rather than start the application's message pump.
 		return FALSE;
 	}
-
-err:
-	DestroyPleaseWaitDlg();
-	CleanupD3DEnumeration();
-	return FALSE;
-}
-
-void DoEvents()
-{
-	MSG msg;
-	while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
-		AfxGetApp()->PumpMessage();
-	}
-}
-
-void *Malloc(size_t n)
-{
-	void *ret = malloc(n);
-	if (!ret) {
-		die(1);
-	}
-	return ret;
 }

@@ -23,6 +23,7 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CPatchConfigDlg)
 	enum { IDD = IDD_PATCHCONFIG };
+	CEdit	m_CfgValEdit;
 	CButton	m_CancelBtn;
 	CButton	m_OKBtn;
 	CButton	m_RunfuncBtn;
@@ -62,7 +63,6 @@ protected:
 	int m_OptDescShowing;
 	int m_LockSelUpdate;
 	std::vector<CString> m_EnumList;
-	bool m_Dirty;
 
 	static void OnMouseMoveCallbackWarpper(void *ptr, int btnid);
 	void SetRadioBtnStyle(int btnid, int bold, int underline);

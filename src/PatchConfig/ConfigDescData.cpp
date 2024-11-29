@@ -17,6 +17,10 @@ CString ConfigDescOptionListEnum::GetValueDescription(const CString &value)
 {
 	return GetValueTitle(value);
 }
+CString ConfigDescOptionListEnum::GetFallbackValue()
+{
+	return CString();
+}
 
 #define USE_CHS
 #include "ConfigDescLocale.h"
@@ -36,6 +40,7 @@ static ConfigDescListIndex ConfigDescListArray[] = {
 
 
 ConfigDescItem *ConfigDescList = NULL;
+bool ConfigDirty;
 
 void LoadConfigDescList(LPCTSTR name)
 {

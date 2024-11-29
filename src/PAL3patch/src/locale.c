@@ -45,6 +45,9 @@ static const wchar_t wstr_cantsavereg_title_CHS[] = L"注册表重定向";
 static const wchar_t wstr_badregfile_text_CHS[] = L"注册表存档文件已损坏，是否继续？\n注意：若继续，前尘忆梦、小游戏的解锁状态可能会丢失。";
 static const wchar_t wstr_badregfile_title_CHS[] = L"注册表重定向";
 
+static const wchar_t wstr_cantdeltemp_text_CHS[] = L"游戏目录下存在临时文件 %hs，但无法删除，请手动删除它。";
+static const wchar_t wstr_cantdeltemp_title_CHS[] = L"无法删除临时文件";
+
 static const wchar_t wstr_nomutex_text_CHS[] = L"请先关闭正在运行中的游戏（或补丁配置工具）。";
 static const wchar_t wstr_nomutex_title_CHS[] = L"检测到冲突";
 
@@ -123,6 +126,8 @@ const wchar_t *wstr_cantsavereg_text;
 const wchar_t *wstr_cantsavereg_title;
 const wchar_t *wstr_badregfile_text;
 const wchar_t *wstr_badregfile_title;
+const wchar_t *wstr_cantdeltemp_text;
+const wchar_t *wstr_cantdeltemp_title;
 const wchar_t *wstr_nomutex_text;
 const wchar_t *wstr_nomutex_title;
 const wchar_t *wstr_nocfgfile_text;
@@ -180,6 +185,8 @@ void init_locale_early()
     
     
     // init early strings
+    IMPORT_LOCALE_ITEM(CHS, wstr_cantdeltemp_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_cantdeltemp_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_nomutex_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_nomutex_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_nocfgfile_text);

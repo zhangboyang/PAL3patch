@@ -49,21 +49,78 @@ static void prepare_fs()
     reset_attrib("EngineLog.txt");
 }
 
+static HANDLE game_mutex = NULL;
+static HANDLE temp_mutex = NULL;
+
 static void acquire_game_mutex()
 {
-	HANDLE hMutex;
-	DWORD dwWaitResult;
+    if (!(game_mutex = acquire_mutex("PAL3patch_GameMutex", 100))) {
+        MessageBoxW(NULL, wstr_nomutex_text, wstr_nomutex_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
+        die(0);
+    }
+}
 
-	hMutex = CreateMutexA(NULL, FALSE, "PAL3patch_GameMutex");
-	if (hMutex == NULL) goto fail;
+void fork_laa(int laa)
+{
+    if (!!laa == !!is_laa()) return;
+    HANDLE fork_mutex = acquire_mutex("PAL3patch_ForkMutex", 100);
+    if (!fork_mutex) die(1);
+    if (game_mutex) release_mutex(game_mutex);
+    if (temp_mutex) release_mutex(temp_mutex);
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    memset(&si, 0, sizeof(si));
+    si.cb = sizeof(si);
+    memset(&pi, 0, sizeof(pi));
+    if (!CreateProcess((laa ? GAME_EXE_LAA : GAME_EXE), NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) die(1);
+    if (WaitForSingleObject(pi.hProcess, INFINITE) != WAIT_OBJECT_0) die(1);
+    DWORD dwExitCode;
+    if (!GetExitCodeProcess(pi.hProcess, &dwExitCode)) die(1);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    die(dwExitCode);
+}
 
-	dwWaitResult = WaitForSingleObject(hMutex, 100);
-	if (dwWaitResult != WAIT_OBJECT_0 && dwWaitResult != WAIT_ABANDONED) goto fail;
-
-	return;
-fail:
-	MessageBoxW(NULL, wstr_nomutex_text, wstr_nomutex_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND);
-	die(0);
+static void process_temp_command()
+{
+    temp_mutex = acquire_mutex("PAL3patch_TempMutex", 100);
+    if (!temp_mutex) die(1);
+    if (file_exists(PATCH_TEMP_IN)) {
+        char cmd[MAXLINE];
+        FILE *fp;
+        fp = robust_fopen(PATCH_TEMP_IN, "r");
+        if (fp) {
+            cmd[fread(cmd, 1, sizeof(cmd) - 1, fp)] = 0;
+            if (ferror(fp)) cmd[0] = 0;
+            fclose(fp);
+        } else {
+            cmd[0] = 0;
+        }
+        if (!str_endswith(cmd, "\n")) die(1);
+        
+        if (str_startswith(cmd, "d3denum ")) {
+            char *config = str_rtrim(cmd + strlen("d3denum "), " \n");
+            if (!prepare_d3denum(config)) die(1);
+        }
+        
+        if (robust_unlink(PATCH_TEMP_IN) != 0) {
+            MessageBoxW_format(NULL, wstr_cantdeltemp_text, wstr_cantdeltemp_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND, PATCH_TEMP_IN);
+            die(1);
+        }
+        fp = robust_fopen(PATCH_TEMP_OUT, "w");
+        if (!fp) die(1);
+        int success = 0;
+        
+        if (str_startswith(cmd, "d3denum ")) {
+            success = run_d3denum(fp);
+        }
+        
+        fclose(fp);
+        die(success ? 0 : 1);
+    }
+    robust_unlink(PATCH_TEMP_IN);
+    robust_unlink(PATCH_TEMP_OUT);
+    release_mutex(temp_mutex); temp_mutex = NULL;
 }
 
 // init_stage1() should be called before unpacker is executed (if exists)
@@ -78,12 +135,18 @@ static void init_stage1()
     // init early locale
     init_locale_early();
     
+    // process temp command
+    process_temp_command();
+    
     // acquire mutex
     acquire_game_mutex();
     
     // read config
     read_config_file();
-
+    
+    // prepare d3d9 alternative
+    prepare_d3d9_alternative();
+    
     // init early patchsets in stage1
     INIT_PATCHSET(depcompatible);
     INIT_PATCHSET(dpiawareness);
@@ -101,9 +164,8 @@ static void init_stage2()
     // init memory allocators
     init_memory_allocators();
     
-    // init direct3d wrapper
-    init_d3d9_wrapper();
-    init_d3dx9_wrapper();
+    // init d3d9 alternative
+    init_d3d9_alternative();
     
     // init hook framework
     init_hooks();
@@ -227,8 +289,9 @@ static int try_fix_unpacker()
     const unsigned char oldcode[] = "\x83\x7C\x24\x08\x01\x75\x10\x8B\x44\x24\x04";
     const unsigned char newcode[] = "\x59\x58\x5A\x83\xFA\x01\x5A\x51\x75\x0D\x90";
     unsigned char buf[sizeof(oldcode) - 1];
+    robust_unlink(EXTERNAL_UNPACKER_FIXED);
     if (!CopyFile(EXTERNAL_UNPACKER, EXTERNAL_UNPACKER_FIXED, FALSE)) return 0;
-    FILE *fp = fopen(EXTERNAL_UNPACKER_FIXED, "r+bc");
+    FILE *fp = robust_fopen(EXTERNAL_UNPACKER_FIXED, "r+bc");
     if (!fp) return 0;
     if (fseek(fp, fileoffset, SEEK_SET) != 0) goto fail;
     if (fread(buf, 1, sizeof(buf), fp) != sizeof(buf)) goto fail;
