@@ -1,0 +1,10 @@
+【开启-O2编译优化】
+为代码开启了-O2优化，希望不会出问题
+由于代码中普遍存在指针类型互转的问题，所以必须使用-fno-strict-aliasing选项
+之前发现-O2会产生错误代码（notes20170404.txt）的情况可以用-fno-optimize-sibling-calls选项缓解
+为了生成的代码易于调试，还添加了-fno-omit-frame-pointer -fno-inline -fno-builtin这些保守的选项
+
+【关于使用最新版本的msys2/gcc进行编译】
+可以使用-Wmissing-prototypes -Wmissing-variable-declarations检查函数/全局变量是否已在头文件中声明
+可能需要使用-march=i686选项才能强制使用387浮点指令
+另外如果要启用lto优化，需要在编译时添加-ffat-lto-objects选项（否则def文件为空），并在-r链接时添加-flinker-output=nolto-rel选项（否则最终链接dll时报错）

@@ -259,14 +259,17 @@ static int load_d3d9(const char *config, int silent)
         return 0;
     }
     if (laa && d3d_sdk_version < 32) {
-        if (!silent) fail("Direct3D 9.0b is not compatible with LargeAddressAware.");
+        if (!silent) fail("D3DX of Direct3D 9.0b is not compatible with LargeAddressAware.");
         return 0;
     }
     fork_laa(laa);
-    HMODULE hD3D9 = LoadLibrary_utf8(dll);
-    if (hD3D9) {
-        pDirect3DCreate9 = TOPTR(GetProcAddress(hD3D9, "Direct3DCreate9"));
-    } else {
+    HMODULE hD3D9 = LoadLibraryA(dll);
+    if (!hD3D9) {
+        if (!silent) fail("can't load '%s'.", dll);
+        return 0;
+    }
+    pDirect3DCreate9 = TOPTR(GetProcAddress(hD3D9, "Direct3DCreate9"));
+    if (!pDirect3DCreate9) {
         if (!silent) fail("can't import Direct3DCreate9 from '%s'.", dll);
         return 0;
     }

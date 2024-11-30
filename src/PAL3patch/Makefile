@@ -25,8 +25,8 @@ CFLAGS := -O2 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=GB180
 
 CL := cl
 LINK := link
-CLCFLAGS := -nologo -O2 -MT -I"$(DX90SDK_INCLUDE_PATH)"
-CLCXXFLAGS := $(CLCFLAGS) -GX
+CLCFLAGS := -nologo -O2 -MT
+CLCXXFLAGS := $(CLCFLAGS) -I"$(DX90SDK_INCLUDE_PATH)" -GX
 LINKFLAGS := -nologo -dll -opt:ref -incremental:no -machine:I386 -libpath:"$(FREETYPE_LIBRARY_PATH)" -libpath:"$(DX90SDK_LIBRARY_PATH)"
 LINKLIBS := $(FREETYPE_LIB) $(D3DX9_LIB) winmm.lib comctl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
 

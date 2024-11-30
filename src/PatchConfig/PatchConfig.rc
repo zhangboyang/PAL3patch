@@ -302,7 +302,7 @@ BEGIN
     IDS_REPAIR_COMMITOK     "修复成功。"
     IDS_REPAIR_COMMITPART   "部分修复成功，以下组件仍然损坏："
     IDS_REPAIR_COMMITERROR  "修复失败，以下组件仍然损坏："
-    IDS_REPAIR_COMMITABORT  "已放弃修复，以下组件仍然损坏："
+    IDS_REPAIR_COMMITABORT  "已放弃修复以下组件："
     IDS_REPAIR_COMMITREPORT "修复报告"
     IDS_REPAIR_BADCOMMIT    "无法将修复好的“%s”写入磁盘。"
     IDS_REPAIR_BADCOMMIT_TITLE "修复失败"

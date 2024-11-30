@@ -241,22 +241,6 @@ LPOSVERSIONINFO GetVersionEx_cached()
     return ret ? &osvi : NULL;
 }
 
-HMODULE GetModuleHandle_utf8(const char *lpModuleName)
-{
-    wchar_t *s = utf8_to_utf16(lpModuleName);
-    HMODULE ret = GetModuleHandleW(s);
-    free(s);
-    return ret;
-}
-
-HMODULE LoadLibrary_utf8(const char *lpFileName)
-{
-    wchar_t *s = utf8_to_utf16(lpFileName);
-    HMODULE ret = LoadLibraryW(s);
-    free(s);
-    return ret;
-}
-
 HMODULE GetModuleHandle_check(LPCSTR lpModuleName)
 {
     HMODULE ret = GetModuleHandleA(lpModuleName);

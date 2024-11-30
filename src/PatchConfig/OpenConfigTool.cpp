@@ -1,11 +1,16 @@
 #include "stdafx.h"
 
+#define title_MAX 5
+static const TCHAR title_CHS[] = _T("环境配置");
+static const TCHAR title_CHT[] = _T("設定程式");
+
 static BOOL CALLBACK SetForegroundIfMatched(HWND hwnd, LPARAM lParam)
 {
 	PROCESS_INFORMATION *pi = (PROCESS_INFORMATION *) lParam;
 	DWORD pid;
 	GetWindowThreadProcessId(hwnd, &pid);
-	if (pid == pi->dwProcessId && !GetWindow(hwnd, GW_OWNER) && IsWindowVisible(hwnd)) {
+	TCHAR buf[title_MAX];
+	if (pid == pi->dwProcessId && !GetWindow(hwnd, GW_OWNER) && IsWindowVisible(hwnd) && GetWindowText(hwnd, buf, title_MAX) && (_tcscmp(buf, title_CHS) == 0 || _tcscmp(buf, title_CHT) == 0)) {
 		if (SetForegroundWindow(hwnd)) {
 			if (!is_win9x()) {
 				FLASHWINFO fwi;

@@ -36,8 +36,6 @@ extern PATCHAPI void release_mutex(HANDLE hMutex);
 extern PATCHAPI LPOSVERSIONINFO GetVersionEx_cached(void);
 extern PATCHAPI int MessageBoxW_format(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType, ...); 
 extern PATCHAPI int MessageBoxW_utf8format(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, ...);
-extern PATCHAPI HMODULE GetModuleHandle_utf8(const char *lpModuleName);
-extern PATCHAPI HMODULE LoadLibrary_utf8(const char *lpFileName);
 extern PATCHAPI HMODULE GetModuleHandle_check(LPCSTR lpModuleName);
 extern PATCHAPI HMODULE LoadLibrary_check(LPCSTR lpFileName);
 extern PATCHAPI FARPROC GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName);

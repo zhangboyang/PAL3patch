@@ -2,7 +2,7 @@
 #define PAL3PATCHCONFIG_PATCHVERSIONINFO
 
 #ifdef BUILD_FOR_PAL3
-#define PATCH_VERSION_CSTR "v4.0"
+#define PATCH_VERSION_CSTR "v4.1"
 #define PATCH_APPNAME _T("PAL3-PatchConfig")
 #define PATCH_GAME_MUTEX "PAL3patch_GameMutex"
 #define PATCH_TEMP_MUTEX "PAL3patch_TempMutex"
@@ -13,7 +13,7 @@
 
 
 #ifdef BUILD_FOR_PAL3A
-#define PATCH_VERSION_CSTR "v4.0"
+#define PATCH_VERSION_CSTR "v4.1"
 #define PATCH_APPNAME _T("PAL3A-PatchConfig")
 #define PATCH_GAME_MUTEX "PAL3Apatch_GameMutex"
 #define PATCH_TEMP_MUTEX "PAL3Apatch_TempMutex"
