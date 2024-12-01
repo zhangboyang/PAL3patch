@@ -83,6 +83,15 @@ void FirstD3DEnumeration()
 	}
 }
 
+void On3DAPIConfigReset(CPatchConfigDlg *dlg)
+{
+	ShowPleaseWaitDlg(dlg, STRTABLE(IDS_WAITINGENUMD3D));
+	if (!ReloadD3DEnumeration(GetPleaseWaitDlg(), *p3DAPIConfigItem->pvalue, false)) {
+		GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_NOD3DENUM), STRTABLE(IDS_NOD3DENUM_TITLE), MB_ICONWARNING);
+	}
+	DestroyPleaseWaitDlg(dlg);
+}
+
 bool On3DAPIConfigChange(CPatchConfigDlg *dlg, const CString &oldvalue, const CString &newvalue)
 {
 	dlg->SetTopMost(false);

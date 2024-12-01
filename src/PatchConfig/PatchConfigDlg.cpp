@@ -512,6 +512,8 @@ void CPatchConfigDlg::RestoreAllConfigToDefault(CPatchConfigDlg *dlg)
 		}
 	}
 
+	On3DAPIConfigReset(dlg);
+
 	dlg->MessageBox(STRTABLE(IDS_RESTOREDEFAULT_SUCCEED), STRTABLE(IDS_RESTOREDEFAULT_TITLE), MB_ICONINFORMATION);
 }
 

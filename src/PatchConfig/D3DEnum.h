@@ -4,6 +4,7 @@
 extern ConfigDescItem *p3DAPIConfigItem;
 
 extern void FirstD3DEnumeration();
+extern void On3DAPIConfigReset(CPatchConfigDlg *dlg);
 extern bool On3DAPIConfigChange(CPatchConfigDlg *dlg, const CString &oldvalue, const CString &newvalue);
 
 extern class EnumDisplayMode : public ConfigDescOptionListEnum {

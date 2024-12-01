@@ -2,8 +2,8 @@
 
 wchar_t *chinese_to_unicode(const char *s, const wchar_t *table)
 {
-    struct wstr v;
-    wstr_ctor(&v);
+    wchar_t *buf = malloc(sizeof(wchar_t) * (strlen(s) + 1));
+    wchar_t *p = buf;
     while (*s) {
         wchar_t c = 0xfffd;
         unsigned char b1 = *s++;
@@ -14,15 +14,16 @@ wchar_t *chinese_to_unicode(const char *s, const wchar_t *table)
             int i = ((b1 << 8) | b2) - 0x8000;
             if (table[i]) c = table[i];
         }
-        wstr_pushback(&v, c);
+        *p++ = c;
     }
-    return wstr_mdtor(&v);
+    *p = 0;
+    return buf;
 }
 
 char *utf16_to_utf8(const wchar_t *s)
 {
-    struct cstr v;
-    cstr_ctor(&v);
+    char *buf = malloc(wcslen(s) * 3 + 1);
+    char *p = buf;
     while (*s) {
         unsigned c = 0xfffd;
         unsigned short w1 = *s++;
@@ -36,28 +37,29 @@ char *utf16_to_utf8(const wchar_t *s)
             }
         }
         if (c < (1 << 7)) {
-            cstr_pushback(&v, c);
+            *p++ = c;
         } else if (c < (1 << 11)) {
-            cstr_pushback(&v, 0xc0 | (c >> 6));
-            cstr_pushback(&v, 0x80 | (c & 0x3f));
+            *p++ = 0xc0 | (c >> 6);
+            *p++ = 0x80 | (c & 0x3f);
         } else if (c < (1 << 16)) {
-            cstr_pushback(&v, 0xe0 | (c >> 12));
-            cstr_pushback(&v, 0x80 | ((c >> 6) & 0x3f));
-            cstr_pushback(&v, 0x80 | (c & 0x3f));
+            *p++ = 0xe0 | (c >> 12);
+            *p++ = 0x80 | ((c >> 6) & 0x3f);
+            *p++ = 0x80 | (c & 0x3f);
         } else {
-            cstr_pushback(&v, 0xf0 | (c >> 18));
-            cstr_pushback(&v, 0x80 | ((c >> 12) & 0x3f));
-            cstr_pushback(&v, 0x80 | ((c >> 6) & 0x3f));
-            cstr_pushback(&v, 0x80 | (c & 0x3f));
+            *p++ = 0xf0 | (c >> 18);
+            *p++ = 0x80 | ((c >> 12) & 0x3f);
+            *p++ = 0x80 | ((c >> 6) & 0x3f);
+            *p++ = 0x80 | (c & 0x3f);
         }
     }
-    return cstr_mdtor(&v);
+    *p = 0;
+    return buf;
 }
 
 wchar_t *utf8_to_utf16(const char *s)
 {
-    struct wstr v;
-    wstr_ctor(&v);
+    wchar_t *buf = malloc(sizeof(wchar_t) * (strlen(s) + 1));
+    wchar_t *p = buf;
     while (*s) {
         int i, n;
         unsigned c;
@@ -93,14 +95,15 @@ wchar_t *utf8_to_utf16(const char *s)
             s++;
         }
         if (c < 0x10000) {
-            wstr_pushback(&v, c);
+            *p++ = c;
         } else {
             c -= 0x10000;
-            wstr_pushback(&v, 0xd800 | (c >> 10));
-            wstr_pushback(&v, 0xdc00 | (c & 0x3ff));
+            *p++ = 0xd800 | (c >> 10);
+            *p++ = 0xdc00 | (c & 0x3ff);
         }
     }
-    return wstr_mdtor(&v);
+    *p = 0;
+    return buf;
 }
 
 #define SAFE_CS2WCS L"cs2wcs() failed."

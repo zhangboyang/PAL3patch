@@ -50,6 +50,10 @@ void OpenConfigTool(CPatchConfigDlg *dlg)
 				EnumWindows(SetForegroundIfMatched, (LPARAM) &pi);
 			}
 		}
+		DWORD dwExitCode;
+		if (!GetExitCodeProcess(pi.hProcess, &dwExitCode) || dwExitCode != 0) {
+			GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_CONFIGTOOLERROR), STRTABLE(IDS_CONFIGTOOLERROR_TITLE), MB_ICONERROR);
+		}
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 	}

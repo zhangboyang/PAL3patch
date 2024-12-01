@@ -245,7 +245,7 @@ BEGIN
     IDS_CHECKFORUPDATES_INFO "服务器返回信息：%s"
     IDS_OPENCONFIGTOOLINPROGRESS "正在打开官方配置工具，请稍候 ..."
     IDS_CANTOPENCONFIGTOOL  "无法打开官方配置工具。"
-    IDS_CANTOPENCONFIGTOOL_TITLE "无法打开"
+    IDS_CANTOPENCONFIGTOOL_TITLE "无法运行"
     IDS_CONFIGDESCLIST      "CHS"
     IDS_FREETYPEFONT        "选择一个外部字体文件 ..."
     IDS_FREETYPEFONT_DESC   "使用 FreeType 引擎渲染“%s”中的第 %s 个字体。"
@@ -323,6 +323,8 @@ BEGIN
     IDS_3DAPICHG_ASKFALLBACK_TITLE "需要重置部分图形设置"
     IDS_D3DENUM_ASKFALLBACK "当前计算机不支持之前保存的部分图形设置，是否将这部分设置恢复为默认值？"
     IDS_D3DENUM_ASKFALLBACK_TITLE "图形设备环境发生变化"
+    IDS_CONFIGTOOLERROR     "官方配置工具异常退出。"
+    IDS_CONFIGTOOLERROR_TITLE "异常退出"
 END
 
 #endif    // Chinese (P.R.C.) resources
