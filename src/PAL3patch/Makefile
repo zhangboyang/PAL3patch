@@ -21,7 +21,7 @@ CCLD := $(CC)
 DLLTOOL := dlltool
 STRIP := strip
 SED := sed
-CFLAGS := -O2 -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=GB18030 -fexec-charset=UTF-8 -fwide-exec-charset=UTF-16LE -fms-extensions -mms-bitfields -fno-strict-aliasing -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-inline -fno-builtin -mfpmath=387 -isystem $(FREETYPE_INCLUDE_PATH) -I $(TARGET_DLL_INCPATH)
+CFLAGS := -O2 -fno-strict-aliasing -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-unit-at-a-time -fno-inline -fno-builtin -Wall -Wsign-compare -Wpointer-arith -Werror -finput-charset=GB18030 -fexec-charset=UTF-8 -fwide-exec-charset=UTF-16LE -fms-extensions -mms-bitfields -isystem $(FREETYPE_INCLUDE_PATH) -I $(TARGET_DLL_INCPATH)
 
 CL := cl
 LINK := link

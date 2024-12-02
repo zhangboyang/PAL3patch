@@ -2,9 +2,13 @@
 为代码开启了-O2优化，希望不会出问题
 由于代码中普遍存在指针类型互转的问题，所以必须使用-fno-strict-aliasing选项
 之前发现-O2会产生错误代码（notes20170404.txt）的情况可以用-fno-optimize-sibling-calls选项缓解
-为了生成的代码易于调试，还添加了-fno-omit-frame-pointer -fno-inline -fno-builtin这些保守的选项
+此外还添加了-fno-omit-frame-pointer -fno-unit-at-a-time -fno-inline -fno-builtin这些保守的选项
+可以使用-S -fverbose-asm查看具体已经开启的编译选项
 
 【关于使用最新版本的msys2/gcc进行编译】
 可以使用-Wmissing-prototypes -Wmissing-variable-declarations检查函数/全局变量是否已在头文件中声明
-可能需要使用-march=i686选项才能强制使用387浮点指令
+由于d3d9头文件为9.0c版本，需要禁用代码中的版本检测
+gcc使用的是msvcrt，而msvc使用的是ucrt，理论上不应混在一起链接，但是实际测试下来似乎可以正常运行
+需要使用-march=i686选项才能强制使用387浮点指令
 另外如果要启用lto优化，需要在编译时添加-ffat-lto-objects选项（否则def文件为空），并在-r链接时添加-flinker-output=nolto-rel选项（否则最终链接dll时报错）
+启用lto后，若要优化掉未在外部使用的extern符号，可在编译时添加-fvisibility=hidden，为要保留的符号添加__attribute__((visibility("default")))，并在-r链接时使用-flinker-output=dyn选项

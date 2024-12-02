@@ -135,11 +135,11 @@ BOOL CPatchConfigApp::InitInstance()
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGLOADCFG));
 	LoadConfigData();
 
-	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGENUMD3D));
-	FirstD3DEnumeration();
-
 	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGCHECKSYSTEM));
 	CheckCOMCTL32();
+
+	ShowPleaseWaitDlg(NULL, STRTABLE(IDS_WAITINGENUMD3D));
+	FirstD3DEnumeration();
 
 	DestroyPleaseWaitDlg();
 
