@@ -14,6 +14,7 @@ static HMODULE lazyUser32(void)
     return hUser32;
 }
 
+#define myDPI_AWARENESS_CONTEXT_SYSTEM_AWARE         ((void *)-2)
 #define myDPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE    ((void *)-3)
 #define myDPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 ((void *)-4)
 static int trySetProcessDpiAwarenessContext(void *value)
@@ -30,6 +31,7 @@ static int trySetProcessDpiAwarenessContext(void *value)
     return 0;
 }
 
+#define myPROCESS_SYSTEM_DPI_AWARE      1
 #define myPROCESS_PER_MONITOR_DPI_AWARE 2
 static int trySetProcessDpiAwareness(int value)
 {
@@ -61,6 +63,9 @@ static int trySetProcessDPIAware(void)
 
 MAKE_PATCHSET(dpiawareness)
 {
+    if (flag == -1) {
+        flag = is_fullscreen() ? 2 : 1;
+    }
     switch (flag) {
     case 3:
         if (trySetProcessDpiAwarenessContext(myDPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)) return;
@@ -68,6 +73,8 @@ MAKE_PATCHSET(dpiawareness)
         if (trySetProcessDpiAwarenessContext(myDPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE)) return;
         if (trySetProcessDpiAwareness(myPROCESS_PER_MONITOR_DPI_AWARE)) return;
     case 1:
+        if (trySetProcessDpiAwarenessContext(myDPI_AWARENESS_CONTEXT_SYSTEM_AWARE)) return;
+        if (trySetProcessDpiAwareness(myPROCESS_SYSTEM_DPI_AWARE)) return;
         if (trySetProcessDPIAware()) return;
     }
 }

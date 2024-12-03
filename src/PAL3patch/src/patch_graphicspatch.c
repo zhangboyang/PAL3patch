@@ -372,6 +372,11 @@ static void init_scalefactor_table()
 #define WINDOW_NOBORDER 2
 static char winname[0x80];
 
+int is_fullscreen()
+{
+    return !GET_PATCHSET_FLAG(graphicspatch) || get_int_from_configfile("game_windowed") == WINDOW_FULLSCREEN;
+}
+
 HWND game_hwnd = NULL;
 static int window_patch_cfg = -1;
 void try_goto_desktop()

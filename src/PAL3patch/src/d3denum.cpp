@@ -82,7 +82,7 @@ static void EnumMultisample(FILE *fp, CD3DEnumeration *pD3DEnum)
 				mtype = it->first;
 				maxq = it->second;
 				if (mtype == D3DMULTISAMPLE_NONE) continue;
-				for (q = 0; q < maxq; q++) {
+				for (q = maxq - 1; q >= 0; q--) {
 					fprintf(fp, " %d,%d", mtype, q);
 				}
 			}

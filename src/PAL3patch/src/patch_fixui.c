@@ -662,8 +662,7 @@ static void hook_UIRenderQuad_color()
     });
 }
 
-// there is a bug in gcc 3.4.2 that will generate wrong code for this function when -O2 is enabled
-// it is strongly recommanded that do not enable any optimization when compiling with gcc 3.4.2
+// there is a bug in gcc 3.4.2 that will generate wrong code for this function when -O2 (-foptimize-sibling-calls) is enabled
 static MAKE_THISCALL(void, gbCamera_SetDimention_wrapper_for_RenderTarget_Begin, struct gbCamera *this, int a2, int a3)
 {
     gbCamera_SetDimention(this, floor(512.0 * get_frect_width(&game_frect_sqrtex) + eps), floor(512.0 * get_frect_height(&game_frect_sqrtex) + eps));
