@@ -1662,6 +1662,13 @@ struct CCBAttackSequen {
 
 struct Archive;
 
+struct Role {
+    DWORD gap0[333];
+    struct gbVec3D m_lastautodir;
+    DWORD gap540[1837];
+    struct gbVec3D m_wanapos;
+};
+
 // GBENGINE functions
 #define gbGfxManager_D3D_Reset3DEnvironment(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001AC50, int, struct gbGfxManager_D3D *), this)
 #define gbGfxManager_D3D_BuildPresentParamsFromSettings(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(gboffset + 0x1001A190, void, struct gbGfxManager_D3D *), this)
@@ -1779,6 +1786,8 @@ struct Archive;
 #define CCBRoleState_IsAlive(this, nIndex) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004ED010, bool, struct CCBRoleState *, int), this, nIndex)
 #define Archive_Save(this, index) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00538500, BOOL, struct Archive *, int), this, index)
 #define UpdateLoading ((void (*)(void)) TOPTR(0x0041F9F0))
+#define Role_OnBehaviourFinish(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004142E0, void, struct Role *), this)
+#define Role_UpdateMove(this, deltatime, autopos) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00411E00, void, struct Role *, float, bool), this, deltatime, autopos)
 
 
 // global variables
@@ -1841,6 +1850,7 @@ struct Archive;
     assert(sizeof(struct tagAttackSequen) == 0x28); \
     assert(sizeof(struct CCBAttackSequen) == 0x1C8); \
     assert(sizeof(struct gbPrintFont_UNICODE) == 0xC4); \
+    assert(sizeof(struct Role) == 0x2200); \
 } while (0)
 
 

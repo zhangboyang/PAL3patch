@@ -12,3 +12,15 @@ gcc使用的是msvcrt，而msvc使用的是ucrt，理论上不应混在一起链
 需要使用-march=i686选项才能强制使用387浮点指令
 另外如果要启用lto优化，需要在编译时添加-ffat-lto-objects选项（否则def文件为空），并在-r链接时添加-flinker-output=nolto-rel选项（否则最终链接dll时报错）
 启用lto后，若要优化掉未在外部使用的extern符号，可在编译时添加-fvisibility=hidden，为要保留的符号添加__attribute__((visibility("default")))，并在-r链接时使用-flinker-output=dyn选项
+
+【再次决定关闭-O2编译优化】（2024.12.12）
+kahantimer在开启-O2编译优化的情况下运行不正常
+原因是gcc开启编译优化后会不遵守c99标准（c99标准要求赋值和类型转换时需要将额外的精度舍去）
+float t = PAL3_m_gametime + y;
+优化后的代码将t完全保存在x87寄存器中，使得这行代码相当于
+long double t = PAL3_m_gametime + y;
+于是kahan算法完全失去了作用
+旧版本的gcc可以通过-ffloat-store缓解此问题
+新版本的gcc默认不遵守c99标准，但可以通过-fexcess-precision=standard指定遵守c99标准
+msvc默认遵守c99标准
+为了保守起见还是关闭了-O2编译优化

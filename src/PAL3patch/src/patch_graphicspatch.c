@@ -272,8 +272,8 @@ static void patch_resolution_config(const char *cfgstr)
         game_height = GAME_HEIGHT_ORG;
     }
     
-    if ((long long) game_width * game_height > GAME_WIDTH_SOFTLIMIT * GAME_HEIGHT_SOFTLIMIT) {
-        if (MessageBoxW_format(NULL, wstr_resolutiontoolarge_text, wstr_resolutiontoolarge_title, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND, game_width, game_height, GAME_WIDTH_SOFTLIMIT, GAME_HEIGHT_SOFTLIMIT, game_width, game_height) != IDYES) {
+    if (!is_laa() && (long long) game_width * game_height > GAME_WIDTH_SOFTLIMIT * GAME_HEIGHT_SOFTLIMIT) {
+        if (MessageBoxW_format(NULL, wstr_resolutiontoolarge_text, wstr_resolutiontoolarge_title, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_SETFOREGROUND, game_width, game_height) != IDYES) {
             die(0);
         }
     }

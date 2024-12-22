@@ -66,8 +66,8 @@ static const wchar_t wstr_badiconv_title_CHS[] = L"文字编码转换失败";
 static const wchar_t wstr_resetfailed_text_CHS[] = L"无法重置 Direct3D 设备，是否重试？\n\n按【回车】键重试；\n按【ESC】键退出游戏。";
 static const wchar_t wstr_resetfailed_title_CHS[] = L"重置失败";
 
-static const wchar_t wstr_resolutiontoolarge_text_CHS[] = L"将要使用 %dx%d 分辨率进行游戏。\n但该分辨率实在太大，可能导致游戏运行不稳定或无法运行。\n\n建议您使用“补丁配置工具”指定一个低于 %dx%d 的分辨率。\n\n是否仍要使用 %dx%d 分辨率进行游戏？";
-static const wchar_t wstr_resolutiontoolarge_title_CHS[] = L"游戏分辨率过高";
+static const wchar_t wstr_resolutiontoolarge_text_CHS[] = L"将要使用 %dx%d 分辨率进行游戏，但目前未启用 LAA （大地址空间支持）。\n\n若不启用 LAA，过大的分辨率将导致游戏运行不稳定或无法运行。\n\n建议您运行“补丁配置工具”，将“图形设置——图形接口”设置为“Direct3D 9.0c (LAA)”。\n\n是否忽略该警告强行进入游戏？";
+static const wchar_t wstr_resolutiontoolarge_title_CHS[] = L"建议更换图形接口";
 
 static const wchar_t wstr_nogfxmgr_text_CHS[] = L"显卡设备初始化失败，请检查显卡驱动程序是否工作正常（或图形设置是否合适）。";
 static const wchar_t wstr_nogfxmgr_badtools_text_CHS[] = L"显卡设备初始化失败，这可能是以下工具导致的：\n\n%s\n请关闭或禁用它们，然后再试一次。";
