@@ -593,7 +593,7 @@ static ConfigDescItem LISTNAME[] = {
 		1, false, true,
 		NULL,
 		_T("恢复默认设置"),
-		_T("此功能可以将所有分辨率补丁配置项全部恢复为默认值。官方配置工具中的配置项不会被改变。"),
+		_T("此功能可以将所有分辨率补丁配置项以及官方配置工具中的选项全部恢复为默认值。"),
 		_T("如果您在修改配置文件或升级补丁版本后遇到游戏启动时报错的情况，您可以尝试用此功能将补丁配置文件重置为初始状态。"),
 		CPatchConfigDlg::RestoreAllConfigToDefault, NULL
 	},

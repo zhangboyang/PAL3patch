@@ -100,6 +100,19 @@ done:
 	return ret;
 }
 
+static int TryRebuildConfigIni()
+{
+	int ok = 0;
+	FILE *fp = robust_fopen("config.ini", "wc");
+	if (fp) {
+		const char ini_data[] = "[display]\ndrivertype=1\nwidth=800\nheight=600\ncolorbits=32\ndepthbits=16\nfullscreen=1\nsync=1\n\n[misc]\nxmusic=0\nxsnd=0\nmotionblur=1\nscursor=1\n";
+		size_t ini_len = strlen(ini_data);
+		ok = fwrite(ini_data, 1, ini_len, fp) == ini_len && fflush(fp) == 0;
+		fclose(fp);
+	}
+	return ok;
+}
+
 int TryRebuildConfigFile()
 {
 	HRSRC hRes = FindResource(NULL, MAKEINTRESOURCE(IDR_DEFCONFIG), RT_RCDATA);
@@ -113,10 +126,12 @@ int TryRebuildConfigFile()
 
 	FILE *fp = robust_fopen(CONFIG_FILE_WAL, "wb");
 	if (!fp) return 0;
-	fwrite(pData, 1, datalen, fp);
+	int ok = fwrite(pData, 1, datalen, fp) == datalen;
 	fclose(fp);
-
+	if (!ok) return 0;
 	if (!wal_replace1(CONFIG_FILE, CONFIG_FILE_WAL, CONFIG_FILE_SUM)) return 0;
+
+	if (!TryRebuildConfigIni()) return 0;
 
 	return 1;
 }
