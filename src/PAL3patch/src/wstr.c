@@ -1,5 +1,28 @@
 #include "common.h"
 
+char *unicode_to_chinese(const wchar_t *s, const wchar_t *table)
+{
+    char *buf = malloc(wcslen(s) * 2 + 1);
+    char *p = buf;
+    while (*s) {
+        unsigned short w = *s++;
+        if (w < 0x80) {
+            *p++ = w;
+        } else {
+            wchar_t *c = wmemchr(table, w, 0x8000); // very slow!!!
+            if (c) {
+                int i = (c - table) + 0x8000;
+                *p++ = i >> 8;
+                *p++ = i;
+            } else {
+                *p++ = '?';
+            }
+        }
+    }
+    *p = 0;
+    return buf;
+}
+
 wchar_t *chinese_to_unicode(const char *s, const wchar_t *table)
 {
     wchar_t *buf = malloc(sizeof(wchar_t) * (strlen(s) + 1));

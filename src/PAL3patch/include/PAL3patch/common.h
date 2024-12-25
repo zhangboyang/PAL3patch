@@ -177,6 +177,7 @@
 #include <io.h>
 #include <errno.h>
 #include <stdint.h>
+#include <wchar.h>
 
 // windows headers
 #include <windows.h>

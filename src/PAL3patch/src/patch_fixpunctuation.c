@@ -1,5 +1,14 @@
 #include "common.h"
 
+static char *convert_puncstring(const wchar_t *wstr)
+{
+    switch (target_codepage) {
+    case CODEPAGE_CHS: return unicode_to_chinese(wstr, gbktable);
+    case CODEPAGE_CHT: return unicode_to_chinese(wstr, big5table);
+    default: return wcs2cs_alloc(wstr, target_codepage);
+    }
+}
+
 struct punc_node {
     struct punc_node *next;
     char *mbch;
@@ -20,7 +29,7 @@ static struct punc_node *make_punc_list(const wchar_t *wstr)
         
         node = malloc(sizeof(struct punc_node));
         node->next = NULL;
-        node->mbch = wcs2cs_alloc(buf, target_codepage);
+        node->mbch = convert_puncstring(buf);
         assert(strlen(node->mbch) == 2);
         
         if (!head) {

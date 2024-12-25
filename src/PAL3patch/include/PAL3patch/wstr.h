@@ -2,6 +2,7 @@
 #define PAL3PATCH_WSTR_H
 // PATCHAPI DEFINITIONS
 
+extern PATCHAPI char *unicode_to_chinese(const wchar_t *s, const wchar_t *table);
 extern PATCHAPI wchar_t *chinese_to_unicode(const char *s, const wchar_t *table);
 extern PATCHAPI char *utf16_to_utf8(const wchar_t *s);
 extern PATCHAPI wchar_t *utf8_to_utf16(const char *s);

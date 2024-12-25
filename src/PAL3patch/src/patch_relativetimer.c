@@ -6,9 +6,22 @@ static DWORD WINAPI My_timeGetTime(VOID)
     return timeGetTime() - timeOffset;
 }
 
+static int usePerformanceCounter;
+
+static LARGE_INTEGER countFrequency;
+static BOOL WINAPI My_QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
+{
+    *lpFrequency = countFrequency;
+    return TRUE;
+}
+
 static LARGE_INTEGER countOffset;
 static BOOL WINAPI My_QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 {
+    if (!usePerformanceCounter) {
+        lpPerformanceCount->QuadPart = My_timeGetTime();
+        return TRUE;
+    }
     BOOL ret = QueryPerformanceCounter(lpPerformanceCount);
     if (ret) {
         lpPerformanceCount->QuadPart -= countOffset.QuadPart;
@@ -18,10 +31,17 @@ static BOOL WINAPI My_QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 
 MAKE_PATCHSET(relativetimer)
 {
-    // set offsets
+    TIMECAPS tc;
+    if (timeGetDevCaps(&tc, sizeof(tc)) == TIMERR_NOERROR) {
+        timeBeginPeriod(tc.wPeriodMin);
+    }
     timeOffset = timeGetTime();
-    if (!QueryPerformanceCounter(&countOffset)) {
-        countOffset.QuadPart = 0;
+    
+    if (QueryPerformanceFrequency(&countFrequency) && QueryPerformanceCounter(&countOffset)) {
+        usePerformanceCounter = 1;
+    } else {
+        usePerformanceCounter = 0;
+        countFrequency.QuadPart = 1000;
     }
     
     // hook timeGetTime
@@ -29,5 +49,9 @@ MAKE_PATCHSET(relativetimer)
     make_pointer(gboffset + 0x100F5228, My_timeGetTime);
     
     // hook QueryPerformanceCounter
+    make_pointer(gboffset + 0x100F5080, My_QueryPerformanceFrequency);
     make_pointer(gboffset + 0x100F507C, My_QueryPerformanceCounter);
+    
+    double highFactor = 4294967296.0;
+    memcpy_to_process(gboffset + 0x100F5B30, &highFactor, sizeof(highFactor));
 }
