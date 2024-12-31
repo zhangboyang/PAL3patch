@@ -2,7 +2,8 @@
 
 char *utf16_to_utf8(const wchar_t *s)
 {
-    std::vector<char> v;
+    char *buf = (char *)Malloc(wcslen(s) * 3 + 1);
+    char *p = buf;
     while (*s) {
         unsigned c = 0xfffd;
         unsigned short w1 = *s++;
@@ -16,34 +17,29 @@ char *utf16_to_utf8(const wchar_t *s)
             }
         }
         if (c < (1 << 7)) {
-            v.push_back(c);
+            *p++ = c;
         } else if (c < (1 << 11)) {
-            v.push_back(0xc0 | (c >> 6));
-            v.push_back(0x80 | (c & 0x3f));
+            *p++ = 0xc0 | (c >> 6);
+            *p++ = 0x80 | (c & 0x3f);
         } else if (c < (1 << 16)) {
-            v.push_back(0xe0 | (c >> 12));
-            v.push_back(0x80 | ((c >> 6) & 0x3f));
-            v.push_back(0x80 | (c & 0x3f));
+            *p++ = 0xe0 | (c >> 12);
+            *p++ = 0x80 | ((c >> 6) & 0x3f);
+            *p++ = 0x80 | (c & 0x3f);
         } else {
-            v.push_back(0xf0 | (c >> 18));
-            v.push_back(0x80 | ((c >> 12) & 0x3f));
-            v.push_back(0x80 | ((c >> 6) & 0x3f));
-            v.push_back(0x80 | (c & 0x3f));
+            *p++ = 0xf0 | (c >> 18);
+            *p++ = 0x80 | ((c >> 12) & 0x3f);
+            *p++ = 0x80 | ((c >> 6) & 0x3f);
+            *p++ = 0x80 | (c & 0x3f);
         }
     }
-    size_t l = v.size();
-    char *buf = (char *) Malloc(l + 1);
-    size_t i;
-    for (i = 0; i < l; i++) {
-        buf[i] = v[i];
-    }
-    buf[l] = 0;
+    *p = 0;
     return buf;
 }
 
 wchar_t *utf8_to_utf16(const char *s)
 {
-    std::vector<wchar_t> v;
+    wchar_t *buf = (wchar_t *)Malloc(sizeof(wchar_t) * (strlen(s) + 1));
+    wchar_t *p = buf;
     while (*s) {
         int i, n;
         unsigned c;
@@ -79,20 +75,14 @@ wchar_t *utf8_to_utf16(const char *s)
             s++;
         }
         if (c < 0x10000) {
-            v.push_back(c);
+            *p++ = c;
         } else {
             c -= 0x10000;
-            v.push_back(0xd800 | (c >> 10));
-            v.push_back(0xdc00 | (c & 0x3ff));
+            *p++ = 0xd800 | (c >> 10);
+            *p++ = 0xdc00 | (c & 0x3ff);
         }
     }
-    size_t l = v.size();
-    wchar_t *buf = (wchar_t *) Malloc((l + 1) * sizeof(wchar_t));
-    size_t i;
-    for (i = 0; i < l; i++) {
-        buf[i] = v[i];
-    }
-    buf[l] = 0;
+    *p = 0;
     return buf;
 }
 

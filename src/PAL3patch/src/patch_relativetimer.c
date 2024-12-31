@@ -31,10 +31,6 @@ static BOOL WINAPI My_QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 
 MAKE_PATCHSET(relativetimer)
 {
-    TIMECAPS tc;
-    if (timeGetDevCaps(&tc, sizeof(tc)) == TIMERR_NOERROR) {
-        timeBeginPeriod(tc.wPeriodMin);
-    }
     timeOffset = timeGetTime();
     
     if (QueryPerformanceFrequency(&countFrequency) && QueryPerformanceCounter(&countOffset)) {

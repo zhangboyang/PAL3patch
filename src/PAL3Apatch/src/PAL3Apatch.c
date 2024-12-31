@@ -181,10 +181,10 @@ static void init_stage2()
     INIT_PATCHSET(disableime);
     INIT_PATCHSET(regredirect);
     INIT_PATCHSET(console);
+    INIT_PATCHSET(timerresolution);
     INIT_PATCHSET(relativetimer);
     INIT_PATCHSET(audiofreq);
     INIT_PATCHSET(showfps);
-    INIT_PATCHSET(timerresolution);
     INIT_PATCHSET(reduceinputlatency); // should after INIT_PATCHSET(showfps)
     INIT_PATCHSET(terminateatexit);
     INIT_PATCHSET(preciseresmgr);

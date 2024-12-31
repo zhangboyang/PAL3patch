@@ -187,7 +187,7 @@ BEGIN
     IDS_NODESC              "无说明。"
     IDS_CORRUPTFILE         "检测到以下文件丢失或损坏：\n\n%s\n分辨率补丁很可能无法正常工作，是否继续？"
     IDS_CORRUPTFILE_TITLE   "文件损坏"
-    IDS_CORRUPTCONFIG       "补丁配置文件已损坏，是否将所有设置重置为默认值？"
+    IDS_CORRUPTCONFIG       "补丁配置文件已损坏，是否将所有设置重置为默认值？（该操作无法撤消）"
     IDS_CORRUPTCONFIG_TITLE "无法加载配置"
     IDS_WAITINGVERIFY       "正在校验补丁文件，请稍候 ..."
     IDS_WAITINGLOADCFG      "正在加载配置文件，请稍候 ..."
