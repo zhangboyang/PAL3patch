@@ -2282,6 +2282,8 @@ struct RoleTaskPool {
 
 struct UIDragBar;
 
+struct Console;
+
 
 // GBENGINE functions
 #define gbx2x(gbx) (((gbx) + 1.0) * PAL3_s_drvinfo.width / 2.0)
@@ -2392,6 +2394,7 @@ struct UIDragBar;
 #define UpdateLoading ((void (*)(void)) TOPTR(0x0041E824))
 #define gbCreateGraphManager ((struct gbGfxManager *(*)(struct gbGfxDriverInfo *)) TOPTR(gboffset + 0x1001DBF0))
 #define UIDragBar_SetMaxVal(this, val) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00444528, void, struct UIDragBar *, float), this, val)
+#define Console_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0052595E, void, struct Console *), this)
 
 
 

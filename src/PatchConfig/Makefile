@@ -19,4 +19,4 @@ pal3a:
 	$(MSDEV) $(TARGET_EXE_MSVC_DSP) -make "PatchConfig - Win32 Release PAL3A" -rebuild
 
 clean:
-	rm -rf $(TARGET_EXE_MSVC_TMPFILES) $(OUTPUT_DIR) PAL3patch.conf PAL3patch.in PAL3patch.out PAL3Apatch.conf PAL3Apatch.in PAL3Apatch.out save snap
+	rm -rf $(TARGET_EXE_MSVC_TMPFILES) $(OUTPUT_DIR) PAL3patch.conf PAL3patch.in PAL3patch.out PAL3Apatch.conf PAL3Apatch.in PAL3Apatch.out config.ini save snap

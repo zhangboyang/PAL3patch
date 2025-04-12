@@ -142,6 +142,7 @@
     <ClCompile Include="src\patch_fixbutton.c" />
     <ClCompile Include="src\patch_fixcombatui.c" />
     <ClCompile Include="src\patch_fixcompdonateui.c" />
+    <ClCompile Include="src\patch_fixconsole.c" />
     <ClCompile Include="src\patch_fixcoverfrm.c" />
     <ClCompile Include="src\patch_fixeffect.c" />
     <ClCompile Include="src\patch_fixfov.c" />

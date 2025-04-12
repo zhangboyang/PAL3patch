@@ -17,19 +17,21 @@ static ULONG STDMETHODCALLTYPE proxyID3DXEffect_Release(proxyID3DXEffect *this)
 }
 static HRESULT STDMETHODCALLTYPE proxyID3DXEffect_Begin(proxyID3DXEffect *this, UINT *pPasses, DWORD Flags)
 {
+    if (this->state >= 0) return D3DERR_INVALIDCALL;
     this->state = 0;
     return ID3DXEffect_Begin(this->p, pPasses, Flags);
 }
 static HRESULT STDMETHODCALLTYPE proxyID3DXEffect_Pass(proxyID3DXEffect *this, UINT Pass)
 {
-    if (this->state) ID3DXEffect_EndPass(this->p);
+    if (this->state > 0) ID3DXEffect_EndPass(this->p);
     this->state = 1;
     return ID3DXEffect_BeginPass(this->p, Pass);
 }
 static HRESULT STDMETHODCALLTYPE proxyID3DXEffect_End(proxyID3DXEffect *this)
 {
-    if (this->state) ID3DXEffect_EndPass(this->p);
-    this->state = 0;
+    if (this->state < 0) return E_FAIL;
+    if (this->state > 0) ID3DXEffect_EndPass(this->p);
+    this->state = -1;
     return ID3DXEffect_End(this->p);
 }
 static D3DXHANDLE STDMETHODCALLTYPE proxyID3DXEffect_GetParameterByName(proxyID3DXEffect *this, D3DXHANDLE hParameter, LPCSTR pName)
@@ -40,7 +42,7 @@ static HRESULT STDMETHODCALLTYPE proxyID3DXEffect_SetValue(proxyID3DXEffect *thi
 {
     HRESULT ret = ID3DXEffect_SetValue(this->p, hParameter, pData, Bytes);
     if (ret != D3D_OK) return ret;
-    return this->state ? ID3DXEffect_CommitChanges(this->p) : ret;
+    return this->state > 0 ? ID3DXEffect_CommitChanges(this->p) : ret;
 }
 static HRESULT STDMETHODCALLTYPE proxyID3DXEffect_GetValue(proxyID3DXEffect *this, D3DXHANDLE hParameter, LPVOID pData, UINT Bytes)
 {
@@ -144,7 +146,7 @@ static HRESULT WINAPI proxyD3DXCreateEffect(LPDIRECT3DDEVICE9 pDevice, LPCVOID p
     proxyID3DXEffect *this = malloc(sizeof(proxyID3DXEffect));
     this->vtbl = proxyID3DXEffectVtbl;
     this->p = TOPTR(*ppEffect);
-    this->state = 0;
+    this->state = -1;
     *ppEffect = TOPTR(this);
     return D3D_OK;
 }

@@ -227,6 +227,7 @@ static void init_stage2()
             INIT_PATCHSET(clampuilib);
             INIT_PATCHSET(fixbigmap);
             INIT_PATCHSET(fixpropui);
+            INIT_PATCHSET(fixconsole);
         }
 
         INIT_PATCHSET(fixtrail);
