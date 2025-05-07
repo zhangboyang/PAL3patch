@@ -189,6 +189,7 @@
     <ClCompile Include="FileFixer.cpp" />
     <ClCompile Include="FontEnum.cpp" />
     <ClCompile Include="fsutil.cpp" />
+    <ClCompile Include="GameLocale.cpp" />
     <ClCompile Include="HASH_SHA1.cpp" />
     <ClCompile Include="misc.cpp" />
     <ClCompile Include="MouseMsgButton.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="FileFixer.h" />
     <ClInclude Include="FontEnum.h" />
     <ClInclude Include="fsutil.h" />
+    <ClInclude Include="GameLocale.h" />
     <ClInclude Include="HASH_SHA1.h" />
     <ClInclude Include="misc.h" />
     <ClInclude Include="MouseMsgButton.h" />

@@ -119,6 +119,8 @@
 #define IDS_D3DENUM_ASKFALLBACK_TITLE   114
 #define IDS_CONFIGTOOLERROR             115
 #define IDS_CONFIGTOOLERROR_TITLE       116
+#define IDS_BADPATH                     117
+#define IDS_BADPATH_TITLE               118
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129
 #define IDD_PLEASEWAIT                  130

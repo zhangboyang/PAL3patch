@@ -59,7 +59,7 @@ int TrySetUACVirtualization(bool en)
 	}
 }
 
-void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz)
+void GetUACVirtualizedCurrentDirectory(LPCTSTR testfile, LPTSTR out, DWORD outsz)
 {
 	// if succeed, return buffer always ends with "\"
 	// if failed or no-UAC, return buffer contains empty string
@@ -74,6 +74,8 @@ void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz)
 	int wflag = 0;
 	DWORD r;
 	size_t l;
+
+	if (!testfile) testfile = UACTESTFILE;
 
 	// early test for no-UAC
 	if (InitSetUACVirtualization() < 0) goto fail;
@@ -102,14 +104,14 @@ void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz)
 
 	// construct mapped test file path in curdir
 	_tcscpy(curdir, storedir);
-	if (_tcslen(curdir) + _tcslen(UACTESTFILE) >= BUFLEN) goto fail;
-	_tcscat(curdir, UACTESTFILE);
+	if (_tcslen(curdir) + _tcslen(testfile) >= BUFLEN) goto fail;
+	_tcscat(curdir, testfile);
 
 	// generate test data
 	GetLocalTime(&wdata);
 
 	// write test file
-    wfp = _tfopen(UACTESTFILE, _T("wb"));
+    wfp = _tfopen(testfile, _T("wb"));
 	if (!wfp) goto fail;
 	wflag = 1;
 	if (fwrite(&wdata, sizeof(wdata), 1, wfp) != 1) goto fail;
@@ -132,7 +134,7 @@ done:
 	// free resource
 	if (wfp) fclose(wfp);
 	if (rfp) fclose(rfp);
-	if (wflag) _tunlink(UACTESTFILE);
+	if (wflag) _tunlink(testfile);
 	return;
 
 fail:

@@ -198,6 +198,10 @@ SOURCE=.\fsutil.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\GameLocale.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\HASH_SHA1.cpp
 # End Source File
 # Begin Source File
@@ -328,6 +332,10 @@ SOURCE=.\FontEnum.h
 # Begin Source File
 
 SOURCE=.\fsutil.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\GameLocale.h
 # End Source File
 # Begin Source File
 

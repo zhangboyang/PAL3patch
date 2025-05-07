@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 
-static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR subdir)
+static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR testfile, LPCTSTR subdir)
 {
 	static TCHAR curdir[MAXLINE];
 	static bool curdir_flag = false;
@@ -15,7 +15,8 @@ static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR subdir)
 	ShowPleaseWaitDlg(dlg, msg);
 
 	if (!curdir_flag) {
-		GetUACVirtualizedCurrentDirectory(curdir, MAXLINE);
+		GetUACVirtualizedCurrentDirectory(testfile, curdir, MAXLINE);
+		if (!curdir[0]) GetUACVirtualizedCurrentDirectory(NULL, curdir, MAXLINE);
 		curdir_flag = true;
 	}
 
@@ -42,12 +43,12 @@ void OpenSaveFolder(CPatchConfigDlg *dlg)
 {
 	dlg->SetTopMost(false);
 	create_dir("save");
-	OpenGameFolder(dlg, _T("save"));
+	OpenGameFolder(dlg, _T("save\\savetest.tmp"), _T("save"));
 }
 
 void OpenSnapFolder(CPatchConfigDlg *dlg)
 {
 	dlg->SetTopMost(false);
 	create_dir("snap");
-	OpenGameFolder(dlg, _T("snap"));
+	OpenGameFolder(dlg, _T("snap\\snaptest.tmp"), _T("snap"));
 }

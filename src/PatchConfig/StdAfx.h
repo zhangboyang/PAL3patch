@@ -82,6 +82,7 @@ typedef unsigned int uint32_t;
 #include "PleaseWaitDlg.h"
 #include "UACVirtualization.h"
 #include "TempCommand.h"
+#include "GameLocale.h"
 #include "misc.h"
 #include "wstr.h"
 #include "fsutil.h"

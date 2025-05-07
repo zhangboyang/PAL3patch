@@ -1,6 +1,8 @@
 #include "common.h"
 
 static int screenshot_flag = 0;
+static const char *screenshot_ext;
+static D3DXIMAGE_FILEFORMAT screenshot_fmt;
 
 #define SCREENSHOT_MSG_TIME 5000
 static wchar_t screenshot_msg[MAXLINE];
@@ -18,12 +20,12 @@ static void screenshot_hook()
         char buf[MAXLINE];
         SYSTEMTIME SystemTime;
         GetLocalTime(&SystemTime);
-        snprintf(buf, sizeof(buf), "snap\\%04hu%02hu%02hu_%02hu%02hu%02hu_%03hu.bmp", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds);
+        snprintf(buf, sizeof(buf), "snap\\%04hu%02hu%02hu_%02hu%02hu%02hu_%03hu.%s", SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond, SystemTime.wMilliseconds, screenshot_ext);
     
         // save image
         IDirect3DSurface9 *suf = NULL;
         if (SUCCEEDED(IDirect3DDevice9_GetBackBuffer(GB_GfxMgr->m_pd3dDevice, 0, 0, D3DBACKBUFFER_TYPE_MONO, &suf))) {
-            if (SUCCEEDED(myD3DXSaveSurfaceToFileA(buf, D3DXIFF_BMP, suf, NULL, NULL))) {
+            if (SUCCEEDED(myD3DXSaveSurfaceToFileA(buf, screenshot_fmt, suf, NULL, NULL))) {
                 snwprintf(screenshot_msg, sizeof(screenshot_msg) / sizeof(wchar_t), wstr_screenshot_msg, buf);
                 screenshot_msg_time = timeGetTime();
                 screenshot_msg_enable = 1;
@@ -83,6 +85,17 @@ static void screenshot_grpkbdstate_hook()
 MAKE_PATCHSET(screenshot)
 {
     screenshot_enabled = 1;
+    screenshot_ext = get_string_from_configfile("screenshotformat");
+    if (stricmp(screenshot_ext, "bmp") == 0) {
+        screenshot_fmt = D3DXIFF_BMP;
+    } else if (stricmp(screenshot_ext, "png") == 0) {
+        screenshot_fmt = D3DXIFF_PNG;
+    } else if (stricmp(screenshot_ext, "jpg") == 0) {
+        screenshot_fmt = D3DXIFF_JPG;
+    } else {
+        fail("unsupported screenshot format '%s'.", screenshot_ext);
+    }
+
     add_preendscene_hook(screenshot_hook);
     
     add_postwndproc_hook(screenshot_wndproc_hook);

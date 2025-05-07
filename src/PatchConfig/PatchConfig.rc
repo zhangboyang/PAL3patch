@@ -325,6 +325,8 @@ BEGIN
     IDS_D3DENUM_ASKFALLBACK_TITLE "图形设备环境发生变化"
     IDS_CONFIGTOOLERROR     "官方配置工具异常退出。"
     IDS_CONFIGTOOLERROR_TITLE "异常退出"
+    IDS_BADPATH             "请将游戏文件置于全英文路径下，以防游戏运行出现问题。"
+    IDS_BADPATH_TITLE       "提示"
 END
 
 #endif    // Chinese (P.R.C.) resources
