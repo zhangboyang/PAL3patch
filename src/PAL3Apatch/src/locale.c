@@ -36,7 +36,8 @@ static const int defaultfont_ftindex_CHS = 0;
 static const DWORD defaultfont_charset_CHS = GB2312_CHARSET;
 static const int defaultfont_bold_CHS = 48;
 
-static const wchar_t wstr_defaultfont_CHS[] = L"宋体";
+static const wchar_t wstr_defaultfont_CHS[] = L"SimSun";
+static const wchar_t wstr_defaultfont_localized_CHS[] = L"宋体";
 static const wchar_t wstr_gameloading_CHS[] = L"游戏加载中，请稍候……";
 
 static const wchar_t wstr_cantsavereg_text_CHS[] = L"无法保存注册表存档文件，请确认游戏对存档文件有写入权限，是否重试？\n注意：若取消，前尘忆梦的解锁状态、捉鬼小游戏的关卡进度可能会丢失。";
@@ -108,7 +109,9 @@ static const int defaultfont_ftindex_CHT = 0;
 static const DWORD defaultfont_charset_CHT = CHINESEBIG5_CHARSET;
 static const int defaultfont_bold_CHT = 32;
 
-static const wchar_t wstr_defaultfont_CHT[] = L"細明體";
+static const wchar_t wstr_defaultfont_CHT[] = L"MingLiU";
+static const wchar_t wstr_defaultfont_localized_CHT[] = L"細明體";
+static const wchar_t wstr_gameloading_CHT[] = L"遊戲載入中，請稍候……";
 
 // FIXME: add more translations
 
@@ -219,6 +222,8 @@ void init_locale_early()
 
 void init_locale()
 {
+    const wchar_t *wstr_defaultfont_localized;
+
     // no translations yet
     IMPORT_LOCALE_ITEM(CHS, wstr_about_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_about_text);
@@ -229,6 +234,7 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, defaultfont_charset);
     IMPORT_LOCALE_ITEM(CHS, defaultfont_bold);
     IMPORT_LOCALE_ITEM(CHS, wstr_defaultfont);
+    IMPORT_LOCALE_ITEM(CHS, wstr_defaultfont_localized);
     IMPORT_LOCALE_ITEM(CHS, wstr_gameloading);
     IMPORT_LOCALE_ITEM(CHS, wstr_cantsavereg_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_cantsavereg_title);
@@ -266,7 +272,13 @@ void init_locale()
         IMPORT_LOCALE_ITEM(CHT, defaultfont_charset);
         IMPORT_LOCALE_ITEM(CHT, defaultfont_bold);
         IMPORT_LOCALE_ITEM(CHT, wstr_defaultfont);
+        IMPORT_LOCALE_ITEM(CHT, wstr_defaultfont_localized);
+        IMPORT_LOCALE_ITEM(CHT, wstr_gameloading);
         // FIXME
+    }
+
+    if (is_win9x() && system_codepage == target_codepage) {
+        wstr_defaultfont = wstr_defaultfont_localized;
     }
 }
 

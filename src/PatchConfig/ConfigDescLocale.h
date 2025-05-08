@@ -154,8 +154,8 @@ static ConfigDescItem LISTNAME[] = {
 		NULL, NULL,
 		{
 			{ _T("Direct3D 9.0b"), _T("选择此选项后，游戏将使用 Direct3D 9.0b 图形接口绘制游戏画面。"), _T("0,31,d3d9.dll") },
-			{ _T("Direct3D 9.0c"), _T("选择此选项后，游戏将使用 Direct3D 9.0c (June 2010) 图形接口绘制游戏画面。需要 Windows XP 或更高版本操作系统。"), _T("0,32,d3d9.dll") },
-			{ _T("Direct3D 9.0c (LAA)"), _T("选择此选项后，游戏将使用 Direct3D 9.0c (June 2010) 图形接口绘制游戏画面，并启用 LAA （大地址空间支持）。需要 Windows XP 或更高版本操作系统。"), _T("1,32,d3d9.dll") },
+			{ _T("Direct3D 9.0c"), _T("选择此选项后，游戏将使用 Direct3D 9.0c (June 2010) 图形接口绘制游戏画面。"), _T("0,32,d3d9.dll") },
+			{ _T("Direct3D 9.0c (LAA)"), _T("选择此选项后，游戏将使用 Direct3D 9.0c (June 2010) 图形接口绘制游戏画面，并启用 LAA （大地址空间支持）。"), _T("1,32,d3d9.dll") },
 		},
 		NULL,
 		On3DAPIConfigChange,
@@ -513,9 +513,9 @@ static ConfigDescItem LISTNAME[] = {
 		NULL,
 		NULL, NULL,
 		{
-			{ _T("BMP"), _T("截屏文件将会保存为 BMP 格式（截屏速度最快，画质无损，文件占用空间很大）。"), _T("bmp") },
-			{ _T("PNG"), _T("截屏文件将会保存为 PNG 格式（截屏速度最慢，画质无损，文件占用空间较大）。"), _T("png") },
-			{ _T("JPG"), _T("截屏文件将会保存为 JPG 格式（截屏速度适中，画质有损，文件占用空间较小）。"), _T("jpg") },
+			{ _T("BMP"), _T("截屏图片将会以 BMP 格式保存（截屏速度最快，画质无损，文件占用空间很大）。"), _T("bmp") },
+			{ _T("PNG"), _T("截屏图片将会以 PNG 格式保存（截屏速度最慢，画质无损，文件占用空间较大）。"), _T("png") },
+			{ _T("JPG"), _T("截屏图片将会以 JPG 格式保存（截屏速度适中，画质有损，文件占用空间较小）。"), _T("jpg") },
 		}
 	},
 	{
