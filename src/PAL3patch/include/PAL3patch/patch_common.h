@@ -35,6 +35,7 @@ extern PATCHAPI void print_wstring_begin(void);
 #define FONTID_U16_SCALED (print_wstring_getfontid(PRINTWSTR_U16, game_scalefactor))
 #define FONTID_U20_SCALED (print_wstring_getfontid(PRINTWSTR_U20, game_scalefactor))
 extern PATCHAPI void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color);
+extern PATCHAPI void print_wstring_calcrect(int fontid, LPCWSTR wstr, int left, int top, RECT *out);
 extern PATCHAPI void print_wstring_end(void);
 
 
@@ -248,6 +249,7 @@ MAKE_PATCHSET(graphicspatch);
         extern void set_showcursor_state(int show);
         
         MAKE_PATCHSET(uireplacefont);
+            extern int try_init_d3dxfont(void);
             // enum PRINTWSTR_Uxx is in the PATCHAPI part of this file
             extern void print_wstring_begin(void);
             extern void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color);

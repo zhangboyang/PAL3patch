@@ -288,8 +288,8 @@ int MessageBoxW_utf8format(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uTyp
     char buf[MAXLINE];
     vsnprintf(buf, MAXLINE, lpText, ap);
     cs2wcs_managed(buf, CP_UTF8, &text);
-    cs2wcs_managed(lpCaption, CP_UTF8, &caption);
-    ret = MessageBoxW(hWnd, text, caption, uType);
+    if (lpCaption) cs2wcs_managed(lpCaption, CP_UTF8, &caption);
+    ret = MessageBoxW(hWnd, text, (lpCaption ? caption : NULL), uType);
     free(text);
     free(caption);
     va_end(ap);

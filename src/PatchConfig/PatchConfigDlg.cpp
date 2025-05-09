@@ -222,13 +222,9 @@ void CPatchConfigDlg::SelectConfigItem(ConfigDescItem *pItem)
 
 	if (pItem->enumobj) {
 		if (reload) pItem->enumobj->EnumConfigValues(m_EnumList);
-		std::vector<CString>::iterator it;
-		for (it = m_EnumList.begin(); it != m_EnumList.end(); it++) {
-			if (pItem->enumobj->IsValueEqual(*it, *pItem->pvalue)) {
-				m_OptDesc = pItem->enumobj->GetValueDescription(*pItem->pvalue);
-				descflag = 1;
-				break;
-			}
+		if (pItem->enumobj->IsValueLegal(m_EnumList, *pItem->pvalue)) {
+			m_OptDesc = pItem->enumobj->GetValueDescription(*pItem->pvalue);
+			descflag = 1;
 		}
 		if (reload) m_ChooseBtn.ShowWindow(SW_SHOW);
 	} else {

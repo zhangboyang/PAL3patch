@@ -390,25 +390,40 @@ static int ftfont_draw_char(struct ftfont *font, wchar_t c, int left, int top, D
     left += font->xshift;
     if (ch && ch->tex) {
         adv = ch->adv;
-        RECT rc;
-        set_rect_ltwh(&rc, ch->u, ch->v, ch->w, ch->h);
-        left += ch->l;
-        top -= ch->t;
-        D3DXVECTOR3 pos = { left, top, 0.0f };
-        myID3DXSprite_Draw(sprite, ch->tex->tex, &rc, NULL, &pos, color);
+        if (sprite) {
+            RECT rc;
+            set_rect_ltwh(&rc, ch->u, ch->v, ch->w, ch->h);
+            left += ch->l;
+            top -= ch->t;
+            D3DXVECTOR3 pos = { left, top, 0.0f };
+            myID3DXSprite_Draw(sprite, ch->tex->tex, &rc, NULL, &pos, color);
+        }
     }
     return adv;
 }
 
-void ftfont_draw(struct ftfont *font, const wchar_t *wstr, int left, int top, D3DCOLOR color, ID3DXSprite *sprite)
+static void ftfont_draw_string(struct ftfont *font, const wchar_t *wstr, int left, int top, D3DCOLOR color, ID3DXSprite *sprite, RECT *bound)
 {
+    if (bound) set_rect(bound, left, top, left, top);
+    int hadv = font->size * font->face->height / font->face->units_per_EM;
     int nleft;
     for (nleft = left; *wstr; wstr++) {
         if (*wstr == '\n') {
             nleft = left;
-            top += font->size * font->face->height / font->face->units_per_EM;
+            top += hadv;
         } else if (*wstr != '\r') {
             nleft += ftfont_draw_char(font, *wstr, nleft, top, color, sprite);
+            if (bound) bound->right = imax(bound->right, nleft);
         }
     }
+    if (bound) bound->bottom = imax(bound->bottom, top + hadv);
+}
+
+void ftfont_draw(struct ftfont *font, const wchar_t *wstr, int left, int top, D3DCOLOR color, ID3DXSprite *sprite)
+{
+    ftfont_draw_string(font, wstr, left, top, color, sprite, NULL);
+}
+void ftfont_calcrect(struct ftfont *font, const wchar_t *wstr, int left, int top, RECT *out)
+{
+    ftfont_draw_string(font, wstr, left, top, 0, NULL, out);
 }

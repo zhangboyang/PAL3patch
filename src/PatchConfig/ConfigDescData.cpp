@@ -9,6 +9,16 @@ bool ConfigDescOptionListEnum::IsValueEqual(const CString &lstval, const CString
 {
 	return lstval == selval;
 }
+bool ConfigDescOptionListEnum::IsValueLegal(const std::vector<CString> &lst, const CString &selval)
+{
+	std::vector<CString>::const_iterator it;
+	for (it = lst.begin(); it != lst.end(); it++) {
+		if (IsValueEqual(*it, selval)) {
+			return true;
+		}
+	}
+	return false;
+}
 CString ConfigDescOptionListEnum::GetValueTitle(const CString &value)
 {
 	return value;

@@ -125,6 +125,16 @@ void EnumDisplayMode::EnumConfigValues(std::vector<CString> &result)
 	result.insert(result.end(), d3denum.displaymode.begin(), d3denum.displaymode.end());
 	result.push_back(CString(_T("800x600")));
 }
+bool EnumDisplayMode::IsValueLegal(const std::vector<CString> &lst, const CString &selval)
+{
+	if (ConfigDescOptionListEnum::IsValueLegal(lst, selval)) return true;
+	int width, height;
+	if (_stscanf(selval, _T("%dx%d"), &width, &height) != 2) return false;
+	if (width <= 0 || height <= 0) return false;
+	CString str;
+	str.Format(_T("%dx%d"), width, height);
+	return selval == str;
+}
 CString EnumDisplayMode::GetValueTitle(const CString &value)
 {
 	if (value == CString(_T("current"))) {

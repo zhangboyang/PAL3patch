@@ -4,7 +4,7 @@
 // replace font using D3DXFont
 #define PRINTWSTR_MAXFONTS (PRINTWSTR_COUNT * (SCALEFACTOR_COUNT + 1))
 
-static int d3dxfont_initflag = 0;
+static int d3dxfont_initflag = -1;
 static DWORD d3dxfont_charset;
 static int d3dxfont_quality;
 static LPCWSTR d3dxfont_facename;
@@ -65,7 +65,7 @@ static int d3dxfont_getfontid_orig(int fontsize_orig)
 
 int print_wstring_getfontid(int fontid_orig, double scalefactor)
 {
-    if (!d3dxfont_initflag) return -1;
+    if (d3dxfont_initflag <= 0) return -1;
     
     struct d3dxfont_desc key = {
         .fontsize = MAKE_INT_FONTSIZE(fontid_orig, scalefactor),
@@ -237,8 +237,14 @@ static void d3dxfont_preload(int charset_level)
         }
     }
 }
-static void d3dxfont_init()
+int try_init_d3dxfont(void)
 {
+    // NOTE: try_init_d3dxfont() may be called outside of this module
+    //    d3dxfont_initflag < 0   d3dxfont disabled
+    //    d3dxfont_initflag == 0  d3dxfont need initialize
+    //    d3dxfont_initflag > 0   d3dxfont already initialized
+    if (d3dxfont_initflag != 0) return d3dxfont_initflag;
+    
     // the init function must called after IDirect3DDevice is initialized
     // the scalefactors should have been set at this time
     
@@ -284,9 +290,6 @@ static void d3dxfont_init()
         }
     }
     
-    // do preload
-    d3dxfont_preload(get_int_from_configfile("uireplacefont_preloadcharset"));
-    
     if (FAILED(myD3DXCreateSprite(GB_GfxMgr->m_pd3dDevice, &d3dxfont_sprite))) {
         fail("can't create sprite for font replacing.");
     }
@@ -296,6 +299,34 @@ static void d3dxfont_init()
     }
     
     d3dxfont_initflag = 1;
+    
+    // draw loading splash
+    IDirect3DDevice9_Clear(GB_GfxMgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);
+    IDirect3DDevice9_BeginScene(GB_GfxMgr->m_pd3dDevice);
+    print_wstring_begin();
+    int splash_fontid = FONTID_U16_SCALED;
+    int splash_padding = 20;
+    RECT splash_rect;    
+    fRECT splash_frect;
+    print_wstring_calcrect(splash_fontid, wstr_gameloading, 0, 0, &splash_rect);
+    set_frect_rect(&splash_frect, &splash_rect);
+    transform_frect(&splash_frect, &splash_frect, &splash_frect, &game_frect, TR_HIGH, TR_HIGH, 1.0);
+    translate_frect_rel(&splash_frect, &splash_frect, -splash_padding * game_scalefactor, -splash_padding * game_scalefactor);
+    set_rect_frect(&splash_rect, &splash_frect);
+    print_wstring(splash_fontid, wstr_gameloading, splash_rect.left, splash_rect.top, 0xFFFFFFFF);
+    print_wstring_end();
+    IDirect3DDevice9_EndScene(GB_GfxMgr->m_pd3dDevice);
+    IDirect3DDevice9_Present(GB_GfxMgr->m_pd3dDevice, NULL, NULL, NULL, NULL);
+    
+    // do preload
+    d3dxfont_preload(get_int_from_configfile("uireplacefont_preloadcharset"));
+    
+    return d3dxfont_initflag;
+}
+static void d3dxfont_init()
+{
+    try_init_d3dxfont();
+    assert(d3dxfont_initflag > 0);
 }
 
 
@@ -304,7 +335,7 @@ static void d3dxfont_init()
 //       must check init flag first!
 void print_wstring_begin()
 {
-    if (!d3dxfont_initflag) return;
+    if (d3dxfont_initflag <= 0) return;
     
     // save device state
     IDirect3DStateBlock9_Capture(d3dxfont_stateblock);
@@ -323,23 +354,47 @@ void print_wstring_begin()
     IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_ALPHATESTENABLE, FALSE);
     IDirect3DDevice9_SetRenderState(GB_GfxMgr->m_pd3dDevice, D3DRS_MULTISAMPLEANTIALIAS, FALSE);
 }
-void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color)
+static void print_wstring_impl(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color, RECT *bound)
 {
-    if (!d3dxfont_initflag || fontid < 0) return;
+    if (d3dxfont_initflag <= 0 || fontid < 0) {
+        if (bound) {
+            set_rect(bound, left, top, left, top);
+        }
+        return;
+    }
     
     ID3DXSprite *sprite = d3dxfont_sprite;
     struct d3dxfont_desc *font = &d3dxfont_fontlist[fontid];
     if (font->use_ftfont) {
-        ftfont_draw(font->pftfont, wstr, left, top, color, sprite);
+        if (bound) {
+            ftfont_calcrect(font->pftfont, wstr, left, top, bound);
+        } else {
+            ftfont_draw(font->pftfont, wstr, left, top, color, sprite);
+        }
     } else {
         RECT rc;
         set_rect(&rc, left, top, 0, 0);
-        myID3DXFont_DrawTextW(font->pfont, sprite, wstr, -1, &rc, DT_NOCLIP, color);
+        if (bound) {
+            int height = myID3DXFont_DrawTextW(font->pfont, sprite, wstr, -1, &rc, DT_CALCRECT, color);
+            set_rect(bound, left, top, rc.right, top + height);
+        } else {
+            myID3DXFont_DrawTextW(font->pfont, sprite, wstr, -1, &rc, DT_NOCLIP, color);
+        }
     }
+}
+void print_wstring(int fontid, LPCWSTR wstr, int left, int top, D3DCOLOR color)
+{
+    print_wstring_impl(fontid, wstr, left, top, color, NULL);
+}
+void print_wstring_calcrect(int fontid, LPCWSTR wstr, int left, int top, RECT *out)
+{
+    assert(out);
+    //assert(!wcschr(wstr, '\n'));
+    print_wstring_impl(fontid, wstr, left, top, 0, out);
 }
 void print_wstring_end()
 {
-    if (!d3dxfont_initflag) return;
+    if (d3dxfont_initflag <= 0) return;
     
     // end drawing strings
     myID3DXSprite_End(d3dxfont_sprite);
@@ -536,6 +591,7 @@ static void ui_replacefont_d3dxfont_init()
 
     
     // add hooks
+    d3dxfont_initflag = 0;
     add_postd3dcreate_hook(d3dxfont_init);
     add_onlostdevice_hook(d3dxfont_onlostdevice);
     add_onresetdevice_hook(d3dxfont_onresetdevice);

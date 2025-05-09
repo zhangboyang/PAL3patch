@@ -8,6 +8,7 @@ extern PATCHAPI struct ftfont *ftfont_create(const char *filename, int face_inde
 extern PATCHAPI void ftfont_preload_range(struct ftfont *font, wchar_t low, wchar_t high);
 extern PATCHAPI void ftfont_preload_string(struct ftfont *font, const wchar_t *wstr);
 extern PATCHAPI void ftfont_draw(struct ftfont *font, const wchar_t *wstr, int left, int top, D3DCOLOR color, ID3DXSprite *sprite);
+extern PATCHAPI void ftfont_calcrect(struct ftfont *font, const wchar_t *wstr, int left, int top, RECT *out);
 
 
 #ifdef PATCHAPI_EXPORTS

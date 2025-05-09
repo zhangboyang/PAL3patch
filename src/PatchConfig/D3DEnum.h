@@ -10,6 +10,7 @@ extern bool On3DAPIConfigChange(CPatchConfigDlg *dlg, const CString &oldvalue, c
 extern class EnumDisplayMode : public ConfigDescOptionListEnum {
 public:
 	virtual void EnumConfigValues(std::vector<CString> &result);
+	virtual bool IsValueLegal(const std::vector<CString> &lst, const CString &selval);
 	virtual CString GetValueTitle(const CString &value);
 	virtual CString GetValueDescription(const CString &value);
 } EnumDisplayModeInstance;

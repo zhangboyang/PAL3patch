@@ -787,6 +787,9 @@ double str2scalefactor(const char *str)
 
 static void loading_splash()
 {
+    // delegate loading splash to uireplacefont if possible
+    if (try_init_d3dxfont() > 0) return;
+    
     IDirect3DDevice9_Clear(GB_GfxMgr->m_pd3dDevice, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);
     IDirect3DDevice9_BeginScene(GB_GfxMgr->m_pd3dDevice);
     
