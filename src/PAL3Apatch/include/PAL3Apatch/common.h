@@ -231,10 +231,7 @@
 
 
 #if defined(USE_PAL3A_DEFINITIONS) && !defined(__cplusplus)
-// bool
-typedef unsigned char bool;
-#define true 1
-#define false 0
+#include <stdbool.h>
 #endif
 
 

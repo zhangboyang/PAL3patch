@@ -3,9 +3,6 @@
 
 static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR testfile, LPCTSTR subdir)
 {
-	static TCHAR curdir[MAXLINE];
-	static bool curdir_flag = false;
-
 	TCHAR buf[MAXLINE];
 	LPCTSTR openpath;
 	CString msg;
@@ -14,13 +11,9 @@ static void OpenGameFolder(CPatchConfigDlg *dlg, LPCTSTR testfile, LPCTSTR subdi
 	msg.Format(IDS_OPENGAMEFOLDERINPROGRESS, subdir);
 	ShowPleaseWaitDlg(dlg, msg);
 
-	if (!curdir_flag) {
-		GetUACVirtualizedCurrentDirectory(testfile, curdir, MAXLINE);
-		if (!curdir[0]) GetUACVirtualizedCurrentDirectory(NULL, curdir, MAXLINE);
-		curdir_flag = true;
-	}
+	GetUACVirtualizedCurrentDirectory(testfile, buf, MAXLINE);
+	if (!buf[0]) GetUACVirtualizedCurrentDirectory(NULL, buf, MAXLINE);
 
-	_tcscpy(buf, curdir);
 	if (_tcslen(buf) + _tcslen(subdir) >= MAXLINE) {
 		openpath = subdir;
 	} else {
