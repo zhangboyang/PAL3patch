@@ -14,6 +14,7 @@ extern PATCHAPI int create_dir(const char *dirpath);
 extern PATCHAPI int dir_exists(const char *dirpath);
 extern PATCHAPI int file_exists(const char *filepath);
 extern PATCHAPI int reset_attrib(const char *filepath);
+extern PATCHAPI int batch_delete(const char *filepath[], int n);
 
 
 #ifdef PATCHAPI_EXPORTS

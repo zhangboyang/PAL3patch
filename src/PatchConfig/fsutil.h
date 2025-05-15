@@ -7,6 +7,6 @@ extern int file_exists(const char *filepath);
 extern int reset_attrib(const char *filepath);
 extern FILE *robust_fopen(const char *filename, const char *mode);
 extern int safe_fclose(FILE **fp);
-extern int robust_unlink(const char *filename);
+extern int batch_delete(const char *filepath[], int n);
 
 #endif

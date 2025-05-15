@@ -1,11 +1,11 @@
 #include "common.h"
 
-static void GetUACVirtualizedCurrentDirectory(LPSTR out, DWORD outsz);
+static void GetUACVirtualizedCurrentDirectory(LPCSTR testfile, LPSTR out, DWORD outsz);
 
 static void try_register_install_dir_for_PAL3A()
 {
     char installdir[MAXLINE];
-    GetUACVirtualizedCurrentDirectory(installdir, sizeof(installdir));
+    GetUACVirtualizedCurrentDirectory("save\\savetest.tmp", installdir, sizeof(installdir));
     if (!installdir[0]) {
         DWORD r = GetCurrentDirectory(sizeof(installdir), installdir);
         if (r == 0 || r >= MAXLINE) return;
@@ -50,6 +50,7 @@ MAKE_PATCHSET(reginstalldir)
 
 #undef TCHAR
 #undef LPTSTR
+#undef LPCTSTR
 #undef _T
 #undef _tcscmp
 #undef _tcslen
@@ -59,6 +60,7 @@ MAKE_PATCHSET(reginstalldir)
 #undef _tunlink
 #define TCHAR char
 #define LPTSTR LPSTR
+#define LPCTSTR LPCSTR
 #define _T(x) x
 #define _tcscmp strcmp
 #define _tcslen strlen
@@ -72,7 +74,7 @@ MAKE_PATCHSET(reginstalldir)
 // copied from PatchConfig/UACVirtualization.cpp
 //
 
-static void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz)
+void GetUACVirtualizedCurrentDirectory(LPCTSTR testfile, LPTSTR out, DWORD outsz)
 {
 	// if succeed, return buffer always ends with "\"
 	// if failed or no-UAC, return buffer contains empty string
@@ -82,11 +84,15 @@ static void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz)
 #define UACSTOREROOT _T("%LOCALAPPDATA%\\VirtualStore")
 
 	TCHAR curdir[BUFLEN], storedir[BUFLEN];
-	SYSTEMTIME wdata, rdata;
+	SYSTEMTIME now;
+#define TESTLEN 32
+	char wdata[TESTLEN + 1], rdata[TESTLEN];
 	FILE *wfp = NULL, *rfp = NULL;
 	int wflag = 0;
 	DWORD r;
 	size_t l;
+
+	if (!testfile) testfile = UACTESTFILE;
 
 	// early test for no-UAC
 	if (InitSetUACVirtualization() < 0) goto fail;
@@ -97,7 +103,7 @@ static void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz)
 
 	// get current directory
 	r = GetCurrentDirectory(BUFLEN, curdir);
-	if (r == 0 || r > BUFLEN) goto fail;
+	if (r == 0 || r >= BUFLEN) goto fail;
 	if (!(_T('A') <= curdir[0] && curdir[0] <= _T('Z')) && !(_T('a') <= curdir[0] && curdir[0] <= _T('z'))) goto fail;
 	if (curdir[1] != _T(':') || curdir[2] != _T('\\')) goto fail;
 
@@ -115,27 +121,28 @@ static void GetUACVirtualizedCurrentDirectory(LPTSTR out, DWORD outsz)
 
 	// construct mapped test file path in curdir
 	_tcscpy(curdir, storedir);
-	if (_tcslen(curdir) + _tcslen(UACTESTFILE) >= BUFLEN) goto fail;
-	_tcscat(curdir, UACTESTFILE);
+	if (_tcslen(curdir) + _tcslen(testfile) >= BUFLEN) goto fail;
+	_tcscat(curdir, testfile);
 
 	// generate test data
-	GetLocalTime(&wdata);
+	GetLocalTime(&now);
+	sprintf(wdata, "%04x%04x%04x%04x%04x%04x%04x%04x", now.wYear, now.wMonth, now.wDayOfWeek, now.wDay, now.wHour, now.wMinute, now.wSecond, now.wMilliseconds);
 
 	// write test file
-    wfp = _tfopen(UACTESTFILE, _T("wb"));
+	wfp = _tfopen(testfile, _T("wb"));
 	if (!wfp) goto fail;
 	wflag = 1;
-	if (fwrite(&wdata, sizeof(wdata), 1, wfp) != 1) goto fail;
+	if (fwrite(wdata, 1, TESTLEN, wfp) != TESTLEN) goto fail;
 	fclose(wfp); wfp = NULL;
 
 	// read test file
 	rfp = _tfopen(curdir, _T("rb"));
 	if (!rfp) goto fail;
-	if (fread(&rdata, sizeof(rdata), 1, rfp) != 1) goto fail;
+	if (fread(rdata, 1, TESTLEN, rfp) != TESTLEN) goto fail;
 	fclose(rfp); rfp = NULL;
 
 	// compare test data
-	if (memcmp(&wdata, &rdata, sizeof(wdata)) != 0) goto fail;
+	if (memcmp(wdata, rdata, TESTLEN) != 0) goto fail;
 
 	// write to result buffer
 	if (_tcslen(storedir) >= outsz) goto fail;
@@ -145,7 +152,7 @@ done:
 	// free resource
 	if (wfp) fclose(wfp);
 	if (rfp) fclose(rfp);
-	if (wflag) _tunlink(UACTESTFILE);
+	if (wflag) _tunlink(testfile);
 	return;
 
 fail:
@@ -153,4 +160,3 @@ fail:
 	if (outsz) *out = 0;
 	goto done;
 }
-

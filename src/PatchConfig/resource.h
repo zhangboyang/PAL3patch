@@ -66,9 +66,7 @@
 #define IDS_WAITINGCHECKBADFILES        64
 #define IDS_CANTDELBADFILE              65
 #define IDS_CANTDELBADFILE_TITLE        66
-#define IDS_NOD3D9                      67
 #define IDS_NOD3DENUM                   67
-#define IDS_NOD3D9_TITLE                68
 #define IDS_NOD3DENUM_TITLE             68
 #define IDS_WAITINGCHECKSYSTEM          69
 #define IDS_BADCOMCTL32                 70
@@ -119,8 +117,10 @@
 #define IDS_D3DENUM_ASKFALLBACK_TITLE   114
 #define IDS_CONFIGTOOLERROR             115
 #define IDS_CONFIGTOOLERROR_TITLE       116
-#define IDS_BADPATH                     117
-#define IDS_BADPATH_TITLE               118
+#define IDS_PATHTOOLONG                 117
+#define IDS_PATHTOOLONG_TITLE           118
+#define IDS_PATHNOTENGLISH              119
+#define IDS_PATHNOTENGLISH_TITLE        120
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129
 #define IDD_PLEASEWAIT                  130
@@ -136,12 +136,9 @@
 #define IDC_CHOOSEFROMLIST              1013
 #define IDC_TOGGLEADVOPTS               1014
 #define IDC_ENUMLIST                    1015
-#define IDC_WAITMESSAGE                 1016
 #define IDC_WAITMESSAGE2                1016
 #define IDC_RUNFUNC                     1018
-#define IDC_PROGRESS1                   1019
 #define IDC_WAITPROGRESS                1019
-#define IDC_BUTTON1                     1020
 #define IDC_WAITMESSAGE1                1021
 
 // Next default values for new objects

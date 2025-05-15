@@ -319,6 +319,7 @@ extern "C" {
 #include "sha1.h"
 #include "wal.h"
 #include "badtools.h"
+#include "badpath.h"
 #include "gameversion.h"
 
 

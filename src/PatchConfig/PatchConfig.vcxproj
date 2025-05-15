@@ -179,6 +179,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BadFiles.cpp" />
+    <ClCompile Include="BadPath.cpp" />
     <ClCompile Include="BufferReader.cpp" />
     <ClCompile Include="CheckForUpdates.cpp" />
     <ClCompile Include="ChooseFromListDlg.cpp" />
@@ -220,6 +221,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BadFiles.h" />
+    <ClInclude Include="BadPath.h" />
     <ClInclude Include="BufferReader.h" />
     <ClInclude Include="CheckForUpdates.h" />
     <ClInclude Include="ChooseFromListDlg.h" />

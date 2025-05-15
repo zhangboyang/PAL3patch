@@ -13,6 +13,11 @@ int is_winxp_or_later()
     return osvi && osvi->dwPlatformId == VER_PLATFORM_WIN32_NT && (osvi->dwMajorVersion > 5 || (osvi->dwMajorVersion == 5 && osvi->dwMinorVersion >= 1));
 }
 
+int is_kernelex()
+{
+    return !!GetProcAddress(GetModuleHandle("KERNEL32.DLL"), "KEXVersion");
+}
+
 int is_laa()
 {
     void *image_base = GetModuleHandle(NULL);

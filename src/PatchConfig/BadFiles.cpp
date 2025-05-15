@@ -27,11 +27,12 @@ void CheckBadFilesForPAL3A()
 		NULL // EOF
 	};
 
+	if (!file_exists(main_exe)) return;
+
 	CString buf;
 	const char **bad_files;
 	const char **ptr;
-	
-	if (!file_exists(main_exe)) return;
+	int n;
 
 	bad_files = is_winxp_or_later() ? bad_files_modern : bad_files_retro;
 
@@ -43,19 +44,21 @@ void CheckBadFilesForPAL3A()
 			buf += "\n";
 		}
 	}
+	n = ptr - bad_files;
+
 	if (!buf.IsEmpty()) {
 		CString msg;
 		msg.Format(IDS_HAVEBADFILE, (LPCTSTR) buf);
 		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_HAVEBADFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON1 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES) {
-			buf.Empty();
-			for (ptr = bad_files; *ptr; ptr++) {
-				if (robust_unlink(*ptr) != 0 && errno != ENOENT) {
-					buf += "    ";
-					buf += *ptr;
-					buf += "\n";
+			if (!batch_delete(bad_files, n)) {
+				buf.Empty();
+				for (ptr = bad_files; *ptr; ptr++) {
+					if (file_exists(*ptr)) {
+						buf += "    ";
+						buf += *ptr;
+						buf += "\n";
+					}
 				}
-			}
-			if (!buf.IsEmpty()) {
 				msg.Format(IDS_CANTDELBADFILE, buf);
 				GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CANTDELBADFILE_TITLE), MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
 			}

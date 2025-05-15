@@ -47,15 +47,17 @@ int safe_fclose(FILE **fp)
     return ret;
 }
 
-int robust_unlink(const char *filename)
+int batch_delete(const char *filepath[], int n)
 {
-    int ret;
-    int i;
+    int i, j;
     for (i = 0; i < ROBUST_MAXTRY; i++) {
         if (i) Sleep(ROBUST_WAIT);
-        reset_attrib(filename);
-        ret = _unlink(filename);
-        if (ret == 0 || errno == ENOENT) break;
+        int success = 1;
+        for (j = 0; j < n; j++) {
+            reset_attrib(filepath[j]);
+            success = (_unlink(filepath[j]) == 0 || errno == ENOENT) && success;
+        }
+        if (success) return 1;
     }
-    return ret;
+    return 0;
 }

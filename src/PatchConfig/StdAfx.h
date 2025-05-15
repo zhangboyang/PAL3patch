@@ -60,6 +60,7 @@ typedef unsigned int uint32_t;
 #include "PatchConfigDlg.h"
 
 #include "BadFiles.h"
+#include "BadPath.h"
 #include "CheckForUpdates.h"
 #include "ChooseFromListDlg.h"
 #include "ConfigData.h"

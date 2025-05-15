@@ -158,6 +158,10 @@ SOURCE=.\BadFiles.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\BadPath.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\BufferReader.cpp
 # End Source File
 # Begin Source File
@@ -288,6 +292,10 @@ SOURCE=.\XorRepair.cpp
 # Begin Source File
 
 SOURCE=.\BadFiles.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\BadPath.h
 # End Source File
 # Begin Source File
 

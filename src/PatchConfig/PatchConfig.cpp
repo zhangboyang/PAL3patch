@@ -68,28 +68,6 @@ static void CheckCOMCTL32()
 	}
 }
 
-static void CheckBadPath()
-{
-	int game_locale = detect_game_locale();
-	if (game_locale < 0) return;
-	unsigned system_codepage = GetACP();
-	if (game_locale == 0 && system_codepage == 936) return;
-	if (game_locale == 1 && system_codepage == 950) return;
-
-    TCHAR buf[MAXLINE];
-    if (GetModuleFileName(NULL, buf, MAXLINE) != 0) {
-        wchar_t *ptr;
-        for (ptr = buf; *ptr; ptr++) {
-            if (*ptr < 0x20 || *ptr > 0x7E) {
-                break;
-            }
-        }
-        if (*ptr) {
-            GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_BADPATH), STRTABLE(IDS_BADPATH_TITLE), MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
-        }
-    }
-}
-
 static void VerifyPatchFiles()
 {
 	const int max_show = 10;

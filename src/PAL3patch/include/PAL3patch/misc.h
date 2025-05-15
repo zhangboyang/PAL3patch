@@ -4,6 +4,7 @@
 
 extern PATCHAPI int is_win9x(void);
 extern PATCHAPI int is_winxp_or_later(void);
+extern PATCHAPI int is_kernelex(void);
 extern PATCHAPI int is_laa(void);
 extern PATCHAPI void NORETURN die(int status);
 

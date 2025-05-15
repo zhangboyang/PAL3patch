@@ -264,3 +264,18 @@ int robust_unlink(const char *filename)
     }
     return ret;
 }
+
+int batch_delete(const char *filepath[], int n)
+{
+    int i, j;
+    for (i = 0; i < ROBUST_MAXTRY; i++) {
+        if (i) Sleep(ROBUST_WAIT);
+        int success = 1;
+        for (j = 0; j < n; j++) {
+            reset_attrib(filepath[j]);
+            success = (_unlink(filepath[j]) == 0 || errno == ENOENT) && success;
+        }
+        if (success) return 1;
+    }
+    return 0;
+}

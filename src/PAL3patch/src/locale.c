@@ -58,11 +58,13 @@ static const wchar_t wstr_nocfgfile_title_CHS[] = L"无法加载配置";
 static const wchar_t wstr_badcfgfile_text_CHS[] = L"补丁配置文件已损坏。请运行“补丁配置工具”，使用“实用工具——恢复默认设置”功能来重新生成配置文件。";
 static const wchar_t wstr_badcfgfile_title_CHS[] = L"无法加载配置";
 
-static const wchar_t wstr_badpath_text_CHS[] = L"请将游戏文件置于全英文路径下，以防游戏运行出现问题。";
-static const wchar_t wstr_badpath_title_CHS[] = L"提示";
-
 static const wchar_t wstr_badiconv_text_CHS[] = L"文字编码转换测试不通过，游戏内文字可能会乱码。是否仍要进入游戏？";
 static const wchar_t wstr_badiconv_title_CHS[] = L"文字编码转换失败";
+
+static const wchar_t wstr_pathtoolong_text_CHS[] = L"游戏路径太长，请缩短游戏路径长度，以防游戏运行出现问题。";
+static const wchar_t wstr_pathtoolong_title_CHS[] = L"游戏路径太长";
+static const wchar_t wstr_pathnotenglish_text_CHS[] = L"游戏路径含有非英文字符，请将游戏置于全英文路径下，以防游戏运行出现问题。";
+static const wchar_t wstr_pathnotenglish_title_CHS[] = L"非英文游戏路径";
 
 static const wchar_t wstr_resetfailed_text_CHS[] = L"无法重置 Direct3D 设备，是否重试？\n\n按【回车】键重试；\n按【ESC】键退出游戏。";
 static const wchar_t wstr_resetfailed_title_CHS[] = L"重置失败";
@@ -137,10 +139,12 @@ const wchar_t *wstr_nocfgfile_text;
 const wchar_t *wstr_nocfgfile_title;
 const wchar_t *wstr_badcfgfile_text;
 const wchar_t *wstr_badcfgfile_title;
-const wchar_t *wstr_badpath_text;
-const wchar_t *wstr_badpath_title;
 const wchar_t *wstr_badiconv_text;
 const wchar_t *wstr_badiconv_title;
+const wchar_t *wstr_pathtoolong_text;
+const wchar_t *wstr_pathtoolong_title;
+const wchar_t *wstr_pathnotenglish_text;
+const wchar_t *wstr_pathnotenglish_title;
 const wchar_t *wstr_resetfailed_text;
 const wchar_t *wstr_resetfailed_title;
 const wchar_t *wstr_resolutiontoolarge_text;
@@ -196,8 +200,6 @@ void init_locale_early()
     IMPORT_LOCALE_ITEM(CHS, wstr_nocfgfile_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_badcfgfile_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_badcfgfile_title);
-    IMPORT_LOCALE_ITEM(CHS, wstr_badpath_text);
-    IMPORT_LOCALE_ITEM(CHS, wstr_badpath_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_badiconv_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_badiconv_title);
     
@@ -226,6 +228,10 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_cantsavereg_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_badregfile_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_badregfile_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pathtoolong_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pathtoolong_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pathnotenglish_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_pathnotenglish_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_resolutiontoolarge_text);

@@ -18,22 +18,6 @@ static int WINAPI My_WideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWSTR l
     return WideCharToMultiByte(CodePage, dwFlags, lpWideCharStr, cchWideChar, lpMultiByteStr, cbMultiByte, lpDefaultChar, lpUsedDefaultChar);
 }
 
-static void check_badpath()
-{
-    wchar_t buf[MAXLINE];
-    if (GetModuleFileNameW(NULL, buf, MAXLINE) != 0) {
-        wchar_t *ptr;
-        for (ptr = buf; *ptr; ptr++) {
-            if (*ptr < 0x20 || *ptr > 0x7E) {
-                break;
-            }
-        }
-        if (*ptr) {
-            MessageBoxW(NULL, wstr_badpath_text, wstr_badpath_title, MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
-        }
-    }
-}
-
 static void check_iconv()
 {
     static const char helloworld_chs[] = "\xC4\xE3\xBA\xC3\xCA\xC0\xBD\xE7";
@@ -86,8 +70,6 @@ MAKE_PATCHSET(setlocale)
     }
     
     if (system_codepage != target_codepage) {
-        
-        check_badpath();
         
         if (GET_PATCHSET_FLAG(testcombat) || GET_PATCHSET_FLAG(uireplacefont) != 1) {
             check_iconv();

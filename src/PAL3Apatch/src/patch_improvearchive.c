@@ -304,14 +304,11 @@ static MAKE_THISCALL(BOOL, my_Archive_Delete, struct Archive *this, int index)
     struct arc_wal rm;
     char s[128];
     BOOL ret = PrepareDir();
-    if (ret)
-    {
+    if (ret) {
         sprintf(s, "save\\pal3a%02d.arc", index);
         arc_wal_init(&rm, s);
         arc_wal_check(&rm);
-        if (robust_unlink(rm.dst[ARC_FILE_ARCHIVE]) != 0 && errno != ENOENT) ret = FALSE;
-        if (robust_unlink(rm.dst[ARC_FILE_PICTURE]) != 0 && errno != ENOENT) ret = FALSE;
-        if (robust_unlink(rm.dst[ARC_FILE_TASKPIC]) != 0 && errno != ENOENT) ret = FALSE;
+        if (!batch_delete((const char **) rm.dst, ARC_FILE_COUNT)) ret = FALSE;
         arc_wal_free(&rm);
     }
     return ret;

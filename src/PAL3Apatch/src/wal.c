@@ -101,16 +101,7 @@ fail:
 // internal: delete checksum and src
 static int do_cleanup(const char *src[], int n, const char *sum)
 {
-    int success = 1;
-    int i;
-    
-    if (robust_unlink(sum) != 0 && errno != ENOENT) success = 0;
-    
-    for (i = 0; i < n; i++) {
-        if (robust_unlink(src[i]) != 0 && errno != ENOENT) success = 0;
-    }
-    
-    return success;
+    return batch_delete(&sum, 1) && batch_delete(src, n);
 }
 
 // internal: commit changes

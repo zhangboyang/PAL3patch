@@ -459,6 +459,10 @@ void init_plugins()
 {
     int flag = get_int_from_configfile("loadplugins");
     if (flag && dir_exists("plugins")) {
+        if (is_win9x() && !is_kernelex()) {
+            warning("please install KernelEx in order to use plugins on win9x.");
+        }
+
         wstr_ctor(&plugin_report_body);
         
         search_plugins("plugins");

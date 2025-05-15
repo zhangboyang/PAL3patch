@@ -118,8 +118,8 @@ static void process_temp_command()
         fclose(fp);
         die(success ? 0 : 1);
     }
-    robust_unlink(PATCH_TEMP_IN);
-    robust_unlink(PATCH_TEMP_OUT);
+    const char *temp[2] = { PATCH_TEMP_IN, PATCH_TEMP_OUT };
+    batch_delete(temp, 2);
     release_mutex(temp_mutex); temp_mutex = NULL;
 }
 
@@ -178,6 +178,9 @@ static void init_stage2()
     // init_locale() must called after INIT_PATCHSET(setlocale)
     INIT_PATCHSET(setlocale);
     init_locale();
+    
+    // check bad game path
+    check_badpath();
     
     // init patchsets
     INIT_PATCHSET(cdpatch);

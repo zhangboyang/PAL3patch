@@ -21,8 +21,8 @@ static void CleanupTempFile()
 {
 	HANDLE hMutex = acquire_mutex(PATCH_TEMP_MUTEX, 100);
 	if (!hMutex) return;
-	robust_unlink(PATCH_TEMP_IN);
-	robust_unlink(PATCH_TEMP_OUT);
+	const char *temp[2] = { PATCH_TEMP_IN, PATCH_TEMP_OUT };
+	batch_delete(temp, 2);
 	release_mutex(hMutex);
 }
 

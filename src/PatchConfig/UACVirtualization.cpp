@@ -69,7 +69,9 @@ void GetUACVirtualizedCurrentDirectory(LPCTSTR testfile, LPTSTR out, DWORD outsz
 #define UACSTOREROOT _T("%LOCALAPPDATA%\\VirtualStore")
 
 	TCHAR curdir[BUFLEN], storedir[BUFLEN];
-	SYSTEMTIME wdata, rdata;
+	SYSTEMTIME now;
+#define TESTLEN 32
+	char wdata[TESTLEN + 1], rdata[TESTLEN];
 	FILE *wfp = NULL, *rfp = NULL;
 	int wflag = 0;
 	DWORD r;
@@ -86,7 +88,7 @@ void GetUACVirtualizedCurrentDirectory(LPCTSTR testfile, LPTSTR out, DWORD outsz
 
 	// get current directory
 	r = GetCurrentDirectory(BUFLEN, curdir);
-	if (r == 0 || r > BUFLEN) goto fail;
+	if (r == 0 || r >= BUFLEN) goto fail;
 	if (!(_T('A') <= curdir[0] && curdir[0] <= _T('Z')) && !(_T('a') <= curdir[0] && curdir[0] <= _T('z'))) goto fail;
 	if (curdir[1] != _T(':') || curdir[2] != _T('\\')) goto fail;
 
@@ -108,23 +110,24 @@ void GetUACVirtualizedCurrentDirectory(LPCTSTR testfile, LPTSTR out, DWORD outsz
 	_tcscat(curdir, testfile);
 
 	// generate test data
-	GetLocalTime(&wdata);
+	GetLocalTime(&now);
+	sprintf(wdata, "%04x%04x%04x%04x%04x%04x%04x%04x", now.wYear, now.wMonth, now.wDayOfWeek, now.wDay, now.wHour, now.wMinute, now.wSecond, now.wMilliseconds);
 
 	// write test file
-    wfp = _tfopen(testfile, _T("wb"));
+	wfp = _tfopen(testfile, _T("wb"));
 	if (!wfp) goto fail;
 	wflag = 1;
-	if (fwrite(&wdata, sizeof(wdata), 1, wfp) != 1) goto fail;
+	if (fwrite(wdata, 1, TESTLEN, wfp) != TESTLEN) goto fail;
 	fclose(wfp); wfp = NULL;
 
 	// read test file
 	rfp = _tfopen(curdir, _T("rb"));
 	if (!rfp) goto fail;
-	if (fread(&rdata, sizeof(rdata), 1, rfp) != 1) goto fail;
+	if (fread(rdata, 1, TESTLEN, rfp) != TESTLEN) goto fail;
 	fclose(rfp); rfp = NULL;
 
 	// compare test data
-	if (memcmp(&wdata, &rdata, sizeof(wdata)) != 0) goto fail;
+	if (memcmp(wdata, rdata, TESTLEN) != 0) goto fail;
 
 	// write to result buffer
 	if (_tcslen(storedir) >= outsz) goto fail;
