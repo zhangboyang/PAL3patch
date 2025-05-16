@@ -119,8 +119,8 @@
 #define IDS_CONFIGTOOLERROR_TITLE       116
 #define IDS_PATHTOOLONG                 117
 #define IDS_PATHTOOLONG_TITLE           118
-#define IDS_PATHNOTENGLISH              119
-#define IDS_PATHNOTENGLISH_TITLE        120
+#define IDS_BADPATH                     119
+#define IDS_BADPATH_TITLE               120
 #define IDR_MAINFRAME                   128
 #define IDD_CHOOSEFROMLIST              129
 #define IDD_PLEASEWAIT                  130

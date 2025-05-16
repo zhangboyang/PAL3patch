@@ -327,8 +327,8 @@ BEGIN
     IDS_CONFIGTOOLERROR_TITLE "异常退出"
     IDS_PATHTOOLONG         "游戏路径太长，请缩短游戏路径长度，以防游戏运行出现问题。"
     IDS_PATHTOOLONG_TITLE   "游戏路径太长"
-    IDS_PATHNOTENGLISH      "游戏路径含有非英文字符，请将游戏置于全英文路径下，以防游戏运行出现问题。"
-    IDS_PATHNOTENGLISH_TITLE "非英文游戏路径"
+    IDS_BADPATH             "游戏路径含有无效字符，请将游戏置于全英文路径下，以防游戏运行出现问题。"
+    IDS_BADPATH_TITLE       "游戏路径含有无效字符"
 END
 
 #endif    // Chinese (P.R.C.) resources

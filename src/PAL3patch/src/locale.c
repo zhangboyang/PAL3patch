@@ -63,8 +63,8 @@ static const wchar_t wstr_badiconv_title_CHS[] = L"文字编码转换失败";
 
 static const wchar_t wstr_pathtoolong_text_CHS[] = L"游戏路径太长，请缩短游戏路径长度，以防游戏运行出现问题。";
 static const wchar_t wstr_pathtoolong_title_CHS[] = L"游戏路径太长";
-static const wchar_t wstr_pathnotenglish_text_CHS[] = L"游戏路径含有非英文字符，请将游戏置于全英文路径下，以防游戏运行出现问题。";
-static const wchar_t wstr_pathnotenglish_title_CHS[] = L"非英文游戏路径";
+static const wchar_t wstr_badpath_text_CHS[] = L"游戏路径含有无效字符，请将游戏置于全英文路径下，以防游戏运行出现问题。";
+static const wchar_t wstr_badpath_title_CHS[] = L"游戏路径含有无效字符";
 
 static const wchar_t wstr_resetfailed_text_CHS[] = L"无法重置 Direct3D 设备，是否重试？\n\n按【回车】键重试；\n按【ESC】键退出游戏。";
 static const wchar_t wstr_resetfailed_title_CHS[] = L"重置失败";
@@ -143,8 +143,8 @@ const wchar_t *wstr_badiconv_text;
 const wchar_t *wstr_badiconv_title;
 const wchar_t *wstr_pathtoolong_text;
 const wchar_t *wstr_pathtoolong_title;
-const wchar_t *wstr_pathnotenglish_text;
-const wchar_t *wstr_pathnotenglish_title;
+const wchar_t *wstr_badpath_text;
+const wchar_t *wstr_badpath_title;
 const wchar_t *wstr_resetfailed_text;
 const wchar_t *wstr_resetfailed_title;
 const wchar_t *wstr_resolutiontoolarge_text;
@@ -230,8 +230,8 @@ void init_locale()
     IMPORT_LOCALE_ITEM(CHS, wstr_badregfile_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_pathtoolong_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_pathtoolong_title);
-    IMPORT_LOCALE_ITEM(CHS, wstr_pathnotenglish_text);
-    IMPORT_LOCALE_ITEM(CHS, wstr_pathnotenglish_title);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badpath_text);
+    IMPORT_LOCALE_ITEM(CHS, wstr_badpath_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_text);
     IMPORT_LOCALE_ITEM(CHS, wstr_resetfailed_title);
     IMPORT_LOCALE_ITEM(CHS, wstr_resolutiontoolarge_text);

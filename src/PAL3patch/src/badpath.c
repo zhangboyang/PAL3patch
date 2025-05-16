@@ -1,11 +1,21 @@
 #include "common.h"
 
-static size_t acplen(const wchar_t *ws)
+static size_t acplen(const wchar_t *wstr)
 {
-    char *s = wcs2cs_alloc(ws, CP_ACP);
-    size_t l = strlen(s);
+    char *s = wcs2cs_alloc(wstr, CP_ACP);
+    size_t len = strlen(s);
     free(s);
-    return l;
+    return len;
+}
+
+static int acptest(const wchar_t *wstr)
+{
+    char *s = wcs2cs_alloc(wstr, CP_ACP);
+    wchar_t *ws = cs2wcs_alloc(s, CP_ACP);
+    int ret = wcscmp(wstr, ws) == 0;
+    free(ws);
+    free(s);
+    return ret;
 }
 
 void check_badpath()
@@ -20,17 +30,8 @@ void check_badpath()
         return;
     }
 
-    if (system_codepage == target_codepage || system_codepage == CP_UTF8) {
+    if (!acptest(path)) {
+        MessageBoxW(NULL, wstr_badpath_text, wstr_badpath_title, MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
         return;
-    }
-
-    wchar_t *ptr;
-    for (ptr = path; *ptr; ptr++) {
-        if (*ptr < 0x20 || *ptr > 0x7E) {
-            break;
-        }
-    }
-    if (*ptr) {
-        MessageBoxW(NULL, wstr_pathnotenglish_text, wstr_pathnotenglish_title, MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
     }
 }
