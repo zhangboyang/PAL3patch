@@ -8,8 +8,8 @@ static char *title_CHT = NULL;
 
 static BOOL CALLBACK SetForegroundIfMatched(HWND hwnd, LPARAM lParam)
 {
-	char buf[4096];
-	if (!GetWindow(hwnd, GW_OWNER) && IsWindowVisible(hwnd) && GetWindowTextA(hwnd, buf, sizeof(buf)) && (strcmp(buf, title_CHS) == 0 || strcmp(buf, title_CHT) == 0)) {
+	char buf[MAXLINE];
+	if (!GetWindow(hwnd, GW_OWNER) && IsWindowVisible(hwnd) && GetWindowTextA(hwnd, buf, MAXLINE) && (strcmp(buf, title_CHS) == 0 || strcmp(buf, title_CHT) == 0)) {
 		if (SetForegroundWindow(hwnd)) {
 			if (!is_win9x()) {
 				FLASHWINFO fwi;

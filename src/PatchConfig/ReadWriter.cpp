@@ -264,7 +264,15 @@ bool CacheRW::read(void *buffer, unsigned offset, size_t length)
 			length -= hit;
 		}
 	}
-	if (length >= CACHERW_PREFETCH)	return fp->read(buffer, offset, length);
+	while (length >= CACHERW_PREFETCH) {
+		if (!fp->read(buffer, offset, CACHERW_PREFETCH)) {
+			return fp->read(buffer, offset, length);
+		}
+		buffer = PTRADD(buffer, CACHERW_PREFETCH);
+		offset += CACHERW_PREFETCH;
+		length -= CACHERW_PREFETCH;
+	}
+	if (!length) return true;
 	unsigned sz = fp->size();
 	base = offset;
 	count = CACHERW_PREFETCH < sz - base ? CACHERW_PREFETCH : sz - base;
