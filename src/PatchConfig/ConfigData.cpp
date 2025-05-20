@@ -183,6 +183,16 @@ int FallbackConfigData(bool dry_run)
 	return cnt;
 }
 
+bool IsCdPatch()
+{
+	std::map<CString, std::pair<int, CString> >::iterator it;
+	it = cfgdata.find(CString(_T("cdpatch")));
+	if (it == cfgdata.end()) return true;
+	int value;
+	if (_stscanf(it->second.second, _T("%d"), &value) != 1) return true;
+	return value != 0;
+}
+
 int TrySaveConfigData()
 {
 #if defined(_MBCS)

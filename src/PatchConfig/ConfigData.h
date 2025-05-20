@@ -4,6 +4,7 @@
 extern int TryRebuildConfigFile();
 extern int TryLoadConfigData();
 extern int FallbackConfigData(bool dry_run);
+extern bool IsCdPatch();
 extern int TrySaveConfigData();
 
 #endif

@@ -10,7 +10,12 @@ static bool detect_music_patch()
 	fp->inc();
 	unsigned sz = fp->realsize();
 	fp->dec();
-	return sz > 128 * 1048576;
+#ifdef BUILD_FOR_PAL3
+	return sz > 0.9 * 161663348;
+#endif
+#ifdef BUILD_FOR_PAL3A
+	return sz > 0.9 * 233665106;
+#endif
 }
 
 class RepairProgress : public ProgressObject {
@@ -107,6 +112,7 @@ static bool repair_cpk(RepairProgress *rp, BufferReader &r, LPCTSTR msg, bool gr
 		}
 		delete cf;
 		if (state < 0) {
+			if (strcmp(cpkpath, "movie\\movie.cpk") == 0 && !file_exists(cpkpath) && !IsCdPatch()) continue;
 			return false;
 		}
 	}
