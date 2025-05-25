@@ -14,16 +14,16 @@ extern PATCHAPI int create_dir(const char *dirpath);
 extern PATCHAPI int dir_exists(const char *dirpath);
 extern PATCHAPI int file_exists(const char *filepath);
 extern PATCHAPI int reset_attrib(const char *filepath);
-extern PATCHAPI int batch_delete(const char *filepath[], int n);
+extern PATCHAPI int robust_delete(const char *filepath[], int n);
+extern PATCHAPI int robust_delete1(const char *filepath);
 
 
 #ifdef PATCHAPI_EXPORTS
 // INTERNAL DEFINITIONS
 
 // don't pass CRT objects (FILE *, errno, etc.) across DLL boundary
-extern FILE *robust_fopen(const char *filename, const char *mode);
+extern FILE *robust_fopen(const char *filepath, const char *mode);
 extern int safe_fclose(FILE **fp);
-extern int robust_unlink(const char *filename);
 
 #endif
 #endif

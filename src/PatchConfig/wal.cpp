@@ -101,7 +101,7 @@ fail:
 // internal: delete checksum and src
 static int do_cleanup(const char *src[], int n, const char *sum)
 {
-    return batch_delete(&sum, 1) && batch_delete(src, n);
+    return robust_delete1(sum) && robust_delete(src, n);
 }
 
 // internal: commit changes

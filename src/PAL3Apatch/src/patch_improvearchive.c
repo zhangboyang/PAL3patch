@@ -308,7 +308,7 @@ static MAKE_THISCALL(BOOL, my_Archive_Delete, struct Archive *this, int index)
         sprintf(s, "save\\pal3a%02d.arc", index);
         arc_wal_init(&rm, s);
         arc_wal_check(&rm);
-        if (!batch_delete((const char **) rm.dst, ARC_FILE_COUNT)) ret = FALSE;
+        if (!robust_delete((const char **) rm.dst, ARC_FILE_COUNT)) ret = FALSE;
         arc_wal_free(&rm);
     }
     return ret;

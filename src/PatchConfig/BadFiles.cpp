@@ -50,7 +50,7 @@ void CheckBadFilesForPAL3A()
 		CString msg;
 		msg.Format(IDS_HAVEBADFILE, (LPCTSTR) buf);
 		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_HAVEBADFILE_TITLE), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON1 | MB_TOPMOST | MB_SETFOREGROUND) == IDYES) {
-			if (!batch_delete(bad_files, n)) {
+			if (!robust_delete(bad_files, n)) {
 				buf.Empty();
 				for (ptr = bad_files; *ptr; ptr++) {
 					if (file_exists(*ptr)) {

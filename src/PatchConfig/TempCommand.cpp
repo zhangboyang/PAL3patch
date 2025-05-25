@@ -22,7 +22,7 @@ static void CleanupTempFile()
 	HANDLE hMutex = acquire_mutex(PATCH_TEMP_MUTEX, 100);
 	if (!hMutex) return;
 	const char *temp[2] = { PATCH_TEMP_IN, PATCH_TEMP_OUT };
-	batch_delete(temp, 2);
+	robust_delete(temp, 2);
 	release_mutex(hMutex);
 }
 

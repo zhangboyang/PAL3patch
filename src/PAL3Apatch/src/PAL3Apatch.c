@@ -100,7 +100,7 @@ static void process_temp_command()
             if (!prepare_d3denum(config)) die(1);
         }
         
-        if (robust_unlink(PATCH_TEMP_IN) != 0) {
+        if (!robust_delete1(PATCH_TEMP_IN)) {
             MessageBoxW_format(NULL, wstr_cantdeltemp_text, wstr_cantdeltemp_title, MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND, PATCH_TEMP_IN);
             die(1);
         }
@@ -115,8 +115,7 @@ static void process_temp_command()
         fclose(fp);
         die(success ? 0 : 1);
     }
-    const char *temp[2] = { PATCH_TEMP_IN, PATCH_TEMP_OUT };
-    batch_delete(temp, 2);
+    robust_delete((const char *[]) { PATCH_TEMP_IN, PATCH_TEMP_OUT }, 2);
     release_mutex(temp_mutex); temp_mutex = NULL;
 }
 
@@ -293,7 +292,7 @@ static int try_fix_unpacker()
     const unsigned char oldcode[] = "\x83\x7C\x24\x08\x01\x75\x10\x8B\x44\x24\x04";
     const unsigned char newcode[] = "\x59\x58\x5A\x83\xFA\x01\x5A\x51\x75\x0D\x90";
     unsigned char buf[sizeof(oldcode) - 1];
-    robust_unlink(EXTERNAL_UNPACKER_FIXED);
+    robust_delete1(EXTERNAL_UNPACKER_FIXED);
     if (!CopyFile(EXTERNAL_UNPACKER, EXTERNAL_UNPACKER_FIXED, FALSE)) return 0;
     FILE *fp = robust_fopen(EXTERNAL_UNPACKER_FIXED, "r+bc");
     if (!fp) return 0;

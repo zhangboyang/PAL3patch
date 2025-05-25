@@ -229,14 +229,14 @@ int reset_attrib(const char *filepath)
 #define ROBUST_MAXTRY 10
 #define ROBUST_WAIT   100
 
-FILE *robust_fopen(const char *filename, const char *mode)
+FILE *robust_fopen(const char *filepath, const char *mode)
 {
     FILE *ret;
     int i;
     for (i = 0; i < ROBUST_MAXTRY; i++) {
         if (i) Sleep(ROBUST_WAIT);
-        reset_attrib(filename);
-        ret = fopen(filename, mode);
+        reset_attrib(filepath);
+        ret = fopen(filepath, mode);
         if (ret || errno == ENOENT) break;
     }
     return ret;
@@ -252,20 +252,7 @@ int safe_fclose(FILE **fp)
     return ret;
 }
 
-int robust_unlink(const char *filename)
-{
-    int ret;
-    int i;
-    for (i = 0; i < ROBUST_MAXTRY; i++) {
-        if (i) Sleep(ROBUST_WAIT);
-        reset_attrib(filename);
-        ret = _unlink(filename);
-        if (ret == 0 || errno == ENOENT) break;
-    }
-    return ret;
-}
-
-int batch_delete(const char *filepath[], int n)
+int robust_delete(const char *filepath[], int n)
 {
     int i, j;
     for (i = 0; i < ROBUST_MAXTRY; i++) {
@@ -278,4 +265,9 @@ int batch_delete(const char *filepath[], int n)
         if (success) return 1;
     }
     return 0;
+}
+
+int robust_delete1(const char *filepath)
+{
+    return robust_delete(&filepath, 1);
 }

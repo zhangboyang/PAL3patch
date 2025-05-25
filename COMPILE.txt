@@ -101,6 +101,7 @@
     （1）按实际情况修改 Makefile （如 freetype 库的路径、DirectX SDK 的路径等）
     （2）运行 MSYS，在命令行中切换目录到 src 目录下，执行 make 命令即可编译
     （3）编译好的程序位于：
+         src\PAL3\Release\PAL3.dll
          src\PAL3patch\PAL3patch.dll
          src\PatchConfig\Release_PAL3\PatchConfig.exe
    注意：

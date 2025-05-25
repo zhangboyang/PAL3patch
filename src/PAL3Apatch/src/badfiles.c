@@ -42,7 +42,7 @@ void check_badfiles()
 
 	if (!cstr_empty(&buf)) {
 		if (MessageBoxW_format(NULL, wstr_havebadfile_text, wstr_havebadfile_title, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON1 | MB_TOPMOST | MB_SETFOREGROUND, cstr_getstr(&buf)) == IDYES) {
-			if (!batch_delete(bad_files, n)) {
+			if (!robust_delete(bad_files, n)) {
 				cstr_clear(&buf);
 				for (ptr = bad_files; *ptr; ptr++) {
 					if (file_exists(*ptr)) {
