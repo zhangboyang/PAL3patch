@@ -13,8 +13,8 @@
 
 
 // patch version
-#define PATCH_VERSION          50000
-#define PATCH_VERSION_STRING "v5.0"
+#define PATCH_VERSION          50100
+#define PATCH_VERSION_STRING "v5.1"
 
 
 
