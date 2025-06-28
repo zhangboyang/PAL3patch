@@ -80,6 +80,7 @@ retry:
 	if (wcsncmp(response, HEADER_NEWVERSION, wcslen(HEADER_NEWVERSION)) == 0) {
 		msg.Format(IDS_CHECKFORUPDATES_NEWVERSIONFOUND, GET_RESPONSE_DATA(response, HEADER_NEWVERSION));
 		if (GetPleaseWaitDlg()->MessageBox(msg, STRTABLE(IDS_CHECKFORUPDATES_TITLE), MB_ICONQUESTION | MB_YESNO) == IDYES) {
+			dlg->SetTopMost(false);
 			ShowPleaseWaitDlg(dlg, STRTABLE(IDS_WAITOPENWEBSITE));
 			website = CString(PATCH_WEBSITEURL) + urlparam;
 			r = (DWORD) ShellExecute(NULL, _T("open"), (LPCTSTR) website, NULL, NULL, SW_SHOWNORMAL);

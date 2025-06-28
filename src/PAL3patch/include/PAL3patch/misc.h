@@ -39,7 +39,7 @@ extern PATCHAPI int MessageBoxW_format(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCapt
 extern PATCHAPI int MessageBoxW_utf8format(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, ...);
 extern PATCHAPI HMODULE GetModuleHandle_check(LPCSTR lpModuleName);
 extern PATCHAPI HMODULE LoadLibrary_check(LPCSTR lpFileName);
-extern PATCHAPI FARPROC GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName);
+extern PATCHAPI void *GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName);
 
 
 

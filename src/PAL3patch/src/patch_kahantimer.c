@@ -1,23 +1,23 @@
 #include "common.h"
 
-static float zero = 0.0f;
+static float zero_gametime = 0.0f;
 static float last_gametime = 0.0f;
-static double c = 0.0f; // kahan compensation
+static double c = 0.0; // kahan compensation
 
 static MAKE_ASMPATCH(update_gametime)
 {
     float deltaTime = M_FLOAT(R_ESP + 0x24);
     
-    if (memcmp(&PAL3_m_gametime, &zero, sizeof(float)) == 0 || memcmp(&PAL3_m_gametime, &last_gametime, sizeof(float)) != 0) {
-        c = 0.0f;
+    if (memcmp(&PAL3_m_gametime, &zero_gametime, sizeof(float)) == 0 || memcmp(&PAL3_m_gametime, &last_gametime, sizeof(float)) != 0) {
+        c = 0.0;
     }
     
     // use Kahan summation algorithm to do: PAL3_m_gametime += deltaTime;
     double y = deltaTime - c;
     float t = PAL3_m_gametime + y;
     c = (t - PAL3_m_gametime) - y;
-    
     PAL3_m_gametime = t;
+    
     memcpy(&last_gametime, &PAL3_m_gametime, sizeof(float));
 }
 

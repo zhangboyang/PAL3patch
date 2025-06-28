@@ -26,18 +26,18 @@
 #define PATCH_VERSION _T(PATCH_VERSION_CSTR)
 
 
-#define PATCH_WEBSITEBASE _T("https://pal3.zbyzbyzby.com")
+#define PATCH_WEBSITEBASE _T("https://pal3patch.com")
 #define PATCH_UPDATEUA PATCH_APPNAME _T("/") PATCH_VERSION
 
 #ifdef _DEBUG
 #define PATCH_UPDATEURL _T("http://127.0.0.1/check-updates.txt")
-#define PATCH_WEBSITEURL _T("http://127.0.0.1/check-updates.txt")
+#define PATCH_WEBSITEURL PATCH_UPDATEURL
 #else
 #ifdef BUILD_FOR_PAL3
-#define PATCH_UPDATEURL _T("https://pal3.zbyzbyzby.com/pal3/check-updates.php")
+#define PATCH_UPDATEURL PATCH_WEBSITEBASE _T("/pal3/check-updates.php")
 #endif
 #ifdef BUILD_FOR_PAL3A
-#define PATCH_UPDATEURL _T("https://pal3.zbyzbyzby.com/pal3a/check-updates.php")
+#define PATCH_UPDATEURL PATCH_WEBSITEBASE _T("/pal3a/check-updates.php")
 #endif
 #define PATCH_WEBSITEURL PATCH_WEBSITEBASE _T("/")
 #endif

@@ -1,0 +1,61 @@
+【x87精度】
+x87可以通过fpu control word控制运算的精度
+一共有三种模式sp（单精度）、dp（双精度）、dep（扩展精度） 
+https://software.intel.com/en-us/articles/floating-point-reference-sheet-for-intel-architecture
+
+vc6运行库（包括DllMain）默认会将精度设为双精度
+fsave/finit会将fpu初始化为扩展精度
+dx9在CreateDevice时若不指定D3DCREATE_FPU_PRESERVE则会将精度设为单精度
+
+在游戏进程刚启动时，精度由c运行库设为双精度027F
+在游戏创建d3d设备后，精度由d3d9设为单精度007F
+在游戏加载Mp3dec.asi后，精度由dll的c运行库设为双精度027F
+在补丁的asmpatch的trap中，精度由fnsave设为扩展精度037F
+
+新补丁fpupreserve可指示d3d9不改变精度
+新asmentry用fldcw指令将精度设为双精度027F
+这样在游戏的运行过程中fpu精度就统一设为双精度了，而不再像以前那样混乱了
+
+
+【开启-Os编译优化】
+决定开启编译优化，希望不会出问题
+-Os  与-O2选项差不多，但不会插入用于对齐的nop指令，且关闭了-freorder-blocks，因此汇编代码看起来更简洁一些
+-fno-optimize-sibling-calls  防止产生错误代码导致程序崩溃
+-ffloat-store  防止kahan算法被优化没了
+-fno-strict-aliasing  因为代码中存在各种指针强转，添加此选项防止过度优化产生错误代码
+-fno-omit-frame-pointer -fno-unit-at-a-time -fno-inline -fno-builtin  让汇编代码看起来更易读一些
+不需要-fno-strict-overflow，因为这个老版本的gcc根本没有这个选项（gcc4.2或更高版本才有该选项）
+
+
+【使用clang编译】
+clang似乎不支持-finput-charset，因此需要将locale.c转为utf-8编码
+另外clang-cl会模拟_MSC_VER，因此需要额外判断（或者先判断）__clang__宏才能确定是clang还是msvc
+
+
+【使用tcc编译】
+由于tcc编译产生的object是elf格式的，因此需要转为coff格式才能与其它object和库进行链接
+elf转coff可以通过objconv工具实现：https://agner.org/optimize/objconv.zip
+需要修改objconv源代码，将cmdline.cpp文件中的
+if ((Underscore & 0x0F) == CMDL_UNDERSCORE_ADD) {
+改为
+if ((Underscore & 0x0F) == CMDL_UNDERSCORE_ADD && !strchr(oldname, '@')) {
+防止objconv为stdcall调用约定的函数的符号名添加前置下划线
+
+将.o转换为.obj的命令：objconv -fcoff -nu input.o output.obj
+将.a转换为.lib的命令：objconv -fcoff -nu input.a output.lib
+
+tcc编译器对函数调用约定的语法支持有bug，需要将__stdcall或__fastcall写在函数指针的括号外面，而不是括号里面
+例如void (__stdcall *)(void)需要写成void __stdcall (*)(void)
+如果写错位置，tcc编译时不会报错，但产生的代码是错误的；tcc也不会对(void ()(void))ptr这样的代码报语法错误
+另外如果一个函数返回类型为“stdcall的函数指针”，则该函数自身的调用约定会被错误地标记为stdcall
+例如FARPROC test(void)会导致test函数自身也被标记为stdcall调用约定
+
+tcc也不支持iconv，因此也需要将locale.c转为utf-8编码（而且不能有bom）
+tcc的__chkstk实现与gcc不同，因此需要连接libtcc1.a中的__chkstk（所以还需要用objconv转换libtcc1.a）
+tcc的round()函数的实现默认fpu精度为双精度，因此需要开启fpupreserve才能保证结果正确
+高版本的gcc链接时可能需要添加-Wl,--disable-auto-import选项，否则最终链接为dll时可能会报找不到__pei386_runtime_relocator符号
+
+
+【窗口化默认设置由“全屏幕”改为“窗口模式（无边框）”】
+某些win11系统上全屏d3d9有bug，可能导致切屏后无法重置d3d设备、视频无法播放（播放视频时黑屏且内存占用持续增加，切屏时大量释放内存导致假卡死）等异常情况
+这些问题很可能是操作系统或显卡驱动的bug导致的，分辨率补丁无法解决，因此将默认设置改为“窗口模式（无边框）”从而绕过以上问题

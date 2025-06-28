@@ -108,11 +108,21 @@ static void LoadConfigData()
 	}
 }
 
+static bool TrySetUILanguage()
+{
+	switch (detect_ui_langid()) {
+	case 0x0004: case 0x7804: case 0x0804: case 0x1004: return true;
+	case 0x7C04: case 0x0C04: case 0x1404: case 0x0404: return true;
+	default: return set_ui_lang(detect_game_locale() != 1 ? 0 : 1);
+	}
+}
+
 BOOL CPatchConfigApp::InitInstance()
 {
 	// Standard initialization
 
 	TrySetUACVirtualization(true);
+	TrySetUILanguage();
 
 #ifdef _AFXDLL
 	Enable3dControls();			// Call this when using MFC in a shared DLL

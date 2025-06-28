@@ -260,7 +260,7 @@ HMODULE LoadLibrary_check(LPCSTR lpFileName)
     return ret;
 }
 
-FARPROC GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName)
+void *GetProcAddress_check(HMODULE hModule, LPCSTR lpProcName)
 {
     FARPROC ret = GetProcAddress(hModule, lpProcName);
     if (!ret) {

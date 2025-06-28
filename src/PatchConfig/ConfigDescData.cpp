@@ -32,20 +32,16 @@ CString ConfigDescOptionListEnum::GetFallbackValue()
 	return CString();
 }
 
+
 #define USE_CHS
 #include "ConfigDescLocale.h"
 
-//#define USE_CHT
-//#include "ConfigDescLocale.h"
-
-//#define USE_ENG
-//#include "ConfigDescLocale.h"
-
+#define USE_CHT
+#include "ConfigDescLocale.h"
 
 static ConfigDescListIndex ConfigDescListArray[] = {
 	{ _T("CHS"), ConfigDescList_CHS },
-//	{ _T("CHT"), ConfigDescList_CHT },
-//	{ _T("ENG"), ConfigDescList_ENG },
+	{ _T("CHT"), ConfigDescList_CHT },
 };
 
 

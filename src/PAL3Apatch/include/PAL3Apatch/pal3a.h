@@ -189,7 +189,7 @@ enum VertexProcessingType {
 struct CD3DEnumeration {
     struct IDirect3D9 *m_pD3D;
     struct CArrayList *m_pAdapterInfoList;
-    char (__cdecl *ConfirmDeviceCallback)(D3DCAPS9 *, enum VertexProcessingType, D3DFORMAT, D3DFORMAT);
+    char MAKE_CALLCONV(__cdecl, *ConfirmDeviceCallback)(D3DCAPS9 *, enum VertexProcessingType, D3DFORMAT, D3DFORMAT);
     unsigned int AppMinFullscreenWidth;
     unsigned int AppMinFullscreenHeight;
     unsigned int AppMinColorChannelBits;
@@ -2323,6 +2323,7 @@ struct Console;
 
 
 // PAL3A functions
+#define _setdefaultprecision ((void (*)(void)) TOPTR(0x005451AC))
 #define pal3amalloc ((malloc_funcptr_t) TOPTR(0x00541A65))
 #define pal3afree ((free_funcptr_t) TOPTR(0x005404C9))
 #define pal3afsopen ((FILE *(*)(const char *, const char *, int)) TOPTR(0x00541DDE))
@@ -2341,9 +2342,9 @@ struct Console;
 #define GRPinput_AcquireMouse(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402B25, void, struct GRPinput *this), this)
 #define GRPinput_AcquireKeyboard(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402B78, void, struct GRPinput *this), this)
 #define CCBRoleState_IsAlive(this, nIndex) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004DEFFD, bool, struct CCBRoleState *, int), this, nIndex)
-#define BinkDoFrame (*(int (__stdcall **)(HBINK)) 0x005581DC)
-#define BinkCopyToBuffer (*(int (__stdcall **)(HBINK, void *, int, unsigned, unsigned, unsigned, unsigned)) 0x005581D4)
-#define BinkSetVolume (*(void (__stdcall **)(HBINK, int)) 0x005581D8)
+#define BinkDoFrame (*(int MAKE_CALLCONV(__stdcall, **)(HBINK)) 0x005581DC)
+#define BinkCopyToBuffer (*(int MAKE_CALLCONV(__stdcall, **)(HBINK, void *, int, unsigned, unsigned, unsigned, unsigned)) 0x005581D4)
+#define BinkSetVolume (*(void MAKE_CALLCONV(__stdcall, **)(HBINK, int)) 0x005581D8)
 #define g_bink (*(struct gbBinkVideo *) TOPTR(0x00A3E898))
 #define SoundMgr_Inst() ((struct SoundMgr *) TOPTR(0x021AE020))
 #define SoundMgr_GetAudioMgr(this) ((this)->m_audiodrv)

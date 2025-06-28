@@ -51,27 +51,34 @@
 #endif
 
 
+// calling convention helper
+#ifdef __TINYC__
+#define MAKE_CALLCONV(conv, func) conv ( func )
+#else
+#define MAKE_CALLCONV(conv, func) ( conv func )
+#endif
+
+
 // test thiscall feature
 #if (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
 #define HAVE_THISCALL
 #endif
+#if (defined(__clang__) && (__clang_major__ > 2 || (__clang_major__ == 2 && __clang_minor__ >= 8)))
+#define HAVE_THISCALL
+#endif
 
+
+// thiscall helpers
 #ifndef NO_VARIADIC_MACROS
 #ifdef HAVE_THISCALL
-#define MAKE_THISCALL(ret_type, func_name, this_decl, ...) ret_type (__thiscall func_name)(this_decl, ##__VA_ARGS__)
-#define MAKE_THISCALL_FUNCPTR(addr, ret_type, this_type, ...) ((ret_type (__thiscall *)(this_type, ##__VA_ARGS__)) TOPTR(addr))
+#define MAKE_THISCALL(ret_type, func_name, this_decl, ...) ret_type MAKE_CALLCONV(__thiscall, func_name)(this_decl, ##__VA_ARGS__)
+#define MAKE_THISCALL_FUNCPTR(addr, ret_type, this_type, ...) ((ret_type MAKE_CALLCONV(__thiscall, *)(this_type, ##__VA_ARGS__)) TOPTR(addr))
 #define THISCALL_WRAPPER(func, this, ...) func(this, ##__VA_ARGS__)
 #else
 // use fastcall to simulate thiscall
-#ifdef __TINYC__
-#define MAKE_THISCALL(ret_type, func_name, this_decl, ...) ret_type __fastcall (func_name)(this_decl, int dummy, ##__VA_ARGS__)
-#define MAKE_THISCALL_FUNCPTR(addr, ret_type, this_type, ...) ((ret_type __fastcall (*)(this_type, int, ##__VA_ARGS__)) TOPTR(addr))
+#define MAKE_THISCALL(ret_type, func_name, this_decl, ...) ret_type MAKE_CALLCONV(__fastcall, func_name)(this_decl, int dummy, ##__VA_ARGS__)
+#define MAKE_THISCALL_FUNCPTR(addr, ret_type, this_type, ...) ((ret_type MAKE_CALLCONV(__fastcall, *)(this_type, int, ##__VA_ARGS__)) TOPTR(addr))
 #define THISCALL_WRAPPER(func, this, ...) func(this, 0, ##__VA_ARGS__)
-#else
-#define MAKE_THISCALL(ret_type, func_name, this_decl, ...) ret_type (__fastcall func_name)(this_decl, int dummy, ##__VA_ARGS__)
-#define MAKE_THISCALL_FUNCPTR(addr, ret_type, this_type, ...) ((ret_type (__fastcall *)(this_type, int, ##__VA_ARGS__)) TOPTR(addr))
-#define THISCALL_WRAPPER(func, this, ...) func(this, 0, ##__VA_ARGS__)
-#endif
 #endif
 #endif
 

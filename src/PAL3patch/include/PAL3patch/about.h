@@ -4,12 +4,14 @@
 
 #if defined(__GNUC__) && defined(__VERSION__)
 #define BUILD_COMPILER "gcc " __VERSION__
+#elif defined(__clang__) && defined(__clang_version__)
+#define BUILD_COMPILER "clang " __clang_version__
 #elif defined(_MSC_VER)
 #define BUILD_COMPILER "Microsoft C " TOSTR(_MSC_VER)
 #elif defined(__TINYC__)
 #define BUILD_COMPILER "Tiny C Compiler " TOSTR(__TINYC__)
 #else
-#define BUILD_COMPILER "unknown C compiler"
+#define BUILD_COMPILER "unknown"
 #endif
 
 #define BUILD_DATE __DATE__ ", " __TIME__

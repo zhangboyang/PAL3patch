@@ -112,7 +112,7 @@ static bool repair_cpk(RepairProgress *rp, BufferReader &r, LPCTSTR msg, bool gr
 		}
 		delete cf;
 		if (state < 0) {
-			if (strcmp(cpkpath, "movie\\movie.cpk") == 0 && !file_exists(cpkpath) && !IsCdPatch()) continue;
+			if (strcmp(cpkpath, "movie\\movie.cpk") == 0 && !file_exists(cpkpath) && (!IsCdPatchEnabled() || GetPleaseWaitDlg()->MessageBox(STRTABLE(IDS_ASKSKIPMOVIECPK), STRTABLE(IDS_ASKSKIPMOVIECPK_TITLE), MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING) == IDYES)) continue;
 			return false;
 		}
 	}

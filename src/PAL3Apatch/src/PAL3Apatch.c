@@ -122,6 +122,8 @@ static void process_temp_command()
 // init_stage1() should be called before unpacker is executed (if exists)
 static void init_stage1()
 {
+    int flag;
+    
     // do self-check
     self_check();
     
@@ -151,6 +153,8 @@ static void init_stage1()
 // init_stage2() should be called after EXE is unpacked
 static void init_stage2()
 {
+    int flag;
+    
     // prepare filesystem environment
     prepare_fs();
     
@@ -200,6 +204,7 @@ static void init_stage2()
     INIT_PATCHSET(fixvolume);
     INIT_PATCHSET(nommapcpk);
     INIT_PATCHSET(fixnosndcrash);
+    INIT_PATCHSET(fpupreserve);
     
     if (INIT_PATCHSET(graphicspatch)) {
         // these are subpatchs of graphics patch

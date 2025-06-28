@@ -139,7 +139,7 @@ struct gbGfxDriverInfo {
 struct CD3DEnumeration {
     IDirect3D9 *m_pD3D;
     struct CArrayList *m_pAdapterInfoList;
-    char (__cdecl *ConfirmDeviceCallback)(D3DCAPS9 *, enum VertexProcessingType, D3DFORMAT, D3DFORMAT);
+    char MAKE_CALLCONV(__cdecl, *ConfirmDeviceCallback)(D3DCAPS9 *, enum VertexProcessingType, D3DFORMAT, D3DFORMAT);
     unsigned int AppMinFullscreenWidth;
     unsigned int AppMinFullscreenHeight;
     unsigned int AppMinColorChannelBits;
@@ -1715,6 +1715,7 @@ struct Role {
 
 
 // PAL3 functions
+#define _setdefaultprecision ((void (*)(void)) TOPTR(0x005563DE))
 #define pal3malloc ((malloc_funcptr_t) TOPTR(0x005536A9))
 #define pal3free ((free_funcptr_t) TOPTR(0x00552F55))
 #define pal3fsopen ((FILE *(*)(const char *, const char *, int)) TOPTR(0x00553A61))
@@ -1756,9 +1757,9 @@ struct Role {
 #define UIEncampment_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x0052BEB0, void, struct UIEncampment *), this)
 #define UISkee_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00531F50, void, struct UISkee *), this)
 #define UIGameOver_Create(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x004500F0, void, struct UIGameOver *), this)
-#define BinkDoFrame (*(int (__stdcall **)(HBINK)) 0x0056A1E0)
-#define BinkCopyToBuffer (*(int (__stdcall **)(HBINK, void *, int, unsigned, unsigned, unsigned, unsigned)) 0x0056A1DC)
-#define BinkSetVolume (*(void (__stdcall **)(HBINK, int)) 0x0056A1E4)
+#define BinkDoFrame (*(int MAKE_CALLCONV(__stdcall, **)(HBINK)) 0x0056A1E0)
+#define BinkCopyToBuffer (*(int MAKE_CALLCONV(__stdcall, **)(HBINK, void *, int, unsigned, unsigned, unsigned, unsigned)) 0x0056A1DC)
+#define BinkSetVolume (*(void MAKE_CALLCONV(__stdcall, **)(HBINK, int)) 0x0056A1E4)
 #define UIRenderObj_Ctor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00540F60, void, struct UIRenderObj *), this)
 #define UIRenderObj_Dtor(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00540FA0, void, struct UIRenderObj *), this)
 #define HeadMsg_Render(this) THISCALL_WRAPPER(MAKE_THISCALL_FUNCPTR(0x00402D20, void, struct HeadMsg *), this)

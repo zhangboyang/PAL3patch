@@ -162,6 +162,7 @@
     <ClCompile Include="src\patch_fixuistaticex.c" />
     <ClCompile Include="src\patch_fixvolume.c" />
     <ClCompile Include="src\patch_forcesettexture.c" />
+    <ClCompile Include="src\patch_fpupreserve.c" />
     <ClCompile Include="src\patch_graphicspatch.c" />
     <ClCompile Include="src\patch_improvearchive.c" />
     <ClCompile Include="src\patch_nocpk.c" />

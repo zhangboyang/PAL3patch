@@ -183,7 +183,7 @@ int FallbackConfigData(bool dry_run)
 	return cnt;
 }
 
-bool IsCdPatch()
+bool IsCdPatchEnabled()
 {
 	std::map<CString, std::pair<int, CString> >::iterator it;
 	it = cfgdata.find(CString(_T("cdpatch")));

@@ -9,6 +9,8 @@ extern void patchentry(struct trapframe *tf);
 
 unsigned max_push_dwords = MAX_PUSH_DWORDS;
 
+static unsigned short fpu_control_word = 0x027F;
+
 __declspec(naked) void __stdcall asmentry(unsigned patch_id)
 {
     __asm {
@@ -22,6 +24,8 @@ __declspec(naked) void __stdcall asmentry(unsigned patch_id)
         SUB ESP, 0x6C
         FNSAVE [ESP]
         FWAIT
+	FLDCW fpu_control_word
+	FWAIT
         PUSH ESP
         CALL patchentry
         ADD ESP, 0x4

@@ -46,16 +46,10 @@ extern PATCHAPI void print_wstring_end(void);
 
 #define MAKE_PATCHSET_NAME(name) CONCAT(patchset_, name)
 #define GET_PATCHSET_FLAG(name) (get_int_from_configfile(TOSTR(name)))
-#define GET_PATCHSET_CONFIG_STR(name) (get_string_from_configfile(TOSTR(name)))
 
 // patchset based on integer config
 #define MAKE_PATCHSET(name) void MAKE_PATCHSET_NAME(name)(int flag)
-#define INIT_PATCHSET(name) init_patchset_helper(GET_PATCHSET_FLAG(name), MAKE_PATCHSET_NAME(name))
-static INLINE int init_patchset_helper(int flag, void (*init)(int))
-{
-    if (flag) init(flag);
-    return flag;
-}
+#define INIT_PATCHSET(name) ((flag = GET_PATCHSET_FLAG(name)) ? (MAKE_PATCHSET_NAME(name)(flag), flag) : 0)
 
 
 #define GAME_WIDTH_ORG 800
@@ -97,6 +91,7 @@ MAKE_PATCHSET(fixvolume);
 MAKE_PATCHSET(nommapcpk);
 MAKE_PATCHSET(fixnosndcrash);
 MAKE_PATCHSET(checkgamever);
+MAKE_PATCHSET(fpupreserve);
 
 MAKE_PATCHSET(graphicspatch);
     extern int game_width, game_height;

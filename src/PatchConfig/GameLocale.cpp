@@ -1,5 +1,30 @@
 #include "stdafx.h"
 
+bool set_ui_lang(int lang)
+{
+	typedef CONST WCHAR *myPCZZWSTR;
+#define myMUI_LANGUAGE_ID 0x4
+	typedef BOOL (WINAPI *tySetProcessPreferredUILanguages)(DWORD dwFlags, myPCZZWSTR pwszLanguagesBuffer, PULONG pulNumLanguages);
+	typedef BOOL (WINAPI *tySetThreadPreferredUILanguages)(DWORD dwFlags, myPCZZWSTR pwszLanguagesBuffer, PULONG pulNumLanguages);
+	myPCZZWSTR languages[] = {
+		L"0804\0" L"0404\0", // CHS
+		L"0404\0" L"0804\0", // CHT
+	};
+	ULONG n;
+	tySetProcessPreferredUILanguages mySetProcessPreferredUILanguages = (tySetProcessPreferredUILanguages) GetProcAddress(GetModuleHandle(_T("KERNEL32.DLL")), "SetProcessPreferredUILanguages");
+	if (mySetProcessPreferredUILanguages) return !!mySetProcessPreferredUILanguages(myMUI_LANGUAGE_ID, languages[lang], &n);
+	tySetThreadPreferredUILanguages mySetThreadPreferredUILanguages = (tySetThreadPreferredUILanguages) GetProcAddress(GetModuleHandle(_T("KERNEL32.DLL")), "SetThreadPreferredUILanguages");
+	if (mySetThreadPreferredUILanguages) return !!mySetThreadPreferredUILanguages(myMUI_LANGUAGE_ID, languages[lang], &n);
+	return false;
+}
+
+LANGID detect_ui_langid()
+{
+    typedef LANGID (WINAPI *tyGetUserDefaultUILanguage)();
+	tyGetUserDefaultUILanguage myGetUserDefaultUILanguage = (tyGetUserDefaultUILanguage) GetProcAddress(GetModuleHandle(_T("KERNEL32.DLL")), "GetUserDefaultUILanguage");
+    return myGetUserDefaultUILanguage ? myGetUserDefaultUILanguage() : GetUserDefaultLangID();
+}
+
 int detect_game_locale()
 {
 	DWORD key_CRC = 0xCB283888; /* datascript\lang.txt */
