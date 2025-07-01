@@ -54,8 +54,3 @@ tcc也不支持iconv，因此也需要将locale.c转为utf-8编码（而且不�
 tcc的__chkstk实现与gcc不同，因此需要连接libtcc1.a中的__chkstk（所以还需要用objconv转换libtcc1.a）
 tcc的round()函数的实现默认fpu精度为双精度，因此需要开启fpupreserve才能保证结果正确
 高版本的gcc链接时可能需要添加-Wl,--disable-auto-import选项，否则最终链接为dll时可能会报找不到__pei386_runtime_relocator符号
-
-
-【窗口化默认设置由“全屏幕”改为“窗口模式（无边框）”】
-某些win11系统上全屏d3d9有bug，可能导致切屏后无法重置d3d设备、视频无法播放（播放视频时黑屏且内存占用持续增加，切屏时大量释放内存导致假卡死）等异常情况
-这些问题很可能是操作系统或显卡驱动的bug导致的，分辨率补丁无法解决，因此将默认设置改为“窗口模式（无边框）”从而绕过以上问题

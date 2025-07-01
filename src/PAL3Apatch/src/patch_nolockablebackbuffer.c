@@ -127,9 +127,28 @@ static void get_movie_uv(const char *filename, int movie_width, int movie_height
 
 static void init_movieframe_texture(const char *filename, int movie_width, int movie_height)
 {
+    D3DFORMAT mf_tex_format;
+    
+    // prepare d3d texture format and bink surface type
+    switch (GB_GfxMgr->m_d3dsdBackBuffer.Format) {
+    case D3DFMT_R5G6B5:
+        mf_tex_format = D3DFMT_R5G6B5;
+        mf_bink_dstsurfacetype = 10;
+        break;
+    case D3DFMT_X1R5G5B5:
+    case D3DFMT_A1R5G5B5:
+        mf_tex_format = D3DFMT_X1R5G5B5;
+        mf_bink_dstsurfacetype = 9;
+        break;
+    default:
+        mf_tex_format = D3DFMT_X8R8G8B8;
+        mf_bink_dstsurfacetype = 3;
+        break;
+    }
+    
     // create texture
     if (!mf_tex) {
-        if (FAILED(IDirect3DDevice9_CreateTexture(GB_GfxMgr->m_pd3dDevice, MF_TEX_WIDTH, MF_TEX_HEIGHT, 1, 0, GB_GfxMgr->m_d3dsdBackBuffer.Format, D3DPOOL_MANAGED, &mf_tex, NULL))) {
+        if (FAILED(IDirect3DDevice9_CreateTexture(GB_GfxMgr->m_pd3dDevice, MF_TEX_WIDTH, MF_TEX_HEIGHT, 1, 0, mf_tex_format, D3DPOOL_MANAGED, &mf_tex, NULL))) {
             fail("can't create texture for movie frame.");
         }
     }
@@ -137,14 +156,6 @@ static void init_movieframe_texture(const char *filename, int movie_width, int m
     // set texture information
     get_movie_uv(filename, movie_width, movie_height);
     get_ratio_frect(&mf_frect, &game_frect, mf_tex_ratio, TR_CENTER, TR_CENTER);
-    
-    // prepare target surface type for BinkVideo
-    switch (GB_GfxMgr->m_d3dsdBackBuffer.Format) {
-        case D3DFMT_R5G6B5:   mf_bink_dstsurfacetype = 10; break;
-        case D3DFMT_X8R8G8B8: mf_bink_dstsurfacetype = 3; break;
-        case D3DFMT_X1R5G5B5: mf_bink_dstsurfacetype = 9; break;
-        default:              mf_bink_dstsurfacetype = 0; break;
-    }
 }
 
 
@@ -170,7 +181,7 @@ static void movie_playback_atopen(void *arg)
     
     struct gbAudioManager *pAudioMgr = SoundMgr_GetAudioMgr(SoundMgr_Inst());
     if (pAudioMgr && !xmusic) {
-        BinkSetVolume(g_bink.m_hBink, floor(32768.0 * gbAudioManager_GetMusicMasterVolume(pAudioMgr)) + eps);
+        BinkSetVolume(g_bink.m_hBink, floor(32768.0 * gbAudioManager_GetMusicMasterVolume(pAudioMgr) + eps));
     } else {
         BinkSetVolume(g_bink.m_hBink, 0);
     }
