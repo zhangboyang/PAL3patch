@@ -1,0 +1,22 @@
+diff --git a/cmdline.cpp b/cmdline.cpp
+index cf698fc..d7f01f2 100644
+--- a/cmdline.cpp
++++ b/cmdline.cpp
+@@ -1073,7 +1073,7 @@ int CCommandLineInterpreter::SymbolChange(char const * oldname, char const ** ne
+     }
+ 
+     // Check for underscore options
+-    if ((Underscore & 0x0F) == CMDL_UNDERSCORE_REMOVE && oldname[0] == '_') {
++    if ((Underscore & 0x0F) == CMDL_UNDERSCORE_REMOVE && oldname[0] == '_' && !strchr(oldname, '@')) {
+         // Remove underscore
+         if ((Underscore & CMDL_KEEP_ALIAS) && symtype == SYMT_PUBLIC) {
+             // Alias only applicable to public symbols
+@@ -1090,7 +1090,7 @@ int CCommandLineInterpreter::SymbolChange(char const * oldname, char const ** ne
+             return SYMA_CHANGE_NAME;
+         }
+     }
+-    if ((Underscore & 0x0F) == CMDL_UNDERSCORE_ADD) {
++    if ((Underscore & 0x0F) == CMDL_UNDERSCORE_ADD && !strchr(oldname, '@')) {
+         // Add underscore even if it already has one
+         if ((Underscore & CMDL_KEEP_ALIAS) && symtype == SYMT_PUBLIC) {
+             // Alias only applicable to public symbols

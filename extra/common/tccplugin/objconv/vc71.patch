@@ -1,0 +1,20 @@
+diff --git a/maindef.h b/maindef.h
+index 39a5e89..b1e9390 100644
+--- a/maindef.h
++++ b/maindef.h
+@@ -18,7 +18,14 @@
+ 
+ // Integer type definitions with platform-independent sizes:
+ #include <limits.h>
+-#include <inttypes.h>
++typedef signed char int8_t;
++typedef short int16_t;
++typedef int int32_t;
++typedef long long int64_t;
++typedef unsigned char uint8_t;
++typedef unsigned short uint16_t;
++typedef unsigned int uint32_t;
++typedef unsigned long long uint64_t;
+ 
+ // Get high part of a 64-bit integer
+ static inline uint32_t HighDWord (uint64_t x) {

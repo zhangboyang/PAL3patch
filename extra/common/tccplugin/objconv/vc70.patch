@@ -1,0 +1,42 @@
+diff --git a/mac2asm.cpp b/mac2asm.cpp
+index 15d2e82..2598e88 100644
+--- a/mac2asm.cpp
++++ b/mac2asm.cpp
+@@ -299,14 +299,14 @@ void CMAC2ASM<MACSTRUCTURES>::MakeRelocations() {
+          if (SectOffset + SourceOffset < this->GetDataSize()) {
+             switch (SourceSize) {
+             case 1:
+-               Inline = CMemoryBuffer::Get<int8_t>(SectOffset+SourceOffset);
++               Inline = Get<int8_t>(SectOffset+SourceOffset);
+                // (this->Get<int8_t> doesn't work on Gnu compiler 4.0.1)
+                break;
+             case 2:
+-               Inline = CMemoryBuffer::Get<int16_t>(SectOffset+SourceOffset);
++               Inline = Get<int16_t>(SectOffset+SourceOffset);
+                break;
+             case 4: case 8:
+-               Inline = CMemoryBuffer::Get<int32_t>(SectOffset+SourceOffset);
++               Inline = Get<int32_t>(SectOffset+SourceOffset);
+                break;
+             default:
+                Inline = 0;
+diff --git a/maindef.h b/maindef.h
+index 39a5e89..2a82478 100644
+--- a/maindef.h
++++ b/maindef.h
+@@ -18,7 +18,14 @@
+ 
+ // Integer type definitions with platform-independent sizes:
+ #include <limits.h>
+-#include <inttypes.h>
++typedef signed char int8_t;
++typedef short int16_t;
++typedef int int32_t;
++typedef __int64 int64_t;
++typedef unsigned char uint8_t;
++typedef unsigned short uint16_t;
++typedef unsigned int uint32_t;
++typedef unsigned __int64 uint64_t;
+ 
+ // Get high part of a 64-bit integer
+ static inline uint32_t HighDWord (uint64_t x) {
